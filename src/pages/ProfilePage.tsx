@@ -172,7 +172,7 @@ export default function ProfilePage() {
 
   const allTimezones = useMemo<string[]>(() => {
     try {
-      return Intl.supportedValuesOf("timeZone");
+      return (Intl as unknown as { supportedValuesOf: (key: string) => string[] }).supportedValuesOf("timeZone");
     } catch {
       return [];
     }
