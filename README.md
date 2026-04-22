@@ -1,90 +1,78 @@
-# React + Vite + Hono + Cloudflare Workers
+# dry-eye-web
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/vite-react-template)
+Frontend de **NeuroEye Log (Weqe)** — PWA de salud para pacientes con ojo seco neuropático.
 
-This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, ESLint integration, and the flexibility of Workers deployments.
+Construida con **React 19 + Vite 6**, instalable desde Safari (sin App Store), diseñada para uso con fotofobia — interfaz oscura sin modo claro.
 
-![React + TypeScript + Vite + Cloudflare Workers](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
+## Stack
 
-<!-- dash-content-start -->
+- [React 19](https://react.dev/) + [Vite 6](https://vitejs.dev/)
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [TanStack Query v5](https://tanstack.com/query) — estado servidor
+- [idb-keyval](https://github.com/jakearchibald/idb-keyval) + [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) — offline
+- Deploy en [Cloudflare Pages](https://pages.cloudflare.com/)
 
-🚀 Supercharge your web development with this powerful stack:
+## Requisitos
 
-- [**React**](https://react.dev/) - A modern UI library for building interactive interfaces
-- [**Vite**](https://vite.dev/) - Lightning-fast build tooling and development server
-- [**Hono**](https://hono.dev/) - Ultralight, modern backend framework
-- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Edge computing platform for global deployment
+- Node.js 18+
+- API corriendo localmente (ver [dry_eye_api](https://github.com/ronymateo2/dry_eye_api))
 
-### ✨ Key Features
+## Setup local
 
-- 🔥 Hot Module Replacement (HMR) for rapid development
-- 📦 TypeScript support out of the box
-- 🛠️ ESLint configuration included
-- ⚡ Zero-config deployment to Cloudflare's global network
-- 🎯 API routes with Hono's elegant routing
-- 🔄 Full-stack development setup
-- 🔎 Built-in Observability to monitor your Worker
+1. Clona el repo e instala dependencias:
+   ```bash
+   npm install
+   ```
 
-Get started in minutes with local development or deploy directly via the Cloudflare dashboard. Perfect for building modern, performant web applications at the edge.
+2. Levanta el servidor de desarrollo:
+   ```bash
+   npm run dev
+   # → http://localhost:5173
+   ```
 
-<!-- dash-content-end -->
+   El `vite.config.ts` proxea `/api` → `http://localhost:8787` automáticamente.
 
-## Getting Started
+## Comandos
 
-To start a new project with this template, run:
+| Comando | Descripción |
+|---|---|
+| `npm run dev` | Servidor de desarrollo en puerto 5173 |
+| `npm run build` | Build de producción (`dist/`) |
+| `npm run preview` | Preview del build local |
+| `npm run deploy` | Build + deploy a Cloudflare Pages |
 
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/vite-react-template
-```
+## Pantallas
 
-A live deployment of this template is available at:
-[https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
+| Ruta | Descripción |
+|---|---|
+| `/register` | Registro diario de dolor (5 zonas), check-in principal |
+| `/history` | Historial cronológico de registros |
+| `/dashboard` | Analytics y correlaciones Spearman sueño↔dolor |
+| `/report` | Generación de reporte PDF para el médico |
+| `/profile` | Perfil y configuración |
+| `/drop-types` | Gestión de tipos de gotas personalizados |
+| `/auth/callback` | Callback de Google OAuth |
 
-## Development
+## Diseño
 
-Install dependencies:
+Paleta amber sobre carbón oscuro caliente — basada en evidencia clínica para fotofobia. Ver [DESIGN.md](./DESIGN.md) para el sistema de diseño completo, incluyendo variables CSS, tipografía, espaciado y componentes clave.
 
-```bash
-npm install
-```
+**No hay modo claro.** La fotofobia hace que una UI brillante sea físicamente dolorosa para los usuarios objetivo.
 
-Start the development server with:
+## Estrategia offline
 
-```bash
-npm run dev
-```
+Solo las **gotas** (`/drops`) se encolan en IndexedDB cuando no hay conexión. Al recuperar conectividad, `useOfflineSync` sincroniza automáticamente la cola.
 
-Your application will be available at [http://localhost:5173](http://localhost:5173).
-
-## Production
-
-Build your project for production:
-
-```bash
-npm run build
-```
-
-Preview your build locally:
-
-```bash
-npm run preview
-```
-
-Deploy your project to Cloudflare Workers:
+## Deploy
 
 ```bash
-npm run build && npm run deploy
+# Configura la URL de la API en .env.production
+VITE_API_URL=https://tu-worker.workers.dev/api
+
+# Deploy a Cloudflare Pages
+npm run deploy
 ```
 
-Monitor your workers:
+## API
 
-```bash
-npx wrangler tail
-```
-
-## Additional Resources
-
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Documentation](https://reactjs.org/)
-- [Hono Documentation](https://hono.dev/)
+El backend que alimenta esta app vive en [dry_eye_api](https://github.com/ronymateo2/dry_eye_api).
