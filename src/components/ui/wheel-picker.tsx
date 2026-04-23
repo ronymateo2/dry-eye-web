@@ -95,7 +95,7 @@ export function WheelPicker({
         style={{
           height: `${WHEEL_FADE_HEIGHT}px`,
           background:
-            "linear-gradient(to bottom, rgba(28,24,16,0.96) 0%, rgba(28,24,16,0) 100%)",
+            "linear-gradient(to bottom, var(--wheel-fade) 0%, transparent 100%)",
         }}
       />
       <div
@@ -104,7 +104,7 @@ export function WheelPicker({
         style={{
           height: `${WHEEL_FADE_HEIGHT}px`,
           background:
-            "linear-gradient(to top, rgba(28,24,16,0.96) 0%, rgba(28,24,16,0) 100%)",
+            "linear-gradient(to top, var(--wheel-fade) 0%, transparent 100%)",
         }}
       />
       <div

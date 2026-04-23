@@ -54,7 +54,7 @@ const TRIGGER_LABELS: Record<TriggerType, string> = {
 };
 
 const tooltipStyle = {
-  background: "rgba(18,16,8,0.96)",
+  background: "var(--surface-el)",
   border: "1px solid var(--border)",
   borderRadius: "10px",
   color: "var(--text-primary)",
@@ -164,13 +164,13 @@ export function DashboardTrendChart({
           </button>
         </div>
       </div>
-      <div className="h-[220px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))] p-2">
+      <div className="chart-bg h-[220px] rounded-[12px] p-2">
         <ResponsiveContainer height="100%" width="100%">
           <LineChart
             data={visiblePoints}
             margin={{ top: 12, right: 12, left: -14, bottom: 0 }}
           >
-            <CartesianGrid stroke="rgba(46,39,24,0.8)" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis
               dataKey="label"
               stroke="var(--text-faint)"
@@ -238,10 +238,10 @@ export function DashboardCorrelationChart({
   correlationPoints,
 }: Pick<DashboardChartsProps, "correlationPoints">) {
   return (
-    <div className="h-[200px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))] p-2">
+    <div className="chart-bg h-[200px] rounded-[12px] p-2">
       <ResponsiveContainer height="100%" width="100%">
         <ScatterChart margin={{ top: 12, right: 16, left: -10, bottom: 0 }}>
-          <CartesianGrid stroke="rgba(46,39,24,0.8)" strokeDasharray="3 3" />
+          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
           <XAxis
             dataKey="sleepHours"
             domain={[0, 12]}
@@ -267,7 +267,7 @@ export function DashboardCorrelationChart({
             }
             labelFormatter={() => ""}
           />
-          <ReferenceLine stroke="rgba(212,162,76,0.5)" x={6} />
+          <ReferenceLine stroke="var(--accent)" strokeOpacity={0.5} x={6} />
           <Scatter data={correlationPoints} fill="var(--accent)" name="Sueno" />
         </ScatterChart>
       </ResponsiveContainer>
@@ -398,7 +398,7 @@ export function DashboardDropsChart({
             <div
               className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-[180px] rounded-[14px] border py-1 shadow-xl"
               style={{
-                background: "rgba(18,16,8,0.97)",
+                background: "var(--surface)",
                 borderColor: "var(--border)",
                 backdropFilter: "blur(12px)",
               }}
@@ -458,10 +458,10 @@ export function DashboardDropsChart({
           )}
         </div>
       </div>
-      <div className="h-[220px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))] p-2">
+      <div className="chart-bg h-[220px] rounded-[12px] p-2">
         <ResponsiveContainer height="100%" width="100%">
           <BarChart data={chartData} margin={{ top: 12, right: 12, left: -14, bottom: 0 }}>
-            <CartesianGrid stroke="rgba(46,39,24,0.8)" strokeDasharray="3 3" vertical={false} />
+            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="label"
               stroke="var(--text-faint)"
@@ -536,7 +536,7 @@ export function DashboardDropsWeekdayChart({ data }: { data: WeekdayDropAvg[] })
                 style={{
                   width: "100%",
                   height: `${barH}px`,
-                  background: isToday ? "var(--accent)" : "rgba(212,162,76,0.28)",
+                  background: isToday ? "var(--accent)" : "var(--accent-dim)",
                   borderRadius: "3px 3px 0 0",
                   transition: "height 0.35s cubic-bezier(0,0,0.2,1)",
                 }}
@@ -572,10 +572,10 @@ export function DashboardTriggerPainChart({ stats }: { stats: TriggerZoneStat[] 
   const yMax = Math.max(1, Math.ceil(maxVal) + 1);
 
   return (
-    <div className="h-[220px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))] p-2">
+    <div className="chart-bg h-[220px] rounded-[12px] p-2">
       <ResponsiveContainer height="100%" width="100%">
         <BarChart data={chartData} margin={{ top: 12, right: 12, left: -14, bottom: 0 }}>
-          <CartesianGrid stroke="rgba(46,39,24,0.8)" strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="label"
             stroke="var(--text-faint)"

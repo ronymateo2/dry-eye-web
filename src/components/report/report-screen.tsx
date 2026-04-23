@@ -305,7 +305,7 @@ export function ReportScreen({ data }: Props) {
       {/* ── Summary card ─────────────────────────────── */}
       <div>
         <p className="section-label mb-3">Resumen del periodo</p>
-        <div className="space-y-6 rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.72)] p-5">
+        <div className="space-y-6 rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-5">
           <div>
             <p className="screen-title text-[17px]">{data.checkInsCount} registros</p>
             <p className="screen-subtitle text-[13px]">{data.dateRange}</p>

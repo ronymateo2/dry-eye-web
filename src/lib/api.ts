@@ -48,8 +48,8 @@ export const api = {
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 
   // Named endpoints
-  getMe: () => api.get<{ id: string; name: string | null; email: string | null; image: string | null; timezone: string }>("/user/me"),
-  updateMe: (body: { timezone?: string; name?: string }) => api.put("/user/me", body),
+  getMe: () => api.get<{ id: string; name: string | null; email: string | null; image: string | null; timezone: string; theme: "dark" | "light" }>("/user/me"),
+  updateMe: (body: { timezone?: string; name?: string; theme?: "dark" | "light" }) => api.put("/user/me", body),
 
   saveCheckIn: (body: unknown) => api.post("/check-ins", body),
 

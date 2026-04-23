@@ -10,10 +10,13 @@ import { useAuth, useUser } from "@/lib/auth";
 import {
   ClockIcon,
   DotsSixVerticalIcon,
+  MoonIcon,
   PencilSimpleIcon,
   PlusIcon,
+  SunIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
+import { useTheme } from "@/lib/theme";
 import {
   DndContext,
   PointerSensor,
@@ -164,6 +167,9 @@ export default function ProfilePage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const { theme, setTheme } = useTheme();
+  const [themePending, setThemePending] = useState(false);
+
   // Timezone state
   const [timezone, setTimezone] = useState(user.timezone ?? "");
   const [tzSheetOpen, setTzSheetOpen] = useState(false);
@@ -247,6 +253,17 @@ export default function ProfilePage() {
     }
   };
 
+  const handleThemeToggle = async () => {
+    setThemePending(true);
+    try {
+      await setTheme(theme === "dark" ? "light" : "dark");
+    } catch {
+      toast.error("No se pudo cambiar el tema.");
+    } finally {
+      setThemePending(false);
+    }
+  };
+
   const openSheet = () => {
     setForm(EMPTY_FORM);
     setSheetOpen(true);
@@ -265,7 +282,7 @@ export default function ProfilePage() {
         {/* Información */}
         <div className="space-y-3">
           <p className="section-label">Información</p>
-          <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.56)]">
+          <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
             {user.name ? (
               <div className="flex min-h-12 items-center border-b border-[var(--border)] px-4">
                 <span className="w-20 shrink-0 text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
@@ -288,7 +305,7 @@ export default function ProfilePage() {
         {/* Configuración */}
         <div className="space-y-3">
           <p className="section-label">Configuración</p>
-          <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.56)]">
+          <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
             <div className="flex min-h-[72px] items-center gap-3 px-4">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
                 <ClockIcon size={16} color="var(--accent)" weight="fill" />
@@ -307,6 +324,30 @@ export default function ProfilePage() {
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-40"
               >
                 <PencilSimpleIcon size={15} />
+              </button>
+            </div>
+            <div className="flex min-h-[72px] items-center gap-3 border-t border-[var(--border)] px-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                {theme === "light"
+                  ? <SunIcon size={16} color="var(--accent)" weight="fill" />
+                  : <MoonIcon size={16} color="var(--accent)" weight="fill" />}
+              </div>
+              <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
+                  Tema
+                </span>
+                <span className="mono truncate text-[14px] text-[var(--text-primary)]">
+                  {theme === "light" ? "Claro" : "Oscuro"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleThemeToggle}
+                aria-label="Cambiar tema"
+                disabled={themePending}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-40"
+              >
+                {theme === "light" ? <MoonIcon size={15} /> : <SunIcon size={15} />}
               </button>
             </div>
           </div>
@@ -348,7 +389,7 @@ export default function ProfilePage() {
               )}
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                 <SortableContext items={medications.map((m) => m.id)} strategy={verticalListSortingStrategy}>
-                  <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.56)]">
+                  <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
                     {medications.map((med) => (
                       <SortableMedRow
                         key={med.id}
@@ -427,7 +468,7 @@ export default function ProfilePage() {
             rows={1}
             onChange={(e) => setTzSearch(e.target.value)}
           />
-          <ul className="max-h-[45vh] overflow-y-auto rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.56)]">
+          <ul className="max-h-[45vh] overflow-y-auto rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
             {filteredTimezones.length === 0 ? (
               <li className="flex min-h-12 items-center px-4 text-[13px] text-[var(--text-faint)]">
                 Sin resultados

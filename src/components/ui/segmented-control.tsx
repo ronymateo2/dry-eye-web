@@ -123,7 +123,7 @@ export function SegmentedControl<T extends string>({
               className={cn(
                 "relative z-10 flex min-h-12 select-none items-center justify-center px-4 text-[13px] font-medium",
                 isActive
-                  ? "text-[#121008]"
+                  ? "text-[var(--btn-primary-text)]"
                   : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
               )}
               style={{ transition: `color 220ms ${TEXT_EASING}` }}

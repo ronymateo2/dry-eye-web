@@ -10,7 +10,7 @@ export default function LoginPage() {
         title="Registro rapido"
         description="Registra dolor y sueno con el minimo esfuerzo posible, incluso en un mal dia."
       />
-      <div className="space-y-4 rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.72)] p-5">
+      <div className="space-y-4 rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-5">
         <p className="text-[13px] text-[var(--text-muted)]">
           Para continuar, primero inicia sesion con Google.
         </p>

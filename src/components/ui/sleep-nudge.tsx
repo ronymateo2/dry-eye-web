@@ -19,7 +19,7 @@ export function SleepNudge() {
 
   return (
     <>
-      <div className="flex items-center justify-between rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.7)] px-4 py-3">
+      <div className="flex items-center justify-between rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] px-4 py-3">
         <div className="flex items-center gap-3">
           <MoonIcon size={18} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
           <p className="text-[13px]" style={{ color: "var(--text-muted)" }}>

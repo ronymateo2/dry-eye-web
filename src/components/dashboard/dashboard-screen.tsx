@@ -99,11 +99,11 @@ export function DashboardScreen({ data }: { data: DashboardData }) {
     <section className="space-y-10">
       <section>
         <p className="section-label">Promedio por dia</p>
-        <div className="rounded-[16px] bg-[rgba(28,24,16,0.72)] p-5">
+        <div className="rounded-[16px] bg-[var(--surface-card)] p-5">
           {data.dropsByWeekday.some((d) => d.avg !== null) ? (
             <DashboardDropsWeekdayChart data={data.dropsByWeekday} />
           ) : (
-            <div className="h-[120px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))]" />
+            <div className="h-[120px] rounded-[12px] chart-bg" />
           )}
           <p className="mt-3 text-[13px] text-[var(--text-muted)]">
             {data.dropsByWeekday.some((d) => d.avg !== null)
@@ -115,14 +115,14 @@ export function DashboardScreen({ data }: { data: DashboardData }) {
 
       <section>
         <p className="section-label">Gotas por dia</p>
-        <div className="rounded-[16px] bg-[rgba(28,24,16,0.72)] p-5">
+        <div className="rounded-[16px] bg-[var(--surface-card)] p-5">
           {hasDropsData ? (
             <DashboardDropsChart
               dropTypes={data.drops.dropTypes}
               points={data.drops.points}
             />
           ) : (
-            <div className="mb-4 h-[220px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))]" />
+            <div className="mb-4 h-[220px] rounded-[12px] chart-bg" />
           )}
           <p className="mt-3 text-[13px] text-[var(--text-muted)]">
             {hasDropsData
@@ -140,11 +140,11 @@ export function DashboardScreen({ data }: { data: DashboardData }) {
             {formatAverage(data.trend.average30d)}
           </div>
         </div>
-        <div className="rounded-[16px] bg-[rgba(28,24,16,0.72)] p-5">
+        <div className="rounded-[16px] bg-[var(--surface-card)] p-5">
           {hasTrendData ? (
             <DashboardTrendChart trendPoints={data.trend.points} />
           ) : (
-            <div className="mb-4 h-[220px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))]" />
+            <div className="mb-4 h-[220px] rounded-[12px] chart-bg" />
           )}
           <p className="text-[13px] text-[var(--text-muted)]">
             {hasTrendData
@@ -159,11 +159,11 @@ export function DashboardScreen({ data }: { data: DashboardData }) {
         <p className="mb-3 text-[15px] text-[var(--text-primary)]">
           {data.correlation.insight}
         </p>
-        <div className="rounded-[16px] bg-[rgba(28,24,16,0.72)] p-5">
+        <div className="rounded-[16px] bg-[var(--surface-card)] p-5">
           {hasCorrelationChart ? (
             <DashboardCorrelationChart correlationPoints={data.correlation.points} />
           ) : (
-            <div className="mb-4 h-[200px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))]" />
+            <div className="mb-4 h-[200px] rounded-[12px] chart-bg" />
           )}
           <p className="mono text-[12px] text-[var(--text-muted)]">
             {data.correlation.spearman !== null
@@ -177,11 +177,11 @@ export function DashboardScreen({ data }: { data: DashboardData }) {
 
       <section>
         <p className="section-label">Triggers ↔ parpados y sienes</p>
-        <div className="rounded-[16px] bg-[rgba(28,24,16,0.72)] p-5">
+        <div className="rounded-[16px] bg-[var(--surface-card)] p-5">
           {hasTriggerZoneStats ? (
             <DashboardTriggerPainChart stats={data.triggerZonePainStats} />
           ) : (
-            <div className="mb-4 h-[220px] rounded-[12px] bg-[linear-gradient(180deg,rgba(37,32,20,0.9),rgba(28,24,16,0.55))]" />
+            <div className="mb-4 h-[220px] rounded-[12px] chart-bg" />
           )}
           <p className="mt-3 text-[13px] text-[var(--text-muted)]">
             {hasTriggerZoneStats

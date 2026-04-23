@@ -139,7 +139,7 @@ export default function DropTypesPage() {
             )}
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={dropTypes.map((d) => d.id)} strategy={verticalListSortingStrategy}>
-                <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.56)]">
+                <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
                   {dropTypes.map((dt) => (
                     <SortableDropType key={dt.id} dt={dt} isOnly={dropTypes.length === 1} />
                   ))}

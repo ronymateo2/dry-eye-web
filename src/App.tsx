@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth, storeTokenFromUrl } from "@/lib/auth";
+import { ThemeProvider } from "@/lib/theme";
 import { AppShell } from "@/components/layout/app-shell";
 
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
@@ -69,8 +70,10 @@ export function App() {
     <BrowserRouter>
       <TokenInit />
       <AuthProvider>
-        <AppRoutes />
-        <Toaster />
+        <ThemeProvider>
+          <AppRoutes />
+          <Toaster />
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
   );

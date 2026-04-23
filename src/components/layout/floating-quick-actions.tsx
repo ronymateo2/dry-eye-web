@@ -54,7 +54,7 @@ export function FloatingQuickActions() {
           <button
             aria-label="Acciones rapidas"
             className={cn(
-              "flex h-14 w-14 items-center justify-center rounded-full border-0 text-[#121008] shadow-[0_4px_20px_rgba(212,162,76,0.35)] transition-transform",
+              "flex h-14 w-14 items-center justify-center rounded-full border-0 text-[var(--btn-primary-text)] shadow-[0_4px_20px_rgba(212,162,76,0.35)] transition-transform",
               menuOpen ? "rotate-45 bg-[var(--accent-bright)]" : "bg-[var(--accent)]",
             )}
             type="button"

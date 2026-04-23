@@ -237,7 +237,7 @@ export default function RegisterPage() {
 
       <div className="relative pb-[calc(var(--sticky-cta-height,88px)+44px)] space-y-6">
         {/* Context */}
-        <div className="rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.7)]">
+        <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
             <p className="section-label mb-0">Contexto</p>
           </div>
@@ -443,7 +443,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Pain map */}
-        <div className="space-y-4 rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.7)] p-4">
+        <div className="space-y-4 rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
           <p className="section-label">Mapa de dolor</p>
           <div className="space-y-5">
             <PainSlider
@@ -480,7 +480,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Stress */}
-        <div className="space-y-4 rounded-[16px] border border-[var(--border)] bg-[rgba(28,24,16,0.7)] p-4">
+        <div className="space-y-4 rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
           <p className="section-label">Estres</p>
           <PainSlider
             icon={<LightningIcon size={15} />}

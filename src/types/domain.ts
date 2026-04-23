@@ -86,4 +86,5 @@ export type User = {
   email: string | null;
   image: string | null;
   timezone: string;
+  theme: "dark" | "light";
 };

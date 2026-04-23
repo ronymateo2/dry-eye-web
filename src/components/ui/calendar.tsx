@@ -90,7 +90,7 @@ function CalendarDayButton({
       className={cn(
         "size-[--cell-size] flex-col gap-1 font-normal leading-none",
         "text-[var(--text-primary)] hover:bg-[var(--surface-el)] hover:text-[var(--text-primary)]",
-        "data-[selected-single=true]:bg-[var(--accent)] data-[selected-single=true]:text-[#121008] data-[selected-single=true]:hover:bg-[var(--accent-bright)] data-[selected-single=true]:rounded-[var(--radius-sm)]",
+        "data-[selected-single=true]:bg-[var(--accent)] data-[selected-single=true]:text-[var(--btn-primary-text)] data-[selected-single=true]:hover:bg-[var(--accent-bright)] data-[selected-single=true]:rounded-[var(--radius-sm)]",
         className,
       )}
       {...props}
