@@ -97,7 +97,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
 
       <div
         className="sticky bottom-0 pb-[calc(24px+env(safe-area-inset-bottom))] pt-3"
-        style={{ background: "linear-gradient(to top, rgba(18,16,8,1) 60%, rgba(18,16,8,0))" }}
+        style={{ background: "linear-gradient(to top, var(--bg) 60%, transparent)" }}
       >
         <Button className="w-full gap-2" type="button" onClick={onCreateNew}>
           <Plus size={18} />
