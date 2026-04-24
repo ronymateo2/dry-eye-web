@@ -74,9 +74,11 @@
   background: rgba(255, 255, 255, 0.9);
   border-color: rgba(237, 234, 245, 0.95);
 }
-[data-theme="light"] .bottom-nav,
+[data-theme="light"] .bottom-nav {
+  background: linear-gradient(to top, var(--bg) 30%, transparent);
+}
 [data-theme="light"] .bottom-nav__inner {
-  background: var(--bg);
+  background: transparent;
 }
 [data-theme="light"] .bottom-nav__rail {
   background: rgba(255, 255, 255, 0.96);
@@ -306,22 +308,21 @@ img, svg { display: block; max-width: 100%; }
   text-shadow: 0 0 14px rgba(124, 109, 205, 0.45);
 }
 
-/* ── Bottom nav ──────────────────────────────────────────────────────────── */
 .bottom-nav {
   position: fixed;
   right: 0;
   bottom: 0;
   left: 0;
   z-index: 40;
-  background: var(--bg);
+  background: linear-gradient(to top, var(--bg) 30%, transparent);
   pointer-events: none;
 }
 .bottom-nav__inner {
   position: relative;
   width: min(100%, 480px);
   margin: 0 auto;
-  background: var(--bg);
-  padding: 10px 20px var(--safe-bottom-nav);
+  background: transparent;
+  padding: 10px 20px calc(16px + max(env(safe-area-inset-bottom), 8px));
   pointer-events: auto;
 }
 .bottom-nav__rail {
