@@ -26,8 +26,8 @@ export default defineConfig({
     },
     includeAssets: ["favicon.svg", "apple-touch-icon.png"],
     manifest: {
-      name: "Weqe — Dry Eye Tracker",
-      short_name: "Weqe",
+      name: "Dry Eye Tracker",
+      short_name: "Dry Eye Tracker",
       description: "Track dry eye symptoms, pain, and treatments",
       theme_color: "#121008",
       background_color: "#121008",
