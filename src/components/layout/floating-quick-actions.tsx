@@ -14,6 +14,13 @@ const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet
 
 type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | null;
 
+const ACTION_ITEMS = [
+  { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota", delay: 0 },
+  { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño", delay: 50 },
+  { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene", delay: 100 },
+  { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación", delay: 150 },
+];
+
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,29 +40,34 @@ export function FloatingQuickActions() {
 
   return (
     <>
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-[29]"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       <div className={cn("fixed right-6 z-30", fabBottomOffsetClass)}>
         <div className="flex flex-col items-end gap-3">
-          {menuOpen && (
-            <>
-              <Button className="min-w-[132px] justify-start gap-2" variant="subtle" onClick={() => setSheet("drop")}>
-                <DropIcon size={18} /> Gota
-              </Button>
-              <Button className="min-w-[132px] justify-start gap-2" variant="subtle" onClick={() => setSheet("sleep")}>
-                <MoonIcon size={18} /> Sueno
-              </Button>
-              <Button className="min-w-[132px] justify-start gap-2" variant="subtle" onClick={() => setSheet("hygiene")}>
-                <EyeIcon size={18} /> Higiene
-              </Button>
-              <Button className="min-w-[132px] justify-start gap-2" variant="subtle" onClick={() => setSheet("obs_list")}>
-                <NotePencilIcon size={18} /> Observacion
-              </Button>
-            </>
-          )}
+          {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label, delay }) => (
+            <Button
+              key={s}
+              className="min-w-[136px] justify-start gap-2.5 shadow-sm"
+              style={{ animation: `fab-item-in 220ms ease-out ${delay}ms both` }}
+              variant="subtle"
+              onClick={() => setSheet(s)}
+            >
+              <Icon size={18} color="var(--accent)" /> {label}
+            </Button>
+          ))}
           <button
             aria-label="Acciones rapidas"
             className={cn(
-              "flex h-14 w-14 items-center justify-center rounded-full border-0 text-[var(--btn-primary-text)] shadow-[0_4px_20px_rgba(212,162,76,0.35)] transition-transform",
-              menuOpen ? "rotate-45 bg-[var(--accent-bright)]" : "bg-[var(--accent)]",
+              "flex h-14 w-14 items-center justify-center rounded-full border-0 text-[var(--btn-primary-text)] transition-all duration-200",
+              menuOpen
+                ? "rotate-45 bg-[var(--accent-bright)] shadow-[0_0_0_8px_var(--accent-dim),0_4px_20px_var(--fab-shadow)]"
+                : "bg-[var(--accent)] shadow-[0_4px_20px_var(--fab-shadow)]",
             )}
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
