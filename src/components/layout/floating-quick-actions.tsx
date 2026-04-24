@@ -30,8 +30,8 @@ export function FloatingQuickActions() {
   const isVisible = pathname === "/register" || pathname === "/history";
   const fabBottomOffsetClass =
     pathname === "/register"
-      ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom)+var(--sticky-cta-height)+16px)]"
-      : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom)+24px)]";
+      ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+var(--sticky-cta-height)+16px)]"
+      : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+24px)]";
 
   if (!isVisible) return null;
 

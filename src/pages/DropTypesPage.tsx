@@ -93,15 +93,7 @@ export default function DropTypesPage() {
 
   return (
     <section className="space-y-6">
-      <ScreenHeader
-        title="Tipos de gota"
-        description="Guarda tus gotas frecuentes una sola vez y luego seleccionalas rapido al registrar aplicaciones."
-        user={user}
-        action={<Button className="px-4 text-[13px]" onClick={signOut} type="button" variant="ghost">Cerrar sesion</Button>}
-      />
-
       {state.status !== "idle" && <StatusBanner state={state} />}
-
       <section className="space-y-3">
         <p className="section-label">Nueva gota</p>
         <input

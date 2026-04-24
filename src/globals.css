@@ -32,11 +32,20 @@
   --tabbar-height: 92px;
   --sticky-cta-height: 84px;
   --safe-bottom: min(env(safe-area-inset-bottom), 34px);
+  --safe-bottom-nav: var(--safe-bottom);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --btn-primary-text: #121008;
   --wheel-fade: rgba(28, 24, 16, 0.96);
   --fab-shadow: rgba(212, 162, 76, 0.40);
+}
+
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    :root {
+      --safe-bottom-nav: min(env(safe-area-inset-bottom), 10px);
+    }
+  }
 }
 
 :root[data-theme="light"] {
@@ -313,7 +322,7 @@ img, svg { display: block; max-width: 100%; }
   width: min(100%, 480px);
   margin: 0 auto;
   background: var(--bg);
-  padding: 10px 20px var(--safe-bottom);
+  padding: 10px 20px var(--safe-bottom-nav);
   pointer-events: auto;
 }
 .bottom-nav__rail {

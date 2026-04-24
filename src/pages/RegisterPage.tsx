@@ -470,7 +470,7 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      <div className="pointer-events-none fixed bottom-[calc(82px+var(--safe-bottom))] right-4 z-50 flex flex-col items-end gap-3 md:right-[calc(50vw-240px)]">
+      <div className="pointer-events-none fixed bottom-[calc(82px+var(--safe-bottom-nav))] right-4 z-50 flex flex-col items-end gap-3 md:right-[calc(50vw-240px)]">
         {!isOnline && (
           <div className="pointer-events-auto flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[rgba(28,24,16,0.9)] px-3 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-md">
             <span
