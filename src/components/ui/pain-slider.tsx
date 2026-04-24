@@ -14,7 +14,7 @@ export const PainSlider = memo(function PainSlider({ label, icon, value, onChang
   const gradientFn = variant === "quality" ? qualityGradient : painGradient;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-1">
       <div className="flex items-end justify-between gap-4">
         <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]">
           {icon}{label}

@@ -300,9 +300,9 @@ export default function RegisterPage() {
             <p className="section-label mb-0">Contexto</p>
           </div>
 
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-4 space-y-5">
             {/* Time tabs */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
