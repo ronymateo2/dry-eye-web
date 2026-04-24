@@ -52,6 +52,20 @@ export const api = {
   updateMe: (body: { timezone?: string; name?: string; theme?: "dark" | "light" }) => api.put("/user/me", body),
 
   saveCheckIn: (body: unknown) => api.post("/check-ins", body),
+  getLastCheckIn: () =>
+    api.get<{
+      id: string;
+      logged_at: string;
+      time_of_day: string | null;
+      eyelid_pain: number;
+      temple_pain: number;
+      masseter_pain: number;
+      cervical_pain: number;
+      orbital_pain: number;
+      stress_level: number;
+      trigger_type: string | null;
+      notes: string | null;
+    } | null>("/check-ins/last"),
 
   getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null }[]>("/drop-types"),
   createDropType: (name: string) => api.post<{ id: string; name: string }>("/drop-types", { name }),

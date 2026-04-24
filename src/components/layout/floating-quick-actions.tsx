@@ -49,8 +49,9 @@ export function FloatingQuickActions() {
         />
       )}
 
-      <div className={cn("fixed right-5 z-30", fabBottomOffsetClass)}>
-        <div className="flex flex-col items-end gap-3">
+      <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>
+        <div className="mx-auto flex w-[min(100%,480px)] flex-col items-end px-[var(--screen-padding)]">
+          <div className="pointer-events-auto flex flex-col items-end gap-3">
           {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label, delay }) => (
             <Button
               key={s}
@@ -76,6 +77,7 @@ export function FloatingQuickActions() {
           >
             <PlusIcon size={22} />
           </button>
+          </div>
         </div>
       </div>
 
