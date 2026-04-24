@@ -12,16 +12,16 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  BoneIcon,
-  HandEyeIcon,
-  EyeIcon,
-  SmileyMeltingIcon,
   LightningIcon,
-  HeadCircuitIcon,
   CaretDownIcon,
   ActivityIcon,
   TargetIcon,
 } from "@phosphor-icons/react";
+import eyelidsImg from "@/assets/pain-areas/eyelids.png";
+import templesImg from "@/assets/pain-areas/temples.png";
+import orbitalImg from "@/assets/pain-areas/orbital.png";
+import masseterImg from "@/assets/pain-areas/masseter.png";
+import cervicalImg from "@/assets/pain-areas/cervical.png";
 import type { TriggerType } from "@/types/domain";
 
 const defaultPain = {
@@ -300,9 +300,9 @@ export default function RegisterPage() {
             <p className="section-label mb-0">Contexto</p>
           </div>
 
-          <div className="px-4 pb-4 space-y-5">
+          <div className="px-4 pb-4">
             {/* Time tabs */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
@@ -571,31 +571,31 @@ export default function RegisterPage() {
           )}
           <div className="space-y-5">
             <PainSlider
-              icon={<EyeIcon size={15} />}
+              icon={<img src={eyelidsImg} alt="Ojo/Parpados" className="w-11 h-11 object-contain theme-invert" />}
               label="Ojo/Parpados"
               value={pain.eyelidPain}
               onChange={updatePain("eyelidPain")}
             />
             <PainSlider
-              icon={<HeadCircuitIcon size={15} />}
+              icon={<img src={templesImg} alt="Sienes" className="w-11 h-11 object-contain theme-invert" />}
               label="Sienes"
               value={pain.templePain}
               onChange={updatePain("templePain")}
             />
             <PainSlider
-              icon={<HandEyeIcon size={15} />}
+              icon={<img src={orbitalImg} alt="Zona Orbital" className="w-11 h-11 object-contain theme-invert" />}
               label="Zona Orbital"
               value={pain.orbitalPain}
               onChange={updatePain("orbitalPain")}
             />
             <PainSlider
-              icon={<SmileyMeltingIcon size={15} />}
+              icon={<img src={masseterImg} alt="Masetero" className="w-11 h-11 object-contain theme-invert" />}
               label="Masetero"
               value={pain.masseterPain}
               onChange={updatePain("masseterPain")}
             />
             <PainSlider
-              icon={<BoneIcon size={15} />}
+              icon={<img src={cervicalImg} alt="Cuello / Cervical" className="w-11 h-11 object-contain theme-invert" />}
               label="Cuello / Cervical"
               value={pain.cervicalPain}
               onChange={updatePain("cervicalPain")}

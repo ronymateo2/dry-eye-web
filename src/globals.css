@@ -177,6 +177,10 @@ button { cursor: pointer; }
 img, svg { display: block; max-width: 100%; }
 ::selection { background: rgba(212, 162, 76, 0.35); }
 
+[data-theme="light"] .theme-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* ── App shell ───────────────────────────────────────────────────────────── */
 .app-shell {
   display: flex;
