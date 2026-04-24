@@ -189,6 +189,7 @@ img, svg { display: block; max-width: 100%; }
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
   width: min(100%, 480px);
   margin: 0 auto;
   padding:
@@ -196,6 +197,7 @@ img, svg { display: block; max-width: 100%; }
     var(--screen-padding)
     16px;
 }
+.app-frame::-webkit-scrollbar { display: none; }
 
 /* ── Typography helpers ──────────────────────────────────────────────────── */
 .section-label {
