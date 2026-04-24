@@ -173,7 +173,10 @@ img, svg { display: block; max-width: 100%; }
 
 /* ── App shell ───────────────────────────────────────────────────────────── */
 .app-shell {
-  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  overflow: hidden;
   background:
     radial-gradient(circle at top center, rgba(212,162,76,0.08), transparent 32%),
     linear-gradient(180deg, rgba(28,24,16,0.6), transparent 26%),
@@ -182,13 +185,16 @@ img, svg { display: block; max-width: 100%; }
 
 .app-frame {
   position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   width: min(100%, 480px);
-  min-height: 100svh;
   margin: 0 auto;
   padding:
     calc(16px + env(safe-area-inset-top))
     var(--screen-padding)
-    calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 16px);
+    16px;
 }
 
 /* ── Typography helpers ──────────────────────────────────────────────────── */
@@ -295,9 +301,7 @@ img, svg { display: block; max-width: 100%; }
 
 /* ── Bottom nav ──────────────────────────────────────────────────────────── */
 .bottom-nav {
-  position: fixed;
-  right: 0; bottom: 0; left: 0;
-  z-index: 40;
+  flex-shrink: 0;
   background: var(--bg);
   pointer-events: none;
 }
