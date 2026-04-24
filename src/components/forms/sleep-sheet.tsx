@@ -17,7 +17,7 @@ function parseSleepHours(value: string): number | null {
 
 function SleepSheetSkeleton() {
   return (
-    <div className="animate-pulse space-y-5 pb-4">
+    <div className="animate-pulse space-y-5">
       <div className="space-y-3">
         <div className="flex items-end justify-between gap-4">
           <div className="h-4 w-32 rounded-md bg-[var(--surface)]" />
@@ -94,31 +94,26 @@ export function SleepSheet({ onSaved }: SleepSheetProps) {
   };
 
   return (
-    <>
+    <div className="space-y-5 pb-[calc(20px+env(safe-area-inset-bottom))]">
       {isLoading ? (
         <SleepSheetSkeleton />
       ) : (
-        <div className="space-y-5 pb-4">
+        <>
           {state.status !== "idle" && state.message ? (
             <StatusBanner state={state} />
           ) : null}
           <SleepHoursInput value={sleepHours} onChange={setSleepHours} />
           <SleepQualitySelector value={sleepQuality} onChange={setSleepQuality} />
-        </div>
+        </>
       )}
-      <div
-        className="sticky bottom-0 pb-[calc(24px+env(safe-area-inset-bottom))] pt-3"
-        style={{ background: "linear-gradient(to top, rgba(18,16,8,1) 60%, rgba(18,16,8,0))" }}
+      <Button
+        className="w-full"
+        disabled={isPending || isLoading}
+        type="button"
+        onClick={handleSave}
       >
-        <Button
-          className="w-full"
-          disabled={isPending || isLoading}
-          type="button"
-          onClick={handleSave}
-        >
-          {isPending ? "Guardando..." : isUpdating ? "Actualizar sueno" : "Guardar sueno"}
-        </Button>
-      </div>
-    </>
+        {isPending ? "Guardando..." : isUpdating ? "Actualizar sueno" : "Guardar sueno"}
+      </Button>
+    </div>
   );
 }

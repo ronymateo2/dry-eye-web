@@ -471,30 +471,34 @@ export default function RegisterPage() {
       </div>
 
       <div
-        className="pointer-events-none fixed right-4 z-50 flex flex-col items-end gap-3 md:right-[calc(50vw-240px)]"
-        style={{ bottom: "calc(82px + var(--safe-bottom-nav))" }}
+        className="pointer-events-none fixed inset-x-0 z-50"
+        style={{
+          bottom: "calc(var(--tabbar-height) + var(--safe-bottom-nav) + 12px)",
+        }}
       >
-        {!isOnline && (
-          <div className="pointer-events-auto flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[rgba(28,24,16,0.9)] px-3 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-md">
-            <span
-              className="h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{ background: "var(--text-muted)" }}
-            />
-            <p
-              className="m-0 text-[12px] leading-none"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Sin conexion
-            </p>
-          </div>
-        )}
-        <Button
-          className="pointer-events-auto h-[56px] min-w-[124px] px-6 text-[16px] shadow-[0_6px_20px_var(--fab-shadow)]"
-          disabled={isPending || !isTriggerValid}
-          onClick={handleSave}
-        >
-          {isPending ? "Guardando..." : "Guardar"}
-        </Button>
+        <div className="mx-auto flex w-[min(100%,480px)] flex-col gap-3 px-[var(--screen-padding)]">
+          {!isOnline && (
+            <div className="pointer-events-auto self-end flex items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[rgba(28,24,16,0.9)] px-3 py-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-md">
+              <span
+                className="h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{ background: "var(--text-muted)" }}
+              />
+              <p
+                className="m-0 text-[12px] leading-none"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Sin conexion
+              </p>
+            </div>
+          )}
+          <Button
+            className="pointer-events-auto h-[56px] w-full text-[16px] shadow-[0_8px_24px_var(--fab-shadow)]"
+            disabled={isPending || !isTriggerValid}
+            onClick={handleSave}
+          >
+            {isPending ? "Guardando..." : "Guardar"}
+          </Button>
+        </div>
       </div>
 
       <MobileSheet

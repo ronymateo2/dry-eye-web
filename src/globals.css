@@ -30,7 +30,7 @@
   --surface-card: rgba(28, 24, 16, 0.56);
   --screen-padding: 20px;
   --tabbar-height: 92px;
-  --sticky-cta-height: 84px;
+  --sticky-cta-height: 74px;
   --safe-bottom: min(env(safe-area-inset-bottom), 34px);
   --safe-bottom-nav: 0px;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);

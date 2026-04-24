@@ -27,11 +27,12 @@ export function FloatingQuickActions() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const [selectedObservation, setSelectedObservation] = useState<{ id: string; title: string; eye: string } | null>(null);
 
-  const isVisible = pathname === "/register" || pathname === "/history";
+  const isRegisterPage = pathname === "/register";
+  const isVisible = isRegisterPage || pathname === "/history";
   const fabBottomOffsetClass =
-    pathname === "/register"
+    isRegisterPage
       ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+var(--sticky-cta-height)+16px)]"
-      : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+24px)]";
+      : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
 
   if (!isVisible) return null;
 
@@ -42,18 +43,18 @@ export function FloatingQuickActions() {
     <>
       {menuOpen && (
         <div
-          className="fixed inset-0 z-[29]"
+          className="fixed inset-0 z-[29] bg-[rgba(0,0,0,0.06)]"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      <div className={cn("fixed right-6 z-30", fabBottomOffsetClass)}>
+      <div className={cn("fixed right-5 z-30", fabBottomOffsetClass)}>
         <div className="flex flex-col items-end gap-3">
           {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label, delay }) => (
             <Button
               key={s}
-              className="min-w-[136px] justify-start gap-2.5 shadow-sm"
+              className="min-w-[132px] justify-start gap-2.5 border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
               style={{ animation: `fab-item-in 220ms ease-out ${delay}ms both` }}
               variant="subtle"
               onClick={() => setSheet(s)}
@@ -63,16 +64,17 @@ export function FloatingQuickActions() {
           ))}
           <button
             aria-label="Acciones rapidas"
+            aria-expanded={menuOpen}
             className={cn(
-              "flex h-14 w-14 items-center justify-center rounded-full border-0 text-[var(--btn-primary-text)] transition-all duration-200",
+              "flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color,color,box-shadow] duration-200",
               menuOpen
-                ? "rotate-45 bg-[var(--accent-bright)] shadow-[0_0_0_8px_var(--accent-dim),0_4px_20px_var(--fab-shadow)]"
-                : "bg-[var(--accent)] shadow-[0_4px_20px_var(--fab-shadow)]",
+                ? "rotate-45 border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] shadow-[0_0_0_6px_var(--accent-dim),0_8px_20px_var(--fab-shadow)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--accent)] shadow-[0_8px_18px_rgba(0,0,0,0.20)] hover:bg-[var(--surface-el)]",
             )}
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
           >
-            <PlusIcon size={24} />
+            <PlusIcon size={22} />
           </button>
         </div>
       </div>

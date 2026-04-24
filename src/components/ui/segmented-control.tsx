@@ -14,6 +14,7 @@ type SegmentedControlProps<T extends string> = {
   options: readonly Option<T>[];
   value: T;
   onChange: (value: T) => void;
+  tone?: "default" | "quiet";
 };
 
 // Split easings — the leading edge uses ease-out (fast start, slow settle)
@@ -29,6 +30,7 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  tone = "default",
 }: SegmentedControlProps<T>) {
   const shouldReduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,12 +85,17 @@ export function SegmentedControl<T extends string>({
         ease: pill.dir === 1 ? EASE_LEAD : EASE_TRAIL,
       };
 
+  const isQuiet = tone === "quiet";
+
   return (
     <div className="space-y-3">
       <p className="section-label">{label}</p>
       <div
         ref={containerRef}
-        className="relative grid min-h-12"
+        className={cn(
+          "relative grid min-h-12",
+          isQuiet && "rounded-full",
+        )}
         style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}
       >
         <motion.div
@@ -96,7 +103,10 @@ export function SegmentedControl<T extends string>({
           initial={false}
           animate={{ left: pill.left, right: pill.right }}
           transition={{ left: leftTransition, right: rightTransition }}
-          className="pointer-events-none absolute top-0 bottom-0 rounded-full bg-[var(--accent)]"
+          className={cn(
+            "pointer-events-none absolute top-0 bottom-0 rounded-full",
+            isQuiet ? "bg-[var(--accent-dim)]" : "bg-[var(--accent)]",
+          )}
         />
 
         {options.map((option) => {
@@ -121,10 +131,11 @@ export function SegmentedControl<T extends string>({
                 e.currentTarget.style.opacity = "1";
               }}
               className={cn(
-                "relative z-10 flex min-h-12 select-none items-center justify-center px-4 text-[13px] font-medium",
-                isActive
-                  ? "text-[var(--btn-primary-text)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
+                "relative z-10 flex min-h-12 select-none items-center justify-center px-4 text-[13px]",
+                isActive ? "font-semibold" : "font-medium",
+                isActive && !isQuiet && "text-[var(--btn-primary-text)]",
+                isActive && isQuiet && "text-[var(--accent)]",
+                !isActive && "text-[var(--text-muted)] hover:text-[var(--text-primary)]",
               )}
               style={{ transition: `color 220ms ${TEXT_EASING}` }}
             >

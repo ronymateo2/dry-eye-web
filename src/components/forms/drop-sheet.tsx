@@ -198,6 +198,7 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
           options={DROP_EYES.map((e) => ({ label: e === "left" ? "Izq" : e === "right" ? "Der" : "Ambos", value: e }))}
           value={eye}
           onChange={setEye}
+          tone="quiet"
         />
         <div className="space-y-2">
           <p className="section-label">Cantidad</p>
@@ -222,7 +223,7 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
       )}
 
       <Button
-        className="w-full"
+        className="w-full shadow-[0_10px_24px_var(--fab-shadow)]"
         disabled={isPending || !canSave || state.status === "success"}
         type="button"
         onClick={handleSave}

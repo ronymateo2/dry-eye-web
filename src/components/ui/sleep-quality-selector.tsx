@@ -24,7 +24,7 @@ function SignalBars({ bars, color, active }: { bars: number; color: string; acti
           key={i}
           x={i * (W + GAP)} y={maxH - h}
           width={W} height={h} rx={1.5}
-          fill={i < bars && active ? color : "#2e2718"}
+          fill={i < bars && active ? color : "var(--text-faint)"}
           opacity={i < bars ? 1 : 0.5}
         />
       ))}
