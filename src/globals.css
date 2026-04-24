@@ -207,6 +207,9 @@ img, svg { display: block; max-width: 100%; }
     var(--screen-padding)
     16px;
 }
+.app-frame--with-nav {
+  padding-bottom: calc(24px + var(--tabbar-height) + var(--safe-bottom-nav));
+}
 .app-frame::-webkit-scrollbar { display: none; }
 
 /* ── Typography helpers ──────────────────────────────────────────────────── */
@@ -313,7 +316,11 @@ img, svg { display: block; max-width: 100%; }
 
 /* ── Bottom nav ──────────────────────────────────────────────────────────── */
 .bottom-nav {
-  flex-shrink: 0;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
   background: var(--bg);
   pointer-events: none;
 }

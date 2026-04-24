@@ -39,7 +39,7 @@ export function AppShell({ children, isAuthenticated }: { children: React.ReactN
     <div className="app-shell">
       {isAuthenticated && <NetworkBanner />}
       {isAuthenticated && <SyncTrigger />}
-      <main className="app-frame">
+      <main className={isAuthenticated ? "app-frame app-frame--with-nav" : "app-frame"}>
         {isAuthenticated && <AppHeader />}
         {children}
       </main>
