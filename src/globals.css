@@ -31,6 +31,7 @@
   --screen-padding: 20px;
   --tabbar-height: 92px;
   --sticky-cta-height: 84px;
+  --safe-bottom: min(env(safe-area-inset-bottom), 34px);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --btn-primary-text: #121008;
@@ -312,7 +313,7 @@ img, svg { display: block; max-width: 100%; }
   width: min(100%, 480px);
   margin: 0 auto;
   background: var(--bg);
-  padding: 10px 20px env(safe-area-inset-bottom);
+  padding: 10px 20px var(--safe-bottom);
   pointer-events: auto;
 }
 .bottom-nav__rail {
