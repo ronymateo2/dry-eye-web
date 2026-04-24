@@ -486,7 +486,7 @@ export default function RegisterPage() {
           </div>
         )}
         <Button
-          className="pointer-events-auto h-[56px] min-w-[124px] px-6 text-[16px] shadow-[0_8px_32px_rgba(0,0,0,0.8)]"
+          className="pointer-events-auto h-[56px] min-w-[124px] px-6 text-[16px] shadow-[0_6px_20px_var(--fab-shadow)]"
           disabled={isPending || !isTriggerValid}
           onClick={handleSave}
         >

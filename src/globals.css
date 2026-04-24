@@ -75,7 +75,7 @@
   border-color: rgba(237, 234, 245, 0.95);
 }
 [data-theme="light"] .bottom-nav {
-  background: linear-gradient(to top, var(--bg) 30%, transparent);
+  background: var(--surface);
 }
 [data-theme="light"] .bottom-nav__inner {
   background: transparent;
@@ -314,7 +314,7 @@ img, svg { display: block; max-width: 100%; }
   bottom: 0;
   left: 0;
   z-index: 40;
-  background: linear-gradient(to top, var(--bg) 30%, transparent);
+  background: var(--surface);
   pointer-events: none;
 }
 .bottom-nav__inner {
@@ -322,7 +322,7 @@ img, svg { display: block; max-width: 100%; }
   width: min(100%, 480px);
   margin: 0 auto;
   background: transparent;
-  padding: 10px 20px calc(16px + max(env(safe-area-inset-bottom), 8px));
+  padding: 0;
   pointer-events: auto;
 }
 .bottom-nav__rail {
@@ -332,11 +332,10 @@ img, svg { display: block; max-width: 100%; }
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
   min-height: 64px;
-  padding: 8px 4px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 26px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.05); /* Lighter shadow since background is white */
 }
 .bottom-nav__item {
   position: relative;
