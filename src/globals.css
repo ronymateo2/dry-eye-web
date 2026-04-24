@@ -103,8 +103,7 @@
 
 html, body {
   margin: 0;
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
   background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-ui);
@@ -174,10 +173,7 @@ img, svg { display: block; max-width: 100%; }
 
 /* ── App shell ───────────────────────────────────────────────────────────── */
 .app-shell {
-  height: 100%;
-  overflow-y: auto;
-  overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
+  min-height: 100svh;
   background:
     radial-gradient(circle at top center, rgba(212,162,76,0.08), transparent 32%),
     linear-gradient(180deg, rgba(28,24,16,0.6), transparent 26%),
@@ -232,38 +228,39 @@ img, svg { display: block; max-width: 100%; }
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 28px;
-  padding: 4px 0;
+  margin-bottom: 24px;
+  padding: 4px 0 16px;
+  border-bottom: 1px solid var(--border);
 }
 .app-header__brand {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
 }
 .app-header__brand-icon {
-  font-size: 17px;
+  font-size: 21px;
   color: var(--accent);
-  opacity: 0.75;
   font-family: var(--font-mono);
   line-height: 1;
+  text-shadow: 0 0 14px rgba(212, 162, 76, 0.5);
 }
 .app-header__brand-name {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--accent);
 }
 .app-header__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 .app-header__date-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 13px;
+  padding: 8px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
@@ -271,15 +268,16 @@ img, svg { display: block; max-width: 100%; }
   font-size: 13px;
   font-weight: 500;
   font-family: var(--font-mono);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 .app-header__avatar-link { display: block; flex-shrink: 0; }
 .app-header__avatar {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: var(--radius-full);
   object-fit: cover;
   border: 1.5px solid var(--accent);
   display: block;
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 .app-header__avatar--initials {
   display: flex;
@@ -287,9 +285,12 @@ img, svg { display: block; max-width: 100%; }
   justify-content: center;
   background: var(--surface-el);
   color: var(--accent);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   font-family: var(--font-mono);
+}
+[data-theme="light"] .app-header__brand-icon {
+  text-shadow: 0 0 14px rgba(124, 109, 205, 0.45);
 }
 
 /* ── Bottom nav ──────────────────────────────────────────────────────────── */
@@ -299,8 +300,6 @@ img, svg { display: block; max-width: 100%; }
   z-index: 40;
   background: var(--bg);
   pointer-events: none;
-  transform: translateZ(0);
-  will-change: transform;
 }
 .bottom-nav__inner {
   position: relative;
