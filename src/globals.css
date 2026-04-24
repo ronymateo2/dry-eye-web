@@ -220,6 +220,72 @@ img, svg { display: block; max-width: 100%; }
   font-variant-numeric: tabular-nums;
 }
 
+/* ── App header ──────────────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 4px 0;
+}
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.app-header__brand-icon {
+  font-size: 17px;
+  color: var(--accent);
+  opacity: 0.75;
+  font-family: var(--font-mono);
+  line-height: 1;
+}
+.app-header__brand-name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+.app-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app-header__date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.app-header__avatar-link { display: block; flex-shrink: 0; }
+.app-header__avatar {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1.5px solid var(--accent);
+  display: block;
+}
+.app-header__avatar--initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-el);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
 /* ── Bottom nav ──────────────────────────────────────────────────────────── */
 .bottom-nav {
   position: fixed;

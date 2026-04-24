@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BottomNav } from "./bottom-nav";
 import { FloatingQuickActions } from "./floating-quick-actions";
+import { AppHeader } from "./app-header";
 import { useOfflineSync } from "@/lib/hooks/use-offline-sync";
 
 function NetworkBanner() {
@@ -38,7 +39,10 @@ export function AppShell({ children, isAuthenticated }: { children: React.ReactN
     <div className="app-shell">
       {isAuthenticated && <NetworkBanner />}
       {isAuthenticated && <SyncTrigger />}
-      <main className="app-frame">{children}</main>
+      <main className="app-frame">
+        {isAuthenticated && <AppHeader />}
+        {children}
+      </main>
       {isAuthenticated && (
         <>
           <FloatingQuickActions />

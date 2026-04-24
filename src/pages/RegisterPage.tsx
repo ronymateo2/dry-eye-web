@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { PainSlider } from "@/components/ui/pain-slider";
 import { TextInput } from "@/components/ui/text-input";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
-import { ScreenHeader } from "@/components/layout/screen-header";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { api } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
 import { TRIGGER_OPTIONS, SYMPTOM_OPTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -74,9 +72,6 @@ const accordionToggleClass = (expanded: boolean, hasSelection: boolean) =>
   );
 
 export default function RegisterPage() {
-  const { auth, signOut } = useAuth();
-  const user = auth.status === "authenticated" ? auth.user : null;
-
   const [pain, setPain] = useState(defaultPain);
   const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
   const [customTriggerName, setCustomTriggerName] = useState("");
@@ -219,22 +214,6 @@ export default function RegisterPage() {
 
   return (
     <section>
-      <ScreenHeader
-        title="Registro rapido"
-        description="Registra dolor y sueno con el minimo esfuerzo posible, incluso en un mal dia."
-        user={user}
-        action={
-          <Button
-            className="px-4 text-[13px]"
-            onClick={signOut}
-            type="submit"
-            variant="ghost"
-          >
-            Cerrar sesion
-          </Button>
-        }
-      />
-
       <div className="relative pb-[calc(var(--sticky-cta-height,88px)+44px)] space-y-6">
         {/* Context */}
         <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">

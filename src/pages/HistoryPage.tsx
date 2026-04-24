@@ -15,13 +15,11 @@ import {
   NotePencilIcon,
   BedIcon,
 } from "@phosphor-icons/react";
-import { ScreenHeader } from "@/components/layout/screen-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SegmentedControl } from "@/components/ui/segmented-control";
-import { Button } from "@/components/ui/button";
 import { SYMPTOM_OPTIONS, OBS_EYE_LABELS } from "@/lib/constants";
 import { api } from "@/lib/api";
-import { useAuth, useUser } from "@/lib/auth";
+import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import type { TriggerType, ObservationEye, SleepQuality, HistoryEntry, HistoryFeed } from "@/types/domain";
 
@@ -695,7 +693,6 @@ function ObservationsTab({ timezone }: { timezone: string }) {
 
 export default function HistoryPage() {
   const user = useUser();
-  const { signOut } = useAuth();
   const [feed, setFeed] = useState<HistoryFeed | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -743,13 +740,6 @@ export default function HistoryPage() {
 
   return (
     <section>
-      <ScreenHeader
-        title="Historial"
-        description="El historial agrupa check-ins, gotas y triggers por dia para revisar contexto clinico rapido."
-        user={user}
-        action={<Button className="px-4 text-[13px]" onClick={signOut} type="button" variant="ghost">Cerrar sesion</Button>}
-      />
-
       {isLoading ? (
         <FeedSkeleton />
       ) : (

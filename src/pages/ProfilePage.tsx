@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ScreenHeader } from "@/components/layout/screen-header";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/ui/text-input";
@@ -13,6 +12,7 @@ import {
   MoonIcon,
   PencilSimpleIcon,
   PlusIcon,
+  SignOutIcon,
   SunIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
@@ -272,13 +272,6 @@ export default function ProfilePage() {
   return (
     <>
       <section className="space-y-8">
-        <ScreenHeader
-          title="Perfil"
-          description="Configuración de tu cuenta."
-          user={user}
-          action={<Button className="px-4 text-[13px]" onClick={signOut} type="button" variant="ghost">Cerrar sesion</Button>}
-        />
-
         {/* Información */}
         <div className="space-y-3">
           <p className="section-label">Información</p>
@@ -406,6 +399,24 @@ export default function ProfilePage() {
               </DndContext>
             </>
           )}
+        </div>
+
+        {/* Cerrar sesion */}
+        <div className="flex flex-col items-center gap-3 pt-2 pb-4">
+          {user.name ? (
+            <p className="text-[11px] text-[var(--text-faint)]">
+              Sesión activa como <span className="text-[var(--text-muted)]">{user.name}</span>
+            </p>
+          ) : null}
+          <button
+            type="button"
+            onClick={signOut}
+            aria-label="Cerrar sesión"
+            className="group flex items-center gap-2 rounded-[999px] border border-[rgba(204,63,48,0.22)] bg-[rgba(204,63,48,0.07)] px-6 py-3 text-[14px] font-medium text-[var(--error)] transition-all duration-[180ms] active:scale-[0.96] hover:border-[rgba(204,63,48,0.45)] hover:bg-[rgba(204,63,48,0.13)]"
+          >
+            <SignOutIcon size={14} weight="bold" className="transition-transform duration-200 group-hover:-translate-x-0.5" />
+            Cerrar sesión
+          </button>
         </div>
       </section>
 
