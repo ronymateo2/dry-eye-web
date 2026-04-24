@@ -65,10 +65,31 @@ function TokenInit() {
   return null;
 }
 
+function IosPwaLayoutInit() {
+  useEffect(() => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const nav = navigator as Navigator & { standalone?: boolean };
+    const update = () => {
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true;
+      document.documentElement.toggleAttribute("data-ios-pwa", isIOS && isStandalone);
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, []);
+
+  return null;
+}
+
 export function App() {
   return (
     <BrowserRouter>
       <TokenInit />
+      <IosPwaLayoutInit />
       <AuthProvider>
         <ThemeProvider>
           <AppRoutes />

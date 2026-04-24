@@ -48,6 +48,10 @@
   }
 }
 
+:root[data-ios-pwa] {
+  --safe-bottom-nav: 0px;
+}
+
 :root[data-theme="light"] {
   --bg: #F0EFF8;
   --surface: #FFFFFF;
