@@ -235,7 +235,7 @@ img, svg { display: block; max-width: 100%; }
   width: min(100%, 480px);
   margin: 0 auto;
   background: var(--bg);
-  padding: 14px 12px env(safe-area-inset-bottom);
+  padding: 10px 20px env(safe-area-inset-bottom);
   pointer-events: auto;
 }
 .bottom-nav__rail {
