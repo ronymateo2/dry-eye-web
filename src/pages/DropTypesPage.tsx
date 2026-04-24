@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { ScreenHeader } from "@/components/layout/screen-header";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
-import { useAuth, useUser } from "@/lib/auth";
 import { DotsSixVerticalIcon } from "@phosphor-icons/react";
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent,
@@ -51,8 +49,6 @@ function SortableDropType({ dt, isOnly }: { dt: DropTypeRecord; isOnly: boolean 
 }
 
 export default function DropTypesPage() {
-  const user = useUser();
-  const { signOut } = useAuth();
   const qc = useQueryClient();
 
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
