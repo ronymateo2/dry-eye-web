@@ -26,7 +26,7 @@ function timeAgo(iso: string): string {
 function EyePill({ eye }: { eye: string }) {
   if (eye === "none") return null;
   return (
-    <span className="rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
+    <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
       {OBS_EYE_LABELS[eye as ObservationEye]}
     </span>
   );
@@ -34,7 +34,7 @@ function EyePill({ eye }: { eye: string }) {
 
 function SkeletonRow() {
   return (
-    <div className="flex min-h-[64px] w-full items-center gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface-1)] px-4 py-3">
+    <div className="flex min-h-[64px] w-full items-center gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
       <div className="flex flex-1 flex-col gap-2">
         <Skeleton className="h-4 w-2/3" />
         <Skeleton className="h-3 w-1/3" />
@@ -74,7 +74,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
               type="button"
               className={cn(
                 "flex min-h-[64px] w-full items-center gap-3 rounded-[14px]",
-                "border border-[var(--border)] bg-[var(--surface-1)] px-4 py-3",
+                "border border-[var(--border)] bg-[var(--surface)] px-4 py-3",
                 "text-left active:opacity-80 transition-opacity"
               )}
               onClick={() => onSelectObservation(obs)}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { PainSlider } from "@/components/ui/pain-slider";
@@ -28,6 +29,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
         durationMinutes,
         notes: notes.trim(),
       });
+      toast.success("Ocurrencia guardada.");
       onSaved();
     } catch {
       setState({ status: "error", message: "No se pudo guardar." });
@@ -63,7 +65,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
           />
         </div>
       </div>
-      <div className="sticky bottom-0 pb-[calc(24px+env(safe-area-inset-bottom))] pt-3" style={{ background: "linear-gradient(to top, rgba(18,16,8,1) 60%, rgba(18,16,8,0))" }}>
+      <div className="sticky bottom-0 pb-[calc(24px+env(safe-area-inset-bottom))] pt-3" style={{ background: "linear-gradient(to top, var(--bg) 60%, transparent)" }}>
         <Button className="w-full" disabled={isPending} onClick={handleSave}>
           {isPending ? "Guardando..." : "Guardar ocurrencia"}
         </Button>
