@@ -57,7 +57,7 @@
 		"build": "tsc -b && vite build",
 		"cf-typegen": "wrangler types",
 		"check": "tsc && vite build",
-		"deploy": "wrangler pages deploy dist --project-name=dry-eye-web",
+		"deploy": "wrangler deploy",
 		"dev": "vite",
 		"lint": "eslint .",
 		"preview": "npm run build && vite preview"
