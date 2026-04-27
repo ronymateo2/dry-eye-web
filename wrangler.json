@@ -12,15 +12,5 @@
 	"assets": {
 		"directory": "./dist",
 		"not_found_handling": "single-page-application"
-	},
-	"vars": {
-		"VITE_API_URL": "https://dry-eye-api.ronymateo.workers.dev/api",
-	},
-	"env": {
-		"dev": {
-			"vars": {
-				"VITE_API_URL": "https://dev.dry-eye-api.ronymateo.workers.dev/api"
-			}
-		}
 	}
 }

@@ -17,6 +17,7 @@ import {
   ActivityIcon,
   TargetIcon,
 } from "@phosphor-icons/react";
+import { SleepNudge } from "@/components/ui/sleep-nudge";
 import eyelidsImg from "@/assets/pain-areas/eyelids.png";
 import templesImg from "@/assets/pain-areas/temples.png";
 import orbitalImg from "@/assets/pain-areas/orbital.png";
@@ -294,6 +295,7 @@ export default function RegisterPage() {
   return (
     <section>
       <div className="relative pb-[calc(var(--sticky-cta-height,88px)+44px)] space-y-6">
+        <SleepNudge />
         {/* Context */}
         <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
