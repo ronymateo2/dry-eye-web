@@ -203,10 +203,13 @@ Tap cycles 0→1→2→3→0. Default on first select is State 1 (leve).
 
 ### Toast
 - Position: top of screen, below safe area inset, full width
-- Error: `background: var(--error)` (#cc3f30) | Success: `background: var(--success)` (#5cb85a)
-- Text: `color: var(--text-primary)`, Inter 13px 500
+- Background: always `var(--surface-el)` (#252014) — never solid color backgrounds (high luminance = harmful for photophobia)
+- Border: colored at 50% opacity — success `rgba(92,184,90,0.5)`, error `rgba(204,63,48,0.5)`, warning `rgba(224,147,42,0.5)`, info `var(--border)`
+- Icon: full color — success `#5cb85a`, error `#cc3f30`, warning `#e0932a`, info `var(--accent)`
+- Text: `color: var(--text-primary)`, 13px 500
 - Duration: 4 seconds, then fade out
 - Do not auto-dismiss error toasts that require user action (e.g., retry)
+- **Rationale:** Solid colored backgrounds flash high luminance on a dark UI. Users with neuropathic dry eye have photophobia. The colored border + icon communicates severity without a luminance spike.
 
 ### Skeleton Loader
 - Background: `var(--surface-el)` (#252014)
@@ -251,3 +254,4 @@ Used for Gotas and Triggers screens (launched from FAB).
 | 2026-03-29 | Error toasts don't auto-dismiss if action required | If the user needs to retry or re-auth, the toast stays visible. Silent error recovery is the worst UX for a health tracker. |
 | 2026-03-29 | Skeleton shape matches content (not generic spinner) | Charts get rect skeletons, lists get row skeletons. Reduces layout shift and helps the user understand what's loading before data arrives. |
 | 2026-04-16 | Aumento de contraste base y pesos tipográficos mínimos (`var(--text-faint)` y `font-weight: 400` en *Geist Mono*) | Pacientes con fotofobia y ojo seco usan el dispositivo con **50-60% de brillo**. Tonos muy tenues (`#5a4e3a`) o pesos finos (`300`) desaparecen. Todo elemento requiere legibilidad clínica bajo atenuación extrema de luminancia, sin migrar a tonos azules. |
+| 2026-04-27 | Toast: dark surface + colored border + colored icon (no solid color bg) | Solid color backgrounds (bright green/red) flash high luminance against the dark UI — a direct photophobia trigger. Severity still readable via border and icon color. Consistent with how info toasts already worked. |

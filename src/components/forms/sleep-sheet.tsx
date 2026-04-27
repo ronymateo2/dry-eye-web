@@ -4,6 +4,7 @@ import { SleepHoursInput } from "@/components/ui/sleep-hours-input";
 import { SleepQualitySelector } from "@/components/ui/sleep-quality-selector";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 import type { ActionState, SleepQuality } from "@/types/domain";
 
 function parseSleepHours(value: string): number | null {
@@ -86,6 +87,7 @@ export function SleepSheet({ onSaved }: SleepSheetProps) {
     setIsPending(true);
     try {
       await api.saveSleep(input);
+      toast.success(`${hours}h de sueno registradas.`);
       onSaved();
     } catch {
       setState({ status: "error", message: "No se pudo guardar. Intenta de nuevo." });
