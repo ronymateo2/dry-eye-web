@@ -26,14 +26,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            "group toast !rounded-[10px] !border-0 !shadow-[0_4px_20px_rgba(0,0,0,0.5)] !text-[13px] !font-medium !leading-snug",
+            "group toast !rounded-[10px] !shadow-[0_4px_20px_rgba(0,0,0,0.5)] !text-[13px] !font-medium !leading-snug !bg-[var(--surface-el)] !text-[var(--text-primary)]",
           success:
-            "!bg-[#5cb85a] !text-white [&>[data-icon]]:!text-white",
+            "!border !border-[rgba(92,184,90,0.5)] [&>[data-icon]]:!text-[#5cb85a]",
           error:
-            "!bg-[#cc3f30] !text-white [&>[data-icon]]:!text-white",
+            "!border !border-[rgba(204,63,48,0.5)] [&>[data-icon]]:!text-[#cc3f30]",
           warning:
-            "!bg-[#e0932a] !text-white [&>[data-icon]]:!text-white",
-          info: "!bg-[var(--surface-el)] !text-[var(--text-primary)] !border !border-[var(--border)] [&>[data-icon]]:!text-[var(--accent)]",
+            "!border !border-[rgba(224,147,42,0.5)] [&>[data-icon]]:!text-[#e0932a]",
+          info: "!border !border-[var(--border)] [&>[data-icon]]:!text-[var(--accent)]",
         },
       }}
       {...props}

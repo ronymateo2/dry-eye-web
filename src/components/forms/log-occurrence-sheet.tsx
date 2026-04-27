@@ -44,7 +44,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
         <div className="space-y-2">
           <p className="section-label">Duracion (min, opcional)</p>
           <input
-            className="w-full h-12 rounded-[12px] border border-[var(--border)] bg-transparent px-4 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+            className="w-full h-12 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
             inputMode="numeric"
             placeholder="Ej: 15"
             type="number"
@@ -55,7 +55,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
         <div className="space-y-2">
           <p className="section-label">Notas (opcional)</p>
           <textarea
-            className="w-full resize-none rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-3 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] min-h-[80px]"
+            className="w-full resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] min-h-[80px]"
             maxLength={300}
             placeholder="Que mas notaste?"
             value={notes}

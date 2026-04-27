@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -61,20 +62,23 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
     // Offline path
     if (!isOnline) {
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: Number(quantity) || 1, eye });
-      setState({ status: "success", message: "Guardada sin conexión. Se sincronizará al reconectar." });
+      toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
+      onSaved();
       return;
     }
 
     try {
       await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: Number(quantity) || 1, eye });
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      toast.success("Gota registrada.");
       onSaved();
     } catch {
       // Network failure while online — queue and sync later
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: Number(quantity) || 1, eye });
-      setState({ status: "success", message: "Guardada sin conexión. Se sincronizará al reconectar." });
+      toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
+      onSaved();
     }
   };
 
@@ -224,7 +228,7 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
 
       <Button
         className="w-full shadow-[0_10px_24px_var(--fab-shadow)]"
-        disabled={isPending || !canSave || state.status === "success"}
+        disabled={isPending || !canSave}
         type="button"
         onClick={handleSave}
       >
