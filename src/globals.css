@@ -6,6 +6,8 @@
   --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --bg: #121008;
+  --splash-glow-near: rgba(212, 162, 76, 0.55);
+  --splash-glow-far: rgba(212, 162, 76, 0.18);
   --surface: #1c1810;
   --surface-el: #252014;
   --border: #2e2718;
@@ -42,6 +44,8 @@
 
 :root[data-theme="light"] {
   --bg: #F0EFF8;
+  --splash-glow-near: rgba(124, 109, 205, 0.45);
+  --splash-glow-far: rgba(124, 109, 205, 0.12);
   --surface: #FFFFFF;
   --surface-el: #EAE8F8;
   --border: #EDEAF5;
@@ -532,4 +536,106 @@ img, svg { display: block; max-width: 100%; }
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Splash Screen ───────────────────────────────────────────────────────── */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  pointer-events: none;
+}
+.splash--out {
+  animation: splash-exit 380ms var(--ease-out) forwards;
+}
+@keyframes splash-exit {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.03); }
+}
+
+.splash__icon {
+  font-size: 56px;
+  line-height: 1;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  text-shadow:
+    0 0 28px var(--splash-glow-near),
+    0 0 64px var(--splash-glow-far);
+  animation:
+    splash-icon-in 650ms var(--ease-out) both,
+    splash-glow-pulse 2.8s ease-in-out 650ms infinite;
+}
+@keyframes splash-icon-in {
+  from { opacity: 0; transform: scale(0.72); filter: blur(6px); }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0); }
+}
+@keyframes splash-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 28px var(--splash-glow-near),
+      0 0 64px var(--splash-glow-far);
+  }
+  50% {
+    text-shadow:
+      0 0 44px var(--splash-glow-near),
+      0 0 96px var(--splash-glow-near);
+  }
+}
+
+.splash__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 20px;
+  animation: splash-rise 500ms var(--ease-out) 280ms both;
+}
+@keyframes splash-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.splash__name {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.splash__sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.splash__progress {
+  position: absolute;
+  bottom: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+  animation: splash-rise 400ms var(--ease-out) 560ms both;
+}
+.splash__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: splash-load 2.8s cubic-bezier(0.16, 1, 0.3, 1) 480ms both;
+}
+@keyframes splash-load {
+  from { width: 0%; }
+  to   { width: 88%; }
 }
