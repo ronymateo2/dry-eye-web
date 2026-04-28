@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from "react";
-import { ArrowLeftIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, XIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 type MobileSheetProps = {
@@ -61,7 +61,15 @@ export function MobileSheet({
         role="dialog"
       >
         <div className="sheet-handle" />
-        <header className="mb-6">
+        <button
+          aria-label="Cerrar"
+          className="sheet-close-btn"
+          type="button"
+          onClick={onClose}
+        >
+          <XIcon size={16} weight="bold" />
+        </button>
+        <header className="mb-6 pr-10">
           {onBack && (
             <button
               aria-label="Volver"

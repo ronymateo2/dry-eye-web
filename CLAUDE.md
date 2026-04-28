@@ -2,7 +2,7 @@
 
 ## Qué es este proyecto
 
-**NeuroEye Log (Weqe) — Web** es una PWA de salud para pacientes con ojo seco neuropático. Permite registrar diariamente dolor en 5 zonas (párpado, sien, masetero, cervical, orbital), gotas oculares, sueño, higiene palpebral, síntomas, triggers y observaciones clínicas. El dashboard calcula correlaciones Spearman entre sueño y dolor. La UI es oscura, sin modo claro.
+**NeuroEye Log (Weqe) — Web** es una PWA de salud para pacientes con ojo seco neuropático. Permite registrar diariamente dolor en 5 zonas (párpado, sien, masetero, cervical, orbital), gotas oculares, sueño, higiene palpebral, síntomas, triggers y observaciones clínicas. El dashboard calcula correlaciones Spearman entre sueño y dolor. UI dual-tema: dark (default, necesidad clínica) y light (opt-in via `[data-theme="light"]` en `<html>`).
 
 **Público objetivo:** pacientes hispanohablantes con ojo seco neuropático. Toda la UI está en español.
 
@@ -19,7 +19,7 @@ El backend vive en https://github.com/ronymateo2/dry_eye_api (Hono + Cloudflare 
 | Auth | Google OAuth2 + JWT HS256 (tokens del API) |
 | Estado cliente | TanStack React Query v5 |
 | Offline | IndexedDB (`idb-keyval`) + PWA (`vite-plugin-pwa`) |
-| Deploy | Cloudflare Pages |
+| Deploy | Cloudflare Worker |
 
 ---
 
@@ -134,7 +134,7 @@ Ver [DESIGN.md](./DESIGN.md) para el sistema completo de diseño.
 --radius-sm / --radius-md / --radius-lg / --radius-full
 ```
 
-**No hay modo claro.** Usar siempre variables CSS, nunca colores hardcoded en componentes nuevos.
+**Dual-tema.** Dark es el default (necesidad médica para fotofobia). Light es opt-in (`document.documentElement.dataset.theme = "light"`). Usar siempre variables CSS — nunca colores hardcoded. Ver [DESIGN.md](./DESIGN.md) para paleta completa de ambos temas.
 
 ---
 

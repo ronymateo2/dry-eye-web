@@ -9,9 +9,10 @@
 ---
 
 ## Aesthetic Direction
-- **Direction:** Clinical Precision — dark, focused, trustworthy. The visual language of ophthalmology equipment, not consumer wellness apps.
+- **Direction:** Clinical Precision — focused, trustworthy. The visual language of ophthalmology equipment, not consumer wellness apps.
 - **Decoration level:** Minimal — typography and data carry all meaning. No illustrations, no mascots, no gamification badges.
 - **Mood:** A tool you trust with your health. Calm, precise, serious. The interface reduces cognitive load, not adds to it. The user may be in pain when they open it.
+- **Theme system:** Dual-theme — dark (default, clinical necessity) and light (optional). Switched via `document.documentElement.dataset.theme = "light"`. Dark remains the recommended mode for all photophobia patients.
 - **Scientific rationale:** Blue light (400-510nm) maximally activates ipRGC photoreceptors that trigger photophobia in neuropathic dry eye. The FL-41 tint (clinical gold standard for photophobia) attenuates 480-520nm. This palette eliminates blue components throughout and uses an amber accent (~580-600nm) in the lowest-activation wavelength zone. Dark-first is not a style choice — it is clinical necessity.
 
 ---
@@ -91,8 +92,30 @@ export function painGradient(score: number): string {
 }
 ```
 
-### Dark Mode
-This product is **dark-mode only**. There is no light mode. Users with neuropathic dry eye have photophobia — a bright interface is physically painful. Do not add a light mode toggle.
+### Dark Mode (default)
+Dark mode is the **medically recommended default**. Users with neuropathic dry eye have photophobia — a bright interface is physically painful. Dark mode should always be the initial state.
+
+### Light Mode
+Light mode is available for users who prefer or require it (e.g., bright environments, visual accessibility needs). Activated via `[data-theme="light"]` on `<html>`. Uses a lavender-tinted palette with violet accent (#7C6DCD) — still warm-spectrum compliant, avoiding blue/cyan components.
+
+```css
+[data-theme="light"] {
+  --bg:           #F0EFF8;
+  --surface:      #FFFFFF;
+  --surface-el:   #EAE8F8;
+  --border:       #EDEAF5;
+  --text-primary: #1E1A3C;
+  --text-muted:   #5C5985;
+  --text-faint:   #7E7BA2;
+  --accent:       #7C6DCD;
+  --accent-dim:   rgba(124, 109, 205, 0.12);
+  --accent-bright:#9D91D9;
+  --pain-low:     #5CC8A0;
+  --pain-mid:     #F4A25A;
+  --pain-high:    #F47070;
+  --btn-primary-text: #ffffff;
+}
+```
 
 ### PWA Manifest Colors
 ```json
@@ -227,7 +250,7 @@ Used for Gotas and Triggers screens (launched from FAB).
 
 ## Anti-Patterns — Never Do This
 
-- **No light mode.** Photophobia makes this a medical necessity, not a feature toggle.
+- **Never default to light mode.** Dark mode must be the initial state — photophobia patients open the app in pain. Light mode is opt-in only.
 - **No blue or cyan accents.** `#06b6d4`, `#0ea5e9`, `#3b82f6` — all activate photosensitive receptors. Even the original manifest `#0f172a` navy is too blue for this product.
 - **No custom UI web fonts.** Use the system font stack (`-apple-system`) — zero download, native rendering.
 - **No purple/violet gradients.** Generic wellness app slop.
@@ -255,3 +278,4 @@ Used for Gotas and Triggers screens (launched from FAB).
 | 2026-03-29 | Skeleton shape matches content (not generic spinner) | Charts get rect skeletons, lists get row skeletons. Reduces layout shift and helps the user understand what's loading before data arrives. |
 | 2026-04-16 | Aumento de contraste base y pesos tipográficos mínimos (`var(--text-faint)` y `font-weight: 400` en *Geist Mono*) | Pacientes con fotofobia y ojo seco usan el dispositivo con **50-60% de brillo**. Tonos muy tenues (`#5a4e3a`) o pesos finos (`300`) desaparecen. Todo elemento requiere legibilidad clínica bajo atenuación extrema de luminancia, sin migrar a tonos azules. |
 | 2026-04-27 | Toast: dark surface + colored border + colored icon (no solid color bg) | Solid color backgrounds (bright green/red) flash high luminance against the dark UI — a direct photophobia trigger. Severity still readable via border and icon color. Consistent with how info toasts already worked. |
+| 2026-04-27 | Added opt-in light theme (`[data-theme="light"]`) | Some users operate in bright environments or have accessibility needs not related to photophobia. Dark remains default; light is user-selectable. Violet accent (#7C6DCD) chosen to stay out of the blue/cyan photosensitive zone while providing sufficient contrast on light backgrounds. |
