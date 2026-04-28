@@ -341,17 +341,23 @@ function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: strin
   }
 
   const groupEntries = Array.from(groups.entries());
+  const applicationLabel = drops.length === 1 ? "aplicación" : "aplicaciones";
 
   return (
-    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] overflow-hidden">
-      <div className="flex items-center gap-2 px-3.5 py-2 border-b border-[var(--border)]">
+    <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)]">
+      <div className="flex items-center gap-2 px-3.5 py-3.5">
         <DropIcon size={11} color="var(--text-faint)" />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)] flex-1">
+        <span className="flex-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
           Gotas
         </span>
-        <span className="mono text-[10px] text-[var(--text-faint)]">
-          {drops.length} {drops.length === 1 ? "aplic." : "aplic."}
-        </span>
+        <div className="flex items-baseline gap-1.5">
+          <span className="mono text-[13px] font-semibold leading-none text-[var(--text-primary)]">
+            {drops.length}
+          </span>
+          <span className="text-[10px] text-[var(--text-faint)]">
+            {applicationLabel}
+          </span>
+        </div>
       </div>
 
       {groupEntries.map(([name, typedDrops], idx) => {
@@ -362,24 +368,21 @@ function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: strin
         return (
           <div key={name}>
             <button
-              className={cn(
-                "w-full flex items-center gap-3 px-3.5 py-2.5 text-left",
-                !isLast && !isExpanded ? "border-b border-[var(--border)]" : "",
-              )}
+              className="w-full flex items-center gap-3 px-3.5 py-3.5 text-left"
               onClick={() => setExpandedType(isExpanded ? null : name)}
             >
-              <span className="flex-1 text-[13px] font-medium text-[var(--text-primary)] truncate min-w-0">
+              <span className="min-w-0 flex-1 truncate text-[14px] font-medium text-[var(--text-primary)]">
                 {name}
               </span>
               <DropDots count={typedDrops.length} />
-              <span className="mono text-[10px] text-[var(--text-muted)] shrink-0 ml-1">
+              <span className="mono ml-1 shrink-0 text-[11px] text-[var(--text-muted)]">
                 {formatTime(last.loggedAt, timezone)} {EYE_SHORT[last.eye]}
               </span>
               <div
                 className="shrink-0 transition-transform duration-200"
                 style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
               >
-                <CaretRightIcon size={11} color="var(--text-faint)" />
+                <CaretRightIcon size={12} color="var(--text-faint)" />
               </div>
             </button>
 
@@ -391,18 +394,18 @@ function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: strin
               }}
             >
               <div className="overflow-hidden">
-                <div className={cn("border-t border-[var(--border)]", !isLast ? "border-b border-[var(--border)]" : "")}>
+                <div className="pt-1 pb-1.5">
                   {typedDrops.map((d) => (
-                    <div key={d.id} className="flex items-center justify-between px-3.5 py-1.5">
-                      <span className="mono text-[11px] text-[var(--text-muted)]">
+                    <div key={d.id} className="flex items-center justify-between px-3.5 py-2.5">
+                      <span className="mono text-[12px] text-[var(--text-muted)]">
                         {formatTime(d.loggedAt, timezone)}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-[var(--text-secondary)]">
+                        <span className="text-[12px] text-[var(--text-secondary)]">
                           {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye]}
                         </span>
                         <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
-                          <CheckIcon size={8} color="var(--pain-low)" />
+                          <CheckIcon size={9} color="var(--pain-low)" />
                         </div>
                       </div>
                     </div>
