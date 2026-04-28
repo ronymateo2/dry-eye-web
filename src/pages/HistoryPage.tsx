@@ -360,7 +360,7 @@ function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: strin
         </div>
       </div>
 
-      {groupEntries.map(([name, typedDrops], idx) => {
+      {groupEntries.map(([name, typedDrops]) => {
         const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
         const isExpanded = expandedType === name;
 
