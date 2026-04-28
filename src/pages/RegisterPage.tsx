@@ -18,11 +18,11 @@ import {
   TargetIcon,
 } from "@phosphor-icons/react";
 import { SleepNudge } from "@/components/ui/sleep-nudge";
-import eyelidsImg from "@/assets/pain-areas/eyelids.png";
-import templesImg from "@/assets/pain-areas/temples.png";
-import orbitalImg from "@/assets/pain-areas/orbital.png";
-import masseterImg from "@/assets/pain-areas/masseter.png";
-import cervicalImg from "@/assets/pain-areas/cervical.png";
+import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
+import templesImg from "@/assets/pain-areas/temples.webp";
+import orbitalImg from "@/assets/pain-areas/orbital.webp";
+import masseterImg from "@/assets/pain-areas/masseter.webp";
+import cervicalImg from "@/assets/pain-areas/cervical.webp";
 import type { TriggerType } from "@/types/domain";
 
 const defaultPain = {
@@ -585,19 +585,19 @@ export default function RegisterPage() {
               onChange={updatePain("templePain")}
             />
             <PainSlider
-              icon={<img src={orbitalImg} alt="Zona Orbital" className="w-11 h-11 object-contain theme-invert" />}
+              icon={<img src={orbitalImg} alt="Zona Orbital" loading="lazy" className="w-11 h-11 object-contain theme-invert" />}
               label="Zona Orbital"
               value={pain.orbitalPain}
               onChange={updatePain("orbitalPain")}
             />
             <PainSlider
-              icon={<img src={masseterImg} alt="Masetero" className="w-11 h-11 object-contain theme-invert" />}
+              icon={<img src={masseterImg} alt="Masetero" loading="lazy" className="w-11 h-11 object-contain theme-invert" />}
               label="Masetero"
               value={pain.masseterPain}
               onChange={updatePain("masseterPain")}
             />
             <PainSlider
-              icon={<img src={cervicalImg} alt="Cuello / Cervical" className="w-11 h-11 object-contain theme-invert" />}
+              icon={<img src={cervicalImg} alt="Cuello / Cervical" loading="lazy" className="w-11 h-11 object-contain theme-invert" />}
               label="Cuello / Cervical"
               value={pain.cervicalPain}
               onChange={updatePain("cervicalPain")}

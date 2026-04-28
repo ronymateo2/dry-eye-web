@@ -17,6 +17,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [theme]);
 
   const setTheme = async (t: Theme) => {
+    localStorage.setItem("weqe_theme", t);
     await api.updateMe({ theme: t });
     await refreshUser();
   };
