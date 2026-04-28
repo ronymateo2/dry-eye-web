@@ -9,6 +9,7 @@ import {
   LightningIcon,
   NotePencilIcon,
   BedIcon,
+  EyeIcon,
 } from "@phosphor-icons/react";
 import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
 import templesImg from "@/assets/pain-areas/temples.webp";
@@ -16,12 +17,11 @@ import orbitalImg from "@/assets/pain-areas/orbital.webp";
 import masseterImg from "@/assets/pain-areas/masseter.webp";
 import cervicalImg from "@/assets/pain-areas/cervical.webp";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SegmentedControl } from "@/components/ui/segmented-control";
 import { SYMPTOM_OPTIONS, OBS_EYE_LABELS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
-import { getDayKey } from "@/lib/utils";
-import type { TriggerType, ObservationEye, SleepQuality, HistoryEntry, HistoryFeed } from "@/types/domain";
+import { getDayKey, cn } from "@/lib/utils";
+import type { TriggerType, ObservationEye, SleepQuality, HistoryEntry, HistoryDayGroup, HistoryFeed, HygieneRecord, HygieneStatus } from "@/types/domain";
 
 // ─── Display types (post-collapse) ───────────────────────────────────────────
 
@@ -99,10 +99,10 @@ type OccurrenceRow = {
 const TRIGGER_LABELS: Record<TriggerType, string> = {
   climate: "Clima",
   humidifier: "Humidificador",
-  stress: "Estres",
+  stress: "Estrés",
   screens: "Pantallas",
   tv: "TV",
-  ergonomics: "Ergonomia",
+  ergonomics: "Ergonomía",
   exercise: "Ejercicio",
   other: "Otro",
 };
@@ -111,6 +111,12 @@ const EYE_LABELS = {
   left: "Izquierdo",
   right: "Derecho",
   both: "Ambos",
+} as const;
+
+const EYE_SHORT = {
+  left: "IZQ",
+  right: "DER",
+  both: "AMB",
 } as const;
 
 const SLEEP_QUALITY_LABELS: Record<SleepQuality, string> = {
@@ -127,6 +133,18 @@ const SLEEP_QUALITY_COLORS: Record<SleepQuality, string> = {
   regular: "var(--text-muted)",
   bueno: "var(--pain-low)",
   excelente: "var(--pain-low)",
+};
+
+const HYGIENE_STATUS_LABELS: Record<HygieneStatus, string> = {
+  completed: "Completado",
+  partial: "Parcial",
+  skipped: "Omitido",
+};
+
+const HYGIENE_STATUS_COLORS: Record<HygieneStatus, string> = {
+  completed: "var(--pain-low)",
+  partial: "var(--pain-mid)",
+  skipped: "var(--text-faint)",
 };
 
 const HISTORY_TABS = [
@@ -290,6 +308,178 @@ function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
   return result;
 }
 
+// ─── Drops block ──────────────────────────────────────────────────────────────
+
+function DropDots({ count }: { count: number }) {
+  const MAX = 6;
+  const dots = Math.min(count, MAX);
+  return (
+    <div className="flex items-center gap-[3px]">
+      {count > MAX && (
+        <span className="mono text-[10px] font-semibold mr-0.5" style={{ color: "var(--pain-low)" }}>
+          {count}×
+        </span>
+      )}
+      {Array.from({ length: dots }).map((_, i) => (
+        <span
+          key={i}
+          className="block h-[5px] w-[5px] rounded-full"
+          style={{ background: "var(--pain-low)" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
+  const [expandedType, setExpandedType] = useState<string | null>(null);
+
+  const groups = new Map<string, DisplayDrop[]>();
+  for (const d of drops) {
+    if (!groups.has(d.name)) groups.set(d.name, []);
+    groups.get(d.name)!.push(d);
+  }
+
+  const groupEntries = Array.from(groups.entries());
+
+  return (
+    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] overflow-hidden">
+      <div className="flex items-center gap-2 px-3.5 py-2 border-b border-[var(--border)]">
+        <DropIcon size={11} color="var(--text-faint)" />
+        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)] flex-1">
+          Gotas
+        </span>
+        <span className="mono text-[10px] text-[var(--text-faint)]">
+          {drops.length} {drops.length === 1 ? "aplic." : "aplic."}
+        </span>
+      </div>
+
+      {groupEntries.map(([name, typedDrops], idx) => {
+        const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
+        const isExpanded = expandedType === name;
+        const isLast = idx === groupEntries.length - 1;
+
+        return (
+          <div key={name}>
+            <button
+              className={cn(
+                "w-full flex items-center gap-3 px-3.5 py-2.5 text-left",
+                !isLast && !isExpanded ? "border-b border-[var(--border)]" : "",
+              )}
+              onClick={() => setExpandedType(isExpanded ? null : name)}
+            >
+              <span className="flex-1 text-[13px] font-medium text-[var(--text-primary)] truncate min-w-0">
+                {name}
+              </span>
+              <DropDots count={typedDrops.length} />
+              <span className="mono text-[10px] text-[var(--text-muted)] shrink-0 ml-1">
+                {formatTime(last.loggedAt, timezone)} {EYE_SHORT[last.eye]}
+              </span>
+              <div
+                className="shrink-0 transition-transform duration-200"
+                style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
+              >
+                <CaretRightIcon size={11} color="var(--text-faint)" />
+              </div>
+            </button>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                transition: "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              <div className="overflow-hidden">
+                <div className={cn("border-t border-[var(--border)]", !isLast ? "border-b border-[var(--border)]" : "")}>
+                  {typedDrops.map((d) => (
+                    <div key={d.id} className="flex items-center justify-between px-3.5 py-1.5">
+                      <span className="mono text-[11px] text-[var(--text-muted)]">
+                        {formatTime(d.loggedAt, timezone)}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-[var(--text-secondary)]">
+                          {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye]}
+                        </span>
+                        <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
+                          <CheckIcon size={8} color="var(--pain-low)" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Collapsed day summary ────────────────────────────────────────────────────
+
+function CollapsedDaySummary({
+  group,
+  timezone,
+  onExpand,
+}: {
+  group: HistoryDayGroup;
+  timezone: string;
+  onExpand: () => void;
+}) {
+  let dropCount = 0;
+  let checkCount = 0;
+  let otherCount = 0;
+  let lastAt = "";
+
+  for (const e of group.entries) {
+    if (e.kind === "drop") dropCount++;
+    else if (e.kind === "check_in") checkCount++;
+    else otherCount++;
+    if (!lastAt || e.loggedAt > lastAt) lastAt = e.loggedAt;
+  }
+
+  const pillLabel = getDayPillLabel(group.dayKey, timezone);
+  const shortDate = formatShortDate(group.dayKey);
+
+  const parts: string[] = [];
+  if (checkCount > 0) parts.push(`${checkCount} check${checkCount > 1 ? "s" : ""}`);
+  if (dropCount > 0) parts.push(`${dropCount} gota${dropCount !== 1 ? "s" : ""}`);
+  if (otherCount > 0) parts.push(`+${otherCount}`);
+
+  return (
+    <button
+      onClick={onExpand}
+      className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left transition-colors duration-150 hover:bg-[var(--surface-el)]"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-baseline gap-2">
+            <span className="text-[13px] font-semibold text-[var(--text-primary)]">{shortDate}</span>
+            {pillLabel && (
+              <span className="text-[10px] font-semibold tracking-[0.1em]" style={{ color: "var(--accent)" }}>
+                {pillLabel}
+              </span>
+            )}
+          </div>
+          {parts.length > 0 && (
+            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{parts.join(" · ")}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {lastAt && (
+            <span className="mono text-[10px] text-[var(--text-faint)]">
+              ult {formatTime(lastAt, timezone)}
+            </span>
+          )}
+          <CaretRightIcon size={14} color="var(--text-faint)" />
+        </div>
+      </div>
+    </button>
+  );
+}
+
 // ─── Card components ──────────────────────────────────────────────────────────
 
 function PrimaryRow({
@@ -371,7 +561,6 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
 
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3.5 pb-3.5">
-      {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(212,162,76,0.12)]">
@@ -401,7 +590,6 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
         </div>
       </div>
 
-      {/* Primary zone */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
@@ -421,7 +609,6 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
         </div>
       </div>
 
-      {/* Peripheral zone */}
       <div className="mt-3 space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
@@ -506,35 +693,6 @@ function TriggerCard({ item, timezone }: { item: DisplayTriggerGroup; timezone: 
   );
 }
 
-function DropCard({ item, timezone }: { item: DisplayDrop; timezone: string }) {
-  const time = formatTime(item.loggedAt, timezone);
-  const eyeLabel = EYE_LABELS[item.eye].toUpperCase();
-  const quantityLabel = `${item.quantity} ${item.quantity === 1 ? "gota" : "gotas"}`;
-
-  return (
-    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(90,78,58,0.25)]">
-            <DropIcon size={15} color="var(--text-muted)" />
-          </div>
-          <div>
-            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
-              {item.name} {quantityLabel}
-            </p>
-            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)]">
-              ({eyeLabel}) · {time}
-            </p>
-          </div>
-        </div>
-        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
-          <CheckIcon size={12} color="var(--pain-low)" strokeWidth={2.5} />
-        </div>
-      </div>
-    </article>
-  );
-}
-
 function SymptomCard({ item, timezone }: { item: DisplaySymptomGroup; timezone: string }) {
   const time = formatTime(item.loggedAt, timezone);
 
@@ -545,7 +703,7 @@ function SymptomCard({ item, timezone }: { item: DisplaySymptomGroup; timezone: 
           <PulseIcon size={15} color="var(--text-muted)" />
         </div>
         <div>
-          <p className="text-[13px] font-semibold text-[var(--text-primary)]">Sintomas</p>
+          <p className="text-[13px] font-semibold text-[var(--text-primary)]">Síntomas</p>
           <p className="mono text-[10px] text-[var(--text-muted)]">{time}</p>
         </div>
       </div>
@@ -622,9 +780,56 @@ function SleepCard({ item, timezone }: { item: DisplaySleep; timezone: string })
   );
 }
 
+function HygieneCard({ item }: { item: HygieneRecord }) {
+  const statusColor = HYGIENE_STATUS_COLORS[item.status];
+  const statusLabel = HYGIENE_STATUS_LABELS[item.status];
+
+  return (
+    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+            style={{ background: `color-mix(in srgb, ${statusColor} 12%, transparent)` }}
+          >
+            <EyeIcon size={15} style={{ color: statusColor }} />
+          </div>
+          <div>
+            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
+              Higiene palpebral
+            </p>
+            {item.completedCount > 0 && (
+              <div className="flex items-center gap-[3px] mt-1">
+                {Array.from({ length: Math.min(item.completedCount, 6) }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="block h-[5px] w-[5px] rounded-full"
+                    style={{ background: statusColor }}
+                  />
+                ))}
+                {item.completedCount > 6 && (
+                  <span className="mono text-[10px] font-semibold ml-0.5" style={{ color: statusColor }}>
+                    {item.completedCount}×
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <span
+          className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+          style={{ color: statusColor }}
+        >
+          {statusLabel}
+        </span>
+      </div>
+    </article>
+  );
+}
+
 function renderItem(item: DisplayItem, timezone: string) {
   if (item.kind === "check_in") return <CheckInCard item={item} timezone={timezone} />;
-  if (item.kind === "drop") return <DropCard item={item} timezone={timezone} />;
+  if (item.kind === "drop") return null;
   if (item.kind === "trigger_group") return <TriggerCard item={item} timezone={timezone} />;
   if (item.kind === "observation") return <ObservationCard item={item} timezone={timezone} />;
   if (item.kind === "sleep") return <SleepCard item={item} timezone={timezone} />;
@@ -695,12 +900,11 @@ function ObservationsTab({ timezone }: { timezone: string }) {
   if (occurrences.length === 0) {
     return (
       <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
-        No hay observaciones clinicas aun. Toca + para registrar tu primera observacion.
+        No hay observaciones clínicas aún. Toca + para registrar tu primera observación.
       </div>
     );
   }
 
-  // Group by observationId preserving order of first appearance
   const groups = new Map<string, { title: string; eye: string; items: OccurrenceRow[] }>();
   for (const occ of occurrences) {
     const existing = groups.get(occ.observationId);
@@ -789,20 +993,41 @@ export default function HistoryPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<HistoryTab>("all");
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
+  const [hygieneByDay, setHygieneByDay] = useState<Map<string, HygieneRecord>>(new Map());
 
   const timezone = feed?.timezone ?? user.timezone ?? "America/Bogota";
+
+  const toggleDay = (dayKey: string) => {
+    setExpandedDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(dayKey)) next.delete(dayKey);
+      else next.add(dayKey);
+      return next;
+    });
+  };
 
   const loadFeed = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await api.getHistory();
       setFeed(data);
+      const todayKey = getDayKey(new Date().toISOString(), data.timezone);
+      setExpandedDays(new Set([todayKey]));
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => { loadFeed(); }, [loadFeed]);
+
+  useEffect(() => {
+    api.getHygieneSessions().then(({ sessions }) => {
+      const map = new Map<string, HygieneRecord>();
+      for (const s of sessions) map.set(s.dayKey, s);
+      setHygieneByDay(map);
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handler = async () => {
@@ -835,61 +1060,132 @@ export default function HistoryPage() {
         <FeedSkeleton />
       ) : (
         <>
-          <div className="mb-6">
-            <SegmentedControl
-              label=""
-              options={HISTORY_TABS}
-              value={activeTab}
-              onChange={setActiveTab}
-            />
+          {/* Minimal underline tabs */}
+          <div className="mb-6 flex gap-6 border-b border-[var(--border)]">
+            {HISTORY_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className="relative pb-2.5 text-[14px] font-semibold transition-colors duration-150"
+                style={{
+                  color: activeTab === tab.value ? "var(--text-primary)" : "var(--text-faint)",
+                }}
+              >
+                {tab.label}
+                {activeTab === tab.value && (
+                  <span
+                    className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
+                    style={{ background: "var(--accent)" }}
+                  />
+                )}
+              </button>
+            ))}
           </div>
 
           {activeTab === "observations" ? (
             <ObservationsTab timezone={timezone} />
           ) : !feed || feed.groups.length === 0 ? (
             <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
-              Aun no tienes registros. Ve a Registrar para empezar y cuando guardes veremos aqui check-ins, gotas y triggers agrupados por dia.
+              Aún no tienes registros. Ve a Registrar para empezar.
             </div>
           ) : (
             <>
-              <div className="relative">
-                {/* Vertical timeline line */}
-                <div className="absolute bottom-0 left-[15px] top-2 w-px bg-[var(--border)]" />
+              <div className="space-y-3">
+                {feed.groups.map((group) => {
+                  const isExpanded = expandedDays.has(group.dayKey);
 
-                <div className="space-y-6">
-                  {feed.groups.map((group) => {
-                    const items = collapseEntries(group.entries);
-                    const pillLabel = getDayPillLabel(group.dayKey, timezone);
-                    const shortDate = formatShortDate(group.dayKey);
-
+                  if (!isExpanded) {
                     return (
-                      <div key={group.dayKey}>
-                        <div className="relative mb-3 flex items-center gap-2 py-1">
-                          <span className="relative z-10 inline-flex h-7 items-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-3 text-[10px] font-semibold tracking-[0.12em] text-[var(--text-primary)]">
-                            {pillLabel ?? shortDate}
+                      <CollapsedDaySummary
+                        key={group.dayKey}
+                        group={group}
+                        timezone={timezone}
+                        onExpand={() => toggleDay(group.dayKey)}
+                      />
+                    );
+                  }
+
+                  const allItems = collapseEntries(group.entries);
+                  const dropItems = allItems.filter((i): i is DisplayDrop => i.kind === "drop");
+                  const nonDropItems = allItems.filter((i) => i.kind !== "drop");
+                  const pillLabel = getDayPillLabel(group.dayKey, timezone);
+                  const shortDate = formatShortDate(group.dayKey);
+
+                  return (
+                    <div key={group.dayKey} className="space-y-3">
+                      {/* Collapsible day header */}
+                      <div className="flex items-center gap-2 py-1">
+                        <button
+                          onClick={() => toggleDay(group.dayKey)}
+                          className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-3 text-[10px] font-semibold tracking-[0.12em] text-[var(--text-primary)] transition-colors duration-150 hover:bg-[var(--border)]"
+                        >
+                          <span>{pillLabel ?? shortDate}</span>
+                          <div style={{ transform: "rotate(90deg)" }}>
+                            <CaretRightIcon size={9} color="var(--text-faint)" />
+                          </div>
+                        </button>
+                        {pillLabel && (
+                          <span className="text-[11px] font-medium tracking-[0.1em] text-[var(--text-muted)]">
+                            {shortDate}
                           </span>
-                          {pillLabel ? (
-                            <span className="text-[11px] font-medium tracking-[0.1em] text-[var(--text-muted)]">
-                              {shortDate}
-                            </span>
-                          ) : null}
-                        </div>
+                        )}
+                      </div>
+
+                      {/* Timeline */}
+                      <div className="relative">
+                        <div className="absolute left-[15px] top-0 bottom-0 w-px bg-[var(--border)]" />
 
                         <div className="space-y-2.5">
-                          {items.map((item) => (
-                            <div key={item.id} className="relative flex items-start gap-3 pl-8">
+                          {/* Drops block pinned at top */}
+                          {dropItems.length > 0 && (
+                            <div className="relative flex items-start gap-3 pl-8">
                               <div
-                                className="absolute left-[11px] top-[19px] z-10 h-[9px] w-[9px] rounded-full"
-                                style={{ background: getDotColor(item), boxShadow: "0 0 0 2px var(--bg)" }}
+                                className="absolute left-[11px] top-[13px] z-10 h-[9px] w-[9px] rounded-full"
+                                style={{ background: "var(--pain-low)", boxShadow: "0 0 0 2px var(--bg)" }}
                               />
-                              <div className="min-w-0 flex-1">{renderItem(item, timezone)}</div>
+                              <div className="min-w-0 flex-1">
+                                <DropsBlock drops={dropItems} timezone={timezone} />
+                              </div>
                             </div>
-                          ))}
+                          )}
+
+                          {/* Hygiene entry for this day */}
+                          {(() => {
+                            const hyg = hygieneByDay.get(group.dayKey);
+                            if (!hyg) return null;
+                            const hygColor = HYGIENE_STATUS_COLORS[hyg.status];
+                            return (
+                              <div className="relative flex items-start gap-3 pl-8">
+                                <div
+                                  className="absolute left-[11px] top-[19px] z-10 h-[9px] w-[9px] rounded-full"
+                                  style={{ background: hygColor, boxShadow: "0 0 0 2px var(--bg)" }}
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <HygieneCard item={hyg} />
+                                </div>
+                              </div>
+                            );
+                          })()}
+
+                          {/* Other events chronological */}
+                          {nonDropItems.map((item) => {
+                            const rendered = renderItem(item, timezone);
+                            if (!rendered) return null;
+                            return (
+                              <div key={item.id} className="relative flex items-start gap-3 pl-8">
+                                <div
+                                  className="absolute left-[11px] top-[19px] z-10 h-[9px] w-[9px] rounded-full"
+                                  style={{ background: getDotColor(item), boxShadow: "0 0 0 2px var(--bg)" }}
+                                />
+                                <div className="min-w-0 flex-1">{rendered}</div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-6 flex flex-col items-center gap-3 pb-4">
