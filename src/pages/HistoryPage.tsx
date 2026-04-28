@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SYMPTOM_OPTIONS, OBS_EYE_LABELS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
-import { getDayKey, cn } from "@/lib/utils";
+import { getDayKey, } from "@/lib/utils";
 import type { TriggerType, ObservationEye, SleepQuality, HistoryEntry, HistoryDayGroup, HistoryFeed, HygieneRecord, HygieneStatus } from "@/types/domain";
 
 // ─── Display types (post-collapse) ───────────────────────────────────────────
@@ -363,7 +363,6 @@ function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: strin
       {groupEntries.map(([name, typedDrops], idx) => {
         const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
         const isExpanded = expandedType === name;
-        const isLast = idx === groupEntries.length - 1;
 
         return (
           <div key={name}>
