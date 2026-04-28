@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   PulseIcon,
   CheckIcon,
@@ -7,14 +7,14 @@ import {
   MoonIcon,
   SunIcon,
   LightningIcon,
-  EyeIcon,
-  HeadCircuitIcon,
-  HandEyeIcon,
-  SmileyMeltingIcon,
-  BoneIcon,
   NotePencilIcon,
   BedIcon,
 } from "@phosphor-icons/react";
+import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
+import templesImg from "@/assets/pain-areas/temples.webp";
+import orbitalImg from "@/assets/pain-areas/orbital.webp";
+import masseterImg from "@/assets/pain-areas/masseter.webp";
+import cervicalImg from "@/assets/pain-areas/cervical.webp";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { SYMPTOM_OPTIONS, OBS_EYE_LABELS } from "@/lib/constants";
@@ -136,13 +136,20 @@ const HISTORY_TABS = [
 
 type HistoryTab = (typeof HISTORY_TABS)[number]["value"];
 
-const SCORE_FIELDS: { key: keyof DisplayCheckIn; icon: ReactNode }[] = [
-  { key: "eyelidPain", icon: <EyeIcon size={15} /> },
-  { key: "templePain", icon: <HeadCircuitIcon size={15} /> },
-  { key: "orbitalPain", icon: <HandEyeIcon size={15} /> },
-  { key: "masseterPain", icon: <SmileyMeltingIcon size={15} /> },
-  { key: "cervicalPain", icon: <BoneIcon size={15} /> },
+type ScoreField = { key: keyof DisplayCheckIn; img: string; label: string };
+
+const PRIMARY_FIELDS: ScoreField[] = [
+  { key: "eyelidPain", img: eyelidsImg, label: "Párpado" },
+  { key: "templePain", img: templesImg, label: "Sien" },
+  { key: "orbitalPain", img: orbitalImg, label: "Orbital" },
 ];
+
+const PERIPHERAL_FIELDS: ScoreField[] = [
+  { key: "masseterPain", img: masseterImg, label: "Masetero" },
+  { key: "cervicalPain", img: cervicalImg, label: "Cervical" },
+];
+
+const ALL_SCORE_FIELDS: ScoreField[] = [...PRIMARY_FIELDS, ...PERIPHERAL_FIELDS];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -285,6 +292,67 @@ function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
 
 // ─── Card components ──────────────────────────────────────────────────────────
 
+function PrimaryRow({
+  field,
+  value,
+  barsReady,
+}: {
+  field: ScoreField;
+  value: number;
+  barsReady: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex w-[68px] shrink-0 items-center gap-2">
+        <img
+          src={field.img}
+          alt={field.label}
+          className="w-[22px] h-[22px] shrink-0 object-contain theme-invert"
+        />
+        <span className="text-[12px] font-medium leading-none text-[var(--text-secondary)]">
+          {field.label}
+        </span>
+      </div>
+      <div className="h-[5px] flex-1 overflow-hidden rounded-full bg-[var(--surface-el)]">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: barsReady ? `${value * 10}%` : "0%",
+            background: painColor(value),
+            transition: `width 650ms cubic-bezier(0.25, 1, 0.5, 1) 150ms`,
+          }}
+        />
+      </div>
+      <span
+        className="mono w-[34px] text-right text-[12px] font-semibold tabular-nums"
+        style={{ color: value === 0 ? "var(--text-faint)" : painColor(value) }}
+      >
+        {value}
+        <span className="text-[10px] font-normal opacity-60">/10</span>
+      </span>
+    </div>
+  );
+}
+
+function PeripheralChip({ field, value }: { field: ScoreField; value: number }) {
+  const color = value === 0 ? "var(--text-faint)" : painColor(value);
+  return (
+    <div className="flex flex-1 items-center gap-2 rounded-[8px] border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-1.5">
+      <img
+        src={field.img}
+        alt={field.label}
+        className="w-[18px] h-[18px] shrink-0 object-contain theme-invert"
+      />
+      <span className="min-w-0 flex-1 truncate text-[11px] text-[var(--text-muted)]">
+        {field.label}
+      </span>
+      <span className="mono shrink-0 text-[12px] font-semibold tabular-nums" style={{ color }}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
 function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: string }) {
   const { label, isMoon } = getTimeOfDay(item.loggedAt, timezone);
   const [barsReady, setBarsReady] = useState(false);
@@ -294,9 +362,14 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
     return () => clearTimeout(id);
   }, []);
 
+  const maxScore = Math.max(...ALL_SCORE_FIELDS.map(({ key }) => item[key] as number));
+  const primaryMax = Math.max(...PRIMARY_FIELDS.map(({ key }) => item[key] as number));
+  const maxColor = painColor(maxScore);
+
   return (
-    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-4 pb-3">
-      <div className="flex items-start justify-between gap-2">
+    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3.5 pb-3.5">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-2 mb-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(212,162,76,0.12)]">
             {isMoon ? <MoonIcon size={15} color="var(--accent)" /> : <SunIcon size={15} color="var(--accent)" />}
@@ -310,43 +383,65 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
             <p className="mono text-[11px] text-[var(--text-muted)]">{formatTime(item.loggedAt, timezone)}</p>
           </div>
         </div>
-        <div className="flex shrink-0 gap-3">
-          {SCORE_FIELDS.map(({ key, icon }) => {
-            const score = item[key] as number;
-            return (
-              <div key={key} className="flex flex-col items-center gap-0.5">
-                <span className="mono text-[15px] font-medium leading-none" style={{ color: painColor(score) }}>
-                  {score}
-                </span>
-                <span style={{ color: "var(--text-primary)" }}>{icon}</span>
-              </div>
-            );
-          })}
+        <div
+          className="flex shrink-0 flex-col items-center justify-center rounded-[8px] px-2.5 py-1"
+          style={{ background: `color-mix(in srgb, ${maxColor} 12%, transparent)` }}
+        >
+          <span className="mono text-[16px] font-semibold leading-none" style={{ color: maxColor }}>
+            {maxScore}
+          </span>
+          <span
+            className="text-[9px] font-medium uppercase tracking-[0.1em] leading-none mt-1"
+            style={{ color: maxColor, opacity: 0.75 }}
+          >
+            máx
+          </span>
         </div>
       </div>
 
-      <div className="mt-3 space-y-1.5">
-        {[
-          { label: "Párpado", icon: <EyeIcon size={13} />, value: item.eyelidPain },
-          { label: "Sien", icon: <HeadCircuitIcon size={13} />, value: item.templePain },
-        ].map(({ label, icon, value }) => (
-          <div key={label} className="flex items-center gap-2">
-            <span className="flex w-[13px] shrink-0 items-center justify-center" style={{ color: "var(--text-primary)" }}>
-              {icon}
-            </span>
-            <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-[var(--surface-el)]">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: barsReady ? `${value * 10}%` : "0%",
-                  background: painColor(value),
-                  transition: `width 650ms cubic-bezier(0.25, 1, 0.5, 1) 150ms`,
-                }}
-              />
-            </div>
-            <span className="mono w-[28px] text-right text-[11px] text-[var(--text-muted)]">{value}/10</span>
-          </div>
-        ))}
+      {/* Primary zone */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+            Zona ocular
+          </span>
+          <span className="h-px flex-1 bg-[var(--border)]" />
+          <span
+            className="mono text-[10px] font-medium tabular-nums"
+            style={{ color: primaryMax === 0 ? "var(--text-faint)" : painColor(primaryMax) }}
+          >
+            pico {primaryMax}
+          </span>
+        </div>
+        <div className="space-y-1.5">
+          {PRIMARY_FIELDS.map((field) => (
+            <PrimaryRow
+              key={field.key}
+              field={field}
+              value={item[field.key] as number}
+              barsReady={barsReady}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Peripheral zone */}
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+            Asociado
+          </span>
+          <span className="h-px flex-1 bg-[var(--border)]" />
+        </div>
+        <div className="flex gap-2">
+          {PERIPHERAL_FIELDS.map((field) => (
+            <PeripheralChip
+              key={field.key}
+              field={field}
+              value={item[field.key] as number}
+            />
+          ))}
+        </div>
       </div>
     </article>
   );
