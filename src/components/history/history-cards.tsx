@@ -49,6 +49,25 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
   const sorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
   const showTimeline = sorted.length > 1;
 
+  if (!showTimeline) {
+    const d = sorted[0];
+    return (
+      <div className="flex items-center justify-between gap-2">
+        <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
+          {formatTime(d.loggedAt, timezone)}
+        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[12px] text-[var(--text-muted)]">
+            {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
+          </span>
+          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
+            <CheckIcon size={9} color="var(--pain-low)" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       {sorted.map((d, i) => {
@@ -58,61 +77,53 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
 
         return (
           <div key={d.id}>
-            <div
-              className={
-                showTimeline
-                  ? "grid grid-cols-[44px_18px_1fr] items-center gap-2"
-                  : "flex items-center justify-between gap-2"
-              }
-            >
+            <div className="grid grid-cols-[auto_14px_1fr] items-center gap-2.5">
               <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
                 {formatTime(d.loggedAt, timezone)}
               </span>
 
-              {showTimeline && (
-                <div className="relative flex h-6 items-center justify-center">
-                  <span
-                    className="relative z-10 block h-[7px] w-[7px] rounded-full"
-                    style={{
-                      background: "var(--accent)",
-                      boxShadow: "0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent)",
-                    }}
-                  />
-                </div>
-              )}
+              <div className="relative flex h-6 items-center justify-center">
+                <span
+                  className="relative z-10 block h-[7px] w-[7px] rounded-full"
+                  style={{
+                    background: "var(--accent)",
+                    boxShadow: "0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent)",
+                  }}
+                />
+              </div>
 
-              <div className="flex items-center justify-end gap-2">
-                <span className="text-[12px] text-[var(--text-muted)]">
-                  {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
+              <div className="flex min-w-0 items-center justify-end gap-1.5">
+                {d.quantity > 1 && (
+                  <span className="mono text-[11px] font-semibold tabular-nums text-[var(--text-muted)]">
+                    {d.quantity}×
+                  </span>
+                )}
+                <span className="mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                  {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
                 </span>
-                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
+                <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
                   <CheckIcon size={9} color="var(--pain-low)" />
                 </div>
               </div>
             </div>
 
             {!isLast && (
-              <div className="grid grid-cols-[44px_18px_1fr] items-stretch gap-2">
+              <div className="grid grid-cols-[auto_14px_1fr] items-center gap-2.5">
                 <span />
-                <div className="relative flex min-h-[22px] items-center justify-center">
+                <div className="relative flex h-5 items-center justify-center">
                   <span
                     className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2"
-                    style={{
-                      background:
-                        "linear-gradient(to bottom, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent) 30%, transparent))",
-                    }}
+                    style={{ background: "color-mix(in srgb, var(--accent) 28%, transparent)" }}
                     aria-hidden
                   />
                 </div>
-                <div className="flex items-center gap-2 py-0.5">
+                <div className="flex items-center gap-2">
                   <span
-                    className="h-px w-3 shrink-0"
-                    style={{ background: "color-mix(in srgb, var(--accent) 25%, transparent)" }}
+                    className="h-px flex-1 max-w-[18px]"
+                    style={{ background: "color-mix(in srgb, var(--accent) 22%, transparent)" }}
                     aria-hidden
                   />
-                  <span
-                    className="mono text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]"
-                  >
+                  <span className="mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
                     {gap}
                   </span>
                 </div>
