@@ -78,7 +78,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
 
   return (
     <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)]">
-      <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-[var(--border)]">
+      <div className="flex items-center justify-between gap-2 px-4 py-3">
         <div className="flex items-center gap-2.5">
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
@@ -97,7 +97,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
         </span>
       </div>
 
-      <div className="divide-y divide-[var(--border)]">
+      <div>
         {groupEntries.map(([name, typedDrops]) => {
           const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
           const isExpanded = expandedType === name;
