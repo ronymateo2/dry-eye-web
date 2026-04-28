@@ -626,7 +626,7 @@ function ObservationsTab({ timezone }: { timezone: string }) {
         <div key={obsId} className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
             <div className="min-w-0">
-              <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate">{group.title}</p>
+              <p className="text-[14px] font-semibold text-[var(--text-primary)]">{group.title}</p>
               {group.eye && group.eye !== "none" ? (
                 <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)] mt-0.5">
                   {OBS_EYE_LABELS[group.eye]}
