@@ -362,9 +362,12 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
     return () => clearTimeout(id);
   }, []);
 
-  const maxScore = Math.max(...ALL_SCORE_FIELDS.map(({ key }) => item[key] as number));
-  const primaryMax = Math.max(...PRIMARY_FIELDS.map(({ key }) => item[key] as number));
-  const maxColor = painColor(maxScore);
+  const worstField = ALL_SCORE_FIELDS.reduce((best, field) =>
+    (item[field.key] as number) > (item[best.key] as number) ? field : best,
+    ALL_SCORE_FIELDS[0],
+  );
+  const worstScore = item[worstField.key] as number;
+  const worstColor = painColor(worstScore);
 
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3.5 pb-3.5">
@@ -384,17 +387,16 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
           </div>
         </div>
         <div
-          className="flex shrink-0 flex-col items-center justify-center rounded-[8px] px-2.5 py-1"
-          style={{ background: `color-mix(in srgb, ${maxColor} 12%, transparent)` }}
+          className="flex shrink-0 items-center gap-2 rounded-[10px] px-2.5 py-1.5"
+          style={{ background: `color-mix(in srgb, ${worstColor} 12%, transparent)` }}
         >
-          <span className="mono text-[16px] font-semibold leading-none" style={{ color: maxColor }}>
-            {maxScore}
-          </span>
-          <span
-            className="text-[9px] font-medium uppercase tracking-[0.1em] leading-none mt-1"
-            style={{ color: maxColor, opacity: 0.75 }}
-          >
-            máx
+          <img
+            src={worstField.img}
+            alt={worstField.label}
+            className="w-[20px] h-[20px] object-contain theme-invert"
+          />
+          <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: worstColor }}>
+            {worstScore}
           </span>
         </div>
       </div>
@@ -406,12 +408,6 @@ function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone: strin
             Zona ocular
           </span>
           <span className="h-px flex-1 bg-[var(--border)]" />
-          <span
-            className="mono text-[10px] font-medium tabular-nums"
-            style={{ color: primaryMax === 0 ? "var(--text-faint)" : painColor(primaryMax) }}
-          >
-            pico {primaryMax}
-          </span>
         </div>
         <div className="space-y-1.5">
           {PRIMARY_FIELDS.map((field) => (
