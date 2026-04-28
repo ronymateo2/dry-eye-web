@@ -85,7 +85,7 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "sleep"} title="Sueno de hoy" description="Registra o actualiza tu sueno de hoy." onClose={closeAll}>
           <SleepSheet onSaved={savedAndClose} />
         </MobileSheet>
-        <MobileSheet open={sheet === "drop"} title="Registrar gota" description="Registra rapidamente una aplicacion." panelClassName="!h-[95svh]" onClose={closeAll}>
+        <MobileSheet open={sheet === "drop"} title="Registrar gota" description="Registra rapidamente una aplicacion." panelClassName="!h-[92svh]" onClose={closeAll}>
           <DropSheet onSaved={savedAndClose} />
         </MobileSheet>
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95svh]" onClose={closeAll}>
