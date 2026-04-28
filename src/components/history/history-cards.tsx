@@ -47,6 +47,7 @@ import {
 
 function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
   const sorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
+  const showTimeline = sorted.length > 1;
 
   return (
     <div className="relative">
@@ -57,20 +58,28 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
 
         return (
           <div key={d.id}>
-            <div className="grid grid-cols-[44px_18px_1fr] items-center gap-2">
+            <div
+              className={
+                showTimeline
+                  ? "grid grid-cols-[44px_18px_1fr] items-center gap-2"
+                  : "flex items-center justify-between gap-2"
+              }
+            >
               <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
                 {formatTime(d.loggedAt, timezone)}
               </span>
 
-              <div className="relative flex h-6 items-center justify-center">
-                <span
-                  className="relative z-10 block h-[7px] w-[7px] rounded-full"
-                  style={{
-                    background: "var(--accent)",
-                    boxShadow: "0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent)",
-                  }}
-                />
-              </div>
+              {showTimeline && (
+                <div className="relative flex h-6 items-center justify-center">
+                  <span
+                    className="relative z-10 block h-[7px] w-[7px] rounded-full"
+                    style={{
+                      background: "var(--accent)",
+                      boxShadow: "0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent)",
+                    }}
+                  />
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2">
                 <span className="text-[12px] text-[var(--text-muted)]">
