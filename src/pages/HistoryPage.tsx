@@ -75,13 +75,27 @@ type DisplaySleep = {
   sleepQuality: SleepQuality;
 };
 
+type DisplayDropGroup = {
+  kind: "drop_group";
+  id: string;
+  loggedAt: string;
+  drops: DisplayDrop[];
+};
+type DisplayHygiene = {
+  kind: "hygiene";
+  id: string;
+  loggedAt: string;
+  record: HygieneRecord;
+};
+
 type DisplayItem =
   | DisplayCheckIn
-  | DisplayDrop
+  | DisplayDropGroup
   | DisplayTriggerGroup
   | DisplaySymptomGroup
   | DisplayObservation
-  | DisplaySleep;
+  | DisplaySleep
+  | DisplayHygiene;
 
 type OccurrenceRow = {
   id: string;
@@ -253,16 +267,23 @@ function getDotColor(item: DisplayItem): string {
     const max = Math.max(...item.triggers.map((t) => t.intensity)) as 1 | 2 | 3;
     return intensityColor(max);
   }
-  if (item.kind === "drop") return "var(--pain-low)";
+  if (item.kind === "drop_group") return "var(--pain-low)";
+  if (item.kind === "hygiene") return HYGIENE_STATUS_COLORS[item.record.status];
   return "var(--text-muted)";
 }
 
 function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
   const result: DisplayItem[] = [];
+  const drops: DisplayDrop[] = [];
 
   for (const entry of entries) {
-    if (entry.kind === "check_in" || entry.kind === "drop") {
-      result.push(entry as unknown as DisplayCheckIn | DisplayDrop);
+    if (entry.kind === "check_in") {
+      result.push(entry as unknown as DisplayCheckIn);
+      continue;
+    }
+
+    if (entry.kind === "drop") {
+      drops.push(entry as unknown as DisplayDrop);
       continue;
     }
 
@@ -303,6 +324,11 @@ function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
       result.push(entry as unknown as DisplayObservation | DisplaySleep);
       continue;
     }
+  }
+
+  if (drops.length > 0) {
+    const latest = drops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
+    result.push({ kind: "drop_group", id: latest.id, loggedAt: latest.loggedAt, drops });
   }
 
   return result;
@@ -831,7 +857,8 @@ function HygieneCard({ item }: { item: HygieneRecord }) {
 
 function renderItem(item: DisplayItem, timezone: string) {
   if (item.kind === "check_in") return <CheckInCard item={item} timezone={timezone} />;
-  if (item.kind === "drop") return null;
+  if (item.kind === "drop_group") return <DropsBlock drops={item.drops} timezone={timezone} />;
+  if (item.kind === "hygiene") return <HygieneCard item={item.record} />;
   if (item.kind === "trigger_group") return <TriggerCard item={item} timezone={timezone} />;
   if (item.kind === "observation") return <ObservationCard item={item} timezone={timezone} />;
   if (item.kind === "sleep") return <SleepCard item={item} timezone={timezone} />;
@@ -1111,9 +1138,12 @@ export default function HistoryPage() {
                     );
                   }
 
-                  const allItems = collapseEntries(group.entries);
-                  const dropItems = allItems.filter((i): i is DisplayDrop => i.kind === "drop");
-                  const nonDropItems = allItems.filter((i) => i.kind !== "drop");
+                  const collapsed = collapseEntries(group.entries);
+                  const hyg = hygieneByDay.get(group.dayKey);
+                  const allItems: DisplayItem[] = hyg
+                    ? [...collapsed, { kind: "hygiene", id: group.dayKey, loggedAt: hyg.loggedAt, record: hyg }]
+                    : collapsed;
+                  allItems.sort((a, b) => (b.loggedAt > a.loggedAt ? 1 : -1));
                   const pillLabel = getDayPillLabel(group.dayKey, timezone);
                   const shortDate = formatShortDate(group.dayKey);
 
@@ -1142,51 +1172,15 @@ export default function HistoryPage() {
                         <div className="absolute left-[15px] top-0 bottom-0 w-px bg-[var(--border)]" />
 
                         <div className="space-y-2.5">
-                          {/* Drops block pinned at top */}
-                          {dropItems.length > 0 && (
-                            <div className="relative flex items-start gap-3 pl-8">
+                          {allItems.map((item) => (
+                            <div key={item.id} className="relative flex items-start gap-3 pl-8">
                               <div
-                                className="absolute left-[11px] top-[13px] z-10 h-[9px] w-[9px] rounded-full"
-                                style={{ background: "var(--pain-low)", boxShadow: "0 0 0 2px var(--bg)" }}
+                                className="absolute left-[11px] top-[19px] z-10 h-[9px] w-[9px] rounded-full"
+                                style={{ background: getDotColor(item), boxShadow: "0 0 0 2px var(--bg)" }}
                               />
-                              <div className="min-w-0 flex-1">
-                                <DropsBlock drops={dropItems} timezone={timezone} />
-                              </div>
+                              <div className="min-w-0 flex-1">{renderItem(item, timezone)}</div>
                             </div>
-                          )}
-
-                          {/* Hygiene entry for this day */}
-                          {(() => {
-                            const hyg = hygieneByDay.get(group.dayKey);
-                            if (!hyg) return null;
-                            const hygColor = HYGIENE_STATUS_COLORS[hyg.status];
-                            return (
-                              <div className="relative flex items-start gap-3 pl-8">
-                                <div
-                                  className="absolute left-[11px] top-[19px] z-10 h-[9px] w-[9px] rounded-full"
-                                  style={{ background: hygColor, boxShadow: "0 0 0 2px var(--bg)" }}
-                                />
-                                <div className="min-w-0 flex-1">
-                                  <HygieneCard item={hyg} />
-                                </div>
-                              </div>
-                            );
-                          })()}
-
-                          {/* Other events chronological */}
-                          {nonDropItems.map((item) => {
-                            const rendered = renderItem(item, timezone);
-                            if (!rendered) return null;
-                            return (
-                              <div key={item.id} className="relative flex items-start gap-3 pl-8">
-                                <div
-                                  className="absolute left-[11px] top-[19px] z-10 h-[9px] w-[9px] rounded-full"
-                                  style={{ background: getDotColor(item), boxShadow: "0 0 0 2px var(--bg)" }}
-                                />
-                                <div className="min-w-0 flex-1">{rendered}</div>
-                              </div>
-                            );
-                          })}
+                          ))}
                         </div>
                       </div>
                     </div>
