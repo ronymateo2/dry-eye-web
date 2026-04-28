@@ -73,7 +73,7 @@ export type HygieneRecord = {
 
 export type HistoryEntry = { id: string; kind: string; loggedAt: string; [key: string]: unknown };
 export type HistoryDayGroup = { dayKey: string; entries: HistoryEntry[] };
-export type HistoryFeed = { ok: boolean; groups: HistoryDayGroup[]; hasMore: boolean; timezone: string };
+export type HistoryFeed = { ok: boolean; groups: HistoryDayGroup[]; hygiene: HygieneRecord[]; hasMore: boolean; timezone: string };
 
 export type ActionState =
   | { status: "idle" }

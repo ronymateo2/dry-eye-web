@@ -994,7 +994,6 @@ export default function HistoryPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<HistoryTab>("all");
   const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
-  const [hygieneByDay, setHygieneByDay] = useState<Map<string, HygieneRecord>>(new Map());
 
   const timezone = feed?.timezone ?? user.timezone ?? "America/Bogota";
 
@@ -1022,14 +1021,6 @@ export default function HistoryPage() {
   useEffect(() => { loadFeed(); }, [loadFeed]);
 
   useEffect(() => {
-    api.getHygieneSessions().then(({ sessions }) => {
-      const map = new Map<string, HygieneRecord>();
-      for (const s of sessions) map.set(s.dayKey, s);
-      setHygieneByDay(map);
-    }).catch(() => {});
-  }, []);
-
-  useEffect(() => {
     const handler = async () => {
       const data = await api.getHistory();
       setFeed(data);
@@ -1046,13 +1037,26 @@ export default function HistoryPage() {
     setLoadError(null);
     try {
       const more = await api.getHistoryMore(lastGroup.dayKey);
-      setFeed((prev) => prev ? { ...more, groups: [...prev.groups, ...more.groups] } : more);
+      setFeed((prev) => {
+        if (!prev) return more;
+        const hygieneByDay = new Map<string, HygieneRecord>();
+        for (const row of prev.hygiene) hygieneByDay.set(row.dayKey, row);
+        for (const row of more.hygiene) hygieneByDay.set(row.dayKey, row);
+        return {
+          ...more,
+          groups: [...prev.groups, ...more.groups],
+          hygiene: Array.from(hygieneByDay.values()),
+        };
+      });
     } catch {
       setLoadError("No se pudo cargar más registros. Intenta de nuevo.");
     } finally {
       setIsLoadingMore(false);
     }
   };
+
+  const hygieneByDay = new Map<string, HygieneRecord>();
+  for (const row of feed?.hygiene ?? []) hygieneByDay.set(row.dayKey, row);
 
   return (
     <section>
