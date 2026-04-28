@@ -52,31 +52,31 @@ export function FloatingQuickActions() {
       <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>
         <div className="mx-auto flex w-[min(100%,480px)] flex-col items-end px-[var(--screen-padding)]">
           <div className="pointer-events-auto flex flex-col items-end gap-3">
-          {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label, delay }) => (
-            <Button
-              key={s}
-              className="min-w-[132px] justify-start gap-2.5 border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
-              style={{ animation: `fab-item-in 220ms ease-out ${delay}ms both` }}
-              variant="subtle"
-              onClick={() => setSheet(s)}
+            {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label, delay }) => (
+              <Button
+                key={s}
+                className="min-w-[132px] justify-start gap-2.5 border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
+                style={{ animation: `fab-item-in 220ms ease-out ${delay}ms both` }}
+                variant="subtle"
+                onClick={() => setSheet(s)}
+              >
+                <Icon size={18} color="var(--accent)" /> {label}
+              </Button>
+            ))}
+            <button
+              aria-label="Acciones rapidas"
+              aria-expanded={menuOpen}
+              className={cn(
+                "flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color,color,box-shadow] duration-200",
+                menuOpen
+                  ? "rotate-45 border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] shadow-[0_0_0_6px_var(--accent-dim),0_8px_20px_var(--fab-shadow)]"
+                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--accent)] shadow-[0_8px_18px_rgba(0,0,0,0.20)] hover:bg-[var(--surface-el)]",
+              )}
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
             >
-              <Icon size={18} color="var(--accent)" /> {label}
-            </Button>
-          ))}
-          <button
-            aria-label="Acciones rapidas"
-            aria-expanded={menuOpen}
-            className={cn(
-              "flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color,color,box-shadow] duration-200",
-              menuOpen
-                ? "rotate-45 border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] shadow-[0_0_0_6px_var(--accent-dim),0_8px_20px_var(--fab-shadow)]"
-                : "border-[var(--border)] bg-[var(--surface)] text-[var(--accent)] shadow-[0_8px_18px_rgba(0,0,0,0.20)] hover:bg-[var(--surface-el)]",
-            )}
-            type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <PlusIcon size={22} />
-          </button>
+              <PlusIcon size={22} />
+            </button>
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "sleep"} title="Sueno de hoy" description="Registra o actualiza tu sueno de hoy." onClose={closeAll}>
           <SleepSheet onSaved={savedAndClose} />
         </MobileSheet>
-        <MobileSheet open={sheet === "drop"} title="Registrar gota" description="Registra rapidamente una aplicacion." panelClassName="!h-[88svh]" onClose={closeAll}>
+        <MobileSheet open={sheet === "drop"} title="Registrar gota" description="Registra rapidamente una aplicacion." panelClassName="!h-[95svh]" onClose={closeAll}>
           <DropSheet onSaved={savedAndClose} />
         </MobileSheet>
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95svh]" onClose={closeAll}>
