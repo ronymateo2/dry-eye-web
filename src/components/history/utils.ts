@@ -84,7 +84,7 @@ export function getDotColor(item: DisplayItem): string {
     const max = Math.max(...item.triggers.map((t) => t.intensity)) as 1 | 2 | 3;
     return intensityColor(max);
   }
-  if (item.kind === "drop_group") return "var(--pain-low)";
+  if (item.kind === "drop_group") return "var(--accent)";
   if (item.kind === "hygiene") return HYGIENE_STATUS_COLORS[item.record.status];
   return "var(--text-muted)";
 }

@@ -4,6 +4,7 @@ import {
   CheckIcon,
   CaretRightIcon,
   DropIcon,
+  EyedropperIcon,
   MoonIcon,
   SunIcon,
   LightningIcon,
@@ -43,27 +44,6 @@ import {
 
 // ─── Drops block ──────────────────────────────────────────────────────────────
 
-function DropDots({ count }: { count: number }) {
-  const MAX = 6;
-  const dots = Math.min(count, MAX);
-  return (
-    <div className="flex items-center gap-[3px]">
-      {count > MAX && (
-        <span className="mono text-[10px] font-semibold mr-0.5" style={{ color: "var(--pain-low)" }}>
-          {count}×
-        </span>
-      )}
-      {Array.from({ length: dots }).map((_, i) => (
-        <span
-          key={i}
-          className="block h-[5px] w-[5px] rounded-full"
-          style={{ background: "var(--pain-low)" }}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
   const [expandedType, setExpandedType] = useState<string | null>(null);
 
@@ -74,11 +54,12 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
   }
 
   const groupEntries = Array.from(groups.entries());
-  const applicationLabel = drops.length === 1 ? "aplicación" : "aplicaciones";
+  const lastDrop = drops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
+  const lastTime = formatTime(lastDrop.loggedAt, timezone);
 
   return (
-    <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)]">
-      <div className="flex items-center justify-between gap-2 px-4 py-3">
+    <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3 pb-2">
+      <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2.5">
           <div
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
@@ -90,30 +71,50 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
             <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
               Gotas
             </p>
+            <p className="mono text-[11px] text-[var(--text-muted)]">{lastTime}</p>
           </div>
         </div>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--pain-low)]">
-          {drops.length} {applicationLabel}
-        </span>
+        <div
+          className="flex shrink-0 items-center gap-2 rounded-[10px] px-2.5 py-1.5"
+          style={{ background: "color-mix(in srgb, var(--pain-low) 12%, transparent)" }}
+        >
+          <EyedropperIcon size={15} color="var(--pain-low)" />
+          <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: "var(--pain-low)" }}>
+            {drops.length}
+          </span>
+        </div>
       </div>
 
       <div>
         {groupEntries.map(([name, typedDrops]) => {
           const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
           const isExpanded = expandedType === name;
+          const typeQuantity = typedDrops.reduce((s, d) => s + d.quantity, 0);
 
           return (
             <div key={name}>
               <button
-                className="w-full flex items-center gap-3 px-3.5 py-3.5 text-left"
+                className="w-full flex items-center gap-3 py-2 text-left"
                 onClick={() => setExpandedType(isExpanded ? null : name)}
+                aria-expanded={isExpanded}
               >
-                <span className="min-w-0 flex-1 truncate text-[14px] font-regular text-[var(--text-primary)]">
+                <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
                   {name}
                 </span>
-                <DropDots count={typedDrops.length} />
-                <span className="mono ml-1 shrink-0 text-[11px] text-[var(--text-muted)]">
-                  {formatTime(last.loggedAt, timezone)} {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
+                <span
+                  className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+                  style={{
+                    color: "var(--pain-low)",
+                    background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
+                  }}
+                >
+                  {typedDrops.length}×
+                </span>
+                <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
+                  {formatTime(last.loggedAt, timezone)}
+                </span>
+                <span className="mono w-[26px] shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                  {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
                 </span>
                 <div
                   className="shrink-0 transition-transform duration-200"
@@ -131,14 +132,17 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                 }}
               >
                 <div className="overflow-hidden">
-                  <div className="pt-1 pb-1.5">
+                  <div className="rounded-[8px] bg-[var(--surface-el)] px-3 py-2 mb-1">
+                    <p className="mono mb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                      {typeQuantity} gotas
+                    </p>
                     {typedDrops.map((d) => (
-                      <div key={d.id} className="flex items-center justify-between px-3.5 py-2.5">
-                        <span className="mono text-[12px] text-[var(--text-muted)]">
+                      <div key={d.id} className="flex items-center justify-between py-1.5">
+                        <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
                           {formatTime(d.loggedAt, timezone)}
                         </span>
                         <div className="flex items-center gap-2">
-                          <span className="text-[12px] text-[var(--text-secondary)]">
+                          <span className="text-[12px] text-[var(--text-muted)]">
                             {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
                           </span>
                           <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
@@ -177,7 +181,7 @@ function PrimaryRow({
           alt={field.label}
           className="w-[22px] h-[22px] shrink-0 object-contain theme-invert"
         />
-        <span className="text-[12px] font-medium leading-none text-[var(--text-secondary)]">
+        <span className="text-[12px] font-medium leading-none text-[var(--text-muted)]">
           {field.label}
         </span>
       </div>
@@ -241,7 +245,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3.5 pb-3.5">
       <div className="flex items-center justify-between gap-2 mb-3.5">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(212,162,76,0.12)]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)]">
             {isMoon ? <MoonIcon size={15} color="var(--accent)" /> : <SunIcon size={15} color="var(--accent)" />}
           </div>
           <div>
@@ -377,7 +381,7 @@ export function SymptomCard({ item, timezone }: { item: DisplaySymptomGroup; tim
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
       <div className="mb-2 flex items-center gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(90,78,58,0.25)]">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-el)]">
           <PulseIcon size={15} color="var(--text-muted)" />
         </div>
         <div>
@@ -405,7 +409,7 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
       <div className="flex items-start gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(90,78,58,0.25)]">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-el)]">
           <NotePencilIcon size={15} color="var(--text-muted)" />
         </div>
         <div className="min-w-0 flex-1">
@@ -424,7 +428,7 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
             {time}
           </p>
           {item.notes ? (
-            <p className="mt-1.5 text-[13px] leading-snug text-[var(--text-secondary)]">{item.notes}</p>
+            <p className="mt-1.5 text-[13px] leading-snug text-[var(--text-muted)]">{item.notes}</p>
           ) : null}
         </div>
       </div>
@@ -440,7 +444,7 @@ export function SleepCard({ item, timezone }: { item: DisplaySleep; timezone: st
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[rgba(90,78,58,0.25)]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-el)]">
             <BedIcon size={15} color="var(--text-muted)" />
           </div>
           <div>
