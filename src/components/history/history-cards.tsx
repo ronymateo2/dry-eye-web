@@ -37,12 +37,84 @@ import {
 } from "./types";
 import {
   formatTime,
+  formatGap,
   getTimeOfDay,
   painColor,
   intensityColor,
 } from "./utils";
 
 // ─── Drops block ──────────────────────────────────────────────────────────────
+
+function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
+  const sorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
+
+  return (
+    <div className="relative">
+      {sorted.map((d, i) => {
+        const next = sorted[i + 1];
+        const isLast = i === sorted.length - 1;
+        const gap = next ? formatGap(next.loggedAt, d.loggedAt) : null;
+
+        return (
+          <div key={d.id}>
+            <div className="grid grid-cols-[44px_18px_1fr] items-center gap-2">
+              <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
+                {formatTime(d.loggedAt, timezone)}
+              </span>
+
+              <div className="relative flex h-6 items-center justify-center">
+                <span
+                  className="relative z-10 block h-[7px] w-[7px] rounded-full"
+                  style={{
+                    background: "var(--accent)",
+                    boxShadow: "0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent)",
+                  }}
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2">
+                <span className="text-[12px] text-[var(--text-muted)]">
+                  {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
+                </span>
+                <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
+                  <CheckIcon size={9} color="var(--pain-low)" />
+                </div>
+              </div>
+            </div>
+
+            {!isLast && (
+              <div className="grid grid-cols-[44px_18px_1fr] items-stretch gap-2">
+                <span />
+                <div className="relative flex min-h-[22px] items-center justify-center">
+                  <span
+                    className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2"
+                    style={{
+                      background:
+                        "linear-gradient(to bottom, color-mix(in srgb, var(--accent) 30%, transparent), color-mix(in srgb, var(--accent) 30%, transparent))",
+                    }}
+                    aria-hidden
+                  />
+                </div>
+                <div className="flex items-center gap-2 py-0.5">
+                  <span
+                    className="h-px w-3 shrink-0"
+                    style={{ background: "color-mix(in srgb, var(--accent) 25%, transparent)" }}
+                    aria-hidden
+                  />
+                  <span
+                    className="mono text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]"
+                  >
+                    {gap}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
   const [expandedType, setExpandedType] = useState<string | null>(null);
@@ -132,25 +204,18 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                 }}
               >
                 <div className="overflow-hidden">
-                  <div className="rounded-[8px] bg-[var(--surface-el)] px-3 py-2 mb-1">
-                    <p className="mono mb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-                      {typeQuantity} gotas
-                    </p>
-                    {typedDrops.map((d) => (
-                      <div key={d.id} className="flex items-center justify-between py-1.5">
-                        <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
-                          {formatTime(d.loggedAt, timezone)}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[12px] text-[var(--text-muted)]">
-                            {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
-                          </span>
-                          <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
-                            <CheckIcon size={9} color="var(--pain-low)" />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
+                    <div className="mb-2 flex items-baseline justify-between">
+                      <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                        {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
+                      </p>
+                      {typedDrops.length > 1 && (
+                        <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                          Intervalos
+                        </p>
+                      )}
+                    </div>
+                    <DropsTimeline drops={typedDrops} timezone={timezone} />
                   </div>
                 </div>
               </div>

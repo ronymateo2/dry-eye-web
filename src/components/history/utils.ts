@@ -38,6 +38,19 @@ export function formatTime(loggedAt: string, timezone: string) {
   return getTimeFormatter(timezone).format(new Date(loggedAt));
 }
 
+export function formatGap(fromIso: string, toIso: string): string {
+  const ms = Math.abs(new Date(toIso).getTime() - new Date(fromIso).getTime());
+  const totalMin = Math.round(ms / 60000);
+  if (totalMin < 1) return "<1m";
+  if (totalMin < 60) return `${totalMin}m`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h < 24) return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  const d = Math.floor(h / 24);
+  const rh = h % 24;
+  return rh === 0 ? `${d}d` : `${d}d ${rh}h`;
+}
+
 export function formatShortDate(dayKey: string): string {
   const [year, month, day] = dayKey.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, day));
