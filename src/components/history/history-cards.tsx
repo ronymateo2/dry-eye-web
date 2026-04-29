@@ -632,6 +632,7 @@ export function HygieneCard({
   const lastTime = item.loggedAt ? formatTime(item.loggedAt, timezone) : null;
   const sessions = item.sessions ?? [];
   const showTimeline = sessions.length > 1;
+  const [timelineOpen, setTimelineOpen] = useState(false);
 
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3 pb-3">
@@ -663,18 +664,32 @@ export function HygieneCard({
         </div>
 
         {item.completedCount > 0 ? (
-          <div
-            className="flex shrink-0 items-center gap-1.5 rounded-[10px] px-2.5 py-1.5"
-            style={{ background: `color-mix(in srgb, ${statusColor} 12%, transparent)` }}
-          >
-            <CheckIcon size={13} color={statusColor} weight="bold" />
-            <span
-              className="mono text-[15px] font-semibold tabular-nums"
-              style={{ color: statusColor }}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <div
+              className="flex items-center gap-1.5 rounded-[10px] px-2.5 py-1.5"
+              style={{ background: `color-mix(in srgb, ${statusColor} 12%, transparent)` }}
             >
-              {item.completedCount}
-              <span className="text-[11px] font-normal opacity-70">×</span>
-            </span>
+              <CheckIcon size={13} color={statusColor} weight="bold" />
+              <span
+                className="mono text-[15px] font-semibold tabular-nums"
+                style={{ color: statusColor }}
+              >
+                {item.completedCount}
+                <span className="text-[11px] font-normal opacity-70">×</span>
+              </span>
+            </div>
+            {showTimeline && (
+              <button
+                onClick={() => setTimelineOpen((o) => !o)}
+                aria-expanded={timelineOpen}
+                aria-label="Ver sesiones"
+              >
+                <CaretRightIcon
+                  size={13}
+                  style={{ color: `color-mix(in srgb, ${statusColor} 45%, var(--text-faint))`, transform: timelineOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}
+                />
+              </button>
+            )}
           </div>
         ) : (
           <span
@@ -686,7 +701,7 @@ export function HygieneCard({
         )}
       </div>
 
-      {showTimeline && (
+      {showTimeline && timelineOpen && (
         <div className="mt-2.5 rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3">
           <p className="mono mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
             Sesiones
