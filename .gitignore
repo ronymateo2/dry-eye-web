@@ -201,3 +201,6 @@ dist
 .claude
 
 .vscode
+
+.agents
+skills-lock.json
