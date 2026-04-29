@@ -92,13 +92,14 @@ export function FloatingQuickActions() {
               aria-label="Acciones rapidas"
               aria-expanded={menuOpen}
               className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color,color,box-shadow] duration-200",
+                "flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color,color,box-shadow] duration-200 active:scale-[0.90]",
                 menuOpen
                   ? "rotate-45 border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] shadow-[0_0_0_6px_var(--accent-dim),0_8px_20px_var(--fab-shadow)]"
                   : "border-[var(--border)] bg-[var(--surface)] text-[var(--accent)] shadow-[0_8px_18px_rgba(0,0,0,0.20)] hover:bg-[var(--surface-el)]",
               )}
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
+              style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <PlusIcon size={22} />
             </button>

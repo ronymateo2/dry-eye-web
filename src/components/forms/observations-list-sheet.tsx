@@ -75,7 +75,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
               className={cn(
                 "flex min-h-[64px] w-full items-center gap-3 rounded-[14px]",
                 "border border-[var(--border)] bg-[var(--surface)] px-4 py-3",
-                "text-left active:opacity-80 transition-opacity"
+                "text-left transition duration-[120ms] ease-out active:scale-[0.97]"
               )}
               onClick={() => onSelectObservation(obs)}
             >

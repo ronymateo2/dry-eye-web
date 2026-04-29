@@ -32,7 +32,7 @@ export function CollapsedDaySummary({ group, timezone, onExpand }: CollapsedDayS
   return (
     <button
       onClick={onExpand}
-      className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left transition-colors duration-150 hover:bg-[var(--surface-el)]"
+      className="w-full rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left transition duration-150 ease-out hover:bg-[var(--surface-el)] active:scale-[0.97]"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">

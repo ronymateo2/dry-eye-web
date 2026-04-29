@@ -52,7 +52,7 @@ export function SleepQualitySelector({
               key={q}
               type="button"
               onClick={() => onChange(q)}
-              className={cn("flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-[10px] border px-1 py-3 transition-colors duration-150")}
+              className={cn("flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-[10px] border px-1 py-3 transition duration-[130ms] ease-out active:scale-[0.95]")}
               style={{
                 borderColor: active ? meta.color : "var(--border)",
                 backgroundColor: active ? meta.activeBg : "var(--surface)",

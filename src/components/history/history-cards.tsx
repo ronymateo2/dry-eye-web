@@ -187,7 +187,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
           return (
             <div key={name}>
               <button
-                className="w-full flex items-center gap-3 py-2 text-left"
+                className="w-full flex items-center gap-3 py-2 text-left transition-transform duration-[120ms] ease-out active:scale-[0.98]"
                 onClick={() => setExpandedType(isExpanded ? null : name)}
                 aria-expanded={isExpanded}
               >
@@ -683,6 +683,7 @@ export function HygieneCard({
                 onClick={() => setTimelineOpen((o) => !o)}
                 aria-expanded={timelineOpen}
                 aria-label="Ver sesiones"
+                className="transition-transform duration-[120ms] ease-out active:scale-[0.80]"
               >
                 <CaretRightIcon
                   size={13}
