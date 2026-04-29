@@ -9,15 +9,12 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { ArrowLeftIcon } from "@phosphor-icons/react";
 import type { HygieneRecord } from "@/types/domain";
 
 export function ServoView({
   records,
-  onBack,
 }: {
   records: HygieneRecord[];
-  onBack: () => void;
 }) {
   const {
     trajectoryData,
@@ -103,33 +100,6 @@ export function ServoView({
 
   return (
     <div className="flex flex-col gap-4 px-5 pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          className="flex items-center gap-2 rounded-full px-4 text-[13px] font-medium transition-opacity active:opacity-70"
-          style={{
-            minHeight: 48,
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            color: "var(--text-primary)",
-          }}
-          type="button"
-          onClick={onBack}
-        >
-          <ArrowLeftIcon size={13} />
-          volver
-        </button>
-        <span
-          className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]"
-          style={{
-            border: "1px solid var(--border)",
-            color: "var(--text-muted)",
-          }}
-        >
-          Últimas 3 Semanas
-        </span>
-      </div>
-
       {/* Trajectory chart */}
       <div
         className="rounded-[var(--radius-lg)] p-4"

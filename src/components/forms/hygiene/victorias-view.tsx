@@ -1,15 +1,12 @@
 import { useMemo } from "react";
-import { ArrowLeftIcon } from "@phosphor-icons/react";
 import type { HygieneRecord } from "@/types/domain";
 
 export function VictoriasView({
   records,
   cycleStartKey,
-  onBack,
 }: {
   records: HygieneRecord[];
   cycleStartKey: string;
-  onBack: () => void;
 }) {
   const todayKey = new Date().toLocaleDateString("en-CA");
 
@@ -45,51 +42,24 @@ export function VictoriasView({
     if (!completed)
       return {
         completed: false,
-        dot: null as null | "low" | "high" | "gray",
+        friction: null as null | "low" | "high" | "uncalibrated",
         isToday,
         isFuture,
         sessionCount: 0,
       };
-    if (rec?.deviationValue == null || rec.deviationValue === 0)
-      return { completed, dot: "gray" as const, isToday, isFuture: false, sessionCount };
-    return {
-      completed,
-      dot: rec.deviationValue <= 2 ? ("low" as const) : ("high" as const),
-      isToday,
-      isFuture: false,
-      sessionCount,
-    };
+
+    let friction: "low" | "high" | "uncalibrated";
+    if (rec?.deviationValue == null || rec.deviationValue === 0) {
+      friction = "uncalibrated";
+    } else {
+      friction = rec.deviationValue <= 2 ? "low" : "high";
+    }
+
+    return { completed, friction, isToday, isFuture: false, sessionCount };
   }
 
   return (
     <div className="flex flex-col gap-4 px-5 pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <button
-          className="flex items-center gap-2 rounded-full px-4 text-[13px] font-medium transition-opacity active:opacity-70"
-          style={{
-            minHeight: 48,
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            color: "var(--text-primary)",
-          }}
-          type="button"
-          onClick={onBack}
-        >
-          <ArrowLeftIcon size={13} />
-          volver
-        </button>
-        <span
-          className="rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em]"
-          style={{
-            border: "1px solid var(--border)",
-            color: "var(--text-muted)",
-          }}
-        >
-          Banco de Victorias
-        </span>
-      </div>
-
       <p
         className="text-[10px] font-semibold uppercase tracking-[0.12em]"
         style={{ color: "var(--text-faint)" }}
@@ -98,13 +68,14 @@ export function VictoriasView({
       </p>
 
       {/* Calendar grid */}
-      <div className="flex flex-col gap-[6px]">
-        <div className="grid grid-cols-7 gap-[6px]">
+      <div className="flex flex-col gap-2">
+        {/* Day headers */}
+        <div className="grid grid-cols-7">
           {["L", "M", "M", "J", "V", "S", "D"].map((label, i) => (
-            <div key={i} className="flex items-center justify-center">
+            <div key={i} className="flex h-7 items-center justify-center">
               <span
-                className="text-[9px] font-semibold uppercase tracking-[0.08em]"
-                style={{ color: "var(--text-faint)" }}
+                className="text-[11px] font-semibold uppercase tracking-[0.06em]"
+                style={{ color: "var(--text-muted)" }}
               >
                 {label}
               </span>
@@ -115,69 +86,68 @@ export function VictoriasView({
         {Array.from(
           { length: Math.ceil((startOffset + 21) / 7) },
           (_, row) => (
-            <div key={row} className="grid grid-cols-7 gap-[6px]">
+            <div key={row} className="grid grid-cols-7 gap-y-2">
               {Array.from({ length: 7 }, (_, col) => {
                 const cellIndex = row * 7 + col;
                 const dayIndex = cellIndex - startOffset;
                 const d = dayIndex >= 0 && dayIndex < 21 ? days[dayIndex] : null;
 
-                if (!d) return <div key={col} className="h-[38px]" />;
+                if (!d) return <div key={col} className="h-[44px]" />;
 
-                const { completed, dot, isToday, isFuture, sessionCount } = getDayInfo(d);
+                const { completed, friction, isToday, isFuture, sessionCount } = getDayInfo(d);
                 const dayNum = d.getUTCDate();
-                const dotColor =
-                  dot === "low"
+
+                const borderColor = completed
+                  ? friction === "low"
                     ? "var(--accent)"
-                    : dot === "high"
+                    : friction === "high"
                       ? "#cc3f30"
-                      : "var(--border)";
+                      : "rgba(212,162,76,0.35)"
+                  : "transparent";
+
+                const bgColor = completed
+                  ? isToday
+                    ? "var(--accent)"
+                    : "var(--accent-dim)"
+                  : "transparent";
+
+                const textColor = completed
+                  ? isToday
+                    ? "#121008"
+                    : "var(--accent)"
+                  : isFuture
+                    ? "var(--text-faint)"
+                    : "var(--text-faint)";
 
                 return (
                   <div
                     key={col}
-                    className="relative flex flex-col items-center pb-[8px]"
+                    className="relative flex items-center justify-center"
+                    style={{ opacity: isFuture ? 0.35 : 1 }}
                   >
                     <div
-                      className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
+                      className="flex h-[42px] w-[42px] items-center justify-center rounded-full"
                       style={{
-                        background: completed
-                          ? isToday
-                            ? "var(--accent)"
-                            : "var(--accent-dim)"
-                          : "var(--surface-el)",
-                        border: `1px solid ${
-                          completed ? "rgba(212,162,76,0.55)" : "var(--border)"
-                        }`,
-                        opacity: isFuture ? 0.5 : 1,
-                        outline: isToday ? "2px solid var(--accent)" : "none",
-                        outlineOffset: 1,
+                        background: bgColor,
+                        border: completed ? `2px solid ${borderColor}` : "none",
+                        boxShadow: isToday
+                          ? "0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent)"
+                          : "none",
                       }}
                     >
                       <span
-                        className="font-mono text-[10px] font-medium"
-                        style={{
-                          color: completed
-                            ? isToday
-                              ? "#121008"
-                              : "var(--accent)"
-                            : "var(--text-muted)",
-                        }}
+                        className="text-[14px] font-semibold tabular-nums"
+                        style={{ color: textColor }}
                       >
                         {dayNum}
                       </span>
                     </div>
-                    {dot && (
-                      <div
-                        className="absolute bottom-[2px] right-0 h-[5px] w-[5px] rounded-full"
-                        style={{ background: dotColor }}
-                      />
-                    )}
                     {sessionCount > 1 && (
                       <div
-                        className="absolute -right-[4px] -top-[3px] flex h-[11px] min-w-[11px] items-center justify-center rounded-full px-[2px]"
+                        className="absolute -right-[3px] -top-[3px] flex h-[17px] min-w-[17px] items-center justify-center rounded-full px-[3px]"
                         style={{
                           background: "var(--accent)",
-                          fontSize: 6,
+                          fontSize: 9,
                           fontFamily: "monospace",
                           fontWeight: 700,
                           color: "#121008",
@@ -196,20 +166,23 @@ export function VictoriasView({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         {[
-          { color: "var(--accent)", label: "Baja fricción" },
-          { color: "#cc3f30", label: "Alta fricción" },
-          { color: "var(--border)", label: "Sin calibrar" },
-        ].map(({ color, label }) => (
-          <div key={label} className="flex items-center gap-[5px]">
+          { borderColor: "var(--accent)", label: "Baja fricción" },
+          { borderColor: "#cc3f30", label: "Alta fricción" },
+          { borderColor: "rgba(212,162,76,0.35)", label: "Sin calibrar" },
+        ].map(({ borderColor, label }) => (
+          <div key={label} className="flex items-center gap-[7px]">
             <div
-              className="h-[7px] w-[7px] rounded-full"
-              style={{ background: color }}
+              className="h-[12px] w-[12px] rounded-full"
+              style={{
+                border: `2px solid ${borderColor}`,
+                background: "var(--accent-dim)",
+              }}
             />
             <span
-              className="text-[10px]"
-              style={{ color: "var(--text-faint)" }}
+              className="text-[12px]"
+              style={{ color: "var(--text-muted)" }}
             >
               {label}
             </span>

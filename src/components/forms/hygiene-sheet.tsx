@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { TrophyIcon, WrenchIcon } from "@phosphor-icons/react";
+import { EyeIcon, TrophyIcon, WrenchIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { HygieneRecord, SaveHygieneInput, ActionState } from "@/types/domain";
@@ -63,6 +63,7 @@ export function HygieneSheet({
   const [loading, setLoading] = useState(true);
   const isSaving = useRef(false);
   const mounted = useRef(false);
+  const currentViewRef = useRef<View>("main");
 
   useEffect(() => {
     mounted.current = true;
@@ -77,9 +78,14 @@ export function HygieneSheet({
       .finally(() => setLoading(false));
   }, []);
 
+  const VIEW_ORDER: View[] = ["main", "victorias", "servo", "calibrating"];
+
   const transitionTo = useCallback(
     (next: View) => {
-      setNavDirection(next === "main" ? "back" : "forward");
+      const currentIndex = VIEW_ORDER.indexOf(currentViewRef.current);
+      const nextIndex = VIEW_ORDER.indexOf(next);
+      setNavDirection(nextIndex >= currentIndex ? "forward" : "back");
+      currentViewRef.current = next;
       setDisplayedView(next);
       if (next === "servo" && sessions === null) {
         api.getHygieneSessions().then(({ sessions }) => setSessions(sessions));
@@ -205,8 +211,44 @@ export function HygieneSheet({
     );
   }
 
+  const tabs: { view: "main" | "victorias" | "servo"; label: string; icon: React.ReactNode }[] = [
+    { view: "main", label: "Acción", icon: <EyeIcon size={15} /> },
+    { view: "victorias", label: "Victorias", icon: <TrophyIcon size={15} /> },
+    { view: "servo", label: "Progreso", icon: <WrenchIcon size={15} /> },
+  ];
+
   return (
     <div>
+      {displayedView !== "calibrating" && (
+        <div className="flex w-full px-2 pb-2 pt-1">
+          {tabs.map(({ view, label, icon }) => {
+            const active = displayedView === view;
+            return (
+              <button
+                key={view}
+                aria-label={label}
+                className="flex flex-1 items-center justify-center gap-[6px] py-2 transition-colors active:opacity-60"
+                type="button"
+                onClick={() => transitionTo(view)}
+              >
+                <span style={{ color: active ? "var(--accent)" : "var(--text-faint)" }}>
+                  {icon}
+                </span>
+                <span
+                  className="text-[11px] uppercase tracking-[0.08em]"
+                  style={{
+                    color: active ? "var(--text-primary)" : "var(--text-faint)",
+                    fontWeight: active ? 700 : 400,
+                  }}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {displayedView === "calibrating" && (
         <SlideView direction={navDirection}>
           <CalibratingView
@@ -225,14 +267,13 @@ export function HygieneSheet({
           <VictoriasView
             records={recentRecords}
             cycleStartKey={cycleStartKey}
-            onBack={() => transitionTo("main")}
           />
         </SlideView>
       )}
 
       {displayedView === "servo" && (
         <SlideView direction={navDirection}>
-          <ServoView records={sessions ?? []} onBack={() => transitionTo("main")} />
+          <ServoView records={sessions ?? []} />
         </SlideView>
       )}
 
@@ -240,7 +281,7 @@ export function HygieneSheet({
         <SlideView direction={navDirection}>
           <div className="flex flex-col gap-5 px-5 pb-8">
             {/* Top bar */}
-            <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="flex items-center pt-1">
               <div
                 className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em]"
                 style={{
@@ -253,38 +294,6 @@ export function HygieneSheet({
                 <span style={{ color: "var(--accent)" }}>{cycleNumber}</span>
                 {" · "}DÍA{" "}
                 <span style={{ color: "var(--accent)" }}>{sessionInCycle}</span>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  aria-label="Victorias"
-                  className="flex items-center justify-center rounded-full transition-opacity active:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
-                    color: "var(--text-muted)",
-                  }}
-                  type="button"
-                  onClick={() => transitionTo("victorias")}
-                >
-                  <TrophyIcon size={18} />
-                </button>
-                <button
-                  aria-label="Progreso"
-                  className="flex items-center justify-center rounded-full transition-opacity active:opacity-70"
-                  style={{
-                    width: 44,
-                    height: 44,
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
-                    color: "var(--text-muted)",
-                  }}
-                  type="button"
-                  onClick={() => transitionTo("servo")}
-                >
-                  <WrenchIcon size={18} />
-                </button>
               </div>
             </div>
 
