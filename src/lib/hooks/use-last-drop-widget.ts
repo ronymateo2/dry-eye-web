@@ -28,7 +28,9 @@ export function useLastDropWidget() {
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 60_000);
-    return () => clearInterval(id);
+    const onVisible = () => { if (document.visibilityState === "visible") setTick((t) => t + 1); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVisible); };
   }, []);
 
   const refresh = useCallback(async () => {
