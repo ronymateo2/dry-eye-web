@@ -4,14 +4,10 @@ import { useLastDropWidget } from "@/lib/hooks/use-last-drop-widget";
 export function LastDropLine() {
   const { data, timeAgo, isRefreshing, refresh } = useLastDropWidget();
   if (!data) return null;
-
-  const eyeLabel = data.eye === "left" ? "Izq" : data.eye === "right" ? "Der" : "Ambos";
-
   return (
     <div className="app-header__last-drop-line">
-      <DropIcon aria-hidden weight="duotone" size={11} style={{ color: "var(--accent)", flexShrink: 0 }} />
+      <DropIcon aria-hidden weight="duotone" size={13} style={{ color: "var(--accent)", flexShrink: 0 }} />
       <span className="app-header__last-drop-name">{data.drop_type_name}</span>
-      <span className="app-header__last-drop-detail">· {eyeLabel}</span>
       <span className="app-header__last-drop-sep">·</span>
       <span className="app-header__last-drop-time">{timeAgo}</span>
       <button
@@ -21,7 +17,7 @@ export function LastDropLine() {
         disabled={isRefreshing}
         onClick={refresh}
       >
-        <ArrowsClockwiseIcon size={11} className={isRefreshing ? "animate-spin" : ""} />
+        <ArrowsClockwiseIcon size={13} className={isRefreshing ? "animate-spin" : ""} />
       </button>
     </div>
   );

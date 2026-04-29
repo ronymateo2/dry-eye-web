@@ -288,28 +288,28 @@ img, svg { display: block; max-width: 100%; }
   max-width: 220px;
 }
 .app-header__last-drop-name {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 80px;
+  max-width: 90px;
 }
 .app-header__last-drop-detail {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }
 .app-header__last-drop-sep {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 .app-header__last-drop-time {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--text-muted);
   white-space: nowrap;
