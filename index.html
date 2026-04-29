@@ -12,6 +12,10 @@
     <title>NeuroEye Log</title>
   </head>
   <body>
+    <script>
+      const t = localStorage.getItem('weqe_theme');
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

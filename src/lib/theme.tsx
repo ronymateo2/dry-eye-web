@@ -13,10 +13,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     auth.status === "authenticated" ? (auth.user.theme ?? "dark") : "dark";
 
   useEffect(() => {
+    if (auth.status === "loading") return;
     document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+    if (auth.status === "authenticated") {
+      localStorage.setItem("weqe_theme", theme);
+    }
+  }, [theme, auth.status]);
 
   const setTheme = async (t: Theme) => {
+    localStorage.setItem("weqe_theme", t);
     await api.updateMe({ theme: t });
     await refreshUser();
   };

@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { MoonIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
-import { SleepSheet } from "@/components/forms/sleep-sheet";
 import { api } from "@/lib/api";
+
+const SleepSheet = lazy(() =>
+  import("@/components/forms/sleep-sheet").then((m) => ({ default: m.SleepSheet }))
+);
 
 export function SleepNudge() {
   const [hasSleep, setHasSleep] = useState<boolean | null>(null);
@@ -37,7 +40,9 @@ export function SleepNudge() {
         title="Sueno de hoy"
         onClose={() => setOpen(false)}
       >
-        <SleepSheet onSaved={() => { setOpen(false); setHasSleep(true); }} />
+        <Suspense fallback={null}>
+          <SleepSheet onSaved={() => { setOpen(false); setHasSleep(true); }} />
+        </Suspense>
       </MobileSheet>
     </>
   );
