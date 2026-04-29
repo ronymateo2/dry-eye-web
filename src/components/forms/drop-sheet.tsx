@@ -11,6 +11,7 @@ import { EyedropperIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { queueDrop } from "@/lib/offline/drops-queue";
+import { setLastDrop } from "@/lib/last-drop-store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, DropEye } from "@/types/domain";
 
@@ -58,10 +59,16 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
     setIsPending(true);
     const dropId = crypto.randomUUID();
     const ts = loggedAt ? new Date(loggedAt).toISOString() : new Date().toISOString();
+    const qty = Number(quantity) || 1;
+    const dropTypeName = dropTypes.find((dt) => dt.id === selectedDropType)?.name ?? "";
+
+    const persistLastDrop = () =>
+      setLastDrop({ id: dropId, logged_at: ts, quantity: qty, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
 
     // Offline path
     if (!isOnline) {
-      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: Number(quantity) || 1, eye });
+      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
+      persistLastDrop();
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
       onSaved();
@@ -69,13 +76,15 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
     }
 
     try {
-      await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: Number(quantity) || 1, eye });
+      await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
+      persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       toast.success("Gota registrada.");
       onSaved();
     } catch {
       // Network failure while online — queue and sync later
-      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: Number(quantity) || 1, eye });
+      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
+      persistLastDrop();
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
       onSaved();

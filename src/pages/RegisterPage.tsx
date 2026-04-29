@@ -160,13 +160,13 @@ export default function RegisterPage() {
 
   const lastCheckInPainValues: { label: string; value: number }[] = lastCheckIn
     ? [
-        { label: "Ojo/Parpados", value: lastCheckIn.eyelid_pain },
-        { label: "Sienes", value: lastCheckIn.temple_pain },
-        { label: "Zona orbital", value: lastCheckIn.orbital_pain },
-        { label: "Masetero", value: lastCheckIn.masseter_pain },
-        { label: "Cuello / Cervical", value: lastCheckIn.cervical_pain },
-        { label: "Estres", value: lastCheckIn.stress_level },
-      ]
+      { label: "Ojo/Parpados", value: lastCheckIn.eyelid_pain },
+      { label: "Sienes", value: lastCheckIn.temple_pain },
+      { label: "Zona orbital", value: lastCheckIn.orbital_pain },
+      { label: "Masetero", value: lastCheckIn.masseter_pain },
+      { label: "Cuello / Cervical", value: lastCheckIn.cervical_pain },
+      { label: "Estres", value: lastCheckIn.stress_level },
+    ]
     : [];
   const lastTriggerLabel = getTriggerLabel(lastCheckIn?.trigger_type ?? null);
 
