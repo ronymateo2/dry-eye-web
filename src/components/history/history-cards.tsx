@@ -701,12 +701,22 @@ export function HygieneCard({
         )}
       </div>
 
-      {showTimeline && timelineOpen && (
-        <div className="mt-2.5 rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3">
-          <p className="mono mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-            Sesiones
-          </p>
-          <HygieneTimeline sessions={sessions} timezone={timezone} statusColor={statusColor} />
+      {showTimeline && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateRows: timelineOpen ? "1fr" : "0fr",
+            transition: "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <div className="overflow-hidden">
+            <div className="mt-2.5 rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3">
+              <p className="mono mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                Sesiones
+              </p>
+              <HygieneTimeline sessions={sessions} timezone={timezone} statusColor={statusColor} />
+            </div>
+          </div>
         </div>
       )}
 

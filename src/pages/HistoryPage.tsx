@@ -108,44 +108,46 @@ export default function HistoryPage() {
             ))}
           </div>
 
-          {activeTab === "observations" ? (
-            <ObservationsTab timezone={timezone} />
-          ) : !feed || feed.groups.length === 0 ? (
-            <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
-              Aún no tienes registros. Ve a Registrar para empezar.
-            </div>
-          ) : (
-            <>
-              <HistoryList
-                feed={feed}
-                timezone={timezone}
-                expandedDays={expandedDays}
-                toggleDay={toggleDay}
-              />
-
-              <div className="mt-6 flex flex-col items-center gap-3 pb-4">
-                {loadError && (
-                  <div className="w-full rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
-                    {loadError}
-                  </div>
-                )}
-                {feed.hasMore && (
-                  <button
-                    onClick={loadMore}
-                    disabled={isLoadingMore}
-                    className="mono text-[11px] tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
-                  >
-                    {isLoadingMore ? "CARGANDO..." : "CARGAR MÁS"}
-                  </button>
-                )}
-                {!feed.hasMore && (
-                  <p className="mono text-[10px] tracking-[0.12em] text-[var(--text-faint)]">
-                    INICIO DEL HISTORIAL
-                  </p>
-                )}
+          <div key={activeTab} className="history-appear">
+            {activeTab === "observations" ? (
+              <ObservationsTab timezone={timezone} />
+            ) : !feed || feed.groups.length === 0 ? (
+              <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
+                Aún no tienes registros. Ve a Registrar para empezar.
               </div>
-            </>
-          )}
+            ) : (
+              <>
+                <HistoryList
+                  feed={feed}
+                  timezone={timezone}
+                  expandedDays={expandedDays}
+                  toggleDay={toggleDay}
+                />
+
+                <div className="mt-6 flex flex-col items-center gap-3 pb-4">
+                  {loadError && (
+                    <div className="w-full rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
+                      {loadError}
+                    </div>
+                  )}
+                  {feed.hasMore && (
+                    <button
+                      onClick={loadMore}
+                      disabled={isLoadingMore}
+                      className="mono text-[11px] tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
+                    >
+                      {isLoadingMore ? "CARGANDO..." : "CARGAR MÁS"}
+                    </button>
+                  )}
+                  {!feed.hasMore && (
+                    <p className="mono text-[10px] tracking-[0.12em] text-[var(--text-faint)]">
+                      INICIO DEL HISTORIAL
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </>
       )}
     </section>
