@@ -142,6 +142,13 @@ export const HYGIENE_STATUS_COLORS: Record<HygieneStatus, string> = {
   skipped: "var(--text-faint)",
 };
 
+import type { FrictionType } from "@/types/domain";
+
+export const FRICTION_LABELS: Record<Exclude<FrictionType, "none">, string> = {
+  mental: "Resistencia mental",
+  logistics: "Fricción logística",
+};
+
 export const HISTORY_TABS = [
   { label: "Todo", value: "all" },
   { label: "Observaciones", value: "observations" },

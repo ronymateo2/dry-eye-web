@@ -31,6 +31,7 @@ import {
   SLEEP_QUALITY_COLORS,
   HYGIENE_STATUS_LABELS,
   HYGIENE_STATUS_COLORS,
+  FRICTION_LABELS,
   ALL_SCORE_FIELDS,
   PRIMARY_FIELDS,
   PERIPHERAL_FIELDS,
@@ -547,12 +548,23 @@ export function SleepCard({ item, timezone }: { item: DisplaySleep; timezone: st
   );
 }
 
-export function HygieneCard({ item }: { item: HygieneRecord }) {
+export function HygieneCard({
+  item,
+  timezone,
+}: {
+  item: HygieneRecord;
+  timezone: string;
+}) {
   const statusColor = HYGIENE_STATUS_COLORS[item.status];
   const statusLabel = HYGIENE_STATUS_LABELS[item.status];
+  const friction =
+    item.frictionType && item.frictionType !== "none"
+      ? FRICTION_LABELS[item.frictionType]
+      : null;
+  const lastTime = item.loggedAt ? formatTime(item.loggedAt, timezone) : null;
 
   return (
-    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3 pb-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
           <div
@@ -561,35 +573,70 @@ export function HygieneCard({ item }: { item: HygieneRecord }) {
           >
             <EyeIcon size={15} style={{ color: statusColor }} />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
               Higiene palpebral
             </p>
-            {item.completedCount > 0 && (
-              <div className="flex items-center gap-[3px] mt-1">
-                {Array.from({ length: Math.min(item.completedCount, 6) }).map((_, i) => (
-                  <span
-                    key={i}
-                    className="block h-[5px] w-[5px] rounded-full"
-                    style={{ background: statusColor }}
-                  />
-                ))}
-                {item.completedCount > 6 && (
-                  <span className="mono text-[10px] font-semibold ml-0.5" style={{ color: statusColor }}>
-                    {item.completedCount}×
-                  </span>
-                )}
-              </div>
+            {lastTime ? (
+              <p className="mono text-[11px] text-[var(--text-muted)]">
+                {item.completedCount > 1 ? `Última ${lastTime}` : lastTime}
+              </p>
+            ) : (
+              <p
+                className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+                style={{ color: statusColor }}
+              >
+                {statusLabel}
+              </p>
             )}
           </div>
         </div>
-        <span
-          className="text-[11px] font-semibold uppercase tracking-[0.08em]"
-          style={{ color: statusColor }}
-        >
-          {statusLabel}
-        </span>
+
+        {item.completedCount > 0 ? (
+          <div
+            className="flex shrink-0 items-center gap-1.5 rounded-[10px] px-2.5 py-1.5"
+            style={{ background: `color-mix(in srgb, ${statusColor} 12%, transparent)` }}
+          >
+            <CheckIcon size={13} color={statusColor} weight="bold" />
+            <span
+              className="mono text-[15px] font-semibold tabular-nums"
+              style={{ color: statusColor }}
+            >
+              {item.completedCount}
+              <span className="text-[11px] font-normal opacity-70">×</span>
+            </span>
+          </div>
+        ) : (
+          <span
+            className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+            style={{ color: statusColor }}
+          >
+            {statusLabel}
+          </span>
+        )}
       </div>
+
+      {(friction || item.userNote) && (
+        <div className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-2.5">
+          {friction && (
+            <span
+              className="self-start rounded-[var(--radius-sm)] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+              style={{
+                color: "var(--accent)",
+                borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
+                background: "var(--accent-dim)",
+              }}
+            >
+              {friction}
+            </span>
+          )}
+          {item.userNote && (
+            <p className="text-[12px] italic leading-snug text-[var(--text-muted)]">
+              "{item.userNote}"
+            </p>
+          )}
+        </div>
+      )}
     </article>
   );
 }

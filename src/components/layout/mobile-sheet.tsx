@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowLeftIcon, XIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +42,7 @@ export function MobileSheet({
 
   if (!mounted) return null;
 
-  return (
+  return createPortal(
     <>
       <button
         aria-label="Cerrar modal"
@@ -89,6 +90,7 @@ export function MobileSheet({
         </header>
         <div className="sheet-body">{children}</div>
       </section>
-    </>
+    </>,
+    document.body,
   );
 }
