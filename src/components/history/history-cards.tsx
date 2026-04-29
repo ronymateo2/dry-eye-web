@@ -548,6 +548,74 @@ export function SleepCard({ item, timezone }: { item: DisplaySleep; timezone: st
   );
 }
 
+function HygieneTimeline({
+  sessions,
+  timezone,
+  statusColor,
+}: {
+  sessions: { id: string; loggedAt: string }[];
+  timezone: string;
+  statusColor: string;
+}) {
+  const sorted = [...sessions].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
+
+  return (
+    <div className="relative">
+      {sorted.map((s, i) => {
+        const next = sorted[i + 1];
+        const isLast = i === sorted.length - 1;
+        const gap = next ? formatGap(next.loggedAt, s.loggedAt) : null;
+
+        return (
+          <div key={s.id}>
+            <div className="grid grid-cols-[44px_16px_1fr] items-center gap-2">
+              <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
+                {formatTime(s.loggedAt, timezone)}
+              </span>
+              <div className="relative flex h-6 items-center justify-center">
+                <span
+                  className="relative z-10 block h-[7px] w-[7px] rounded-full"
+                  style={{
+                    background: statusColor,
+                    boxShadow: `0 0 0 3px color-mix(in srgb, ${statusColor} 18%, transparent)`,
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-end">
+                <div className="flex h-4 w-4 items-center justify-center rounded-full" style={{ background: `color-mix(in srgb, ${statusColor} 15%, transparent)` }}>
+                  <CheckIcon size={9} color={statusColor} weight="bold" />
+                </div>
+              </div>
+            </div>
+
+            {!isLast && (
+              <div className="grid grid-cols-[44px_16px_1fr] items-center gap-2">
+                <span />
+                <div className="relative flex h-5 items-center justify-center" aria-hidden>
+                  <span
+                    className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2"
+                    style={{ background: `color-mix(in srgb, ${statusColor} 28%, transparent)` }}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="h-px flex-1 max-w-[18px]"
+                    style={{ background: `color-mix(in srgb, ${statusColor} 22%, transparent)` }}
+                    aria-hidden
+                  />
+                  <span className="mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                    {gap}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function HygieneCard({
   item,
   timezone,
@@ -562,6 +630,8 @@ export function HygieneCard({
       ? FRICTION_LABELS[item.frictionType]
       : null;
   const lastTime = item.loggedAt ? formatTime(item.loggedAt, timezone) : null;
+  const sessions = item.sessions ?? [];
+  const showTimeline = sessions.length > 1;
 
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3 pb-3">
@@ -615,6 +685,15 @@ export function HygieneCard({
           </span>
         )}
       </div>
+
+      {showTimeline && (
+        <div className="mt-2.5 rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3">
+          <p className="mono mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+            Sesiones
+          </p>
+          <HygieneTimeline sessions={sessions} timezone={timezone} statusColor={statusColor} />
+        </div>
+      )}
 
       {(friction || item.userNote) && (
         <div className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-2.5">

@@ -69,6 +69,7 @@ export type HygieneRecord = {
   frictionType: FrictionType | null;
   userNote: string | null;
   completedCount: number;
+  sessions?: { id: string; loggedAt: string }[];
 };
 
 export type HistoryEntry = { id: string; kind: string; loggedAt: string; [key: string]: unknown };
