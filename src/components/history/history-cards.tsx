@@ -536,7 +536,7 @@ export function SleepCard({ item, timezone }: { item: DisplaySleep; timezone: st
             <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
               Sueño · {item.sleepHours}h
             </p>
-            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)]">{time}</p>
+            <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
           </div>
         </div>
         <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: qualityColor }}>
