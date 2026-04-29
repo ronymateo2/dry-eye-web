@@ -77,7 +77,7 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
 
         return (
           <div key={d.id}>
-            <div className="grid grid-cols-[auto_14px_1fr] items-center gap-2.5">
+            <div className="grid grid-cols-[44px_16px_1fr] items-center gap-2">
               <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
                 {formatTime(d.loggedAt, timezone)}
               </span>
@@ -92,13 +92,13 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
                 />
               </div>
 
-              <div className="flex min-w-0 items-center justify-end gap-1.5">
+              <div className="flex min-w-0 items-center justify-end gap-2">
                 {d.quantity > 1 && (
-                  <span className="mono text-[11px] font-semibold tabular-nums text-[var(--text-muted)]">
+                  <span className="mono text-[12px] tabular-nums text-[var(--text-muted)]">
                     {d.quantity}×
                   </span>
                 )}
-                <span className="mono text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                <span className="mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
                   {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
                 </span>
                 <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
@@ -108,9 +108,9 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
             </div>
 
             {!isLast && (
-              <div className="grid grid-cols-[auto_14px_1fr] items-center gap-2.5">
+              <div className="grid grid-cols-[44px_16px_1fr] items-center gap-2">
                 <span />
-                <div className="relative flex h-5 items-center justify-center">
+                <div className="relative flex h-5 items-center justify-center" aria-hidden>
                   <span
                     className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2"
                     style={{ background: "color-mix(in srgb, var(--accent) 28%, transparent)" }}
