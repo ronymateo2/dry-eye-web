@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
 import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { MobileSheet } from "./mobile-sheet";
@@ -15,10 +16,10 @@ const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet
 type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | null;
 
 const ACTION_ITEMS = [
-  { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota", delay: 0 },
-  { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño", delay: 50 },
-  { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene", delay: 100 },
-  { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación", delay: 150 },
+  { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
+  { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
+  { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },
+  { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación" },
 ];
 
 export function FloatingQuickActions() {
@@ -41,28 +42,52 @@ export function FloatingQuickActions() {
 
   return (
     <>
-      {menuOpen && (
-        <div
-          className="fixed inset-0 z-[29] bg-[rgba(0,0,0,0.06)]"
-          onClick={() => setMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            key="fab-backdrop"
+            className="fixed inset-0 z-[29] bg-[rgba(0,0,0,0.06)]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            onClick={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
 
       <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>
         <div className="mx-auto flex w-[min(100%,480px)] flex-col items-end px-[var(--screen-padding)]">
           <div className="pointer-events-auto flex flex-col items-end gap-3">
-            {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label, delay }) => (
-              <Button
-                key={s}
-                className="min-w-[132px] justify-start gap-2.5 border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
-                style={{ animation: `fab-item-in 220ms ease-out ${delay}ms both` }}
-                variant="subtle"
-                onClick={() => setSheet(s)}
-              >
-                <Icon size={18} color="var(--accent)" /> {label}
-              </Button>
-            ))}
+            <AnimatePresence>
+              {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label }, i) => {
+                const reverseI = ACTION_ITEMS.length - 1 - i;
+                return (
+                  <motion.div
+                    key={s}
+                    initial={{ opacity: 0, y: 8, scale: 0.92 }}
+                    animate={{
+                      opacity: 1, y: 0, scale: 1,
+                      transition: { type: "spring", stiffness: 340, damping: 26, delay: reverseI * 0.04 },
+                    }}
+                    exit={{
+                      opacity: 0, y: 6, scale: 0.94,
+                      transition: { duration: 0.13, ease: "easeIn", delay: reverseI * 0.03 },
+                    }}
+                  >
+                    <Button
+                      className="min-w-[132px] justify-start gap-2.5 border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
+                      variant="subtle"
+                      onClick={() => setSheet(s)}
+                    >
+                      <Icon size={18} color="var(--accent)" /> {label}
+                    </Button>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+
             <button
               aria-label="Acciones rapidas"
               aria-expanded={menuOpen}

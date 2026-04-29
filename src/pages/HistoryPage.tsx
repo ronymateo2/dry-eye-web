@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
@@ -108,7 +109,14 @@ export default function HistoryPage() {
             ))}
           </div>
 
-          <div key={activeTab} className="history-appear">
+          <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -3 }}
+            transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
+          >
             {activeTab === "observations" ? (
               <ObservationsTab timezone={timezone} />
             ) : !feed || feed.groups.length === 0 ? (
@@ -147,7 +155,8 @@ export default function HistoryPage() {
                 </div>
               </>
             )}
-          </div>
+          </motion.div>
+          </AnimatePresence>
         </>
       )}
     </section>
