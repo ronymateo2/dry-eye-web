@@ -12,6 +12,8 @@ import {
   YAxis,
 } from "recharts";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { painColor, painGradient } from "@/lib/pain";
 import type { TriggerType } from "@/types/domain";
 
 type ReportTrendPoint = {
@@ -64,6 +66,38 @@ const TRIGGER_LABELS: Record<string, string> = {
   exercise: "Ejercicio",
   other: "Otro",
 };
+
+const PAIN_ZONES: { key: keyof ReportAveragePain; label: string }[] = [
+  { key: "eyelid", label: "Párpados" },
+  { key: "temple", label: "Sienes" },
+  { key: "masseter", label: "Masetero" },
+  { key: "cervical", label: "Cervical" },
+  { key: "orbital", label: "Orbital" },
+];
+
+function correlationAccentColor(r: number): string {
+  if (r <= -0.3) return "var(--pain-low)";
+  if (r >= 0.3) return "var(--pain-high)";
+  return "var(--pain-mid)";
+}
+
+function correlationChipStyle(r: number): { color: string; background: string; border: string } {
+  if (r <= -0.3) return {
+    color: "var(--pain-low)",
+    background: "rgba(92, 184, 90, 0.12)",
+    border: "1px solid rgba(92, 184, 90, 0.28)",
+  };
+  if (r >= 0.3) return {
+    color: "var(--pain-high)",
+    background: "rgba(204, 63, 48, 0.12)",
+    border: "1px solid rgba(204, 63, 48, 0.28)",
+  };
+  return {
+    color: "var(--pain-mid)",
+    background: "rgba(224, 147, 42, 0.12)",
+    border: "1px solid rgba(224, 147, 42, 0.28)",
+  };
+}
 
 interface Props {
   data: ReportData;
@@ -294,76 +328,197 @@ export function ReportScreen({ data }: Props) {
 
   const showAllLabels = data.trendPoints.length <= 30;
   const trendInterval = showAllLabels ? 0 : Math.floor(data.trendPoints.length / 10);
-
   const formatTrendLabel = (dayKey: string) => {
     const [, month, day] = dayKey.split("-");
     return `${day}/${month}`;
   };
 
+  const maxTriggerDays = data.topTriggers[0]?.days ?? 1;
+  const chipStyle = data.spearman !== null ? correlationChipStyle(data.spearman) : null;
+
   return (
-    <section className="space-y-8 px-5 pt-4 pb-8">
-      {/* ── Summary card ─────────────────────────────── */}
-      <div>
-        <p className="section-label mb-3">Resumen del periodo</p>
-        <div className="space-y-6 rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-5">
-          <div>
-            <p className="screen-title text-[17px]">{data.checkInsCount} registros</p>
-            <p className="screen-subtitle text-[13px]">{data.dateRange}</p>
-          </div>
+    <section className="space-y-6 pb-8 pt-2">
 
-          {data.averageSleepHours !== null && (
-            <div>
-              <p className="section-label">Sueno promedio</p>
-              <p className="text-[15px] text-[var(--text-primary)]">
-                {data.averageSleepHours}h
-                {data.averageSleepQuality !== null && (
-                  <span className="text-[var(--text-muted)]">
-                    {" "}
-                    · calidad {data.averageSleepQuality} / 10
-                  </span>
-                )}
-              </p>
-            </div>
-          )}
-
-          <div>
-            <p className="section-label">Correlacion sueno ↔ dolor</p>
-            {data.spearman !== null ? (
-              <>
-                <p className="mono text-[22px] font-normal">r = {data.spearman}</p>
-                <p className="screen-subtitle text-[13px] mt-1">
-                  {data.correlationLabel.charAt(0).toUpperCase() +
-                    data.correlationLabel.slice(1)}
-                  . Se destacara en la portada del PDF.
-                </p>
-              </>
-            ) : (
-              <p className="screen-subtitle text-[13px]">
-                {data.correlationPoints.length < 14
-                  ? `Faltan ${14 - data.correlationPoints.length} registros matutinos con datos de sueno.`
-                  : "No hay suficiente variacion para calcular correlacion."}
-              </p>
-            )}
-          </div>
+      {/* ── Period + count ─────────────────────────────────────── */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="section-label mb-1">Período analizado</p>
+          <p className="screen-title text-[18px]">{data.dateRange}</p>
+        </div>
+        <div className="flex flex-col items-end gap-0.5">
+          <span className="mono text-[30px] font-medium leading-none text-[var(--text-primary)]">
+            {data.checkInsCount}
+          </span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-faint)]">
+            registros
+          </span>
         </div>
       </div>
 
-      {/* ── PDF button ───────────────────────────────── */}
-      <Button
-        className="w-full"
-        disabled={!data.hasEnoughData || generating}
-        onClick={handleGeneratePDF}
-        type="button"
-        style={!data.hasEnoughData ? { opacity: 0.4 } : undefined}
-      >
-        {generating
-          ? "Generando PDF…"
-          : data.hasEnoughData
-            ? "Generar PDF para médico"
-            : `Necesitas al menos 14 días de datos (${data.checkInsCount}/14)`}
-      </Button>
+      {/* ── Correlation hero ───────────────────────────────────── */}
+      <div>
+        <p className="section-label">Correlación sueño ↔ dolor</p>
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-card)] p-5">
+          {data.spearman !== null && chipStyle ? (
+            <>
+              <div className="mb-3 flex items-end justify-between gap-3">
+                <span
+                  className="mono text-[52px] font-medium leading-none"
+                  style={{ color: correlationAccentColor(data.spearman) }}
+                >
+                  {data.spearman > 0 ? "+" : ""}{data.spearman}
+                </span>
+                <span
+                  className="mb-1 shrink-0 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em]"
+                  style={chipStyle}
+                >
+                  {data.correlationLabel}
+                </span>
+              </div>
+              <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">
+                Spearman entre horas de sueño y dolor de masetero. Se destacará en la portada del PDF.
+              </p>
+            </>
+          ) : (
+            <div className="py-1">
+              <p className="mono mb-2 text-[36px] font-medium leading-none text-[var(--text-faint)]">
+                — / —
+              </p>
+              <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">
+                {data.correlationPoints.length < 14
+                  ? `Faltan ${14 - data.correlationPoints.length} registros matutinos con sueño para calcular.`
+                  : "No hay suficiente variación para calcular la correlación."}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* ── Hidden charts for PDF capture ───────────── */}
+      {/* ── Sleep + drops stats ────────────────────────────────── */}
+      {(data.averageSleepHours !== null || data.dropsPerDay !== null) && (
+        <div className={cn(
+          "grid gap-3",
+          data.averageSleepHours !== null && data.dropsPerDay !== null
+            ? "grid-cols-2"
+            : "grid-cols-1",
+        )}>
+          {data.averageSleepHours !== null && (
+            <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-card)] p-4">
+              <p className="section-label mb-2">Sueño prom.</p>
+              <p className="mono text-[28px] font-medium leading-none text-[var(--text-primary)]">
+                {data.averageSleepHours}
+                <span className="text-[16px] text-[var(--text-muted)]">h</span>
+              </p>
+              {data.averageSleepQuality !== null && (
+                <p className="mt-1.5 text-[12px] text-[var(--text-muted)]">
+                  calidad {data.averageSleepQuality}/10
+                </p>
+              )}
+            </div>
+          )}
+          {data.dropsPerDay !== null && (
+            <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-card)] p-4">
+              <p className="section-label mb-2">Gotas / día</p>
+              <p className="mono text-[28px] font-medium leading-none text-[var(--text-primary)]">
+                {data.dropsPerDay}
+              </p>
+              <p className="mt-1.5 text-[12px] text-[var(--text-muted)]">promedio diario</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Pain zones ─────────────────────────────────────────── */}
+      {data.averagePain && (
+        <div>
+          <p className="section-label">Dolor promedio por zona</p>
+          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-card)]">
+            {PAIN_ZONES.map(({ key, label }, i) => {
+              const score = data.averagePain![key];
+              return (
+                <div
+                  key={key}
+                  className={cn(
+                    "flex items-center gap-3 px-5 py-3.5",
+                    i < PAIN_ZONES.length - 1 && "border-b border-[var(--border)]",
+                  )}
+                >
+                  <span className="w-[76px] shrink-0 text-[13px] text-[var(--text-muted)]">
+                    {label}
+                  </span>
+                  <div
+                    aria-label={`${label}: ${score.toFixed(1)}`}
+                    className="h-[5px] flex-1 rounded-full"
+                    style={{ background: painGradient(score) }}
+                  />
+                  <span
+                    className="mono w-[30px] shrink-0 text-right text-[13px] font-medium"
+                    style={{ color: painColor(score) }}
+                  >
+                    {score.toFixed(1)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Top triggers ───────────────────────────────────────── */}
+      {data.topTriggers.length > 0 && (
+        <div>
+          <p className="section-label">Triggers frecuentes</p>
+          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-card)]">
+            {data.topTriggers.map((t, i) => (
+              <div
+                key={t.triggerType}
+                className={cn(
+                  "flex items-center gap-3 px-5 py-3.5",
+                  i < data.topTriggers.length - 1 && "border-b border-[var(--border)]",
+                )}
+              >
+                <span className="flex-1 text-[13px] text-[var(--text-primary)]">
+                  {TRIGGER_LABELS[t.triggerType] ?? t.triggerType}
+                </span>
+                <div className="flex items-center gap-2.5">
+                  <div className="h-[3px] w-[52px] overflow-hidden rounded-full bg-[var(--surface-el)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--accent)]"
+                      style={{ width: `${(t.days / maxTriggerDays) * 100}%` }}
+                    />
+                  </div>
+                  <span className="mono w-[36px] text-right text-[12px] text-[var(--text-muted)]">
+                    {t.days}d
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── CTA ────────────────────────────────────────────────── */}
+      <div>
+        <Button
+          className="w-full"
+          disabled={!data.hasEnoughData || generating}
+          onClick={handleGeneratePDF}
+          type="button"
+        >
+          {generating
+            ? "Generando PDF…"
+            : data.hasEnoughData
+              ? "Generar PDF para médico"
+              : `Necesitas ${14 - data.checkInsCount} registros más`}
+        </Button>
+        {!data.hasEnoughData && (
+          <p className="mt-3 text-center text-[12px] text-[var(--text-faint)]">
+            {data.checkInsCount}/14 registros · completa al menos 14 días para generar el reporte
+          </p>
+        )}
+      </div>
+
+      {/* ── Hidden charts for PDF capture ──────────────────────── */}
       {data.hasEnoughData && (
         <div
           aria-hidden="true"
@@ -433,7 +588,7 @@ export function ReportScreen({ data }: Props) {
                 <XAxis
                   dataKey="sleepHours"
                   domain={[0, 12]}
-                  name="Sueno"
+                  name="Sueño"
                   stroke="#5a4e3a"
                   tick={{ fill: "#5a4e3a", fontSize: 10 }}
                   tickCount={7}
@@ -448,7 +603,7 @@ export function ReportScreen({ data }: Props) {
                   tickCount={6}
                 />
                 <ReferenceLine stroke="rgba(212,162,76,0.4)" x={6} />
-                <Scatter data={data.correlationPoints} fill="#d4a24c" name="Sueno" />
+                <Scatter data={data.correlationPoints} fill="#d4a24c" name="Sueño" />
               </ScatterChart>
             </div>
           )}
