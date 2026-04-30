@@ -119,7 +119,7 @@ export default function HistoryPage() {
           >
             {activeTab === "observations" ? (
               <ObservationsTab timezone={timezone} />
-            ) : !feed || feed.groups.length === 0 ? (
+            ) : !feed || (feed.groups.length === 0 && feed.hygiene.length === 0) ? (
               <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
                 Aún no tienes registros. Ve a Registrar para empezar.
               </div>
