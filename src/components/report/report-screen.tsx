@@ -75,6 +75,8 @@ const PAIN_ZONES: { key: keyof ReportAveragePain; label: string }[] = [
   { key: "orbital", label: "Orbital" },
 ];
 
+// ─── UI color helpers ─────────────────────────────────────────────────────
+
 function correlationAccentColor(r: number): string {
   if (r <= -0.3) return "var(--pain-low)";
   if (r >= 0.3) return "var(--pain-high)";
@@ -108,6 +110,15 @@ export function ReportScreen({ data }: Props) {
   const trendChartRef = useRef<HTMLDivElement>(null);
   const scatterChartRef = useRef<HTMLDivElement>(null);
 
+  const isLight = document.documentElement.dataset.theme === "light";
+  const chartColors = {
+    bg:     isLight ? "#FFFFFF"               : "#1c1810",
+    grid:   isLight ? "rgba(237,234,245,0.8)" : "rgba(46,39,24,0.8)",
+    axis:   isLight ? "#7E7BA2"               : "#5a4e3a",
+    accent: isLight ? "#7C6DCD"               : "#d4a24c",
+    refLine: isLight ? "rgba(124,109,205,0.4)" : "rgba(212,162,76,0.4)",
+  };
+
   const handleGeneratePDF = async () => {
     setGenerating(true);
     try {
@@ -121,201 +132,366 @@ export function ReportScreen({ data }: Props) {
       const margin = 20;
       const contentW = pageW - margin * 2;
 
-      const bg: [number, number, number] = [18, 16, 8];
-      const textPrimary: [number, number, number] = [240, 228, 200];
-      const textMuted: [number, number, number] = [138, 120, 96];
-      const textFaint: [number, number, number] = [90, 78, 58];
-      const borderColor: [number, number, number] = [46, 39, 24];
-      const accent: [number, number, number] = [212, 162, 76];
+      // ─── Color palette (theme-aware) ──────────────────────────────
+      const light = document.documentElement.dataset.theme === "light";
+      const chartBg = light ? "#FFFFFF" : "#1c1810";
+
+      const bg: [number, number, number]          = light ? [240, 239, 248] : [18,  16,  8];
+      const surface: [number, number, number]     = light ? [255, 255, 255] : [28,  24,  16];
+      const surfaceEl: [number, number, number]   = light ? [234, 232, 248] : [37,  32,  20];
+      const border: [number, number, number]      = light ? [237, 234, 245] : [46,  39,  24];
+      const textPrimary: [number, number, number] = light ? [30,  26,  60]  : [240, 228, 200];
+      const textMuted: [number, number, number]   = light ? [92,  89,  133] : [168, 147, 117];
+      const textFaint: [number, number, number]   = light ? [126, 123, 162] : [122, 106, 79];
+      const accent: [number, number, number]      = light ? [124, 109, 205] : [212, 162, 76];
+      const painLow: [number, number, number]     = light ? [92,  200, 160] : [92,  184, 90];
+      const painMid: [number, number, number]     = light ? [244, 162, 90]  : [224, 147, 42];
+      const painHigh: [number, number, number]    = light ? [244, 112, 112] : [204, 63,  48];
+
+      const getPainRgb = (score: number): [number, number, number] =>
+        score >= 7 ? painHigh : score >= 4 ? painMid : painLow;
+
+      const getCorrRgb = (r: number): [number, number, number] =>
+        r <= -0.3 ? painLow : r >= 0.3 ? painHigh : painMid;
 
       const fillPage = () => {
         doc.setFillColor(...bg);
         doc.rect(0, 0, pageW, pageH, "F");
       };
 
-      // ─── Page 1: Cover ────────────────────────────────────────────────
-      fillPage();
+      const accentStripe = () => {
+        doc.setFillColor(...accent);
+        doc.rect(0, 0, pageW, 2.5, "F");
+      };
 
-      doc.setFillColor(...accent);
-      doc.rect(margin, 32, 4, 28, "F");
+      const card = (x: number, y: number, w: number, h: number) => {
+        doc.setFillColor(...surface);
+        doc.setDrawColor(...border);
+        doc.rect(x, y, w, h, "FD");
+      };
 
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(24);
-      doc.setTextColor(...textPrimary);
-      doc.text("Reporte para Médico", margin + 10, 44);
-
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...textMuted);
-      doc.text("NeuroEye Log", margin + 10, 54);
-
-      if (data.userName) {
-        doc.setFontSize(12);
-        doc.setTextColor(...textPrimary);
-        doc.text(data.userName, margin + 10, 66);
-      }
-
-      doc.setFontSize(11);
-      doc.setTextColor(...textMuted);
-      doc.text(data.dateRange, margin + 10, 76);
+      const sLabel = (text: string, x: number, y: number) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(...textFaint);
+        doc.text(text.toUpperCase(), x, y);
+      };
 
       const today = new Date().toLocaleDateString("es-CO", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
+        day: "2-digit", month: "long", year: "numeric",
       });
-      doc.text(`Generado el ${today}`, margin + 10, 84);
 
-      doc.setFontSize(8);
+      // ─── PAGE 1: Cover ────────────────────────────────────────────
+      fillPage();
+      accentStripe();
+
+      // Left accent bar
+      doc.setFillColor(...accent);
+      doc.rect(margin, 36, 3, 34, "F");
+
+      // Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(26);
+      doc.setTextColor(...textPrimary);
+      doc.text("Reporte para Médico", margin + 9, 49);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(13);
+      doc.setTextColor(...textMuted);
+      doc.text("NeuroEye Log", margin + 9, 58);
+
+      let metaY = 68;
+      if (data.userName) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.setTextColor(...textPrimary);
+        doc.text(data.userName, margin + 9, metaY);
+        metaY += 9;
+      }
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(...textMuted);
+      doc.text(data.dateRange, margin + 9, metaY);
+      doc.text(`Generado el ${today}`, margin + 9, metaY + 7);
+
+      // Correlation hero card
+      let nextY = 106;
+      if (data.spearman !== null) {
+        const corrRgb = getCorrRgb(data.spearman);
+        card(margin, nextY, contentW, 56);
+
+        sLabel("Correlación sueño ↔ dolor · Spearman", margin + 5, nextY + 9);
+
+        const rSign = data.spearman > 0 ? "+" : "";
+        const rStr = `r = ${rSign}${data.spearman}`;
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(34);
+        doc.setTextColor(...corrRgb);
+        doc.text(rStr, margin + 5, nextY + 32);
+
+        const rWidth = doc.getTextWidth(rStr);
+        doc.setFontSize(9);
+        doc.text(data.correlationLabel.toUpperCase(), margin + 5 + rWidth + 5, nextY + 32);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(...textMuted);
+        doc.text(`${data.checkInsCount} registros · ${data.dateRange}`, margin + 5, nextY + 44);
+
+        nextY += 64;
+      } else {
+        card(margin, nextY, contentW, 44);
+        sLabel("Registros totales", margin + 5, nextY + 9);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(28);
+        doc.setTextColor(...textPrimary);
+        doc.text(`${data.checkInsCount}`, margin + 5, nextY + 33);
+        nextY += 52;
+      }
+
+      // Stats row
+      const hasStats = data.averageSleepHours !== null || data.dropsPerDay !== null;
+      if (hasStats) {
+        const statH = 42;
+        const bothStats = data.averageSleepHours !== null && data.dropsPerDay !== null;
+        const statW = bothStats ? (contentW - 5) / 2 : contentW;
+        let sx = margin;
+
+        if (data.averageSleepHours !== null) {
+          card(sx, nextY, statW, statH);
+          sLabel("Sueño prom.", sx + 5, nextY + 9);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(22);
+          doc.setTextColor(...textPrimary);
+          doc.text(`${data.averageSleepHours}h`, sx + 5, nextY + 28);
+          if (data.averageSleepQuality !== null) {
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            doc.setTextColor(...textMuted);
+            doc.text(`calidad ${data.averageSleepQuality}/10`, sx + 5, nextY + 38);
+          }
+          sx += statW + 5;
+        }
+
+        if (data.dropsPerDay !== null) {
+          card(sx, nextY, statW, statH);
+          sLabel("Gotas / día", sx + 5, nextY + 9);
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(22);
+          doc.setTextColor(...textPrimary);
+          doc.text(`${data.dropsPerDay}`, sx + 5, nextY + 28);
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          doc.setTextColor(...textMuted);
+          doc.text("promedio diario", sx + 5, nextY + 38);
+        }
+      }
+
+      // Disclaimer footer
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
       doc.setTextColor(...textFaint);
       const disclaimer =
         "Este reporte es generado automáticamente por NeuroEye Log y es informativo únicamente. No constituye diagnóstico médico. Los coeficientes de correlación (Spearman) indican asociación estadística, no causalidad.";
-      doc.text(doc.splitTextToSize(disclaimer, contentW), margin, 268);
+      doc.text(doc.splitTextToSize(disclaimer, contentW), margin, 273);
 
-      // ─── Page 2: Summary table ────────────────────────────────────────
+      // ─── PAGE 2: Pain zones + Triggers ───────────────────────────
       doc.addPage();
       fillPage();
+      accentStripe();
 
-      let y = 32;
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(17);
-      doc.setTextColor(...textPrimary);
-      doc.text("Resumen del Período", margin, y);
-      y += 14;
+      let y = 22;
 
-      const rows: [string, string][] = [
-        ["Registros totales", `${data.checkInsCount}`],
+      // Compact summary table
+      sLabel("Resumen del período", margin, y);
+      y += 7;
+
+      const summaryRows: [string, string][] = [
+        ["Registros", `${data.checkInsCount}`],
         ["Período", data.dateRange],
       ];
-
-      if (data.averagePain) {
-        rows.push(
-          ["Dolor párpados (prom.)", `${data.averagePain.eyelid} / 10`],
-          ["Dolor sienes (prom.)", `${data.averagePain.temple} / 10`],
-          ["Dolor masetero (prom.)", `${data.averagePain.masseter} / 10`],
-          ["Dolor cervical (prom.)", `${data.averagePain.cervical} / 10`],
-          ["Dolor orbital (prom.)", `${data.averagePain.orbital} / 10`],
-        );
-      }
-
       if (data.averageSleepHours !== null) {
-        const sleepStr =
-          data.averageSleepQuality !== null
-            ? `${data.averageSleepHours}h · calidad ${data.averageSleepQuality} / 10`
-            : `${data.averageSleepHours}h`;
-        rows.push(["Sueño (prom.)", sleepStr]);
+        summaryRows.push(["Sueño prom.", data.averageSleepQuality !== null
+          ? `${data.averageSleepHours}h · calidad ${data.averageSleepQuality}/10`
+          : `${data.averageSleepHours}h`]);
       }
-
       if (data.dropsPerDay !== null) {
-        rows.push(["Gotas por día (prom.)", `${data.dropsPerDay}`]);
+        summaryRows.push(["Gotas/día", `${data.dropsPerDay}`]);
       }
-
       if (data.spearman !== null) {
-        rows.push([
-          "Correlación sueño ↔ masetero",
-          `r = ${data.spearman} (${data.correlationLabel})`,
-        ]);
+        summaryRows.push(["Correlación", `r = ${data.spearman} (${data.correlationLabel})`]);
       }
 
-      doc.setFontSize(11);
-      for (const [label, value] of rows) {
+      doc.setFontSize(10);
+      for (const [label, value] of summaryRows) {
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...textMuted);
         doc.text(label, margin, y);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...textPrimary);
-        doc.text(value, margin + 95, y);
+        doc.text(value, margin + 60, y);
         y += 4;
-        doc.setDrawColor(...borderColor);
+        doc.setDrawColor(...border);
         doc.line(margin, y, pageW - margin, y);
         y += 8;
       }
 
-      // ─── Page 3: Trend chart ──────────────────────────────────────────
+      y += 6;
+
+      // Pain zones with gradient bars
+      if (data.averagePain) {
+        const ap = data.averagePain;
+        sLabel("Dolor promedio por zona (0 – 10)", margin, y);
+        y += 8;
+
+        const zones: { key: keyof ReportAveragePain; label: string }[] = [
+          { key: "eyelid",    label: "Párpados" },
+          { key: "temple",    label: "Sienes" },
+          { key: "masseter",  label: "Masetero" },
+          { key: "cervical",  label: "Cervical" },
+          { key: "orbital",   label: "Orbital" },
+        ];
+
+        const zLabelW = 30;
+        const zScoreW = 18;
+        const barX = margin + zLabelW;
+        const barW = contentW - zLabelW - zScoreW;
+        const barH = 5;
+        const zRowH = 16;
+
+        for (const { key, label } of zones) {
+          const score = ap[key];
+          const painRgb = getPainRgb(score);
+          const fillW = (score / 10) * barW;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(...textMuted);
+          doc.text(label, margin, y + 4);
+
+          // Track
+          doc.setFillColor(...surfaceEl);
+          doc.rect(barX, y, barW, barH, "F");
+
+          // Fill
+          if (fillW > 0) {
+            doc.setFillColor(...painRgb);
+            doc.rect(barX, y, Math.max(fillW, 1.5), barH, "F");
+          }
+
+          // Score
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.setTextColor(...painRgb);
+          doc.text(score.toFixed(1), pageW - margin, y + 4, { align: "right" });
+
+          y += zRowH;
+        }
+
+        y += 8;
+      }
+
+      // Triggers with relative bars
+      if (data.topTriggers.length > 0) {
+        sLabel("Triggers frecuentes", margin, y);
+        y += 8;
+
+        const maxDays = data.topTriggers[0]?.days ?? 1;
+        const tLabelW = 46;
+        const tScoreW = 16;
+        const tBarX = margin + tLabelW;
+        const tBarW = contentW - tLabelW - tScoreW;
+        const tBarH = 4;
+        const tRowH = 13;
+
+        for (const trigger of data.topTriggers) {
+          const fillW = (trigger.days / maxDays) * tBarW;
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setTextColor(...textMuted);
+          doc.text(TRIGGER_LABELS[trigger.triggerType] ?? trigger.triggerType, margin, y + 3);
+
+          doc.setFillColor(...surfaceEl);
+          doc.rect(tBarX, y, tBarW, tBarH, "F");
+
+          doc.setFillColor(...accent);
+          doc.rect(tBarX, y, Math.max(fillW, 1.5), tBarH, "F");
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.setTextColor(...textPrimary);
+          doc.text(`${trigger.days}d`, pageW - margin, y + 3, { align: "right" });
+
+          y += tRowH;
+        }
+      }
+
+      // ─── PAGE 3: Trend chart ──────────────────────────────────────
       if (trendChartRef.current && data.trendPoints.length > 0) {
         const canvas = await html2canvas(trendChartRef.current, {
-          backgroundColor: "#1c1810",
+          backgroundColor: chartBg,
           scale: 2,
           useCORS: true,
         });
         doc.addPage();
         fillPage();
-        y = 32;
+        accentStripe();
+
+        y = 22;
+        sLabel("Tendencia del dolor", margin, y);
+        y += 8;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(17);
         doc.setTextColor(...textPrimary);
-        doc.text("Tendencia del Dolor", margin, y);
-        y += 8;
+        doc.text("Evolución del Dolor en el Tiempo", margin, y);
+        y += 7;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.setTextColor(...textMuted);
-        doc.text("Promedio diario de todas las zonas (0 – 10)", margin, y);
-        y += 6;
-        const imgW = contentW;
-        const imgH = (canvas.height / canvas.width) * imgW;
-        doc.addImage(canvas.toDataURL("image/png"), "PNG", margin, y, imgW, imgH);
+        doc.text("Promedio diario de todas las zonas · escala 0 – 10", margin, y);
+        y += 8;
+        const tImgW = contentW;
+        const tImgH = (canvas.height / canvas.width) * tImgW;
+        doc.addImage(canvas.toDataURL("image/png"), "PNG", margin, y, tImgW, tImgH);
       }
 
-      // ─── Page 4: Scatter chart ────────────────────────────────────────
+      // ─── PAGE 4: Scatter chart ────────────────────────────────────
       if (
         scatterChartRef.current &&
         data.correlationPoints.length >= 14 &&
         data.spearman !== null
       ) {
         const canvas = await html2canvas(scatterChartRef.current, {
-          backgroundColor: "#1c1810",
+          backgroundColor: chartBg,
           scale: 2,
           useCORS: true,
         });
         doc.addPage();
         fillPage();
-        y = 32;
+        accentStripe();
+
+        y = 22;
+        sLabel("Correlación estadística", margin, y);
+        y += 8;
         doc.setFont("helvetica", "bold");
         doc.setFontSize(17);
         doc.setTextColor(...textPrimary);
-        doc.text("Correlación Sueño ↔ Dolor (Masetero)", margin, y);
-        y += 8;
+        doc.text("Sueño ↔ Dolor de Masetero", margin, y);
+        y += 7;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.setTextColor(...textMuted);
         doc.text(
-          `Coeficiente de Spearman: r = ${data.spearman} (${data.correlationLabel})`,
+          `Spearman: r = ${data.spearman} · ${data.correlationLabel}`,
           margin,
           y,
         );
-        y += 6;
-        const imgW = contentW;
-        const imgH = (canvas.height / canvas.width) * imgW;
-        doc.addImage(canvas.toDataURL("image/png"), "PNG", margin, y, imgW, imgH);
-      }
-
-      // ─── Top triggers ─────────────────────────────────────────────────
-      if (data.topTriggers.length > 0) {
-        doc.addPage();
-        fillPage();
-        y = 32;
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(17);
-        doc.setTextColor(...textPrimary);
-        doc.text("Desencadenantes Más Frecuentes", margin, y);
-        y += 14;
-        doc.setFontSize(11);
-        for (const trigger of data.topTriggers) {
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(...textMuted);
-          doc.text(
-            TRIGGER_LABELS[trigger.triggerType] ?? trigger.triggerType,
-            margin,
-            y,
-          );
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(...textPrimary);
-          doc.text(`${trigger.days} días`, margin + 95, y);
-          y += 4;
-          doc.setDrawColor(...borderColor);
-          doc.line(margin, y, pageW - margin, y);
-          y += 8;
-        }
+        y += 8;
+        const sImgW = contentW;
+        const sImgH = (canvas.height / canvas.width) * sImgW;
+        doc.addImage(canvas.toDataURL("image/png"), "PNG", margin, y, sImgW, sImgH);
       }
 
       doc.save(`neuroeye-reporte-${new Date().toISOString().split("T")[0]}.pdf`);
@@ -534,7 +710,7 @@ export function ReportScreen({ data }: Props) {
             style={{
               width: 680,
               height: 300,
-              background: "#1c1810",
+              background: chartColors.bg,
               padding: "16px 8px 8px 8px",
             }}
           >
@@ -544,18 +720,18 @@ export function ReportScreen({ data }: Props) {
               margin={{ top: 8, right: 16, left: -8, bottom: 0 }}
               width={656}
             >
-              <CartesianGrid stroke="rgba(46,39,24,0.8)" strokeDasharray="3 3" />
+              <CartesianGrid stroke={chartColors.grid} strokeDasharray="3 3" />
               <XAxis
                 dataKey="dayKey"
                 interval={trendInterval}
-                stroke="#5a4e3a"
-                tick={{ fill: "#5a4e3a", fontSize: 10 }}
+                stroke={chartColors.axis}
+                tick={{ fill: chartColors.axis, fontSize: 10 }}
                 tickFormatter={formatTrendLabel}
               />
               <YAxis
                 domain={[0, 10]}
-                stroke="#5a4e3a"
-                tick={{ fill: "#5a4e3a", fontSize: 10 }}
+                stroke={chartColors.axis}
+                tick={{ fill: chartColors.axis, fontSize: 10 }}
                 tickCount={6}
               />
               <Line
@@ -563,7 +739,7 @@ export function ReportScreen({ data }: Props) {
                 dataKey="averagePain"
                 dot={false}
                 name="Promedio"
-                stroke="#d4a24c"
+                stroke={chartColors.accent}
                 strokeWidth={2.3}
               />
             </LineChart>
@@ -575,7 +751,7 @@ export function ReportScreen({ data }: Props) {
               style={{
                 width: 680,
                 height: 300,
-                background: "#1c1810",
+                background: chartColors.bg,
                 padding: "16px 8px 8px 8px",
               }}
             >
@@ -584,13 +760,13 @@ export function ReportScreen({ data }: Props) {
                 margin={{ top: 8, right: 16, left: -8, bottom: 0 }}
                 width={656}
               >
-                <CartesianGrid stroke="rgba(46,39,24,0.8)" strokeDasharray="3 3" />
+                <CartesianGrid stroke={chartColors.grid} strokeDasharray="3 3" />
                 <XAxis
                   dataKey="sleepHours"
                   domain={[0, 12]}
                   name="Sueño"
-                  stroke="#5a4e3a"
-                  tick={{ fill: "#5a4e3a", fontSize: 10 }}
+                  stroke={chartColors.axis}
+                  tick={{ fill: chartColors.axis, fontSize: 10 }}
                   tickCount={7}
                   unit="h"
                 />
@@ -598,12 +774,12 @@ export function ReportScreen({ data }: Props) {
                   dataKey="masseterPain"
                   domain={[0, 10]}
                   name="Masetero"
-                  stroke="#5a4e3a"
-                  tick={{ fill: "#5a4e3a", fontSize: 10 }}
+                  stroke={chartColors.axis}
+                  tick={{ fill: chartColors.axis, fontSize: 10 }}
                   tickCount={6}
                 />
-                <ReferenceLine stroke="rgba(212,162,76,0.4)" x={6} />
-                <Scatter data={data.correlationPoints} fill="#d4a24c" name="Sueño" />
+                <ReferenceLine stroke={chartColors.refLine} x={6} />
+                <Scatter data={data.correlationPoints} fill={chartColors.accent} name="Sueño" />
               </ScatterChart>
             </div>
           )}
