@@ -8,6 +8,20 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
+  build: {
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-motion": ["motion/react"],
+          "vendor-query": ["@tanstack/react-query"],
+          "vendor-charts": ["recharts"],
+          "vendor-pdf": ["jspdf", "html2canvas"],
+        },
+      },
+    },
+  },
   plugins: [react(), tailwindcss(), VitePWA({
     registerType: "autoUpdate",
     injectRegister: "auto",
