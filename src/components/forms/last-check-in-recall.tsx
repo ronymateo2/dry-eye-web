@@ -71,13 +71,13 @@ export function LastCheckInRecall({ data, triggerLabel, onApply }: Props) {
         <button
           type="button"
           onClick={onApply}
-          className="group inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-[var(--accent)] bg-[var(--accent-dim)] px-3 text-[12.5px] font-semibold text-[var(--accent)] transition-[transform,background-color] duration-150 ease-out hover:bg-[var(--accent)] hover:text-[var(--btn-primary-text)] active:scale-[0.96]"
+          className="group inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-[var(--accent)] bg-[var(--accent-dim)] px-3 text-[12.5px] font-semibold text-[var(--accent)] transition-[transform,background-color,color] duration-400 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[var(--accent)] [@media(hover:hover)_and_(pointer:fine)]:hover:text-[var(--btn-primary-text)] active:scale-[0.96] active:bg-[var(--accent)] active:text-[var(--btn-primary-text)]"
           aria-label="Cargar valores del ultimo registro"
         >
           <ArrowCounterClockwiseIcon
             size={14}
             weight="bold"
-            className="transition-transform duration-300 group-hover:-rotate-180"
+            className="transition-transform duration-300 [@media(hover:hover)_and_(pointer:fine)]:group-hover:-rotate-180 group-active:-rotate-180"
           />
           Usar valores
         </button>
