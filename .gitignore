@@ -205,4 +205,4 @@ dist
 .agents
 skills-lock.json
 
-dev-dist
+dev-dist/
