@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PainSlider } from "@/components/ui/pain-slider";
@@ -7,7 +7,7 @@ import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { api } from "@/lib/api";
 import { TRIGGER_OPTIONS, SYMPTOM_OPTIONS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, formatLoggedAt } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -37,36 +37,6 @@ const defaultPain = {
 type ContextTab = "now" | "custom";
 type LastCheckIn = NonNullable<Awaited<ReturnType<typeof api.getLastCheckIn>>>;
 
-function formatLoggedAt(iso: string): string {
-  const d = new Date(iso);
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const time = d.toLocaleTimeString("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  if (d.toDateString() === now.toDateString()) return `hoy, ${time}`;
-  if (d.toDateString() === yesterday.toDateString()) return `ayer, ${time}`;
-  return (
-    d.toLocaleDateString("es", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    }) + `, ${time}`
-  );
-}
-
-function formatTimeAgo(iso: string): string {
-  const diffMs = Math.max(0, Date.now() - new Date(iso).getTime());
-  const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return "hace un momento";
-  if (diffMin < 60) return `hace ${diffMin} min`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `hace ${diffHr} h`;
-  const diffDays = Math.floor(diffHr / 24);
-  return diffDays === 1 ? "hace 1 dia" : `hace ${diffDays} dias`;
-}
 
 function getTriggerLabel(triggerType: string | null): string | null {
   if (!triggerType) return null;
@@ -258,7 +228,7 @@ export default function RegisterPage() {
     }
   };
 
-  const applyLastCheckInValues = () => {
+  const applyLastCheckInValues = useCallback(() => {
     if (!lastCheckIn) return;
     setPain({
       eyelidPain: lastCheckIn.eyelid_pain,
@@ -270,7 +240,7 @@ export default function RegisterPage() {
     });
     setZeroWarning(null);
     toast.success("Se cargaron los valores del ultimo check-in.");
-  };
+  }, [lastCheckIn]);
 
   const handleSave = () => {
     if (isPending || !isTriggerValid) return;
@@ -508,8 +478,6 @@ export default function RegisterPage() {
             <LastCheckInRecall
               data={lastCheckIn}
               triggerLabel={lastTriggerLabel}
-              formatLoggedAt={formatLoggedAt}
-              formatTimeAgo={formatTimeAgo}
               onApply={applyLastCheckInValues}
             />
           ) : (

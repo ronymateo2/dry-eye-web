@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { ArrowCounterClockwiseIcon, ClockIcon } from "@phosphor-icons/react";
 import { painColor } from "@/lib/pain";
+import { formatLoggedAt, formatTimeAgo } from "@/lib/utils";
 
 type LastCheckInData = {
   logged_at: string;
@@ -17,8 +18,6 @@ type LastCheckInData = {
 type Props = {
   data: LastCheckInData;
   triggerLabel: string | null;
-  formatLoggedAt: (iso: string) => string;
-  formatTimeAgo: (iso: string) => string;
   onApply: () => void;
 };
 
@@ -31,13 +30,7 @@ const ZONES: { key: keyof LastCheckInData; label: string }[] = [
   { key: "stress_level", label: "Estres" },
 ];
 
-export function LastCheckInRecall({
-  data,
-  triggerLabel,
-  formatLoggedAt,
-  formatTimeAgo,
-  onApply,
-}: Props) {
+export function LastCheckInRecall({ data, triggerLabel, onApply }: Props) {
   const peak = Math.max(
     data.eyelid_pain,
     data.temple_pain,
