@@ -19,7 +19,7 @@ export const PainSlider = memo(function PainSlider({ label, icon, value, onChang
         <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]">
           {icon}{label}
         </span>
-        <span className="mono text-[22px] font-normal" style={{ color: colorFn(value) }}>
+        <span className="mono text-[22px] font-normal" style={{ color: colorFn(value), transition: "color 200ms cubic-bezier(0.16, 1, 0.3, 1)" }}>
           {value}
         </span>
       </div>

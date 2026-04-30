@@ -301,7 +301,6 @@ export default function RegisterPage() {
           <div className="flex items-center justify-between px-4 pt-4 pb-3">
             <p className="section-label mb-0">Contexto</p>
           </div>
-
           <div className="px-4 pb-4 space-y-5">
             {/* Time tabs */}
             <div className="space-y-3">
