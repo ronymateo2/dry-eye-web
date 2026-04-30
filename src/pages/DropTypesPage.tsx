@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,6 +49,7 @@ function SortableDropType({ dt, isOnly }: { dt: DropTypeRecord; isOnly: boolean 
 }
 
 export default function DropTypesPage() {
+  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
@@ -138,12 +139,15 @@ export default function DropTypesPage() {
         )}
       </section>
 
-      <Link
+      <button
         className="inline-flex min-h-12 w-full items-center justify-center rounded-[999px] border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-[15px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-el)]"
-        to="/register"
+        onClick={() => {
+          navigate("/register");
+          setTimeout(() => window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } })), 50);
+        }}
       >
         Volver a Registrar
-      </Link>
+      </button>
     </section>
   );
 }

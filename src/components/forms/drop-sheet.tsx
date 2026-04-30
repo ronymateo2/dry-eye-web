@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
@@ -16,6 +16,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, DropEye } from "@/types/domain";
 
 export function DropSheet({ onSaved }: { onSaved: () => void }) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
   const [selectedDropType, setSelectedDropType] = useState<string>("");
@@ -192,13 +193,13 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="section-label mb-0">Tipo de gota</p>
-          <Link to="/drop-types" className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</Link>
+          <button onClick={() => { onSaved(); navigate("/drop-types"); }} className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</button>
         </div>
 
         {dropTypes.length === 0 ? (
           <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center text-[14px] text-[var(--text-muted)]">
             No tienes tipos de gota.{" "}
-            <Link to="/drop-types" className="text-[var(--accent)]">Crear uno</Link>
+            <button onClick={() => { onSaved(); navigate("/drop-types"); }} className="text-[var(--accent)]">Crear uno</button>
           </div>
         ) : (
           <WheelPicker label="Seleccionar tipo de gota" options={wheelOptions} value={selectedDropType} onChange={setSelectedDropType} />
