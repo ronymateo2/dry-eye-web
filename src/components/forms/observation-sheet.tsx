@@ -1,4 +1,5 @@
 import { useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export function ObservationSheet({ onSaved }: Props) {
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [eye, setEye] = useState<ObservationEye>("none");
@@ -34,6 +36,7 @@ export function ObservationSheet({ onSaved }: Props) {
     startTransition(async () => {
       try {
         const result = await api.createObservation({ title: title.trim(), eye, notes: notes.trim() || undefined });
+        queryClient.invalidateQueries({ queryKey: ["observations"] });
         onSaved(result as { id: string; title: string; eye: string });
       } catch {
         setState({ status: "error", message: "No se pudo guardar." });
