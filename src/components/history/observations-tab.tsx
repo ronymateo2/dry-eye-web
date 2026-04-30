@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
 import { OBS_EYE_LABELS } from "@/lib/constants";
@@ -67,8 +68,14 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
 
   return (
     <div className="space-y-4">
-      {Array.from(groups.entries()).map(([obsId, group]) => (
-        <div key={obsId} className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+      {Array.from(groups.entries()).map(([obsId, group], index) => (
+        <motion.div
+          key={obsId}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1], delay: Math.min(index, 4) * 0.055 }}
+          className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden"
+        >
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
             <div className="min-w-0">
               <p className="text-[14px] font-semibold text-[var(--text-primary)]">{group.title}</p>
@@ -111,7 +118,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
               );
             })}
           </div>
-        </div>
+        </motion.div>
       ))}
 
       {hasMore && (
