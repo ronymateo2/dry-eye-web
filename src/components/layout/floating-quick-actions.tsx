@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon } from "@phosphor-icons/react";
@@ -28,14 +28,22 @@ export function FloatingQuickActions() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const [selectedObservation, setSelectedObservation] = useState<{ id: string; title: string; eye: string } | null>(null);
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { sheet: s } = (e as CustomEvent<{ sheet: Sheet }>).detail;
+      setSheet(s);
+      setMenuOpen(false);
+    };
+    window.addEventListener("quickactions:open", handler);
+    return () => window.removeEventListener("quickactions:open", handler);
+  }, []);
+
   const isRegisterPage = pathname === "/register";
   const isVisible = isRegisterPage || pathname === "/history";
   const fabBottomOffsetClass =
     isRegisterPage
       ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+var(--sticky-cta-height)+16px)]"
       : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
-
-  if (!isVisible) return null;
 
   const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); };
   const savedAndClose = () => { window.dispatchEvent(new CustomEvent("history:refresh")); closeAll(); };
@@ -57,7 +65,7 @@ export function FloatingQuickActions() {
         )}
       </AnimatePresence>
 
-      <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>
+      {isVisible && <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>
         <div className="mx-auto flex w-[min(100%,480px)] flex-col items-end px-[var(--screen-padding)]">
           <div className="pointer-events-auto flex flex-col items-end gap-3">
             <AnimatePresence>
@@ -105,7 +113,7 @@ export function FloatingQuickActions() {
             </button>
           </div>
         </div>
-      </div>
+      </div>}
 
       <Suspense fallback={null}>
         <MobileSheet open={sheet === "sleep"} title="Sueno de hoy" description="Registra o actualiza tu sueno de hoy." onClose={closeAll}>

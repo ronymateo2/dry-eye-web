@@ -1,4 +1,4 @@
-import { DropIcon, ArrowsClockwiseIcon } from "@phosphor-icons/react";
+import { DropIcon, ArrowsClockwiseIcon, PlusIcon } from "@phosphor-icons/react";
 import { useLastDropWidget } from "@/lib/hooks/use-last-drop-widget";
 
 export function LastDropLine() {
@@ -18,6 +18,14 @@ export function LastDropLine() {
         onClick={refresh}
       >
         <ArrowsClockwiseIcon size={13} className={isRefreshing ? "animate-spin" : ""} />
+      </button>
+      <button
+        type="button"
+        aria-label="Registrar gota"
+        className="app-header__last-drop-add"
+        onClick={() => window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } }))}
+      >
+        <PlusIcon size={13} weight="bold" />
       </button>
     </div>
   );

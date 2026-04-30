@@ -334,6 +334,18 @@ img, svg { display: block; max-width: 100%; }
 }
 .app-header__last-drop-refresh:hover { color: var(--accent); background: var(--surface-el); }
 .app-header__last-drop-refresh:disabled { opacity: 0.4; }
+.app-header__last-drop-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  color: var(--accent);
+  transition: color 0.15s, background 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+.app-header__last-drop-add:hover { background: var(--accent-dim); }
 .app-header__brand {
   display: flex;
   align-items: center;
