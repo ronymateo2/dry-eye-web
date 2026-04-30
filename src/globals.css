@@ -176,21 +176,21 @@ button { cursor: pointer; }
 }
 .pain-range::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   background: var(--thumb-color, var(--text-primary));
   border: 2px solid var(--bg);
   box-shadow: 0 1px 6px rgba(0,0,0,0.45);
-  margin-top: calc((8px - 28px) / 2);
+  margin-top: calc((8px - 36px) / 2);
   transition: background 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 120ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .pain-range:active::-webkit-slider-thumb {
   transform: scale(1.15);
 }
 .pain-range::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   background: var(--thumb-color, var(--text-primary));
   border: 2px solid var(--bg);
