@@ -161,24 +161,6 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
         </div>
       )}
 
-      {state.status !== "idle" && <StatusBanner state={state} />}
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="section-label mb-0">Tipo de gota</p>
-          <Link to="/drop-types" className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</Link>
-        </div>
-
-        {dropTypes.length === 0 ? (
-          <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center text-[14px] text-[var(--text-muted)]">
-            No tienes tipos de gota.{" "}
-            <Link to="/drop-types" className="text-[var(--accent)]">Crear uno</Link>
-          </div>
-        ) : (
-          <WheelPicker label="Seleccionar tipo de gota" options={wheelOptions} value={selectedDropType} onChange={setSelectedDropType} />
-        )}
-      </div>
-
       <div>
         {!showDatePicker ? (
           <button
@@ -202,6 +184,24 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
             </div>
             <DateTimePicker value={loggedAt} onChange={setLoggedAt} max={new Date()} />
           </div>
+        )}
+      </div>
+
+      {state.status !== "idle" && <StatusBanner state={state} />}
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="section-label mb-0">Tipo de gota</p>
+          <Link to="/drop-types" className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</Link>
+        </div>
+
+        {dropTypes.length === 0 ? (
+          <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center text-[14px] text-[var(--text-muted)]">
+            No tienes tipos de gota.{" "}
+            <Link to="/drop-types" className="text-[var(--accent)]">Crear uno</Link>
+          </div>
+        ) : (
+          <WheelPicker label="Seleccionar tipo de gota" options={wheelOptions} value={selectedDropType} onChange={setSelectedDropType} />
         )}
       </div>
 
