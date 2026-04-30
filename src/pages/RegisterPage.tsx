@@ -7,7 +7,6 @@ import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { api } from "@/lib/api";
 import { TRIGGER_OPTIONS, SYMPTOM_OPTIONS } from "@/lib/constants";
-import { painColor } from "@/lib/pain";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +17,7 @@ import {
   TargetIcon,
 } from "@phosphor-icons/react";
 import { SleepNudge } from "@/components/ui/sleep-nudge";
+import { LastCheckInRecall } from "@/components/forms/last-check-in-recall";
 import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
 import templesImg from "@/assets/pain-areas/temples.webp";
 import orbitalImg from "@/assets/pain-areas/orbital.webp";
@@ -158,16 +158,6 @@ export default function RegisterPage() {
   const triggerValue = TRIGGER_OPTIONS.find((t) => t.id === selectedTrigger)
     ?.value as TriggerType | undefined;
 
-  const lastCheckInPainValues: { label: string; value: number }[] = lastCheckIn
-    ? [
-      { label: "Ojo/Parpados", value: lastCheckIn.eyelid_pain },
-      { label: "Sienes", value: lastCheckIn.temple_pain },
-      { label: "Zona orbital", value: lastCheckIn.orbital_pain },
-      { label: "Masetero", value: lastCheckIn.masseter_pain },
-      { label: "Cuello / Cervical", value: lastCheckIn.cervical_pain },
-      { label: "Estres", value: lastCheckIn.stress_level },
-    ]
-    : [];
   const lastTriggerLabel = getTriggerLabel(lastCheckIn?.trigger_type ?? null);
 
   const getZeroWarning = (): string | null => {
@@ -515,55 +505,13 @@ export default function RegisterPage() {
               No se pudo cargar el ultimo registro por ahora.
             </p>
           ) : lastCheckIn ? (
-            <div className="space-y-3 rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] p-3.5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--text-faint)]">
-                    Ultimo registro
-                  </p>
-                  <p className="mt-1 text-[13px] text-[var(--text-muted)]">
-                    {formatLoggedAt(lastCheckIn.logged_at)} ·{" "}
-                    {formatTimeAgo(lastCheckIn.logged_at)}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="subtle"
-                  className="h-9 min-h-0 shrink-0 whitespace-nowrap px-3 py-0 text-[12px]"
-                  onClick={applyLastCheckInValues}
-                >
-                  Usar valores
-                </Button>
-              </div>
-
-              <ul className="grid grid-cols-2 gap-2">
-                {lastCheckInPainValues.map((item) => (
-                  <li
-                    key={item.label}
-                    className="flex items-center justify-between gap-2 rounded-[10px] border border-[var(--border)] bg-[var(--surface-card)] px-2.5 py-1.5 text-[12px] text-[var(--text-muted)]"
-                  >
-                    <span className="truncate">{item.label}</span>
-                    <span
-                      className="mono text-[13px] font-medium leading-none"
-                      style={{ color: painColor(item.value) }}
-                    >
-                      {item.value}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              {(lastTriggerLabel || lastCheckIn.notes) && (
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-[var(--text-muted)]">
-                  {lastTriggerLabel && <span>Trigger: {lastTriggerLabel}</span>}
-                  {lastCheckIn.notes && (
-                    <span className="max-w-full truncate">
-                      Nota: {lastCheckIn.notes}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
+            <LastCheckInRecall
+              data={lastCheckIn}
+              triggerLabel={lastTriggerLabel}
+              formatLoggedAt={formatLoggedAt}
+              formatTimeAgo={formatTimeAgo}
+              onApply={applyLastCheckInValues}
+            />
           ) : (
             <p className="rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] px-3 py-2.5 text-[13px] text-[var(--text-muted)]">
               Aun no tienes registros previos. Guarda el primero y aqui veremos
