@@ -87,8 +87,8 @@ export function DateTimePicker({ value, onChange, max, className }: DateTimePick
         value={timeStr}
         onChange={handleTimeChange}
         className={cn(
-          "h-12 w-28 flex-shrink-0 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]",
-          "px-3 font-mono text-base text-[var(--text-primary)] outline-none",
+          "h-12 w-[110px] flex-shrink-0 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]",
+          "px-3 font-mono text-[14px] text-[var(--text-primary)] outline-none",
           "transition-colors duration-[160ms] focus:border-[var(--accent)]",
           "[&::-webkit-calendar-picker-indicator]:opacity-0",
           !timeStr && "text-[var(--text-faint)]",
