@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useAuth, useUser } from "@/lib/auth";
 import {
+  ArrowCounterClockwiseIcon,
+  CalendarDotsIcon,
   ClockIcon,
   DotsSixVerticalIcon,
   MoonIcon,
@@ -156,6 +159,48 @@ export default function ProfilePage() {
   const user = useUser();
   const { signOut, refreshUser } = useAuth();
   const qc = useQueryClient();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [reprocessingId, setReprocessingId] = useState<string | null>(null);
+
+  const { data: calendarStatus, isLoading: calendarLoading } = useQuery({
+    queryKey: ["calendar/status"],
+    queryFn: api.getCalendarStatus,
+  });
+
+  useEffect(() => {
+    const calResult = searchParams.get("calendar");
+    if (calResult === "connected") {
+      toast.success("Google Calendar conectado.");
+      qc.invalidateQueries({ queryKey: ["calendar/status"] });
+      setSearchParams({}, { replace: true });
+    } else if (calResult === "error") {
+      const reason = searchParams.get("reason") ?? "";
+      const detail = searchParams.get("detail") ?? "";
+      const msg = reason === "state"
+        ? "Error: cookie de sesión perdida (reason=state)"
+        : reason === "token"
+        ? `Error al obtener token: ${detail || "token_exchange"}`
+        : reason === "userinfo"
+        ? "Error al leer perfil de Google (reason=userinfo)"
+        : "Error al conectar Google Calendar.";
+      toast.error(msg);
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams, qc]);
+
+  const handleReprocessToday = async (dropTypeId: string) => {
+    const dayKey = new Date().toLocaleDateString("en-CA", { timeZone: user.timezone });
+    setReprocessingId(dropTypeId);
+    try {
+      await api.reprocessCalendarDay(dropTypeId, dayKey);
+      qc.invalidateQueries({ queryKey: ["calendar/status"] });
+      toast.success("Eventos de Calendar reprocesados.");
+    } catch {
+      toast.error("No se pudieron reprocesar los eventos.");
+    } finally {
+      setReprocessingId(null);
+    }
+  };
 
   const { data: medications = [], isLoading: medsLoading } = useQuery({
     queryKey: ["medications"],
@@ -343,6 +388,75 @@ export default function ProfilePage() {
                 {theme === "light" ? <MoonIcon size={15} /> : <SunIcon size={15} />}
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Google Calendar */}
+        <div className="space-y-3">
+          <p className="section-label">Google Calendar</p>
+          <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
+            {calendarLoading ? (
+              <div className="flex min-h-[72px] items-center gap-3 px-4">
+                <div className="h-8 w-8 shrink-0 animate-pulse rounded-[8px] bg-[var(--surface-el)]" />
+                <div className="flex flex-1 flex-col gap-1.5">
+                  <div className="h-2.5 w-20 animate-pulse rounded-full bg-[var(--surface-el)]" />
+                  <div className="h-3.5 w-36 animate-pulse rounded-full bg-[var(--surface-el)]" />
+                </div>
+              </div>
+            ) : (
+              <div className="flex min-h-[72px] items-center gap-3 px-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                  <CalendarDotsIcon size={16} color="var(--accent)" weight="fill" />
+                </div>
+                <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
+                    Notificaciones
+                  </span>
+                  <span className="text-[14px] text-[var(--text-primary)]">
+                    {calendarStatus?.authorized ? "Conectado" : "No conectado"}
+                  </span>
+                </div>
+                {!calendarStatus?.authorized && (
+                  <button
+                    type="button"
+                    aria-label="Conectar Google Calendar"
+                    onClick={() => { window.location.href = "/api/calendar/connect"; }}
+                    className="flex h-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] px-3 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  >
+                    Conectar
+                  </button>
+                )}
+              </div>
+            )}
+            {calendarStatus?.authorized && calendarStatus.events_today.length > 0 && (
+              <div className="border-t border-[var(--border)]">
+                {calendarStatus.events_today.map((entry) => (
+                  <div
+                    key={entry.drop_type_id}
+                    className="flex min-h-12 items-center gap-3 border-b border-[var(--border)] px-4 last:border-b-0"
+                  >
+                    <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                      <span className="text-[14px] text-[var(--text-primary)] truncate">{entry.drop_type_name}</span>
+                      <span className="mono text-[11px] text-[var(--text-faint)]">
+                        {entry.count} evento{entry.count !== 1 ? "s" : ""} hoy
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={reprocessingId === entry.drop_type_id}
+                      onClick={() => handleReprocessToday(entry.drop_type_id)}
+                      aria-label={`Reprocesar eventos de ${entry.drop_type_name}`}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-40"
+                    >
+                      <ArrowCounterClockwiseIcon
+                        size={15}
+                        className={reprocessingId === entry.drop_type_id ? "animate-spin" : ""}
+                      />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

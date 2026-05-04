@@ -88,6 +88,16 @@ export type ActionState =
   | { status: "success"; message: string }
   | { status: "error"; message: string };
 
+export type CalendarStatus = {
+  authorized: boolean;
+  events_today: Array<{
+    drop_type_id: string;
+    drop_type_name: string;
+    day_key: string;
+    count: number;
+  }>;
+};
+
 export type User = {
   id: string;
   name: string | null;

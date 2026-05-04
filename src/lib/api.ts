@@ -1,4 +1,4 @@
-import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed, DropScheduleEntry } from "@/types/domain";
+import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed, DropScheduleEntry, CalendarStatus } from "@/types/domain";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -116,6 +116,18 @@ export const api = {
   updateMedication: (id: string, body: SaveMedicationInput) => api.put(`/medications/${id}`, body),
   deleteMedication: (id: string) => api.delete(`/medications/${id}`),
   reorderMedications: (ids: string[]) => api.put("/medications/reorder", { ids }),
+
+  getCalendarStatus: () => api.get<CalendarStatus>("/calendar/status"),
+  syncCalendarDay: (dropTypeId: string, dayKey: string, fromLoggedAt: string) =>
+    api.post<{ ok: boolean; events_created?: number; skipped?: boolean; reason?: string }>(
+      "/calendar/sync-day",
+      { dropTypeId, dayKey, fromLoggedAt },
+    ),
+  reprocessCalendarDay: (dropTypeId: string, dayKey: string) =>
+    api.post<{ ok: boolean; skipped?: boolean; reason?: string }>(
+      "/calendar/reprocess",
+      { dropTypeId, dayKey },
+    ),
 
   getDashboard: () => api.get<unknown>("/dashboard"),
   getHistory: () => api.get<HistoryFeed>("/history"),

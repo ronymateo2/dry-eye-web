@@ -10,6 +10,8 @@ import { WheelPicker } from "@/components/ui/wheel-picker";
 import { EyedropperIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
+import { useUser } from "@/lib/auth";
+import { getDayKey } from "@/lib/utils";
 import { queueDrop } from "@/lib/offline/drops-queue";
 import { setLastDrop } from "@/lib/last-drop-store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +20,7 @@ import type { ActionState, DropEye } from "@/types/domain";
 export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void; initialDropTypeId?: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const user = useUser();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
   const [selectedDropType, setSelectedDropType] = useState<string>("");
   const [quantity, setQuantity] = useState("1");
@@ -81,6 +84,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => {});
       toast.success("Gota registrada.");
       onSaved();
     } catch {
