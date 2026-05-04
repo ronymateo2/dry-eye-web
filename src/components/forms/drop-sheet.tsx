@@ -15,7 +15,7 @@ import { setLastDrop } from "@/lib/last-drop-store";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, DropEye } from "@/types/domain";
 
-export function DropSheet({ onSaved }: { onSaved: () => void }) {
+export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void; initialDropTypeId?: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
@@ -45,9 +45,9 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
 
   useEffect(() => {
     if (dropTypes.length > 0 && !selectedDropType) {
-      setSelectedDropType(dropTypes[0].id);
+      setSelectedDropType(initialDropTypeId ?? dropTypes[0].id);
     }
-  }, [dropTypes, selectedDropType]);
+  }, [dropTypes, selectedDropType, initialDropTypeId]);
 
   const wheelOptions = useMemo(() => dropTypes.map((dt) => ({ value: dt.id, label: dt.name })), [dropTypes]);
 

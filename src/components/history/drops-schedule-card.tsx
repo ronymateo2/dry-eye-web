@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { DropScheduleEntry } from "@/types/domain";
@@ -35,12 +36,21 @@ function ScheduleRow({ entry, index }: { entry: DropScheduleEntry; index: number
   const noRecord = !entry.last_logged_at;
   const computed = noRecord ? null : getCountdown(entry.last_logged_at!, entry.interval_hours);
 
+  const openDropSheet = () => {
+    window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop", dropTypeId: entry.drop_type_id } }));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 3 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
-      className="flex items-center justify-between gap-3"
+      className="flex items-center justify-between gap-3 cursor-pointer active:opacity-70 transition-opacity duration-[120ms]"
+      role="button"
+      tabIndex={0}
+      aria-label={`Registrar ${entry.name}`}
+      onClick={openDropSheet}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDropSheet(); } }}
     >
       <span
         className="text-[13px] capitalize truncate"
@@ -49,23 +59,26 @@ function ScheduleRow({ entry, index }: { entry: DropScheduleEntry; index: number
         {entry.name}
       </span>
 
-      {noRecord ? (
-        <span className="font-mono text-[12px] shrink-0" style={{ color: "var(--text-faint)" }}>
-          c/{entry.interval_hours}h
-        </span>
-      ) : (
-        <div className="flex items-baseline gap-1.5 shrink-0">
-          <span
-            className="font-mono text-[14px] font-semibold tabular-nums"
-            style={{ color: computed!.color, transition: "color 0.4s ease" }}
-          >
-            {computed!.label}
+      <div className="flex items-center gap-1.5 shrink-0">
+        {noRecord ? (
+          <span className="font-mono text-[12px]" style={{ color: "var(--text-faint)" }}>
+            c/{entry.interval_hours}h
           </span>
-          <span className="font-mono text-[11px] tabular-nums" style={{ color: "var(--text-faint)" }}>
-            · {computed!.nextTime}
-          </span>
-        </div>
-      )}
+        ) : (
+          <div className="flex items-baseline gap-1.5">
+            <span
+              className="font-mono text-[14px] font-semibold tabular-nums"
+              style={{ color: computed!.color, transition: "color 0.4s ease" }}
+            >
+              {computed!.label}
+            </span>
+            <span className="font-mono text-[11px] tabular-nums" style={{ color: "var(--text-faint)" }}>
+              · {computed!.nextTime}
+            </span>
+          </div>
+        )}
+        <CaretRightIcon aria-hidden size={9} weight="bold" style={{ color: "var(--text-faint)" }} />
+      </div>
     </motion.div>
   );
 }

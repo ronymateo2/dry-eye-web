@@ -27,11 +27,13 @@ export function FloatingQuickActions() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [selectedObservation, setSelectedObservation] = useState<{ id: string; title: string; eye: string } | null>(null);
+  const [initialDropTypeId, setInitialDropTypeId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const { sheet: s } = (e as CustomEvent<{ sheet: Sheet }>).detail;
+      const { sheet: s, dropTypeId } = (e as CustomEvent<{ sheet: Sheet; dropTypeId?: string }>).detail;
       setSheet(s);
+      setInitialDropTypeId(dropTypeId);
       setMenuOpen(false);
     };
     window.addEventListener("quickactions:open", handler);
@@ -45,7 +47,7 @@ export function FloatingQuickActions() {
       ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+var(--sticky-cta-height)+16px)]"
       : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
 
-  const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); };
+  const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); setInitialDropTypeId(undefined); };
   const savedAndClose = () => { window.dispatchEvent(new CustomEvent("history:refresh")); closeAll(); };
 
   return (
@@ -120,7 +122,7 @@ export function FloatingQuickActions() {
           <SleepSheet onSaved={savedAndClose} />
         </MobileSheet>
         <MobileSheet open={sheet === "drop"} title="Registrar gota" description="Registra rapidamente una aplicacion." panelClassName="!h-[92dvh]" onClose={closeAll}>
-          <DropSheet onSaved={savedAndClose} />
+          <DropSheet onSaved={savedAndClose} initialDropTypeId={initialDropTypeId} />
         </MobileSheet>
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95dvh]" onClose={closeAll}>
           <HygieneSheet onSaved={savedAndClose} onClose={closeAll} />
