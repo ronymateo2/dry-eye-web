@@ -80,6 +80,7 @@ export function DropSheet({ onSaved }: { onSaved: () => void }) {
       await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
       toast.success("Gota registrada.");
       onSaved();
     } catch {

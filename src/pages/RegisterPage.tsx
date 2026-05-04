@@ -17,6 +17,7 @@ import {
   TargetIcon,
 } from "@phosphor-icons/react";
 import { SleepNudge } from "@/components/ui/sleep-nudge";
+import { DropsScheduleCard } from "@/components/history/drops-schedule-card";
 import { LastCheckInRecall } from "@/components/forms/last-check-in-recall";
 import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
 import templesImg from "@/assets/pain-areas/temples.webp";
@@ -255,6 +256,7 @@ export default function RegisterPage() {
   return (
     <section>
       <div className="relative pb-[calc(var(--sticky-cta-height,88px)+44px)] space-y-6">
+        <DropsScheduleCard />
         <SleepNudge />
         {/* Context */}
         <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">

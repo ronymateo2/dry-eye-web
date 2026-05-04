@@ -16,7 +16,14 @@ export type SleepRecord = {
   sleepQuality: SleepQuality;
 };
 
-export type DropTypeRecord = { id: string; name: string; sort_order?: number | null };
+export type DropTypeRecord = { id: string; name: string; sort_order?: number | null; interval_hours?: number | null };
+
+export type DropScheduleEntry = {
+  drop_type_id: string;
+  name: string;
+  interval_hours: number | null;
+  last_logged_at: string | null;
+};
 
 export type SaveDropInput = {
   id: string;

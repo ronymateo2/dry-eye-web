@@ -1,4 +1,4 @@
-import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed } from "@/types/domain";
+import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed, DropScheduleEntry } from "@/types/domain";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -67,13 +67,15 @@ export const api = {
       notes: string | null;
     } | null>("/check-ins/last"),
 
-  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null }[]>("/drop-types"),
-  createDropType: (name: string) => api.post<{ id: string; name: string }>("/drop-types", { name }),
+  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null }[]>("/drop-types"),
+  createDropType: (name: string, intervalHours: number | null) => api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours }),
+  updateDropTypeInterval: (id: string, intervalHours: number | null) => api.put(`/drop-types/${id}`, { intervalHours }),
   deleteDropType: (id: string) => api.delete(`/drop-types/${id}`),
   reorderDropTypes: (ids: string[]) => api.put("/drop-types/reorder", { ids }),
 
   saveDrop: (body: SaveDropInput) => api.post("/drops", body),
   getLastDrop: () => api.get<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_name: string; drop_type_id: string } | null>("/drops/last"),
+  getLastDropPerType: () => api.get<DropScheduleEntry[]>("/drops/last-per-type"),
 
   getTodaySleep: () => api.get<{ id: string; day_key: string; logged_at: string; sleep_hours: number; sleep_quality: string } | null>("/sleep/today"),
   saveSleep: (body: unknown) => api.put("/sleep", body),

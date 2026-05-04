@@ -21,6 +21,7 @@ export function useOfflineSync() {
     }
 
     queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+    queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
   }, [queryClient]);
 
   useEffect(() => {
