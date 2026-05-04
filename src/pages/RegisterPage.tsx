@@ -17,7 +17,7 @@ import {
   TargetIcon,
 } from "@phosphor-icons/react";
 import { SleepNudge } from "@/components/ui/sleep-nudge";
-import { DropsScheduleCard } from "@/components/history/drops-schedule-card";
+import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
 import { LastCheckInRecall } from "@/components/forms/last-check-in-recall";
 import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
 import templesImg from "@/assets/pain-areas/temples.webp";

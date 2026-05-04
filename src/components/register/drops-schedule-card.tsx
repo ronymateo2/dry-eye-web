@@ -102,7 +102,7 @@ function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: n
           aria-hidden
           size={9}
           weight="bold"
-          className="translate-x-0 opacity-40 transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70 group-focus-visible:opacity-70"
+          className="translate-x-0 transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70 group-focus-visible:opacity-70"
           style={{ color: "var(--text-faint)" }}
         />
       </span>
