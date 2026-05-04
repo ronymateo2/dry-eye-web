@@ -493,11 +493,13 @@ export default function RegisterPage() {
               icon={<img src={eyelidsImg} alt="Ojo/Parpados" className="w-11 h-11 object-contain theme-invert" />}
               label="Ojo/Parpados"
               value={pain.eyelidPain}
+              scale="vas"
               onChange={updatePain("eyelidPain")}
             />
             <PainSlider
               icon={<img src={templesImg} alt="Sienes" className="w-11 h-11 object-contain theme-invert" />}
               label="Sienes"
+              scale="vas"
               value={pain.templePain}
               onChange={updatePain("templePain")}
             />
