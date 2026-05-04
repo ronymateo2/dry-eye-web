@@ -420,7 +420,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     aria-label="Conectar Google Calendar"
-                    onClick={() => { window.location.href = "/api/calendar/connect"; }}
+                    onClick={() => { window.location.href = `${import.meta.env.VITE_API_URL ?? "/api"}/calendar/connect`; }}
                     className="flex h-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] px-3 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
                   >
                     Conectar
