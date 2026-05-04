@@ -48,7 +48,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
   const nowPct = pct(now);
 
   return (
-    <MobileSheet open={open} onClose={onClose} title="Proyección del día" description="Cronograma completo del día">
+    <MobileSheet open={open} panelClassName="!h-[95dvh]" onClose={onClose} title="Proyección del día" description="Cronograma completo del día">
       {slots.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-6 text-center">
           <DropIcon size={24} weight="thin" aria-hidden style={{ color: "var(--text-faint)" }} />
