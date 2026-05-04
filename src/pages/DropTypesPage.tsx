@@ -38,15 +38,25 @@ function IntervalPills({
   selected: number | null;
   onChange: (v: number | null) => void;
 }) {
+  const isPreset = INTERVAL_OPTIONS.some((o) => o.value === selected);
+  const isCustom = selected !== null && !isPreset;
+  const [showCustom, setShowCustom] = useState(isCustom);
+  const [customVal, setCustomVal] = useState(isCustom ? String(selected) : "");
+
+  const handleCustomCommit = () => {
+    const n = parseInt(customVal, 10);
+    if (n > 0) onChange(n);
+  };
+
   return (
     <div className="flex flex-wrap gap-1.5">
       {INTERVAL_OPTIONS.map((opt) => {
-        const active = opt.value === selected;
+        const active = !showCustom && opt.value === selected;
         return (
           <button
             key={String(opt.value)}
             type="button"
-            onClick={() => onChange(opt.value)}
+            onClick={() => { setShowCustom(false); onChange(opt.value); }}
             className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
             style={{
               background: active ? "var(--accent)" : "var(--surface-el)",
@@ -57,6 +67,35 @@ function IntervalPills({
           </button>
         );
       })}
+      <button
+        type="button"
+        onClick={() => setShowCustom(true)}
+        className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
+        style={{
+          background: showCustom ? "var(--accent)" : "var(--surface-el)",
+          color: showCustom ? "var(--bg)" : "var(--text-muted)",
+        }}
+      >
+        {isCustom && !showCustom ? `c/${selected}h` : "Otro..."}
+      </button>
+      {showCustom && (
+        <div className="flex w-full items-center gap-2 pt-1">
+          <span className="text-[13px] text-[var(--text-muted)]">c/</span>
+          <input
+            type="number"
+            min="1"
+            max="72"
+            value={customVal}
+            onChange={(e) => setCustomVal(e.target.value)}
+            onBlur={handleCustomCommit}
+            onKeyDown={(e) => e.key === "Enter" && handleCustomCommit()}
+            placeholder="ej. 3"
+            autoFocus
+            className="w-20 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+          />
+          <span className="text-[13px] text-[var(--text-muted)]">horas</span>
+        </div>
+      )}
     </div>
   );
 }
