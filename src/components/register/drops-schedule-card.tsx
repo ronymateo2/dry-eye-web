@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { ArrowRightIcon, CaretRightIcon, DropIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { DropScheduleEntry } from "@/types/domain";
-import { MobileSheet } from "@/components/layout/mobile-sheet";
+import { DayProjectionSheet, type DoseSlot } from "@/components/register/day-projection-sheet";
 
 function getCountdown(lastLoggedAt: string, intervalHours: number, now: number): { label: string; overdue: boolean; nextTime: string; color: string } {
   const nextMs = new Date(lastLoggedAt).getTime() + intervalHours * 3_600_000;
@@ -37,11 +37,6 @@ function getNextMs(entry: DropScheduleEntry): number {
   return new Date(entry.last_logged_at).getTime() + entry.interval_hours * 3_600_000;
 }
 
-type DoseSlot = {
-  time: number;
-  name: string;
-  drop_type_id: string;
-};
 
 function buildDayProjection(entries: DropScheduleEntry[]): DoseSlot[] {
   const todayStart = new Date();
@@ -69,111 +64,6 @@ function buildDayProjection(entries: DropScheduleEntry[]): DoseSlot[] {
   return slots.sort((a, b) => a.time - b.time);
 }
 
-function DayProjectionSheet({ open, onClose, slots, now }: { open: boolean; onClose: () => void; slots: DoseSlot[]; now: number }) {
-  const firstFutureIdx = slots.findIndex((s) => s.time > now);
-  const timeLabel = (t: number) => new Date(t).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
-
-  return (
-    <MobileSheet
-      open={open}
-      onClose={onClose}
-      title="Proyección del día"
-      description="Cronograma completo del día"
-    >
-      {slots.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-6 text-center">
-          <DropIcon size={24} weight="thin" aria-hidden style={{ color: "var(--text-faint)" }} />
-          <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>
-            Registra tu primera gota de hoy para ver las siguientes.
-          </p>
-        </div>
-      ) : (
-        <div className="relative">
-          {/* spine aligns with center of 16px dot col: 60px + 8px gap + 8px = 76px */}
-          <div
-            className="absolute left-[76px] top-2 bottom-2 w-px"
-            style={{ background: "var(--border)" }}
-          />
-
-          <div className="space-y-0">
-            {slots.map((slot, i) => {
-              const overdue = slot.time < now;
-              const isNext = i === firstFutureIdx;
-              const isFuture = slot.time > now;
-              const dotColor = overdue ? "var(--pain-high)" : isNext ? "var(--pain-low)" : "var(--text-faint)";
-              const nameColor = overdue ? "var(--text-primary)" : isFuture && !isNext ? "var(--text-faint)" : "var(--text-muted)";
-
-              const diffMs = slot.time - now;
-              let countdownLabel: string;
-              if (overdue) {
-                const abs = -diffMs;
-                const h = Math.floor(abs / 3_600_000);
-                const m = Math.floor((abs % 3_600_000) / 60_000);
-                countdownLabel = h > 0 ? `hace ${h}h ${m}m` : `hace ${m}m`;
-              } else {
-                const h = Math.floor(diffMs / 3_600_000);
-                const m = Math.floor((diffMs % 3_600_000) / 60_000);
-                countdownLabel = h > 0 ? `en ${h}h ${m}m` : `en ${m}m`;
-              }
-
-              const showNowLine = firstFutureIdx !== -1 && i === firstFutureIdx;
-
-              return (
-                <motion.div
-                  key={`${slot.drop_type_id}-${slot.time}`}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                >
-                  {showNowLine && (
-                    <div className="flex items-center gap-2 py-2 pl-[76px]">
-                      <div className="h-px flex-1" style={{ background: "var(--accent)" }} />
-                      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-                        Ahora
-                      </span>
-                      <div className="h-px flex-1" style={{ background: "var(--accent)" }} />
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-[60px_16px_1fr] items-center gap-2 py-2">
-                    <span
-                      className="text-right font-mono text-[12px] tabular-nums leading-none"
-                      style={{ color: overdue ? "var(--pain-high)" : "var(--text-faint)" }}
-                    >
-                      {timeLabel(slot.time)}
-                    </span>
-
-                    <div className="flex justify-center">
-                      <div
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ background: dotColor }}
-                      />
-                    </div>
-
-                    <div className="flex min-w-0 items-baseline gap-1.5">
-                      <span
-                        className="truncate text-[13px] font-medium capitalize leading-none"
-                        style={{ color: nameColor }}
-                      >
-                        {slot.name}
-                      </span>
-                      <span
-                        className="shrink-0 font-mono text-[11px] tabular-nums leading-none"
-                        style={{ color: overdue ? "var(--pain-high)" : "var(--text-faint)" }}
-                      >
-                        {countdownLabel}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </MobileSheet>
-  );
-}
 
 function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: number; now: number }) {
   if (!entry.interval_hours) return null;
