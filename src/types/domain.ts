@@ -102,6 +102,12 @@ export type ActionState =
   | { status: "success"; message: string }
   | { status: "error"; message: string };
 
+export type CalendarEventEntry = {
+  scheduled_at: string;
+  drop_type_id: string;
+  name: string;
+};
+
 export type CalendarStatus = {
   authorized: boolean;
   events_today: Array<{

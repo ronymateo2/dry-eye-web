@@ -162,7 +162,21 @@ export function DropsScheduleCard() {
     [entries],
   );
 
-  const daySlots = useMemo(() => buildDayProjection(entries), [entries]);
+  const { data: calendarData } = useQuery({
+    queryKey: ["calendar/events/today"],
+    queryFn: api.getCalendarEventsToday,
+    staleTime: 60_000,
+  });
+
+  const daySlots = useMemo<DoseSlot[]>(() => {
+    const calEvents = calendarData?.events;
+    if (calEvents && calEvents.length > 0) {
+      return calEvents
+        .map((e) => ({ time: new Date(e.scheduled_at).getTime(), name: e.name, drop_type_id: e.drop_type_id }))
+        .sort((a, b) => a.time - b.time);
+    }
+    return buildDayProjection(entries);
+  }, [calendarData, entries]);
 
   if (scheduled.length === 0) return null;
 
