@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { CalendarIcon, EyedropperIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
@@ -32,6 +32,7 @@ function StatCell({ label, children }: { label: string; children: React.ReactNod
 }
 
 export function DropsTab({ timezone }: { timezone: string }) {
+  const reducedMotion = useReducedMotion();
   const { data: stats, isLoading } = useQuery({
     queryKey: ["drops/stats-per-type"],
     queryFn: api.getDropStatsPerType,
@@ -79,6 +80,9 @@ export function DropsTab({ timezone }: { timezone: string }) {
 
         const color = DROP_TYPE_COLORS[index % DROP_TYPE_COLORS.length];
 
+        const durationMonths = daysSinceFirst >= 30 ? Math.floor(daysSinceFirst / 30) : null;
+        const durationRem = durationMonths ? daysSinceFirst % 30 : null;
+
         const eyeEntries = (
           [
             { key: "left" as const, count: s.uses_left },
@@ -90,48 +94,43 @@ export function DropsTab({ timezone }: { timezone: string }) {
         return (
           <motion.div
             key={s.drop_type_id}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: reducedMotion ? 0 : 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              duration: 0.22,
+              duration: reducedMotion ? 0.1 : 0.22,
               ease: [0.23, 1, 0.32, 1],
-              delay: Math.min(index, 4) * 0.055,
+              delay: reducedMotion ? 0 : Math.min(index, 4) * 0.055,
             }}
             className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border)]">
+            <div className="flex items-start gap-2.5 px-4 py-3 border-b border-[var(--border)]">
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
                 style={{ background: `color-mix(in srgb, ${color} 15%, transparent)` }}
               >
                 <EyedropperIcon size={16} weight="duotone" color={color} />
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 pt-1">
                 <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate leading-snug">
                   {s.name}
                 </p>
-                {firstLabel && lastLabel && (
-                  <p className="mono inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)] leading-snug">
-                    <CalendarIcon size={11} weight="regular" />
-                    {firstLabel} — {lastLabel}
-                  </p>
-                )}
               </div>
-              {daysSinceFirst > 0 && (() => {
-                const months = daysSinceFirst >= 30 ? Math.floor(daysSinceFirst / 30) : null;
-                const rem = months ? daysSinceFirst % 30 : null;
-                return (
-                  <div className="mono shrink-0 text-right leading-none">
-                    <div className="text-[22px] font-bold text-[var(--text-primary)]">
-                      {months ? `${months}m` : `${daysSinceFirst}d`}
-                    </div>
-                    {rem != null && rem > 0 && (
-                      <div className="text-[11px] text-[var(--text-muted)] mt-0.5">{rem}d</div>
-                    )}
+              {daysSinceFirst > 0 && (
+                <div className="mono shrink-0 text-right leading-none">
+                  <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none">
+                    {durationMonths
+                      ? `${durationMonths}m${durationRem ? ` ${durationRem}d` : ""}`
+                      : `${daysSinceFirst}d`}
                   </div>
-                );
-              })()}
+                  {firstLabel && lastLabel && (
+                    <div className="flex items-center justify-end gap-1 text-[10px] text-[var(--text-faint)] mt-1.5">
+                      <CalendarIcon size={10} weight="regular" />
+                      <span>{firstLabel} — {lastLabel}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Body */}
@@ -148,7 +147,11 @@ export function DropsTab({ timezone }: { timezone: string }) {
                     {eyeEntries.map((e) => (
                       <span
                         key={e.key}
-                        className="mono inline-flex items-center gap-1 px-2.5 h-6 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]"
+                        className="mono inline-flex items-center gap-1 px-2.5 h-6 rounded-full text-[11px] font-semibold"
+                        style={{
+                          background: `color-mix(in srgb, ${color} 12%, var(--surface-el))`,
+                          color: `color-mix(in srgb, ${color} 70%, var(--text-muted))`,
+                        }}
                       >
                         {EYE_SHORT[e.key]} {e.count}
                       </span>
