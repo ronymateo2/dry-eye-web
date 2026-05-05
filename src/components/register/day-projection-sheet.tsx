@@ -1,5 +1,6 @@
-import { motion } from "motion/react";
-import { DropIcon } from "@phosphor-icons/react";
+import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { CheckCircleIcon, ClockCountdownIcon, DropIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 
 export type DoseSlot = {
@@ -16,9 +17,23 @@ interface DayProjectionSheetProps {
 }
 
 export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionSheetProps) {
-  const future = slots.filter((s) => s.time >= now);
+  const sorted = useMemo(() => [...slots].sort((a, b) => a.time - b.time), [slots]);
+  const future = sorted.filter((s) => s.time >= now);
+  const past = sorted.filter((s) => s.time < now);
   const next = future[0] ?? null;
   const later = future.slice(1);
+
+  const slotKey = (s: DoseSlot) => `${s.drop_type_id}-${s.time}`;
+  const defaultKey = next ? slotKey(next) : past.length > 0 ? slotKey(past[past.length - 1]) : null;
+
+  const [selectedKey, setSelectedKey] = useState<string | null>(defaultKey);
+
+  useEffect(() => {
+    if (!open) return;
+    setSelectedKey(defaultKey);
+  }, [open, defaultKey]);
+
+  const selected = sorted.find((s) => slotKey(s) === selectedKey) ?? next ?? null;
 
   const timeLabel = (t: number) => new Date(t).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 
@@ -31,23 +46,34 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
     return diff < 0 ? `hace ${str}` : `en ${str}`;
   };
 
-  const urgencyOpacity = (t: number) => {
-    const diff = t - now;
-    if (diff < 2 * 3_600_000) return 1;
-    if (diff < 4 * 3_600_000) return 0.65;
-    return 0.4;
-  };
-
-  const slotTimes = slots.map((s) => s.time);
-  const tMin = slotTimes.length > 0 ? Math.min(...slotTimes) - 1_800_000 : 0;
-  const tMax = slotTimes.length > 0 ? Math.max(...slotTimes) + 1_800_000 : 0;
+  const slotTimes = sorted.map((s) => s.time);
+  const tMin = slotTimes.length > 0 ? Math.min(...slotTimes, now) - 1_800_000 : 0;
+  const tMax = slotTimes.length > 0 ? Math.max(...slotTimes, now) + 1_800_000 : 0;
   const range = tMax - tMin || 1;
   const pct = (t: number) => Math.max(1, Math.min(99, ((t - tMin) / range) * 100));
   const nowPct = pct(now);
 
+  const selectedKind: "past" | "next" | "later" | null = selected
+    ? selected.time < now
+      ? "past"
+      : selected === next
+        ? "next"
+        : "later"
+    : null;
+
+  const heroAccent =
+    selectedKind === "past"
+      ? "var(--text-muted)"
+      : selectedKind === "next"
+        ? "var(--pain-low)"
+        : "var(--accent)";
+
+  const heroLabel =
+    selectedKind === "past" ? "Dosis pasada" : selectedKind === "next" ? "Próxima dosis" : "Programada";
+
   return (
     <MobileSheet open={open} panelClassName="!h-[95dvh]" onClose={onClose} title="Proyección del día" description="Cronograma completo del día">
-      {slots.length === 0 ? (
+      {sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-6 text-center">
           <DropIcon size={24} weight="thin" aria-hidden style={{ color: "var(--text-faint)" }} />
           <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>
@@ -56,84 +82,223 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
         </div>
       ) : (
         <div className="space-y-5">
-          {/* Horizontal overview strip */}
+          {/* Interactive timeline */}
           <div>
-            <div className="relative h-8 rounded-xl overflow-hidden" style={{ background: "var(--surface-el)" }}>
+            <div
+              className="relative rounded-xl"
+              style={{
+                background: "var(--surface-el)",
+                height: 56,
+                paddingInline: 4,
+              }}
+            >
+              {/* Past fill (subtle wash up to now) */}
               <div
-                className="absolute inset-y-0 left-0 pointer-events-none"
-                style={{ width: `${nowPct}%`, background: "color-mix(in srgb, var(--bg) 55%, transparent)" }}
+                className="absolute top-0 bottom-0 left-0 rounded-l-xl pointer-events-none"
+                style={{
+                  width: `${nowPct}%`,
+                  background:
+                    "linear-gradient(90deg, color-mix(in srgb, var(--bg) 35%, transparent), color-mix(in srgb, var(--bg) 55%, transparent))",
+                }}
               />
-              {slots.map((slot) => {
+              {/* Connector track */}
+              <div
+                className="absolute left-3 right-3 pointer-events-none"
+                style={{
+                  top: "50%",
+                  height: 2,
+                  transform: "translateY(-50%)",
+                  background: "color-mix(in srgb, var(--text-faint) 30%, transparent)",
+                  borderRadius: 999,
+                }}
+              />
+              {/* Future progress overlay (from now → last slot) */}
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  left: `${nowPct}%`,
+                  width: `${Math.max(0, pct(sorted[sorted.length - 1].time) - nowPct)}%`,
+                  height: 2,
+                  background: "linear-gradient(90deg, var(--pain-low), color-mix(in srgb, var(--accent) 60%, transparent))",
+                  borderRadius: 999,
+                  opacity: 0.65,
+                }}
+              />
+
+              {/* Now indicator */}
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  left: `${nowPct}%`,
+                  top: 6,
+                  bottom: 6,
+                  width: 2,
+                  transform: "translateX(-50%)",
+                  background: "var(--accent)",
+                  borderRadius: 2,
+                  boxShadow: "0 0 8px color-mix(in srgb, var(--accent) 70%, transparent)",
+                }}
+              />
+              <motion.div
+                aria-hidden
+                className="absolute pointer-events-none rounded-full"
+                style={{
+                  left: `${nowPct}%`,
+                  top: "50%",
+                  width: 6,
+                  height: 6,
+                  transform: "translate(-50%, -50%)",
+                  background: "var(--accent)",
+                }}
+                animate={{ opacity: [0.6, 1, 0.6] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              />
+
+              {/* Dots */}
+              {sorted.map((slot) => {
                 const isPast = slot.time < now;
                 const isNext = slot === next;
+                const isSelected = slotKey(slot) === selectedKey;
+                const dotSize = isSelected ? 16 : isNext ? 12 : 9;
+                const dotColor = isPast
+                  ? "var(--text-faint)"
+                  : isNext
+                    ? "var(--pain-low)"
+                    : "var(--accent)";
                 return (
-                  <div
-                    key={`tl-${slot.drop_type_id}-${slot.time}`}
-                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 pointer-events-none"
-                    style={{ left: `${pct(slot.time)}%` }}
+                  <button
+                    key={`tl-${slotKey(slot)}`}
+                    type="button"
+                    onClick={() => setSelectedKey(slotKey(slot))}
+                    aria-label={`${slot.name} a las ${timeLabel(slot.time)}`}
+                    aria-pressed={isSelected}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                    style={{
+                      left: `${pct(slot.time)}%`,
+                      top: "50%",
+                      width: 36,
+                      height: 36,
+                      background: "transparent",
+                    }}
                   >
-                    <div
-                      className="rounded-full"
+                    {isSelected && (
+                      <motion.span
+                        layoutId="dot-ring"
+                        className="absolute rounded-full pointer-events-none"
+                        style={{
+                          width: 28,
+                          height: 28,
+                          border: `1.5px solid ${dotColor}`,
+                          boxShadow: `0 0 12px color-mix(in srgb, ${dotColor} 55%, transparent)`,
+                        }}
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <span
+                      className="rounded-full transition-all"
                       style={{
-                        width: isNext ? 13 : 8,
-                        height: isNext ? 13 : 8,
-                        background: isPast ? "var(--text-faint)" : isNext ? "var(--pain-low)" : "var(--text-muted)",
-                        opacity: isPast ? 0.3 : 1,
-                        boxShadow: isNext ? "0 0 8px var(--pain-low)" : "none",
+                        width: dotSize,
+                        height: dotSize,
+                        background: dotColor,
+                        opacity: isPast && !isSelected ? 0.45 : 1,
+                        boxShadow: isNext && !isSelected ? `0 0 8px ${dotColor}` : "none",
                       }}
                     />
-                  </div>
+                  </button>
                 );
               })}
-              <div
-                className="absolute inset-y-0 w-0.5 -translate-x-1/2 pointer-events-none"
-                style={{ left: `${nowPct}%`, background: "var(--accent)", boxShadow: "0 0 5px var(--accent)" }}
-              />
             </div>
-            <div className="relative h-5 mt-1">
+
+            {/* Labels row: ahora + selected dot time */}
+            <div className="relative h-5 mt-1.5">
               <span
                 className="absolute -translate-x-1/2 font-mono text-[10px] font-semibold"
                 style={{ left: `clamp(16px, ${nowPct}%, calc(100% - 24px))`, color: "var(--accent)" }}
               >
                 ahora
               </span>
+              {selected && Math.abs(pct(selected.time) - nowPct) > 8 && (
+                <motion.span
+                  key={selectedKey ?? "none"}
+                  initial={{ opacity: 0, y: -2 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute -translate-x-1/2 font-mono text-[10px] font-semibold tabular-nums"
+                  style={{
+                    left: `clamp(20px, ${pct(selected.time)}%, calc(100% - 28px))`,
+                    color: heroAccent,
+                  }}
+                >
+                  {timeLabel(selected.time)}
+                </motion.span>
+              )}
             </div>
           </div>
-          {/* Next dose hero */}
-          {next ? (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-              className="rounded-xl p-4"
-              style={{ background: "var(--surface-el)", borderLeft: "3px solid var(--pain-low)" }}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-faint)" }}>
-                    Próxima dosis
-                  </p>
-                  <p className="tabular-nums leading-none" style={{ color: "var(--text-primary)", fontSize: 26, fontWeight: 600 }}>
-                    {timeLabel(next.time)}
-                  </p>
-                  <p className="text-[14px] font-medium capitalize mt-1.5" style={{ color: "var(--text-muted)" }}>
-                    {next.name}
-                  </p>
-                </div>
-                <span className="font-mono text-[13px] font-semibold mt-1 shrink-0" style={{ color: "var(--pain-low)" }}>
-                  {countdown(next.time)}
-                </span>
-              </div>
-            </motion.div>
-          ) : (
-            <div className="rounded-xl p-4 text-center" style={{ background: "var(--surface-el)" }}>
-              <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>
-                No hay más dosis programadas hoy.
-              </p>
-            </div>
-          )}
 
-          {/* Later doses with urgency gradient */}
+          {/* Selected dose hero — morphs based on selection */}
+          <AnimatePresence mode="wait" initial={false}>
+            {selected ? (
+              <motion.div
+                key={selectedKey ?? "hero"}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                className="rounded-xl p-4 relative overflow-hidden"
+                style={{
+                  background: "var(--surface-el)",
+                  borderLeft: `3px solid ${heroAccent}`,
+                }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      {selectedKind === "past" ? (
+                        <CheckCircleIcon size={12} weight="fill" style={{ color: heroAccent }} aria-hidden />
+                      ) : (
+                        <ClockCountdownIcon size={12} weight="bold" style={{ color: heroAccent }} aria-hidden />
+                      )}
+                      <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-faint)" }}>
+                        {heroLabel}
+                      </p>
+                    </div>
+                    <p
+                      className="tabular-nums leading-none"
+                      style={{
+                        color: "var(--text-primary)",
+                        fontSize: 26,
+                        fontWeight: 600,
+                        opacity: selectedKind === "past" ? 0.7 : 1,
+                      }}
+                    >
+                      {timeLabel(selected.time)}
+                    </p>
+                    <p
+                      className="text-[14px] font-medium capitalize mt-1.5 truncate"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {selected.name}
+                    </p>
+                  </div>
+                  <span
+                    className="font-mono text-[13px] font-semibold mt-1 shrink-0"
+                    style={{ color: heroAccent, opacity: selectedKind === "past" ? 0.7 : 1 }}
+                  >
+                    {countdown(selected.time)}
+                  </span>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="rounded-xl p-4 text-center" style={{ background: "var(--surface-el)" }}>
+                <p className="text-[13px]" style={{ color: "var(--text-faint)" }}>
+                  No hay más dosis programadas hoy.
+                </p>
+              </div>
+            )}
+          </AnimatePresence>
+
+          {/* Later doses — tappable rows */}
           {later.length > 0 && (
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-faint)" }}>
@@ -141,32 +306,113 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
               </p>
               <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface-el)" }}>
                 {later.map((slot, i) => {
-                  const opacity = urgencyOpacity(slot.time);
+                  const isSelected = slotKey(slot) === selectedKey;
                   return (
-                    <motion.div
-                      key={`lt-${slot.drop_type_id}-${slot.time}`}
+                    <motion.button
+                      key={`lt-${slotKey(slot)}`}
+                      type="button"
+                      onClick={() => setSelectedKey(slotKey(slot))}
                       initial={{ opacity: 0 }}
-                      animate={{ opacity }}
+                      animate={{ opacity: 1 }}
                       transition={{ delay: 0.05 + i * 0.02, duration: 0.18 }}
-                      className="flex items-center gap-3 px-3 py-3"
-                      style={{ borderBottom: i < later.length - 1 ? "1px solid var(--border)" : undefined }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left transition-colors"
+                      style={{
+                        borderBottom: i < later.length - 1 ? "1px solid var(--border)" : undefined,
+                        background: isSelected ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
+                      }}
+                      aria-pressed={isSelected}
                     >
-                      <span className="font-mono text-[12px] tabular-nums shrink-0" style={{ color: "var(--text-faint)", minWidth: 52 }}>
+                      <span
+                        className="rounded-full shrink-0"
+                        style={{
+                          width: 6,
+                          height: 6,
+                          background: isSelected ? "var(--accent)" : "var(--text-faint)",
+                          opacity: isSelected ? 1 : 0.5,
+                        }}
+                      />
+                      <span
+                        className="font-mono text-[12px] tabular-nums shrink-0"
+                        style={{ color: isSelected ? "var(--text-primary)" : "var(--text-faint)", minWidth: 52 }}
+                      >
                         {timeLabel(slot.time)}
                       </span>
-                      <span className="flex-1 min-w-0 truncate text-[13px] font-medium capitalize" style={{ color: "var(--text-muted)" }}>
+                      <span
+                        className="flex-1 min-w-0 truncate text-[13px] font-medium capitalize"
+                        style={{ color: isSelected ? "var(--text-primary)" : "var(--text-muted)" }}
+                      >
                         {slot.name}
                       </span>
-                      <span className="font-mono text-[11px] tabular-nums shrink-0" style={{ color: "var(--text-faint)" }}>
+                      <span
+                        className="font-mono text-[11px] tabular-nums shrink-0"
+                        style={{ color: "var(--text-faint)" }}
+                      >
                         {countdown(slot.time)}
                       </span>
-                    </motion.div>
+                    </motion.button>
                   );
                 })}
               </div>
             </div>
           )}
 
+          {/* Past doses — tappable, collapsed visual */}
+          {past.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-faint)" }}>
+                Antes
+              </p>
+              <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface-el)" }}>
+                {past.map((slot, i) => {
+                  const isSelected = slotKey(slot) === selectedKey;
+                  return (
+                    <button
+                      key={`pst-${slotKey(slot)}`}
+                      type="button"
+                      onClick={() => setSelectedKey(slotKey(slot))}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left"
+                      style={{
+                        borderBottom: i < past.length - 1 ? "1px solid var(--border)" : undefined,
+                        background: isSelected ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
+                        opacity: isSelected ? 1 : 0.7,
+                      }}
+                      aria-pressed={isSelected}
+                    >
+                      <CheckCircleIcon
+                        size={12}
+                        weight="fill"
+                        aria-hidden
+                        style={{ color: isSelected ? "var(--accent)" : "var(--text-faint)", flexShrink: 0 }}
+                      />
+                      <span
+                        className="font-mono text-[12px] tabular-nums shrink-0"
+                        style={{
+                          color: isSelected ? "var(--text-primary)" : "var(--text-faint)",
+                          minWidth: 52,
+                          textDecoration: isSelected ? undefined : "line-through",
+                          textDecorationColor: "color-mix(in srgb, var(--text-faint) 60%, transparent)",
+                        }}
+                      >
+                        {timeLabel(slot.time)}
+                      </span>
+                      <span
+                        className="flex-1 min-w-0 truncate text-[13px] font-medium capitalize"
+                        style={{ color: isSelected ? "var(--text-primary)" : "var(--text-muted)" }}
+                      >
+                        {slot.name}
+                      </span>
+                      <span
+                        className="font-mono text-[11px] tabular-nums shrink-0"
+                        style={{ color: "var(--text-faint)" }}
+                      >
+                        {countdown(slot.time)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </MobileSheet>
