@@ -15,6 +15,17 @@ const DROP_TYPE_COLORS = [
   "#d06050",
 ];
 
+function StatRow({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between gap-4 py-2 border-b border-[var(--border)] last:border-0">
+      <span className="text-[12px] text-[var(--text-muted)]">{label}</span>
+      <span className="mono text-[12px] tabular-nums text-[var(--text-primary)] text-right">
+        {children}
+      </span>
+    </div>
+  );
+}
+
 export function DropsTab({ timezone }: { timezone: string }) {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["drops/stats-per-type"],
@@ -25,7 +36,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
     return (
       <div className="space-y-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-32 animate-pulse rounded-[14px] bg-[var(--surface)]" />
+          <div key={i} className="h-36 animate-pulse rounded-[14px] bg-[var(--surface)]" />
         ))}
       </div>
     );
@@ -83,6 +94,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
             }}
             className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden"
           >
+            {/* Header */}
             <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
               <div className="flex items-center gap-2.5 min-w-0">
                 <div
@@ -95,66 +107,21 @@ export function DropsTab({ timezone }: { timezone: string }) {
                   {s.name}
                 </p>
               </div>
-              <span className="mono shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]">
-                {s.total_uses}
-              </span>
+              {daysSinceFirst > 0 && (
+                <span className="mono shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-2 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]">
+                  {daysSinceFirst}d
+                </span>
+              )}
             </div>
 
+            {/* Body */}
             {s.total_uses === 0 ? (
               <p className="px-4 py-3 text-[12px] text-[var(--text-faint)]">Sin registros aún.</p>
             ) : (
-              <div className="px-4 py-3 space-y-3">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--text-faint)] mb-0.5">
-                      Primer uso
-                    </p>
-                    <p className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
-                      {firstLabel}
-                      {daysSinceFirst > 0 && (
-                        <span className="text-[var(--text-muted)]"> ({daysSinceFirst}d)</span>
-                      )}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--text-faint)] mb-0.5">
-                      Último uso
-                    </p>
-                    <p className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
-                      {lastLabel}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--text-faint)] mb-0.5">
-                      Total gotas
-                    </p>
-                    <p className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
-                      {s.total_quantity}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.08em] text-[var(--text-faint)] mb-0.5">
-                      Promedio/día
-                    </p>
-                    <p className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
-                      {avgPerDay}
-                    </p>
-                  </div>
-                </div>
-
-                {eyeEntries.length > 0 && (
-                  <div className="flex gap-1.5 flex-wrap">
-                    {eyeEntries.map((e) => (
-                      <span
-                        key={e.key}
-                        className="mono inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] tracking-[0.06em] bg-[var(--surface-el)] text-[var(--text-muted)]"
-                      >
-                        {EYE_SHORT[e.key]}{" "}
-                        <span className="tabular-nums text-[var(--text-primary)]">{e.count}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
+              <div className="px-4">
+                <StatRow label="Primer uso">{firstLabel}</StatRow>
+                <StatRow label="Último uso">{lastLabel}</StatRow>
+                {avgPerDay && <StatRow label="Promedio/día">{avgPerDay}</StatRow>}
               </div>
             )}
           </motion.div>
