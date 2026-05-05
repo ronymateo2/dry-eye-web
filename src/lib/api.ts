@@ -1,4 +1,4 @@
-import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed, DropScheduleEntry, CalendarStatus } from "@/types/domain";
+import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus } from "@/types/domain";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -76,6 +76,7 @@ export const api = {
   saveDrop: (body: SaveDropInput) => api.post("/drops", body),
   getLastDrop: () => api.get<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_name: string; drop_type_id: string } | null>("/drops/last"),
   getLastDropPerType: () => api.get<DropScheduleEntry[]>("/drops/last-per-type"),
+  getDropStatsPerType: () => api.get<DropTypeStats[]>("/drops/stats-per-type"),
 
   getTodaySleep: () => api.get<{ id: string; day_key: string; logged_at: string; sleep_hours: number; sleep_quality: string } | null>("/sleep/today"),
   saveSleep: (body: unknown) => api.put("/sleep", body),

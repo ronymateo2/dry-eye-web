@@ -151,6 +151,7 @@ export const FRICTION_LABELS: Record<Exclude<FrictionType, "none">, string> = {
 
 export const HISTORY_TABS = [
   { label: "Todo", value: "all" },
+  { label: "Gotas", value: "drops" },
   { label: "Observaciones", value: "observations" },
 ] as const;
 

@@ -25,6 +25,20 @@ export type DropScheduleEntry = {
   last_logged_at: string | null;
 };
 
+export type DropTypeStats = {
+  drop_type_id: string;
+  name: string;
+  sort_order: number | null;
+  interval_hours: number | null;
+  first_logged_at: string | null;
+  last_logged_at: string | null;
+  total_uses: number;
+  total_quantity: number;
+  uses_left: number;
+  uses_right: number;
+  uses_both: number;
+};
+
 export type SaveDropInput = {
   id: string;
   dropTypeId: string;
