@@ -15,12 +15,7 @@ const DROP_TYPE_COLORS = [
   "#d06050",
 ];
 
-function formatDuration(days: number): string {
-  if (days < 30) return `${days}d`;
-  const months = Math.floor(days / 30);
-  const rem = days % 30;
-  return rem > 0 ? `${months}m ${rem}d` : `${months}m`;
-}
+
 
 function StatCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
