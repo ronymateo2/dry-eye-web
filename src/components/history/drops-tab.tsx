@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { EyedropperIcon } from "@phosphor-icons/react";
+import { CalendarIcon, EyedropperIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
 import { EYE_SHORT } from "./types";
@@ -125,13 +125,18 @@ export function DropsTab({ timezone }: { timezone: string }) {
             ) : (
               <div className="px-4 py-3 space-y-4">
                 <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-                  <StatCell label="Primer uso">
-                    {firstLabel}
-                  </StatCell>
-                  <StatCell label="Último uso">{lastLabel}</StatCell>
                   <StatCell label="Total gotas">{s.total_uses}</StatCell>
                   {avgPerDay && <StatCell label="Promedio/día">{avgPerDay}</StatCell>}
                 </div>
+                {firstLabel && lastLabel && (
+                  <div className="mono inline-flex items-center gap-2 px-3 h-8 rounded-full border border-[var(--border)] bg-[var(--surface-el)] text-[12px] text-[var(--text-muted)] self-start">
+                    <CalendarIcon size={13} weight="regular" />
+                    <span>{firstLabel}</span>
+                    <span className="text-[var(--text-faint)]">—</span>
+                    <span>{lastLabel}</span>
+                  </div>
+                )}
+
                 {eyeEntries.length > 0 && (
                   <div className="flex gap-2">
                     {eyeEntries.map((e) => (
