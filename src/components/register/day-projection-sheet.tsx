@@ -16,11 +16,9 @@ interface DayProjectionSheetProps {
 }
 
 export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionSheetProps) {
-  const past = slots.filter((s) => s.time < now);
   const future = slots.filter((s) => s.time >= now);
   const next = future[0] ?? null;
   const later = future.slice(1);
-  const lastPast = past.length > 0 ? past[past.length - 1] : null;
 
   const timeLabel = (t: number) => new Date(t).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 
@@ -101,31 +99,6 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
               </span>
             </div>
           </div>
-
-          {/* Last past slot + AHORA divider */}
-          {lastPast && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-0.5">
-                <span className="font-mono text-[12px] tabular-nums" style={{ color: "var(--text-faint)" }}>
-                  {timeLabel(lastPast.time)}
-                </span>
-                <span className="text-[13px] font-medium capitalize" style={{ color: "var(--text-faint)" }}>
-                  {lastPast.name}
-                </span>
-                <span className="font-mono text-[11px] tabular-nums" style={{ color: "var(--text-faint)" }}>
-                  {countdown(lastPast.time)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-px flex-1" style={{ background: "var(--accent)" }} />
-                <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--accent)" }}>
-                  Ahora
-                </span>
-                <div className="h-px flex-1" style={{ background: "var(--accent)" }} />
-              </div>
-            </div>
-          )}
-
           {/* Next dose hero */}
           {next ? (
             <motion.div
