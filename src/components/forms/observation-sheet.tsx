@@ -95,6 +95,7 @@ export function ObservationSheet({ onSaved }: Props) {
           label="Ojo afectado"
           options={EYE_OPTIONS}
           value={eye}
+          tone="quiet"
           onChange={setEye}
         />
       </div>
