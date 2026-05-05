@@ -15,6 +15,13 @@ const DROP_TYPE_COLORS = [
   "#d06050",
 ];
 
+function formatDuration(days: number): string {
+  if (days < 30) return `${days}d`;
+  const months = Math.floor(days / 30);
+  const rem = days % 30;
+  return rem > 0 ? `${months}m ${rem}d` : `${months}m`;
+}
+
 function StatCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
@@ -107,7 +114,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
               </div>
               {daysSinceFirst > 0 && (
                 <span className="mono shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-2 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]">
-                  {daysSinceFirst}d
+                  {formatDuration(daysSinceFirst)}
                 </span>
               )}
             </div>
