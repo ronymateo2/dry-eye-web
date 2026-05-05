@@ -100,43 +100,49 @@ export function DropsTab({ timezone }: { timezone: string }) {
             className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                  style={{ background: `color-mix(in srgb, ${color} 15%, transparent)` }}
-                >
-                  <EyedropperIcon size={16} weight="duotone" color={color} />
-                </div>
-                <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate">
+            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border)]">
+              <div
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                style={{ background: `color-mix(in srgb, ${color} 15%, transparent)` }}
+              >
+                <EyedropperIcon size={16} weight="duotone" color={color} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate leading-snug">
                   {s.name}
                 </p>
+                {firstLabel && lastLabel && (
+                  <p className="mono inline-flex items-center gap-1 text-[11px] text-[var(--text-muted)] leading-snug">
+                    <CalendarIcon size={11} weight="regular" />
+                    {firstLabel} — {lastLabel}
+                  </p>
+                )}
               </div>
-              {daysSinceFirst > 0 && (
-                <span className="mono shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-2 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]">
-                  {formatDuration(daysSinceFirst)}
-                </span>
-              )}
+              {daysSinceFirst > 0 && (() => {
+                const months = daysSinceFirst >= 30 ? Math.floor(daysSinceFirst / 30) : null;
+                const rem = months ? daysSinceFirst % 30 : null;
+                return (
+                  <div className="mono shrink-0 text-right leading-none">
+                    <div className="text-[22px] font-bold text-[var(--text-primary)]">
+                      {months ? `${months}m` : `${daysSinceFirst}d`}
+                    </div>
+                    {rem != null && rem > 0 && (
+                      <div className="text-[11px] text-[var(--text-muted)] mt-0.5">{rem}d</div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Body */}
             {s.total_uses === 0 ? (
               <p className="px-4 py-3 text-[12px] text-[var(--text-faint)]">Sin registros aún.</p>
             ) : (
-              <div className="px-4 py-3 space-y-4">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+              <div className="px-4 py-3 space-y-3">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                   <StatCell label="Total gotas">{s.total_uses}</StatCell>
                   {avgPerDay && <StatCell label="Promedio/día">{avgPerDay}</StatCell>}
                 </div>
-                {firstLabel && lastLabel && (
-                  <div className="mono inline-flex items-center gap-2 px-3 h-8 rounded-full border border-[var(--border)] bg-[var(--surface-el)] text-[12px] text-[var(--text-muted)] self-start">
-                    <CalendarIcon size={13} weight="regular" />
-                    <span>{firstLabel}</span>
-                    <span className="text-[var(--text-faint)]">—</span>
-                    <span>{lastLabel}</span>
-                  </div>
-                )}
-
                 {eyeEntries.length > 0 && (
                   <div className="flex gap-2">
                     {eyeEntries.map((e) => (
