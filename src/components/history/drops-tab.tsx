@@ -15,13 +15,11 @@ const DROP_TYPE_COLORS = [
   "#d06050",
 ];
 
-function StatRow({ label, children }: { label: string; children: React.ReactNode }) {
+function StatCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-2 border-b border-[var(--border)] last:border-0">
-      <span className="text-[12px] text-[var(--text-muted)]">{label}</span>
-      <span className="mono text-[12px] tabular-nums text-[var(--text-primary)] text-right">
-        {children}
-      </span>
+    <div className="flex flex-col gap-1">
+      <span className="text-[10px] font-semibold tracking-wide uppercase text-[var(--text-muted)]">{label}</span>
+      <span className="mono text-[15px] tabular-nums text-[var(--text-primary)]">{children}</span>
     </div>
   );
 }
@@ -118,10 +116,27 @@ export function DropsTab({ timezone }: { timezone: string }) {
             {s.total_uses === 0 ? (
               <p className="px-4 py-3 text-[12px] text-[var(--text-faint)]">Sin registros aún.</p>
             ) : (
-              <div className="px-4">
-                <StatRow label="Primer uso">{firstLabel}</StatRow>
-                <StatRow label="Último uso">{lastLabel}</StatRow>
-                {avgPerDay && <StatRow label="Promedio/día">{avgPerDay}</StatRow>}
+              <div className="px-4 py-3 space-y-4">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                  <StatCell label="Primer uso">
+                    {firstLabel}
+                  </StatCell>
+                  <StatCell label="Último uso">{lastLabel}</StatCell>
+                  <StatCell label="Total gotas">{s.total_uses}</StatCell>
+                  {avgPerDay && <StatCell label="Promedio/día">{avgPerDay}</StatCell>}
+                </div>
+                {eyeEntries.length > 0 && (
+                  <div className="flex gap-2">
+                    {eyeEntries.map((e) => (
+                      <span
+                        key={e.key}
+                        className="mono inline-flex items-center gap-1 px-2.5 h-6 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]"
+                      >
+                        {EYE_SHORT[e.key]} {e.count}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
