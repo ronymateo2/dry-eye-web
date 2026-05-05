@@ -28,7 +28,3 @@ export async function removePendingDrop(id: string): Promise<void> {
     console.warn("Failed to remove pending drop", err);
   }
 }
-
-export async function getPendingDropsCount(): Promise<number> {
-  return (await getPendingDrops()).length;
-}
