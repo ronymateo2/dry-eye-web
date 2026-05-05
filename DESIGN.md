@@ -18,17 +18,17 @@
 ---
 
 ## Typography
-- **UI / Body / Headings:** SF Pro (system font) — accessed via `-apple-system, BlinkMacSystemFont`. No font file loaded; the OS provides it. Renders natively on iOS/macOS with subpixel precision. Falls back to Segoe UI on Windows.
+- **UI / Body / Headings:** Manrope — loaded via `@fontsource/manrope` (weights 400, 500, 600, 700). Geometric humanist sans-serif with clean, open letterforms. Highly legible at small sizes; distinctive enough to feel designed, not generic. Falls back to system-ui stack.
+  - Stack: `"Manrope", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`
 - **Data / Numbers:** Geist Mono — all numeric values (pain scores 0-10, drop counts, sleep hours, timestamps, correlation coefficients). Tabular-nums. Makes readings feel like instrument output, not form inputs. Reinforces the clinical precision aesthetic.
-- **UI Labels (uppercase):** Inter 500, 11-12px, 0.1em letter-spacing — section headers, field labels.
-- **Loading:** System font stack (no download) + `geist/font/mono` (Geist Mono) for data values
+- **Loading:** `@fontsource/manrope` (weights 400/500/600/700) + `@fontsource/geist-mono` (weights 400/500)
 - **Scale:**
-  - `11-12px / SF Pro 600 / 0.10em tracking` — section labels (uppercase)
-  - `12px / SF Pro 500` — metadata, timestamps, helper text
-  - `13px / SF Pro 500` — input labels, chip text, alert text
-  - `15px / SF Pro 400` — body copy
-  - `17px / SF Pro 600` — screen titles
-  - `22px / SF Pro 600 / -0.02em` — page headings
+  - `11-12px / Manrope 600 / 0.10em tracking` — section labels (uppercase)
+  - `12px / Manrope 500` — metadata, timestamps, helper text
+  - `13px / Manrope 500` — input labels, chip text, alert text
+  - `15px / Manrope 400` — body copy
+  - `17px / Manrope 600` — screen titles
+  - `22px / Manrope 700 / -0.02em` — page headings
   - `22px / Geist Mono 400` — primary data values (pain score display in sliders)
   - `32-36px / Geist Mono 400` — stat card values (dashboard)
   - `11-13px / Geist Mono 400` — secondary data (correlation coefficients, timestamps)
