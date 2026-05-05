@@ -57,8 +57,9 @@ export function DropsTab({ timezone }: { timezone: string }) {
     <div className="space-y-3">
       {stats.map((s, index) => {
         const firstDate = s.first_logged_at ? new Date(s.first_logged_at) : null;
+        const lastDate = s.last_logged_at ? new Date(s.last_logged_at) : new Date(now);
         const daysSinceFirst = firstDate
-          ? Math.floor((now - firstDate.getTime()) / 86400e3) + 1
+          ? Math.floor((lastDate.getTime() - firstDate.getTime()) / 86400e3) + 1
           : 0;
         const avgPerDay =
           s.total_uses > 0
