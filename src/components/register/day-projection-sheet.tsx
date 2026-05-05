@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CheckCircleIcon, ClockCountdownIcon, DropIcon } from "@phosphor-icons/react";
+import { ClockCountdownIcon, DropIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 
 export type DoseSlot = {
@@ -17,14 +17,12 @@ interface DayProjectionSheetProps {
 }
 
 export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionSheetProps) {
-  const sorted = useMemo(() => [...slots].sort((a, b) => a.time - b.time), [slots]);
-  const future = sorted.filter((s) => s.time >= now);
-  const past = sorted.filter((s) => s.time < now);
-  const next = future[0] ?? null;
-  const later = future.slice(1);
+  const sorted = useMemo(() => [...slots].filter((s) => s.time >= now).sort((a, b) => a.time - b.time), [slots, now]);
+  const next = sorted[0] ?? null;
+  const later = sorted.slice(1);
 
   const slotKey = (s: DoseSlot) => `${s.drop_type_id}-${s.time}`;
-  const defaultKey = next ? slotKey(next) : past.length > 0 ? slotKey(past[past.length - 1]) : null;
+  const defaultKey = next ? slotKey(next) : null;
 
   const [selectedKey, setSelectedKey] = useState<string | null>(defaultKey);
 
@@ -39,37 +37,26 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
 
   const countdown = (t: number) => {
     const diff = t - now;
-    const abs = Math.abs(diff);
-    const h = Math.floor(abs / 3_600_000);
-    const m = Math.floor((abs % 3_600_000) / 60_000);
-    const str = h > 0 ? `${h}h ${m}m` : `${m}m`;
-    return diff < 0 ? `hace ${str}` : `en ${str}`;
+    const h = Math.floor(diff / 3_600_000);
+    const m = Math.floor((diff % 3_600_000) / 60_000);
+    return h > 0 ? `en ${h}h ${m}m` : `en ${m}m`;
   };
 
   const slotTimes = sorted.map((s) => s.time);
-  const tMin = slotTimes.length > 0 ? Math.min(...slotTimes, now) - 1_800_000 : 0;
+  const tMin = slotTimes.length > 0 ? now - 1_800_000 : 0;
   const tMax = slotTimes.length > 0 ? Math.max(...slotTimes, now) + 1_800_000 : 0;
   const range = tMax - tMin || 1;
   const pct = (t: number) => Math.max(1, Math.min(99, ((t - tMin) / range) * 100));
   const nowPct = pct(now);
 
-  const selectedKind: "past" | "next" | "later" | null = selected
-    ? selected.time < now
-      ? "past"
-      : selected === next
-        ? "next"
-        : "later"
+  const selectedKind: "next" | "later" | null = selected
+    ? selected === next
+      ? "next"
+      : "later"
     : null;
 
-  const heroAccent =
-    selectedKind === "past"
-      ? "var(--text-muted)"
-      : selectedKind === "next"
-        ? "var(--pain-low)"
-        : "var(--accent)";
-
-  const heroLabel =
-    selectedKind === "past" ? "Dosis pasada" : selectedKind === "next" ? "Próxima dosis" : "Programada";
+  const heroAccent = selectedKind === "next" ? "var(--pain-low)" : "var(--accent)";
+  const heroLabel = selectedKind === "next" ? "Próxima dosis" : "Programada";
 
   return (
     <MobileSheet open={open} panelClassName="!h-[95dvh]" onClose={onClose} title="Proyección del día" description="Cronograma completo del día">
@@ -158,15 +145,10 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
 
               {/* Dots */}
               {sorted.map((slot) => {
-                const isPast = slot.time < now;
                 const isNext = slot === next;
                 const isSelected = slotKey(slot) === selectedKey;
                 const dotSize = isSelected ? 16 : isNext ? 12 : 9;
-                const dotColor = isPast
-                  ? "var(--text-faint)"
-                  : isNext
-                    ? "var(--pain-low)"
-                    : "var(--accent)";
+                const dotColor = isNext ? "var(--pain-low)" : "var(--accent)";
                 return (
                   <button
                     key={`tl-${slotKey(slot)}`}
@@ -202,7 +184,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                         width: dotSize,
                         height: dotSize,
                         background: dotColor,
-                        opacity: isPast && !isSelected ? 0.45 : 1,
+                        opacity: 1,
                         boxShadow: isNext && !isSelected ? `0 0 8px ${dotColor}` : "none",
                       }}
                     />
@@ -254,11 +236,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-2">
-                      {selectedKind === "past" ? (
-                        <CheckCircleIcon size={12} weight="fill" style={{ color: heroAccent }} aria-hidden />
-                      ) : (
-                        <ClockCountdownIcon size={12} weight="bold" style={{ color: heroAccent }} aria-hidden />
-                      )}
+                      <ClockCountdownIcon size={12} weight="bold" style={{ color: heroAccent }} aria-hidden />
                       <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-faint)" }}>
                         {heroLabel}
                       </p>
@@ -269,7 +247,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                         color: "var(--text-primary)",
                         fontSize: 26,
                         fontWeight: 600,
-                        opacity: selectedKind === "past" ? 0.7 : 1,
+                        opacity: 1,
                       }}
                     >
                       {timeLabel(selected.time)}
@@ -283,7 +261,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                   </div>
                   <span
                     className="font-mono text-[13px] font-semibold mt-1 shrink-0"
-                    style={{ color: heroAccent, opacity: selectedKind === "past" ? 0.7 : 1 }}
+                    style={{ color: heroAccent }}
                   >
                     {countdown(selected.time)}
                   </span>
@@ -356,63 +334,6 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
             </div>
           )}
 
-          {/* Past doses — tappable, collapsed visual */}
-          {past.length > 0 && (
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-faint)" }}>
-                Antes
-              </p>
-              <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface-el)" }}>
-                {past.map((slot, i) => {
-                  const isSelected = slotKey(slot) === selectedKey;
-                  return (
-                    <button
-                      key={`pst-${slotKey(slot)}`}
-                      type="button"
-                      onClick={() => setSelectedKey(slotKey(slot))}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left"
-                      style={{
-                        borderBottom: i < past.length - 1 ? "1px solid var(--border)" : undefined,
-                        background: isSelected ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
-                        opacity: isSelected ? 1 : 0.7,
-                      }}
-                      aria-pressed={isSelected}
-                    >
-                      <CheckCircleIcon
-                        size={12}
-                        weight="fill"
-                        aria-hidden
-                        style={{ color: isSelected ? "var(--accent)" : "var(--text-faint)", flexShrink: 0 }}
-                      />
-                      <span
-                        className="font-mono text-[12px] tabular-nums shrink-0"
-                        style={{
-                          color: isSelected ? "var(--text-primary)" : "var(--text-faint)",
-                          minWidth: 52,
-                          textDecoration: isSelected ? undefined : "line-through",
-                          textDecorationColor: "color-mix(in srgb, var(--text-faint) 60%, transparent)",
-                        }}
-                      >
-                        {timeLabel(slot.time)}
-                      </span>
-                      <span
-                        className="flex-1 min-w-0 truncate text-[13px] font-medium capitalize"
-                        style={{ color: isSelected ? "var(--text-primary)" : "var(--text-muted)" }}
-                      >
-                        {slot.name}
-                      </span>
-                      <span
-                        className="font-mono text-[11px] tabular-nums shrink-0"
-                        style={{ color: "var(--text-faint)" }}
-                      >
-                        {countdown(slot.time)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </MobileSheet>
