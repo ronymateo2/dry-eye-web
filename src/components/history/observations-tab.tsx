@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
@@ -9,21 +10,22 @@ import { formatTime, getDayPillLabel, formatShortDate, painColor } from "./utils
 const OBS_PAGE_SIZE = 5;
 
 export function ObservationsTab({ timezone }: { timezone: string }) {
-  const [occurrences, setOccurrences] = useState<OccurrenceRow[]>([]);
-  const [hasMore, setHasMore] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: firstPage, isLoading } = useQuery({
+    queryKey: ["observation-occurrences"],
+    queryFn: () => api.getObservationOccurrences({ limit: OBS_PAGE_SIZE }),
+  });
+
+  const [extra, setExtra] = useState<OccurrenceRow[]>([]);
+  const [extraHasMore, setExtraHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   useEffect(() => {
-    api.getObservationOccurrences({ limit: OBS_PAGE_SIZE }).then((data) => {
-      setOccurrences(data.occurrences);
-      setHasMore(data.hasMore);
-    }).catch(() => {
-      setOccurrences([]);
-    }).finally(() => {
-      setIsLoading(false);
-    });
-  }, []);
+    setExtra([]);
+    setExtraHasMore(false);
+  }, [firstPage]);
+
+  const occurrences = [...(firstPage?.occurrences ?? []), ...extra];
+  const hasMore = extra.length > 0 ? extraHasMore : (firstPage?.hasMore ?? false);
 
   const loadMore = async () => {
     if (isLoadingMore || occurrences.length === 0) return;
@@ -31,8 +33,8 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
     setIsLoadingMore(true);
     try {
       const data = await api.getObservationOccurrences({ limit: OBS_PAGE_SIZE, before });
-      setOccurrences((prev) => [...prev, ...data.occurrences]);
-      setHasMore(data.hasMore);
+      setExtra((prev) => [...prev, ...data.occurrences]);
+      setExtraHasMore(data.hasMore);
     } finally {
       setIsLoadingMore(false);
     }

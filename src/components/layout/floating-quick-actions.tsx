@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon } from "@phosphor-icons/react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { MobileSheet } from "./mobile-sheet";
 import { cn } from "@/lib/utils";
@@ -47,8 +48,13 @@ export function FloatingQuickActions() {
       ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+var(--sticky-cta-height)+16px)]"
       : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
 
+  const queryClient = useQueryClient();
   const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); setInitialDropTypeId(undefined); };
-  const savedAndClose = () => { window.dispatchEvent(new CustomEvent("history:refresh")); closeAll(); };
+  const savedAndClose = () => {
+    window.dispatchEvent(new CustomEvent("history:refresh"));
+    queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
+    closeAll();
+  };
 
   return (
     <>

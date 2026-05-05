@@ -1,4 +1,4 @@
-import { NotePencil, Plus } from "@phosphor-icons/react";
+import { NotePencilIcon, PlusIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OBS_EYE_LABELS } from "@/lib/constants";
@@ -62,7 +62,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
           <p className="text-center text-[13px] text-[var(--pain-high)]">Error al cargar observaciones.</p>
         ) : observations.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <NotePencil size={32} className="text-[var(--text-muted)]" />
+            <NotePencilIcon size={32} className="text-[var(--text-muted)]" />
             <p className="text-[14px] text-[var(--text-muted)]">
               No tienes observaciones creadas.{"\n"}Crea una para comenzar a registrar ocurrencias.
             </p>
@@ -100,7 +100,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
         style={{ background: "linear-gradient(to top, var(--bg) 60%, transparent)" }}
       >
         <Button className="w-full gap-2" type="button" onClick={onCreateNew}>
-          <Plus size={18} />
+          <PlusIcon size={18} />
           Nueva observacion
         </Button>
       </div>
