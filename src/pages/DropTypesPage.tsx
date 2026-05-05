@@ -56,11 +56,14 @@ function IntervalPills({
           <button
             key={String(opt.value)}
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => { setShowCustom(false); onChange(opt.value); }}
-            className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
+            className="rounded-full px-3 py-1 text-[12px] font-medium"
             style={{
-              background: active ? "var(--accent)" : "var(--surface-el)",
-              color: active ? "var(--bg)" : "var(--text-muted)",
+              background: active ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent",
+              color: active ? "var(--accent)" : "var(--text-faint)",
+              border: active ? "1.5px solid var(--accent)" : "1px solid var(--border)",
+              transition: "color 120ms ease-out, background 120ms ease-out, border-color 120ms ease-out",
             }}
           >
             {opt.label}
@@ -70,10 +73,12 @@ function IntervalPills({
       <button
         type="button"
         onClick={() => setShowCustom(true)}
-        className="rounded-full px-3 py-1 text-[12px] font-medium transition-colors"
+        className="rounded-full px-3 py-1 text-[12px] font-medium"
         style={{
-          background: showCustom ? "var(--accent)" : "var(--surface-el)",
-          color: showCustom ? "var(--bg)" : "var(--text-muted)",
+          background: showCustom ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent",
+          color: showCustom ? "var(--accent)" : "var(--text-faint)",
+          border: showCustom ? "1.5px solid var(--accent)" : "1px solid var(--border)",
+          transition: "color 120ms ease-out, background 120ms ease-out, border-color 120ms ease-out",
         }}
       >
         {isCustom && !showCustom ? `c/${selected}h` : "Otro..."}
