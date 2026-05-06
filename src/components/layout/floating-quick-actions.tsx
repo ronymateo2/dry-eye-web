@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon, HeartbeatIcon } from "@phosphor-icons/react";
+import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon, HeartbeatIcon, PillIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { MobileSheet } from "./mobile-sheet";
@@ -14,11 +14,13 @@ const ObservationsListSheet = lazy(() => import("@/components/forms/observations
 const LogOccurrenceSheet = lazy(() => import("@/components/forms/log-occurrence-sheet").then((m) => ({ default: m.LogOccurrenceSheet })));
 const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet").then((m) => ({ default: m.ObservationSheet })));
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
+const MedicationIntakeSheet = lazy(() => import("@/components/forms/medication-intake-sheet").then((m) => ({ default: m.MedicationIntakeSheet })));
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | null;
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | null;
 
 const ACTION_ITEMS = [
   { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
+  { sheet: "medication-intake" as Sheet, Icon: PillIcon, label: "Pastilla" },
   { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
   { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },
   { sheet: "therapy" as Sheet, Icon: HeartbeatIcon, label: "Terapia" },
@@ -149,6 +151,9 @@ export function FloatingQuickActions() {
         </MobileSheet>
         <MobileSheet open={sheet === "therapy"} title="Registrar terapia" description="Registra una sesion de terapia miofascial." onClose={closeAll}>
           <TherapySheet onSaved={savedAndClose} />
+        </MobileSheet>
+        <MobileSheet open={sheet === "medication-intake"} title="Registrar pastilla" description="Registra una toma de medicamento." onClose={closeAll}>
+          <MedicationIntakeSheet onSaved={savedAndClose} />
         </MobileSheet>
       </Suspense>
     </>

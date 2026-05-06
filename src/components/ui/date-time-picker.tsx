@@ -10,7 +10,15 @@ type DateTimePickerProps = {
   onChange: (value: string | null) => void;
   max?: Date;
   className?: string;
+  dateOnly?: boolean;
 };
+
+function parseDateOnly(val: string | null): Date | undefined {
+  if (!val) return undefined;
+  const [y, m, d] = val.split("-").map(Number);
+  if (!y || !m || !d) return undefined;
+  return new Date(y, m - 1, d);
+}
 
 function parseValue(iso: string | null): { date: Date | undefined; timeStr: string } {
   if (!iso) return { date: undefined, timeStr: "" };
@@ -28,20 +36,33 @@ function buildISO(date: Date, timeStr: string): string {
   return d.toISOString();
 }
 
+function toDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 function formatDate(date: Date): string {
   const s = date.toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" });
   return s.replace(/\b([a-z]{3})\b/, (m) => m[0].toUpperCase() + m.slice(1));
 }
 
-export function DateTimePicker({ value, onChange, max, className }: DateTimePickerProps) {
+export function DateTimePicker({ value, onChange, max, className, dateOnly }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
-  const ceiling = max ?? new Date();
-  const { date, timeStr } = parseValue(value);
+
+  const date = dateOnly ? parseDateOnly(value) : parseValue(value).date;
+  const timeStr = dateOnly ? "" : parseValue(value).timeStr;
+  const ceiling = max ?? (dateOnly ? undefined : new Date());
 
   function handleDateSelect(selected: Date | undefined) {
     if (!selected) { onChange(null); return; }
-    const time = timeStr || `${String(new Date().getHours()).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")}`;
-    onChange(buildISO(selected, time));
+    if (dateOnly) {
+      onChange(toDateKey(selected));
+    } else {
+      const time = timeStr || `${String(new Date().getHours()).padStart(2, "0")}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+      onChange(buildISO(selected, time));
+    }
     setOpen(false);
   }
 
@@ -75,26 +96,28 @@ export function DateTimePicker({ value, onChange, max, className }: DateTimePick
             selected={date}
             onSelect={handleDateSelect}
             defaultMonth={date ?? ceiling}
-            disabled={{ after: ceiling }}
+            disabled={ceiling ? { after: ceiling } : undefined}
             locale={es}
           />
         </PopoverContent>
       </Popover>
 
-      {/* NOTE: Do NOT add appearance-none or color-scheme:dark — breaks <input type="time"> on iOS Safari */}
-      <input
-        type="time"
-        value={timeStr}
-        onChange={handleTimeChange}
-        className={cn(
-          "h-12 w-[110px] flex-shrink-0 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]",
-          "px-3 font-mono text-[14px] text-[var(--text-primary)] outline-none",
-          "transition-colors duration-[160ms] focus:border-[var(--accent)]",
-          "[&::-webkit-calendar-picker-indicator]:opacity-0",
-          !timeStr && "text-[var(--text-faint)]",
-        )}
-        placeholder="--:--"
-      />
+      {!dateOnly && (
+        /* NOTE: Do NOT add appearance-none or color-scheme:dark — breaks <input type="time"> on iOS Safari */
+        <input
+          type="time"
+          value={timeStr}
+          onChange={handleTimeChange}
+          className={cn(
+            "h-12 w-[110px] flex-shrink-0 rounded-[10px] border border-[var(--border)] bg-[var(--surface)]",
+            "px-3 font-mono text-[14px] text-[var(--text-primary)] outline-none",
+            "transition-colors duration-[160ms] focus:border-[var(--accent)]",
+            "[&::-webkit-calendar-picker-indicator]:opacity-0",
+            !timeStr && "text-[var(--text-faint)]",
+          )}
+          placeholder="--:--"
+        />
+      )}
     </div>
   );
 }

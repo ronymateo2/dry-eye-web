@@ -1,5 +1,5 @@
 import type { HistoryEntry, TriggerType } from "@/types/domain";
-import type { DisplayItem, DisplayCheckIn, DisplayDrop, DisplayObservation, DisplaySleep, DisplayTherapy } from "./types";
+import type { DisplayItem, DisplayCheckIn, DisplayDrop, DisplayObservation, DisplaySleep, DisplayTherapy, DisplayMedicationIntake } from "./types";
 import { HYGIENE_STATUS_COLORS } from "./types";
 
 const timeFormatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -136,6 +136,19 @@ export function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
 
     if (entry.kind === "therapy") {
       result.push(entry as unknown as DisplayTherapy);
+      continue;
+    }
+
+    if (entry.kind === "medication-intake") {
+      const intake: DisplayMedicationIntake = {
+        kind: "medication-intake",
+        id: entry.id,
+        loggedAt: entry.loggedAt as string,
+        medicationName: (entry.medicationName ?? null) as string | null,
+        dosageTaken: (entry.dosageTaken ?? null) as string | null,
+        notes: (entry.notes ?? null) as string | null,
+      };
+      result.push(intake);
       continue;
     }
 

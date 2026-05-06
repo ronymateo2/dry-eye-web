@@ -91,6 +91,12 @@ function CalendarDayButton({
         "size-[--cell-size] flex-col gap-1 font-normal leading-none",
         "text-[var(--text-primary)] hover:bg-[var(--surface-el)] hover:text-[var(--text-primary)]",
         "data-[selected-single=true]:bg-[var(--accent)] data-[selected-single=true]:text-[var(--btn-primary-text)] data-[selected-single=true]:hover:bg-[var(--accent-bright)] data-[selected-single=true]:rounded-[var(--radius-sm)]",
+        (modifiers.range_start || modifiers.range_end) &&
+          "bg-[var(--accent)] text-[var(--btn-primary-text)] hover:bg-[var(--accent-bright)]",
+        modifiers.range_start && "rounded-r-none",
+        modifiers.range_end && "rounded-l-none",
+        modifiers.range_middle &&
+          "rounded-none bg-[color-mix(in_srgb,var(--accent)_18%,transparent)] text-[var(--text-primary)] hover:bg-[color-mix(in_srgb,var(--accent)_25%,transparent)]",
         className,
       )}
       {...props}

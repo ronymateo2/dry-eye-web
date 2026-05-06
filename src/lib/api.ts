@@ -1,4 +1,4 @@
-import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry } from "@/types/domain";
+import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, SaveMedicationIntakeInput, SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry } from "@/types/domain";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -69,10 +69,10 @@ export const api = {
       notes: string | null;
     } | null>("/check-ins/last"),
 
-  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; end_date: string | null; suspension_note: string | null }[]>("/drop-types"),
-  createDropType: (name: string, intervalHours: number | null, endDate?: string | null, suspensionNote?: string | null) =>
-    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, endDate, suspensionNote }),
-  updateDropType: (id: string, body: { intervalHours?: number | null; endDate?: string | null; suspensionNote?: string | null }) =>
+  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null }[]>("/drop-types"),
+  createDropType: (name: string, intervalHours: number | null, startDate?: string | null, endDate?: string | null, suspensionNote?: string | null) =>
+    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, startDate, endDate, suspensionNote }),
+  updateDropType: (id: string, body: { intervalHours?: number | null; startDate?: string | null; endDate?: string | null; suspensionNote?: string | null }) =>
     api.put(`/drop-types/${id}`, body),
   updateDropTypeInterval: (id: string, intervalHours: number | null) => api.put(`/drop-types/${id}`, { intervalHours }),
   deleteDropType: (id: string) => api.delete(`/drop-types/${id}`),
@@ -122,6 +122,10 @@ export const api = {
   updateMedication: (id: string, body: SaveMedicationInput) => api.put(`/medications/${id}`, body),
   deleteMedication: (id: string) => api.delete(`/medications/${id}`),
   reorderMedications: (ids: string[]) => api.put("/medications/reorder", { ids }),
+
+  saveMedicationIntake: (body: SaveMedicationIntakeInput) => api.post<{ ok: boolean }>("/medications/intakes", body),
+  getLastIntakePerMedication: () => api.get<{ medication_id: string; last_logged_at: string | null }[]>("/medications/intakes/last-per-med"),
+  deleteMedicationIntake: (id: string) => api.delete(`/medications/intakes/${id}`),
 
   getCalendarStatus: () => api.get<CalendarStatus>("/calendar/status"),
   getCalendarEventsToday: () => api.get<{ events: CalendarEventEntry[] }>("/calendar/events/today"),

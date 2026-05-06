@@ -79,6 +79,15 @@ export type DisplayTherapy = {
   notes: string | null;
 };
 
+export type DisplayMedicationIntake = {
+  kind: "medication-intake";
+  id: string;
+  loggedAt: string;
+  medicationName: string | null;
+  dosageTaken: string | null;
+  notes: string | null;
+};
+
 export type DisplayItem =
   | DisplayCheckIn
   | DisplayDropGroup
@@ -87,7 +96,8 @@ export type DisplayItem =
   | DisplayObservation
   | DisplaySleep
   | DisplayHygiene
-  | DisplayTherapy;
+  | DisplayTherapy
+  | DisplayMedicationIntake;
 
 export type OccurrenceRow = {
   id: string;

@@ -1,207 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
-import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/ui/text-input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { useAuth, useUser } from "@/lib/auth";
 import {
   ArrowCounterClockwiseIcon,
   CalendarDotsIcon,
+  CaretRightIcon,
   ClockIcon,
-  DotsSixVerticalIcon,
   MoonIcon,
   PencilSimpleIcon,
-  PlusIcon,
+  PillIcon,
   SignOutIcon,
   SunIcon,
-  TrashIcon,
 } from "@phosphor-icons/react";
 import { useTheme } from "@/lib/theme";
-import {
-  DndContext,
-  PointerSensor,
-  TouchSensor,
-  KeyboardSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-  arrayMove,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
-import { daysUntilEnd } from "@/lib/utils";
-import type { MedicationPhase } from "@/types/domain";
-
-type Medication = {
-  id: string;
-  name: string;
-  dosage: string | null;
-  frequency: string | null;
-  notes: string | null;
-  sort_order: number | null;
-  start_date: string | null;
-  end_date: string | null;
-  phases_json: string | null;
-};
-
-function MedPhaseTimeline({ phasesJson }: { phasesJson: string }) {
-  let phases: MedicationPhase[] = [];
-  try { phases = JSON.parse(phasesJson); } catch { return null; }
-  const today = new Date().toISOString().slice(0, 10);
-  const currentIdx = phases.findIndex(
-    (p) => today >= p.start_date && (p.end_date === null || today <= p.end_date),
-  );
-  return (
-    <div className="flex items-end gap-1 overflow-x-auto pt-1">
-      {phases.map((p, i) => {
-        const isCurrent = i === currentIdx;
-        const isPast = currentIdx > -1 && i < currentIdx;
-        return (
-          <div key={i} className="flex shrink-0 flex-col items-center gap-0.5">
-            <div className={[
-              "h-1.5 w-12 rounded-full",
-              isCurrent ? "bg-[var(--accent)]" : isPast ? "bg-[var(--text-faint)]" : "bg-[var(--border)]",
-            ].join(" ")} />
-            <span className={["text-[10px]", isCurrent ? "font-medium text-[var(--accent)]" : "text-[var(--text-faint)]"].join(" ")}>
-              {p.dosage}
-            </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-type MedRowProps = {
-  med: Medication;
-  isOnly: boolean;
-  confirmingDelete: boolean;
-  onDeleteRequest: () => void;
-  onDeleteCancel: () => void;
-  onDeleteConfirm: () => void;
-};
-
-function SortableMedRow({
-  med,
-  isOnly,
-  confirmingDelete,
-  onDeleteRequest,
-  onDeleteCancel,
-  onDeleteConfirm,
-}: MedRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: med.id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 10 : undefined,
-    position: isDragging ? ("relative" as const) : undefined,
-  };
-  const detail = [med.dosage, med.frequency].filter(Boolean).join(" · ");
-  const endDays = med.end_date ? daysUntilEnd(med.end_date) : null;
-  const isPastEnd = endDays !== null && endDays < 0;
-  const isUrgentEnd = endDays !== null && !isPastEnd && endDays <= 7;
-
-  return (
-    <li
-      ref={setNodeRef}
-      style={style}
-      className={[
-        "border-b border-[var(--border)] px-4 last:border-b-0",
-        isDragging
-          ? "bg-[var(--surface-el)] opacity-90 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
-          : "bg-transparent",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {confirmingDelete ? (
-        <div className="flex min-h-12 items-center gap-3 py-2">
-          <span className="flex-1 text-[13px] text-[var(--text-muted)]">
-            ¿Eliminar este medicamento?
-          </span>
-          <button
-            type="button"
-            onClick={onDeleteConfirm}
-            className="min-h-[36px] rounded-[8px] bg-[var(--error)] px-3 text-[12px] font-medium text-white"
-          >
-            Eliminar
-          </button>
-          <button
-            type="button"
-            onClick={onDeleteCancel}
-            className="min-h-[36px] rounded-[8px] border border-[var(--border)] px-3 text-[12px] font-medium text-[var(--text-muted)]"
-          >
-            Cancelar
-          </button>
-        </div>
-      ) : (
-        <div className="flex min-h-12 items-start gap-2 py-3">
-          <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-            <span className="text-[15px] text-[var(--text-primary)] leading-tight">
-              {med.name}
-              {(isPastEnd || isUrgentEnd) && (
-                <span className={[
-                  "ml-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
-                  isPastEnd ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]" : "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]",
-                ].join(" ")}>
-                  {isPastEnd ? "Suspendido" : `Suspender en ${endDays}d`}
-                </span>
-              )}
-            </span>
-            {detail ? (
-              <span className="mono text-[11px] text-[var(--text-muted)] leading-tight">
-                {detail}
-              </span>
-            ) : null}
-            {med.notes ? (
-              <span className="text-[12px] text-[var(--text-faint)] leading-tight mt-0.5">
-                {med.notes}
-              </span>
-            ) : null}
-            {med.phases_json && <MedPhaseTimeline phasesJson={med.phases_json} />}
-          </div>
-          <div className="flex shrink-0 items-center gap-0.5">
-            <button
-              type="button"
-              onClick={onDeleteRequest}
-              aria-label={`Eliminar ${med.name}`}
-              className="flex min-h-12 w-10 items-center justify-center text-[var(--text-faint)] hover:text-[var(--error)] transition-colors"
-            >
-              <TrashIcon size={16} />
-            </button>
-            {!isOnly && (
-              <button
-                type="button"
-                {...attributes}
-                {...listeners}
-                aria-label={`Reordenar ${med.name}`}
-                className="flex min-h-12 w-10 cursor-grab items-center justify-center text-[var(--text-faint)] active:cursor-grabbing"
-              >
-                <DotsSixVerticalIcon size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </li>
-  );
-}
-
-type FormState = { name: string; dosage: string; frequency: string; notes: string; startDate: string; endDate: string; phasesJson: string };
-const EMPTY_FORM: FormState = { name: "", dosage: "", frequency: "", notes: "", startDate: "", endDate: "", phasesJson: "" };
 
 export default function ProfilePage() {
   const user = useUser();
+  const navigate = useNavigate();
   const { signOut, refreshUser } = useAuth();
   const qc = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -247,16 +67,6 @@ export default function ProfilePage() {
     }
   };
 
-  const { data: medications = [], isLoading: medsLoading } = useQuery({
-    queryKey: ["medications"],
-    queryFn: api.getMedications,
-  });
-
-  // Medications state
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
   const { theme, setTheme } = useTheme();
   const [themePending, setThemePending] = useState(false);
 
@@ -279,56 +89,6 @@ export default function ProfilePage() {
     const q = tzSearch.toLowerCase();
     return allTimezones.filter((tz) => tz.toLowerCase().includes(q));
   }, [allTimezones, tzSearch]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
-
-  const saveMedMutation = useMutation({
-    mutationFn: () =>
-      api.createMedication({
-        name: form.name.trim(),
-        dosage: form.dosage.trim() || undefined,
-        frequency: form.frequency.trim() || undefined,
-        notes: form.notes.trim() || undefined,
-        startDate: form.startDate.trim() || null,
-        endDate: form.endDate.trim() || null,
-        phasesJson: form.phasesJson.trim() || null,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["medications"] });
-      setSheetOpen(false);
-      setForm(EMPTY_FORM);
-      toast.success("Medicamento guardado.");
-    },
-    onError: () => toast.error("No se pudo guardar el medicamento."),
-  });
-
-  const deleteMedMutation = useMutation({
-    mutationFn: (id: string) => api.deleteMedication(id),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["medications"] });
-      setDeletingId(null);
-      toast.success("Medicamento eliminado.");
-    },
-    onError: () => toast.error("No se pudo eliminar."),
-  });
-
-  const reorderMutation = useMutation({
-    mutationFn: (ids: string[]) => api.reorderMedications(ids),
-  });
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    const oldIndex = medications.findIndex((m) => m.id === active.id);
-    const newIndex = medications.findIndex((m) => m.id === over.id);
-    const reordered = arrayMove(medications, oldIndex, newIndex);
-    qc.setQueryData(["medications"], reordered);
-    reorderMutation.mutate(reordered.map((m) => m.id));
-  };
 
   const handleTimezoneSelect = async (tz: string) => {
     setTzPending(true);
@@ -355,11 +115,6 @@ export default function ProfilePage() {
     } finally {
       setThemePending(false);
     }
-  };
-
-  const openSheet = () => {
-    setForm(EMPTY_FORM);
-    setSheetOpen(true);
   };
 
   return (
@@ -508,59 +263,21 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Medicamentos */}
+        {/* Tratamientos */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="section-label mb-0">Medicamentos</p>
-            <button
-              type="button"
-              onClick={openSheet}
-              aria-label="Agregar medicamento"
-              className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] text-[var(--accent)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-dim)]"
-            >
-              <PlusIcon size={12} weight="bold" />
-            </button>
-          </div>
-
-          {medsLoading ? (
-            <div className="space-y-2">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <Skeleton key={i} className="h-14 rounded-[16px]" />
-              ))}
+          <p className="section-label">Tratamientos</p>
+          <button
+            type="button"
+            onClick={() => navigate("/tratamientos?tab=pills")}
+            aria-label="Ir a mis tratamientos"
+            className="flex min-h-[56px] w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] px-4 transition-colors hover:border-[var(--accent)]"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+              <PillIcon size={16} color="var(--accent)" weight="fill" />
             </div>
-          ) : medications.length === 0 ? (
-            <button
-              type="button"
-              onClick={openSheet}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[16px] border border-dashed border-[var(--border)] text-[13px] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            >
-              <PlusIcon size={14} weight="bold" />
-              Agregar primer medicamento
-            </button>
-          ) : (
-            <>
-              {medications.length > 1 && (
-                <p className="text-[12px] text-[var(--text-muted)]">Mantén presionado para reordenar.</p>
-              )}
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                <SortableContext items={medications.map((m) => m.id)} strategy={verticalListSortingStrategy}>
-                  <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
-                    {medications.map((med) => (
-                      <SortableMedRow
-                        key={med.id}
-                        med={med}
-                        isOnly={medications.length === 1}
-                        confirmingDelete={deletingId === med.id}
-                        onDeleteRequest={() => setDeletingId(med.id)}
-                        onDeleteCancel={() => setDeletingId(null)}
-                        onDeleteConfirm={() => deleteMedMutation.mutate(med.id)}
-                      />
-                    ))}
-                  </ul>
-                </SortableContext>
-              </DndContext>
-            </>
-          )}
+            <span className="flex-1 text-left text-[15px] text-[var(--text-primary)]">Mis tratamientos</span>
+            <CaretRightIcon size={14} color="var(--text-faint)" />
+          </button>
         </div>
 
         {/* Cerrar sesion */}
@@ -581,76 +298,6 @@ export default function ProfilePage() {
           </button>
         </div>
       </section>
-
-      {/* Add medication sheet */}
-      <MobileSheet
-        open={sheetOpen}
-        title="Nuevo medicamento"
-        description="Guarda un medicamento en tu perfil."
-        onClose={() => { setSheetOpen(false); setForm(EMPTY_FORM); }}
-      >
-        <div className="space-y-3">
-          <TextInput
-            placeholder="Nombre (ej. Ciclosporina 0.1%)"
-            value={form.name}
-            autoFocus
-            rows={1}
-            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          />
-          <TextInput
-            placeholder="Dosis (ej. 1 gota)"
-            value={form.dosage}
-            rows={1}
-            onChange={(e) => setForm((f) => ({ ...f, dosage: e.target.value }))}
-          />
-          <TextInput
-            placeholder="Frecuencia (ej. 2 veces al día)"
-            value={form.frequency}
-            rows={1}
-            onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value }))}
-          />
-          <TextInput
-            placeholder="Notas (opcional)"
-            value={form.notes}
-            rows={2}
-            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-          />
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <p className="text-[11px] text-[var(--text-faint)]">Inicio</p>
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-                className="min-h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-            <div className="space-y-1">
-              <p className="text-[11px] text-[var(--text-faint)]">Fin / suspensión</p>
-              <input
-                type="date"
-                value={form.endDate}
-                onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
-                className="min-h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
-              />
-            </div>
-          </div>
-          <TextInput
-            placeholder={`Fases JSON (opcional)\n[{"label":"Fase 1","dosage":"1g","start_date":"2026-05-01","end_date":"2026-06-01"}]`}
-            value={form.phasesJson}
-            rows={3}
-            onChange={(e) => setForm((f) => ({ ...f, phasesJson: e.target.value }))}
-          />
-          <Button
-            className="w-full"
-            disabled={saveMedMutation.isPending || !form.name.trim()}
-            type="button"
-            onClick={() => saveMedMutation.mutate()}
-          >
-            {saveMedMutation.isPending ? "Guardando..." : "Agregar medicamento"}
-          </Button>
-        </div>
-      </MobileSheet>
 
       {/* Timezone picker sheet */}
       <MobileSheet

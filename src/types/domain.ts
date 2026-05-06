@@ -21,8 +21,10 @@ export type DropTypeRecord = {
   name: string;
   sort_order?: number | null;
   interval_hours?: number | null;
+  start_date?: string | null;
   end_date?: string | null;
   suspension_note?: string | null;
+  archived_at?: string | null;
 };
 
 export type DropScheduleEntry = {
@@ -72,6 +74,24 @@ export type MedicationRecord = {
   start_date: string | null;
   end_date: string | null;
   phases_json: string | null;
+  archived_at?: string | null;
+};
+
+export type MedicationIntakeRecord = {
+  id: string;
+  medication_id: string;
+  medication_name: string;
+  logged_at: string;
+  dosage_taken: string | null;
+  notes: string | null;
+};
+
+export type SaveMedicationIntakeInput = {
+  id: string;
+  medicationId: string;
+  loggedAt: string;
+  dosageTaken?: string | null;
+  notes?: string | null;
 };
 
 export type SaveMedicationInput = {
