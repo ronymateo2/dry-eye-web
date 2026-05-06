@@ -8,7 +8,7 @@ import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { TextInput } from "@/components/ui/text-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { api } from "@/lib/api";
-import { DotsSixVerticalIcon, PlusIcon } from "@phosphor-icons/react";
+import { DotsSixVerticalIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import {
   DndContext,
   closestCenter,
@@ -126,7 +126,11 @@ function IntervalPills({
 
 function MedPhaseTimeline({ phasesJson }: { phasesJson: string }) {
   let phases: MedicationPhase[] = [];
-  try { phases = JSON.parse(phasesJson); } catch { return null; }
+  try {
+    const parsed = JSON.parse(phasesJson);
+    if (!Array.isArray(parsed)) return null;
+    phases = parsed;
+  } catch { return null; }
   const today = new Date().toISOString().slice(0, 10);
   const currentIdx = phases.findIndex(
     (p) => today >= p.start_date && (p.end_date === null || today <= p.end_date),
@@ -558,7 +562,7 @@ type MedForm = {
   notes: string;
   startDate: string;
   endDate: string;
-  phasesJson: string;
+  phases: MedicationPhase[];
 };
 
 const EMPTY_MED_FORM: MedForm = {
@@ -568,8 +572,16 @@ const EMPTY_MED_FORM: MedForm = {
   notes: "",
   startDate: "",
   endDate: "",
-  phasesJson: "",
+  phases: [],
 };
+
+function parsePhasesJson(json: string | null | undefined): MedicationPhase[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
 
 function MedSheet({
   item,
@@ -597,7 +609,7 @@ function MedSheet({
               notes: item.notes ?? "",
               startDate: item.start_date ?? "",
               endDate: item.end_date ?? "",
-              phasesJson: item.phases_json ?? "",
+              phases: parsePhasesJson(item.phases_json),
             }
           : EMPTY_MED_FORM,
       );
@@ -614,7 +626,7 @@ function MedSheet({
         notes: form.notes.trim() || undefined,
         startDate: form.startDate.trim() || null,
         endDate: form.endDate.trim() || null,
-        phasesJson: form.phasesJson.trim() || null,
+        phasesJson: form.phases.length > 0 ? JSON.stringify(form.phases) : null,
       };
       return isEdit ? api.updateMedication(item!.id, body) : api.createMedication(body);
     },
@@ -677,12 +689,67 @@ function MedSheet({
             onChange={(f, t) => setForm((fm) => ({ ...fm, startDate: f ?? "", endDate: t ?? "" }))}
           />
         </div>
-        <TextInput
-          placeholder={`Fases JSON (opcional)\n[{"label":"Fase 1","dosage":"1g","start_date":"2026-05-01","end_date":"2026-06-01"}]`}
-          value={form.phasesJson}
-          rows={3}
-          onChange={(e) => setForm((f) => ({ ...f, phasesJson: e.target.value }))}
-        />
+        <div className="space-y-1.5">
+          <p className="text-[12px] text-[var(--text-faint)]">Fases (opcional)</p>
+          <div className="space-y-2">
+            {form.phases.map((phase, i) => (
+              <div key={i} className="rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Etiqueta (ej. Fase 1)"
+                    value={phase.label}
+                    onChange={(e) => setForm((f) => {
+                      const phases = [...f.phases];
+                      phases[i] = { ...phases[i], label: e.target.value };
+                      return { ...f, phases };
+                    })}
+                    className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-faint)]"
+                  />
+                  <button
+                    type="button"
+                    aria-label="Eliminar fase"
+                    onClick={() => setForm((f) => ({ ...f, phases: f.phases.filter((_, j) => j !== i) }))}
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--error)] opacity-60 hover:opacity-100 transition-opacity"
+                  >
+                    <TrashIcon size={15} />
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Dosis (ej. 1g)"
+                  value={phase.dosage}
+                  onChange={(e) => setForm((f) => {
+                    const phases = [...f.phases];
+                    phases[i] = { ...phases[i], dosage: e.target.value };
+                    return { ...f, phases };
+                  })}
+                  className="w-full rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-faint)]"
+                />
+                <DateRangePicker
+                  from={phase.start_date || null}
+                  to={phase.end_date || null}
+                  onChange={(s, e) => setForm((f) => {
+                    const phases = [...f.phases];
+                    phases[i] = { ...phases[i], start_date: s ?? "", end_date: e ?? null };
+                    return { ...f, phases };
+                  })}
+                />
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({
+                ...f,
+                phases: [...f.phases, { label: "", dosage: "", start_date: "", end_date: null }],
+              }))}
+              className="flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[var(--border)] py-2 text-[13px] text-[var(--text-faint)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+            >
+              <PlusIcon size={12} weight="bold" />
+              Agregar fase
+            </button>
+          </div>
+        </div>
         <Button
           className="w-full"
           disabled={saveMutation.isPending || !form.name.trim()}
