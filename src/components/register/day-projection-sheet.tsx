@@ -147,23 +147,27 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
               {sorted.map((slot) => {
                 const isNext = slot === next;
                 const isSelected = slotKey(slot) === selectedKey;
-                const dotSize = isSelected ? 16 : isNext ? 12 : 9;
+                const dotScale = isSelected ? 16 / 9 : isNext ? 12 / 9 : 1;
                 const dotColor = isNext ? "var(--pain-low)" : "var(--accent)";
                 return (
-                  <button
+                  <motion.button
                     key={`tl-${slotKey(slot)}`}
                     type="button"
                     onClick={() => setSelectedKey(slotKey(slot))}
                     aria-label={`${slot.name} a las ${timeLabel(slot.time)}`}
                     aria-pressed={isSelected}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                    className="absolute flex items-center justify-center"
                     style={{
                       left: `${pct(slot.time)}%`,
                       top: "50%",
+                      x: "-50%",
+                      y: "-50%",
                       width: 36,
                       height: 36,
                       background: "transparent",
                     }}
+                    whileTap={{ scale: 0.85 }}
+                    transition={{ type: "spring", duration: 0.25, bounce: 0 }}
                   >
                     {isSelected && (
                       <motion.span
@@ -175,20 +179,21 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                           border: `1.5px solid ${dotColor}`,
                           boxShadow: `0 0 12px color-mix(in srgb, ${dotColor} 55%, transparent)`,
                         }}
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        transition={{ type: "spring", duration: 0.4, bounce: 0.2 }}
                       />
                     )}
                     <span
-                      className="rounded-full transition-all"
+                      className="rounded-full"
                       style={{
-                        width: dotSize,
-                        height: dotSize,
+                        width: 9,
+                        height: 9,
                         background: dotColor,
-                        opacity: 1,
+                        transform: `scale(${dotScale})`,
+                        transition: "transform 380ms cubic-bezier(0.32, 0.72, 0, 1), box-shadow 200ms ease",
                         boxShadow: isNext && !isSelected ? `0 0 8px ${dotColor}` : "none",
                       }}
                     />
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -201,20 +206,24 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
               >
                 ahora
               </span>
-              {selected && Math.abs(pct(selected.time) - nowPct) > 8 && (
-                <motion.span
-                  key={selectedKey ?? "none"}
-                  initial={{ opacity: 0, y: -2 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute -translate-x-1/2 font-mono text-[10px] font-semibold tabular-nums"
-                  style={{
-                    left: `clamp(20px, ${pct(selected.time)}%, calc(100% - 28px))`,
-                    color: heroAccent,
-                  }}
-                >
-                  {timeLabel(selected.time)}
-                </motion.span>
-              )}
+              <AnimatePresence mode="popLayout">
+                {selected && Math.abs(pct(selected.time) - nowPct) > 8 && (
+                  <motion.span
+                    key={selectedKey ?? "none"}
+                    initial={{ opacity: 0, transform: "translateY(-3px)" }}
+                    animate={{ opacity: 1, transform: "translateY(0px)" }}
+                    exit={{ opacity: 0, transform: "translateY(3px)" }}
+                    transition={{ type: "spring", duration: 0.32, bounce: 0 }}
+                    className="absolute -translate-x-1/2 font-mono text-[10px] font-semibold tabular-nums"
+                    style={{
+                      left: `clamp(20px, ${pct(selected.time)}%, calc(100% - 28px))`,
+                      color: heroAccent,
+                    }}
+                  >
+                    {timeLabel(selected.time)}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -223,10 +232,9 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
             {selected ? (
               <motion.div
                 key={selectedKey ?? "hero"}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                initial={{ opacity: 0, transform: "translateY(10px)", filter: "blur(4px)" }}
+                animate={{ opacity: 1, transform: "translateY(0px)", filter: "blur(0px)", transition: { duration: 0.26, ease: [0.23, 1, 0.32, 1] } }}
+                exit={{ opacity: 0, transform: "translateY(-6px)", filter: "blur(3px)", transition: { duration: 0.14, ease: [0.4, 0, 1, 1] } }}
                 className="rounded-xl p-4 relative overflow-hidden"
                 style={{
                   background: "var(--surface-el)",
@@ -290,13 +298,15 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                       key={`lt-${slotKey(slot)}`}
                       type="button"
                       onClick={() => setSelectedKey(slotKey(slot))}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.05 + i * 0.02, duration: 0.18 }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left transition-colors"
+                      initial={{ opacity: 0, transform: "translateY(5px)" }}
+                      animate={{ opacity: 1, transform: "translateY(0px)" }}
+                      whileTap={{ transform: "scale(0.98)" }}
+                      transition={{ delay: i * 0.04, duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left"
                       style={{
                         borderBottom: i < later.length - 1 ? "1px solid var(--border)" : undefined,
                         background: isSelected ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
+                        transition: "background 180ms ease",
                       }}
                       aria-pressed={isSelected}
                     >
