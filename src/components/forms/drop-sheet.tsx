@@ -84,7 +84,8 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-      api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => {});
+      await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => {});
+      queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
       toast.success("Gota registrada.");
       onSaved();
     } catch {
