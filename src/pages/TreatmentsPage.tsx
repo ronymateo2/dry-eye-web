@@ -475,9 +475,11 @@ function DropsPanel() {
           type="button"
           onClick={() => setEditingItem("new")}
           aria-label="Agregar gota"
-          className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] text-[var(--accent)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-dim)]"
+          className="flex h-7 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2.5 text-[12px] font-medium text-[var(--accent)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-dim)] active:scale-[0.96]"
+          style={{ transition: "background-color 150ms ease-out, border-color 150ms ease-out, transform 120ms ease-out" }}
         >
-          <PlusIcon size={12} weight="bold" />
+          <PlusIcon size={10} weight="bold" />
+          Agregar
         </button>
       </div>
 
@@ -754,9 +756,11 @@ function MedicationsPanel() {
             type="button"
             onClick={() => setEditingItem("new")}
             aria-label="Agregar medicamento"
-            className="flex h-7 w-7 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] text-[var(--accent)] transition-colors hover:border-[var(--accent)] hover:bg-[var(--accent-dim)]"
+            className="flex h-7 items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2.5 text-[12px] font-medium text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--accent-dim)] active:scale-[0.96]"
+            style={{ transition: "background-color 150ms ease-out, border-color 150ms ease-out, transform 120ms ease-out" }}
           >
-            <PlusIcon size={12} weight="bold" />
+            <PlusIcon size={10} weight="bold" />
+            Agregar
           </button>
         </div>
 
@@ -822,10 +826,24 @@ export default function TreatmentsPage() {
   return (
     <section className="space-y-6">
       <div
-        className="flex gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] p-1"
+        className="relative flex gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] p-1"
         role="tablist"
         aria-label="Tipo de tratamiento"
       >
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: 4,
+            bottom: 4,
+            left: 4,
+            width: "calc(50% - 6px)",
+            borderRadius: "999px",
+            background: "var(--accent)",
+            transform: tab === "drops" ? "translateX(0)" : "translateX(calc(100% + 4px))",
+            transition: "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
+          }}
+        />
         {(["drops", "pills"] as const).map((v) => (
           <button
             key={v}
@@ -833,10 +851,11 @@ export default function TreatmentsPage() {
             role="tab"
             aria-selected={tab === v}
             onClick={() => setTab(v)}
-            className="flex-1 rounded-full py-2.5 text-[14px] font-medium transition-colors"
+            className="relative z-10 flex-1 rounded-full py-2.5 text-[14px] font-medium"
             style={{
-              background: tab === v ? "var(--accent)" : "transparent",
+              background: "transparent",
               color: tab === v ? "var(--btn-primary-text)" : "var(--text-muted)",
+              transition: "color 280ms cubic-bezier(0.32, 0.72, 0, 1)",
             }}
           >
             {v === "drops" ? "Gotas" : "Pastillas"}
