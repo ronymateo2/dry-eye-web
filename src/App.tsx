@@ -37,7 +37,7 @@ function AppRoutes() {
                   <Route path="/report" element={<ReportPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/drop-types" element={<DropTypesPage />} />
-                  <Route path="/tratamientos" element={<TreatmentsPage />} />
+                  <Route path="/treatments" element={<TreatmentsPage />} />
                   <Route path="/login" element={<Navigate to="/register" replace />} />
                   <Route path="*" element={<Navigate to="/register" replace />} />
                 </>

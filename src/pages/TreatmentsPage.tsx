@@ -130,11 +130,19 @@ function IntervalPills({
 function SortableDropType({
   dt,
   isOnly,
+  confirmingDelete,
+  onDeleteRequest,
+  onDeleteCancel,
+  onDeleteConfirm,
   onIntervalChange,
   onDateChange,
 }: {
   dt: DropTypeRecord;
   isOnly: boolean;
+  confirmingDelete: boolean;
+  onDeleteRequest: () => void;
+  onDeleteCancel: () => void;
+  onDeleteConfirm: () => void;
   onIntervalChange: (id: string, hours: number | null) => void;
   onDateChange: (id: string, startDate: string | null, endDate: string | null) => void;
 }) {
@@ -168,98 +176,130 @@ function SortableDropType({
         isDragging ? "bg-[var(--surface-el)] opacity-90 shadow-[0_4px_20px_rgba(0,0,0,0.4)]" : "bg-transparent",
       ].filter(Boolean).join(" ")}
     >
-      <div className="flex min-h-12 items-center px-4 text-[15px] text-[var(--text-primary)]">
-        <div className={cn("flex flex-1 flex-col gap-0.5 py-3 min-w-0", isPastEnd && "opacity-50")}>
-          <span className={isPastEnd ? "line-through" : ""}>
-            {dt.name}
+      {confirmingDelete ? (
+        <div className="flex min-h-12 items-center gap-3 px-4 py-2">
+          <span className="flex-1 text-[13px] text-[var(--text-muted)]">
+            ¿Archivar esta gota? Tu historial se mantiene intacto.
           </span>
-          {(dt.start_date || dt.end_date) && (
-            <span className="mono text-[10px] text-[var(--text-faint)]">
-              {dt.start_date ?? "—"} → {dt.end_date ?? "∞"}
-            </span>
-          )}
-          {dt.end_date && (
-            <span className={cn(
-              "self-start inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
-              isPastEnd ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]"
-              : isUrgentEnd ? "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]"
-              : "hidden",
-            )}>
-              {isPastEnd ? "Suspendido" : `Suspender en ${endDays}d`}
-            </span>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => { setEditingDates((v) => !v); setEditingInterval(false); }}
-          className="rounded-full px-2 py-1 text-[10px] font-medium transition-colors mr-1"
-          style={{
-            background: editingDates ? "var(--accent)" : "var(--surface-el)",
-            color: editingDates ? "var(--bg)" : "var(--text-faint)",
-          }}
-          aria-label={`Fechas de ${dt.name}`}
-        >
-          {dt.start_date || dt.end_date ? "fechas" : "+ fechas"}
-        </button>
-        <button
-          type="button"
-          onClick={() => { setEditingInterval((v) => !v); setEditingDates(false); }}
-          className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors mr-2"
-          style={{
-            background: editingInterval ? "var(--accent)" : "var(--surface-el)",
-            color: editingInterval ? "var(--bg)" : "var(--text-muted)",
-          }}
-          aria-label={`Cambiar intervalo de ${dt.name}`}
-        >
-          {intervalLabel(dt.interval_hours)}
-        </button>
-        {!isOnly && (
           <button
             type="button"
-            {...attributes}
-            {...listeners}
-            aria-label={`Reordenar ${dt.name}`}
-            className="flex min-h-12 w-10 shrink-0 cursor-grab items-center justify-center text-[var(--text-faint)] active:cursor-grabbing"
+            onClick={onDeleteConfirm}
+            className="min-h-[36px] rounded-[8px] bg-[var(--error)] px-3 text-[12px] font-medium text-white"
           >
-            <DotsSixVerticalIcon size={16} />
+            Archivar
           </button>
-        )}
-      </div>
-      {editingInterval && (
-        <div className="px-4 pb-3">
-          <IntervalPills
-            selected={dt.interval_hours ?? null}
-            onChange={(hours) => {
-              onIntervalChange(dt.id, hours);
-              setEditingInterval(false);
-            }}
-          />
+          <button
+            type="button"
+            onClick={onDeleteCancel}
+            className="min-h-[36px] rounded-[8px] border border-[var(--border)] px-3 text-[12px] font-medium text-[var(--text-muted)]"
+          >
+            Cancelar
+          </button>
         </div>
-      )}
-      {editingDates && (
-        <div className="px-4 pb-3 space-y-2">
-          <DateRangePicker
-            from={localStart || null}
-            to={localEnd || null}
-            onChange={(f, t) => { setLocalStart(f ?? ""); setLocalEnd(t ?? ""); }}
-          />
-          <div className="flex gap-2">
+      ) : (
+        <>
+          <div className="flex min-h-12 items-center px-4 text-[15px] text-[var(--text-primary)]">
+            <div className={cn("flex flex-1 flex-col gap-0.5 py-3 min-w-0", isPastEnd && "opacity-50")}>
+              <span className={isPastEnd ? "line-through" : ""}>
+                {dt.name}
+              </span>
+              {(dt.start_date || dt.end_date) && (
+                <span className="mono text-[10px] text-[var(--text-faint)]">
+                  {dt.start_date ?? "—"} → {dt.end_date ?? "∞"}
+                </span>
+              )}
+              {dt.end_date && (
+                <span className={cn(
+                  "self-start inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
+                  isPastEnd ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]"
+                  : isUrgentEnd ? "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]"
+                  : "hidden",
+                )}>
+                  {isPastEnd ? "Suspendido" : `Suspender en ${endDays}d`}
+                </span>
+              )}
+            </div>
             <button
               type="button"
-              onClick={handleDateSave}
-              className="rounded-full bg-[var(--accent)] px-4 py-1.5 text-[12px] font-medium text-[var(--btn-primary-text)]"
+              onClick={() => { setEditingDates((v) => !v); setEditingInterval(false); }}
+              className="rounded-full px-2 py-1 text-[10px] font-medium transition-colors mr-1"
+              style={{
+                background: editingDates ? "var(--accent)" : "var(--surface-el)",
+                color: editingDates ? "var(--bg)" : "var(--text-faint)",
+              }}
+              aria-label={`Fechas de ${dt.name}`}
             >
-              Guardar fechas
+              {dt.start_date || dt.end_date ? "fechas" : "+ fechas"}
             </button>
             <button
               type="button"
-              onClick={() => setEditingDates(false)}
-              className="rounded-full border border-[var(--border)] px-4 py-1.5 text-[12px] font-medium text-[var(--text-muted)]"
+              onClick={() => { setEditingInterval((v) => !v); setEditingDates(false); }}
+              className="rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors mr-2"
+              style={{
+                background: editingInterval ? "var(--accent)" : "var(--surface-el)",
+                color: editingInterval ? "var(--bg)" : "var(--text-muted)",
+              }}
+              aria-label={`Cambiar intervalo de ${dt.name}`}
             >
-              Cancelar
+              {intervalLabel(dt.interval_hours)}
             </button>
+            <button
+              type="button"
+              onClick={onDeleteRequest}
+              aria-label={`Archivar ${dt.name}`}
+              className="flex min-h-12 w-10 shrink-0 items-center justify-center text-[var(--text-faint)] hover:text-[var(--error)] transition-colors"
+            >
+              <TrashIcon size={16} />
+            </button>
+            {!isOnly && (
+              <button
+                type="button"
+                {...attributes}
+                {...listeners}
+                aria-label={`Reordenar ${dt.name}`}
+                className="flex min-h-12 w-10 shrink-0 cursor-grab items-center justify-center text-[var(--text-faint)] active:cursor-grabbing"
+              >
+                <DotsSixVerticalIcon size={16} />
+              </button>
+            )}
           </div>
-        </div>
+          {editingInterval && (
+            <div className="px-4 pb-3">
+              <IntervalPills
+                selected={dt.interval_hours ?? null}
+                onChange={(hours) => {
+                  onIntervalChange(dt.id, hours);
+                  setEditingInterval(false);
+                }}
+              />
+            </div>
+          )}
+          {editingDates && (
+            <div className="px-4 pb-3 space-y-2">
+              <DateRangePicker
+                from={localStart || null}
+                to={localEnd || null}
+                onChange={(f, t) => { setLocalStart(f ?? ""); setLocalEnd(t ?? ""); }}
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleDateSave}
+                  className="rounded-full bg-[var(--accent)] px-4 py-1.5 text-[12px] font-medium text-[var(--btn-primary-text)]"
+                >
+                  Guardar fechas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingDates(false)}
+                  className="rounded-full border border-[var(--border)] px-4 py-1.5 text-[12px] font-medium text-[var(--text-muted)]"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </li>
   );
@@ -276,6 +316,7 @@ function DropsPanel() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [state, setState] = useState<ActionState>({ status: "idle" });
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -316,6 +357,17 @@ function DropsPanel() {
       toast.success("Fechas guardadas.");
     },
     onError: () => toast.error("No se pudieron guardar las fechas."),
+  });
+
+  const deleteDropTypeMutation = useMutation({
+    mutationFn: (id: string) => api.deleteDropType(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["drop-types"] });
+      qc.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      setDeletingId(null);
+      toast.success("Gota archivada.");
+    },
+    onError: () => toast.error("No se pudo archivar."),
   });
 
   const reorderMutation = useMutation({
@@ -390,6 +442,10 @@ function DropsPanel() {
                       key={dt.id}
                       dt={dt}
                       isOnly={dropTypes.length === 1}
+                      confirmingDelete={deletingId === dt.id}
+                      onDeleteRequest={() => setDeletingId(dt.id)}
+                      onDeleteCancel={() => setDeletingId(null)}
+                      onDeleteConfirm={() => deleteDropTypeMutation.mutate(dt.id)}
                       onIntervalChange={(id, hours) => intervalMutation.mutate({ id, hours })}
                       onDateChange={(id, sd, ed) => dateMutation.mutate({ id, sd, ed })}
                     />

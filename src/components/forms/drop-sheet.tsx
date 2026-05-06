@@ -84,7 +84,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-      await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => {});
+      await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
       toast.success("Gota registrada.");
       onSaved();
@@ -199,13 +199,13 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="section-label mb-0">Tipo de gota</p>
-          <button onClick={() => { onSaved(); navigate("/tratamientos"); }} className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</button>
+          <button onClick={() => { onSaved(); navigate("/treatments"); }} className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</button>
         </div>
 
         {dropTypes.length === 0 ? (
           <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center text-[14px] text-[var(--text-muted)]">
             No tienes tipos de gota.{" "}
-            <button onClick={() => { onSaved(); navigate("/tratamientos"); }} className="text-[var(--accent)]">Crear uno</button>
+            <button onClick={() => { onSaved(); navigate("/treatments"); }} className="text-[var(--accent)]">Crear uno</button>
           </div>
         ) : (
           <WheelPicker label="Seleccionar tipo de gota" options={wheelOptions} value={selectedDropType} onChange={setSelectedDropType} />

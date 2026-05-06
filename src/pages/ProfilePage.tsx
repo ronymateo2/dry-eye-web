@@ -44,10 +44,10 @@ export default function ProfilePage() {
       const msg = reason === "state"
         ? "Error: cookie de sesión perdida (reason=state)"
         : reason === "token"
-        ? `Error al obtener token: ${detail || "token_exchange"}`
-        : reason === "userinfo"
-        ? "Error al leer perfil de Google (reason=userinfo)"
-        : "Error al conectar Google Calendar.";
+          ? `Error al obtener token: ${detail || "token_exchange"}`
+          : reason === "userinfo"
+            ? "Error al leer perfil de Google (reason=userinfo)"
+            : "Error al conectar Google Calendar.";
       toast.error(msg);
       setSearchParams({}, { replace: true });
     }
@@ -268,7 +268,7 @@ export default function ProfilePage() {
           <p className="section-label">Tratamientos</p>
           <button
             type="button"
-            onClick={() => navigate("/tratamientos?tab=pills")}
+            onClick={() => navigate("/treatments?tab=pills")}
             aria-label="Ir a mis tratamientos"
             className="flex min-h-[56px] w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] px-4 transition-colors hover:border-[var(--accent)]"
           >
