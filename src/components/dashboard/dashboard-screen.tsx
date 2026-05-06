@@ -5,7 +5,8 @@ import {
   DashboardTrendChart,
   DashboardTriggerPainChart,
 } from "@/components/dashboard/dashboard-charts";
-import type { TriggerType } from "@/types/domain";
+import type { TriggerType, TherapyCorrelation } from "@/types/domain";
+import { painColor } from "@/lib/pain";
 
 type TrendPoint = {
   dayKey: string;
@@ -70,6 +71,7 @@ export type DashboardData = {
     points: DropsDayPoint[];
   };
   dropsByWeekday: WeekdayDropAvg[];
+  therapyCorrelation: TherapyCorrelation | null;
 };
 
 const TRIGGER_LABELS: Record<TriggerType, string> = {
@@ -190,6 +192,38 @@ export function DashboardScreen({ data }: { data: DashboardData }) {
           </p>
         </div>
       </section>
+
+      {data.therapyCorrelation && data.therapyCorrelation.therapyDays >= 3 && (() => {
+        const tc = data.therapyCorrelation;
+        const delta = +(tc.avgPainBaseline - tc.avgPainAfterTherapy).toFixed(2);
+        return (
+          <section>
+            <p className="section-label">Impacto de terapia miofascial</p>
+            <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-5 space-y-3">
+              <p className="text-[12px] text-[var(--text-faint)]">{tc.therapyDays} sesiones registradas</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-[12px] bg-[var(--surface)] p-3">
+                  <p className="section-label mb-1">Dolor siguiente día</p>
+                  <p className="mono text-[22px] font-medium" style={{ color: painColor(tc.avgPainAfterTherapy) }}>
+                    {tc.avgPainAfterTherapy.toFixed(1)}
+                  </p>
+                </div>
+                <div className="rounded-[12px] bg-[var(--surface)] p-3">
+                  <p className="section-label mb-1">Línea base</p>
+                  <p className="mono text-[22px] font-medium" style={{ color: painColor(tc.avgPainBaseline) }}>
+                    {tc.avgPainBaseline.toFixed(1)}
+                  </p>
+                </div>
+              </div>
+              <p className="text-[13px]" style={{ color: delta > 0 ? "var(--pain-low)" : "var(--text-muted)" }}>
+                {delta > 0
+                  ? `La terapia se asocia con ${delta} pts menos de dolor al dia siguiente.`
+                  : "No se observa reduccion de dolor post-terapia aun."}
+              </p>
+            </div>
+          </section>
+        );
+      })()}
 
       <section>
         <p className="section-label">Triggers en dolor alto</p>

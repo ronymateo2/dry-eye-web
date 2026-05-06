@@ -6,7 +6,7 @@ import { TextInput } from "@/components/ui/text-input";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { api } from "@/lib/api";
-import { TRIGGER_OPTIONS, SYMPTOM_OPTIONS } from "@/lib/constants";
+import { TRIGGER_OPTIONS, SYMPTOM_OPTIONS, PAIN_QUALITY_OPTIONS } from "@/lib/constants";
 import { cn, formatLoggedAt } from "@/lib/utils";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +15,7 @@ import {
   CaretDownIcon,
   ActivityIcon,
   TargetIcon,
+  WarningIcon,
 } from "@phosphor-icons/react";
 import { SleepNudge } from "@/components/ui/sleep-nudge";
 import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
@@ -66,14 +67,14 @@ const accordionToggleClass = (expanded: boolean, hasSelection: boolean) =>
 export default function RegisterPage() {
   const queryClient = useQueryClient();
   const [pain, setPain] = useState(defaultPain);
-  const [selectedTrigger, setSelectedTrigger] = useState<string | null>(null);
+  const [selectedTriggers, setSelectedTriggers] = useState<Set<string>>(new Set());
   const [customTriggerName, setCustomTriggerName] = useState("");
   const [showTriggers, setShowTriggers] = useState(false);
   const [showSymptoms, setShowSymptoms] = useState(false);
-  const [selectedSymptoms, setSelectedSymptoms] = useState<Set<string>>(
-    new Set(),
-  );
+  const [selectedSymptoms, setSelectedSymptoms] = useState<Set<string>>(new Set());
   const [customSymptom, setCustomSymptom] = useState("");
+  const [showPainQuality, setShowPainQuality] = useState(false);
+  const [selectedPainQuality, setSelectedPainQuality] = useState<Set<string>>(new Set());
   const [contextTab, setContextTab] = useState<ContextTab>("now");
   const [loggedAt, setLoggedAt] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(true);
@@ -122,14 +123,14 @@ export default function RegisterPage() {
   };
 
   const isTriggerValid =
-    selectedTrigger === null ||
-    selectedTrigger !== "other" ||
+    !selectedTriggers.has("other") ||
     customTriggerName.trim().length > 0;
 
-  const triggerValue = TRIGGER_OPTIONS.find((t) => t.id === selectedTrigger)
-    ?.value as TriggerType | undefined;
-
   const lastTriggerLabel = getTriggerLabel(lastCheckIn?.trigger_type ?? null);
+
+  const normalSymptoms = SYMPTOM_OPTIONS.filter((o) => !("isAlarm" in o && o.isAlarm));
+  const alarmSymptoms = SYMPTOM_OPTIONS.filter((o) => "isAlarm" in o && o.isAlarm);
+  const hasAlarmSymptom = alarmSymptoms.some((o) => selectedSymptoms.has(o.id));
 
   const getZeroWarning = (): string | null => {
     const fields = [
@@ -149,12 +150,14 @@ export default function RegisterPage() {
 
   const resetForm = () => {
     setPain(defaultPain);
-    setSelectedTrigger(null);
+    setSelectedTriggers(new Set());
     setCustomTriggerName("");
     setShowTriggers(false);
     setShowSymptoms(false);
     setSelectedSymptoms(new Set());
     setCustomSymptom("");
+    setShowPainQuality(false);
+    setSelectedPainQuality(new Set());
     setContextTab("now");
     setLoggedAt(null);
   };
@@ -165,9 +168,15 @@ export default function RegisterPage() {
       const checkInId = crypto.randomUUID();
       const checkInLoggedAt = loggedAt ?? new Date().toISOString();
       const notes =
-        selectedTrigger === "other" && customTriggerName.trim()
+        selectedTriggers.has("other") && customTriggerName.trim()
           ? customTriggerName.trim()
           : null;
+
+      const triggerTypes = ([...selectedTriggers]
+        .map((id) => TRIGGER_OPTIONS.find((t) => t.id === id)?.value)
+        .filter((v) => v != null)) as string[];
+      const uniqueTriggerTypes = [...new Set(triggerTypes)];
+      const triggerValue = uniqueTriggerTypes[0] as TriggerType | undefined;
 
       await api.saveCheckIn({
         id: checkInId,
@@ -180,6 +189,8 @@ export default function RegisterPage() {
         orbitalPain: pain.orbitalPain,
         stressLevel: pain.stressLevel,
         triggerType: triggerValue ?? null,
+        triggerTypes: uniqueTriggerTypes,
+        painQuality: [...selectedPainQuality],
         notes: notes ?? undefined,
       });
 
@@ -194,6 +205,8 @@ export default function RegisterPage() {
         orbital_pain: pain.orbitalPain,
         stress_level: pain.stressLevel,
         trigger_type: triggerValue ?? null,
+        trigger_types: uniqueTriggerTypes.length > 0 ? JSON.stringify(uniqueTriggerTypes) : null,
+        pain_quality: selectedPainQuality.size > 0 ? JSON.stringify([...selectedPainQuality]) : null,
         notes,
       };
       queryClient.setQueryData<LastCheckIn | null>(
@@ -311,13 +324,13 @@ export default function RegisterPage() {
                 type="button"
                 className={accordionToggleClass(
                   showTriggers,
-                  selectedTrigger !== null,
+                  selectedTriggers.size > 0,
                 )}
                 onClick={() => {
                   const next = !showTriggers;
                   setShowTriggers(next);
                   if (!next) {
-                    setSelectedTrigger(null);
+                    setSelectedTriggers(new Set());
                     setCustomTriggerName("");
                   }
                 }}
@@ -327,8 +340,8 @@ export default function RegisterPage() {
                     size={18}
                     className="text-[var(--text-muted)]"
                   />
-                  {selectedTrigger !== null
-                    ? `Trigger: ${TRIGGER_OPTIONS.find((t) => t.id === selectedTrigger)?.label}`
+                  {selectedTriggers.size > 0
+                    ? `Triggers (${selectedTriggers.size})`
                     : "¿Hubo un trigger?"}
                 </span>
                 <CaretDownIcon
@@ -354,20 +367,21 @@ export default function RegisterPage() {
                           <button
                             key={opt.id}
                             type="button"
-                            className={pillClass(selectedTrigger === opt.id)}
+                            className={pillClass(selectedTriggers.has(opt.id))}
                             onClick={() => {
-                              setSelectedTrigger(
-                                selectedTrigger === opt.id ? null : opt.id,
-                              );
-                              if (opt.id !== "other")
-                                setCustomTriggerName("");
+                              setSelectedTriggers((cur) => {
+                                const n = new Set(cur);
+                                n.has(opt.id) ? n.delete(opt.id) : n.add(opt.id);
+                                return n;
+                              });
+                              if (opt.id !== "other") setCustomTriggerName("");
                             }}
                           >
                             {opt.label}
                           </button>
                         ))}
                       </div>
-                      {selectedTrigger === "other" && (
+                      {selectedTriggers.has("other") && (
                         <TextInput
                           placeholder="Nombre del trigger (ej. polvo, humo)"
                           value={customTriggerName}
@@ -428,19 +442,15 @@ export default function RegisterPage() {
                   >
                     <div className="space-y-2.5 pt-1">
                       <div className="flex flex-wrap gap-2">
-                        {SYMPTOM_OPTIONS.map((opt) => (
+                        {normalSymptoms.map((opt) => (
                           <button
                             key={opt.id}
                             type="button"
-                            className={pillClass(
-                              selectedSymptoms.has(opt.id),
-                            )}
+                            className={pillClass(selectedSymptoms.has(opt.id))}
                             onClick={() =>
                               setSelectedSymptoms((cur) => {
                                 const n = new Set(cur);
-                                n.has(opt.id)
-                                  ? n.delete(opt.id)
-                                  : n.add(opt.id);
+                                n.has(opt.id) ? n.delete(opt.id) : n.add(opt.id);
                                 return n;
                               })
                             }
@@ -448,6 +458,38 @@ export default function RegisterPage() {
                             {opt.label}
                           </button>
                         ))}
+                      </div>
+                      <div className="rounded-[12px] border border-[var(--error)] p-3 space-y-2">
+                        <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.1em]" style={{ color: "var(--error)" }}>
+                          <WarningIcon size={13} />
+                          Síntomas de alarma
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {alarmSymptoms.map((opt) => {
+                            const active = selectedSymptoms.has(opt.id);
+                            return (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                className={cn(
+                                  "inline-flex items-center justify-center min-h-[44px] rounded-[999px] border px-4 text-[13px] font-medium transition-[color,background-color,border-color] duration-[160ms] ease-out active:scale-[0.97]",
+                                  active
+                                    ? "border-[var(--error)] bg-[rgba(204,63,48,0.12)] text-[var(--error)]"
+                                    : "border-[var(--border)] bg-transparent text-[var(--text-muted)]",
+                                )}
+                                onClick={() =>
+                                  setSelectedSymptoms((cur) => {
+                                    const n = new Set(cur);
+                                    n.has(opt.id) ? n.delete(opt.id) : n.add(opt.id);
+                                    return n;
+                                  })
+                                }
+                              >
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                       <TextInput
                         placeholder="Describe el sintoma..."
@@ -461,6 +503,14 @@ export default function RegisterPage() {
               </AnimatePresence>
             </div>
           </div>
+
+          {hasAlarmSymptom && (
+            <div className="mx-4 mb-4 rounded-[12px] border border-[var(--error)] bg-[rgba(204,63,48,0.08)] px-4 py-3">
+              <p className="text-[13px] font-medium" style={{ color: "var(--error)" }}>
+                Este síntoma puede requerir atención urgente. Consulta a tu médico.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Pain map */}
@@ -533,6 +583,62 @@ export default function RegisterPage() {
             value={pain.stressLevel}
             onChange={updatePain("stressLevel")}
           />
+        </div>
+
+        {/* Pain quality */}
+        <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              className={accordionToggleClass(showPainQuality, selectedPainQuality.size > 0)}
+              onClick={() => {
+                const next = !showPainQuality;
+                setShowPainQuality(next);
+                if (!next) setSelectedPainQuality(new Set());
+              }}
+            >
+              <span className="flex items-center gap-2">
+                <ActivityIcon size={18} className="text-[var(--text-muted)]" />
+                {selectedPainQuality.size > 0
+                  ? `Calidad de dolor (${selectedPainQuality.size})`
+                  : "¿Cómo es el dolor?"}
+              </span>
+              <CaretDownIcon
+                weight="bold"
+                className={cn("transition-transform duration-200", showPainQuality && "rotate-180")}
+              />
+            </button>
+            <AnimatePresence initial={false}>
+              {showPainQuality && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {PAIN_QUALITY_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        className={pillClass(selectedPainQuality.has(opt.id))}
+                        onClick={() =>
+                          setSelectedPainQuality((cur) => {
+                            const n = new Set(cur);
+                            n.has(opt.id) ? n.delete(opt.id) : n.add(opt.id);
+                            return n;
+                          })
+                        }
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 

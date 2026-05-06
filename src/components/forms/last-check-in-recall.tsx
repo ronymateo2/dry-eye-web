@@ -12,7 +12,15 @@ type LastCheckInData = {
   orbital_pain: number;
   stress_level: number;
   trigger_type: string | null;
+  trigger_types: string | null;
+  pain_quality: string | null;
   notes: string | null;
+};
+
+const TRIGGER_LABELS: Record<string, string> = {
+  climate: "Clima", humidifier: "Humidificador", stress: "Estres",
+  screens: "Pantallas", tv: "TV", ergonomics: "Ergonomia",
+  exercise: "Ejercicio", other: "Otro",
 };
 
 type Props = {
@@ -30,7 +38,16 @@ const ZONES: { key: keyof LastCheckInData; label: string }[] = [
   { key: "stress_level", label: "Estres" },
 ];
 
+function parseTriggers(data: LastCheckInData): string[] {
+  if (data.trigger_types) {
+    try { return JSON.parse(data.trigger_types); } catch { /* fall through */ }
+  }
+  if (data.trigger_type) return [data.trigger_type];
+  return [];
+}
+
 export function LastCheckInRecall({ data, triggerLabel, onApply }: Props) {
+  const parsedTriggers = parseTriggers(data);
   const peak = Math.max(
     data.eyelid_pain,
     data.temple_pain,
@@ -106,14 +123,20 @@ export function LastCheckInRecall({ data, triggerLabel, onApply }: Props) {
         })}
       </ul>
 
-      {(triggerLabel || data.notes) && (
+      {(parsedTriggers.length > 0 || data.notes) && (
         <div className="flex flex-wrap items-center gap-1.5 border-t border-[var(--border)] bg-[var(--surface-card)] px-3.5 py-2.5">
-          {triggerLabel && (
-            <span className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
+          {parsedTriggers.map((t) => (
+            <span key={t} className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
               <span className="mr-1 text-[var(--text-faint)]">Trigger</span>
               <span className="font-medium text-[var(--text-primary)]">
-                {triggerLabel}
+                {TRIGGER_LABELS[t] ?? t}
               </span>
+            </span>
+          ))}
+          {parsedTriggers.length === 0 && triggerLabel && (
+            <span className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
+              <span className="mr-1 text-[var(--text-faint)]">Trigger</span>
+              <span className="font-medium text-[var(--text-primary)]">{triggerLabel}</span>
             </span>
           )}
           {data.notes && (

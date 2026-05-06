@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon } from "@phosphor-icons/react";
+import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon, HeartbeatIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { MobileSheet } from "./mobile-sheet";
@@ -13,13 +13,15 @@ const HygieneSheet = lazy(() => import("@/components/forms/hygiene-sheet").then(
 const ObservationsListSheet = lazy(() => import("@/components/forms/observations-list-sheet").then((m) => ({ default: m.ObservationsListSheet })));
 const LogOccurrenceSheet = lazy(() => import("@/components/forms/log-occurrence-sheet").then((m) => ({ default: m.LogOccurrenceSheet })));
 const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet").then((m) => ({ default: m.ObservationSheet })));
+const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | null;
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | null;
 
 const ACTION_ITEMS = [
   { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
   { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
   { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },
+  { sheet: "therapy" as Sheet, Icon: HeartbeatIcon, label: "Terapia" },
   { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación" },
 ];
 
@@ -144,6 +146,9 @@ export function FloatingQuickActions() {
         </MobileSheet>
         <MobileSheet open={sheet === "obs_new"} title="Nueva observacion" description="Registra algo que notaste." onClose={closeAll}>
           <ObservationSheet onSaved={(obs) => { setSelectedObservation(obs); setSheet("obs_log"); }} />
+        </MobileSheet>
+        <MobileSheet open={sheet === "therapy"} title="Registrar terapia" description="Registra una sesion de terapia miofascial." onClose={closeAll}>
+          <TherapySheet onSaved={savedAndClose} />
         </MobileSheet>
       </Suspense>
     </>

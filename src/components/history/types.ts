@@ -10,6 +10,8 @@ export type DisplayCheckIn = {
   cervicalPain: number;
   orbitalPain: number;
   triggerType: TriggerType | null;
+  triggerTypes: string[] | null;
+  painQuality: string[] | null;
   notes: string | null;
 };
 
@@ -69,6 +71,14 @@ export type DisplayHygiene = {
   record: HygieneRecord;
 };
 
+export type DisplayTherapy = {
+  kind: "therapy";
+  id: string;
+  loggedAt: string;
+  therapyType: string;
+  notes: string | null;
+};
+
 export type DisplayItem =
   | DisplayCheckIn
   | DisplayDropGroup
@@ -76,7 +86,8 @@ export type DisplayItem =
   | DisplaySymptomGroup
   | DisplayObservation
   | DisplaySleep
-  | DisplayHygiene;
+  | DisplayHygiene
+  | DisplayTherapy;
 
 export type OccurrenceRow = {
   id: string;

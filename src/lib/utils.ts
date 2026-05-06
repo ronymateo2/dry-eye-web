@@ -19,6 +19,13 @@ export function formatLoggedAt(iso: string): string {
   return d.toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short" }) + `, ${time}`;
 }
 
+export function daysUntilEnd(endDate: string): number {
+  const end = new Date(endDate + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.ceil((end.getTime() - today.getTime()) / 86_400_000);
+}
+
 export function formatTimeAgo(iso: string): string {
   const diffMs = Math.max(0, Date.now() - new Date(iso).getTime());
   const diffMin = Math.floor(diffMs / 60_000);

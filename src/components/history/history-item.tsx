@@ -7,6 +7,7 @@ import {
   ObservationCard,
   SleepCard,
   SymptomCard,
+  TherapyCard,
 } from "./history-cards";
 
 export function HistoryItem({ item, timezone }: { item: DisplayItem; timezone: string }) {
@@ -16,5 +17,6 @@ export function HistoryItem({ item, timezone }: { item: DisplayItem; timezone: s
   if (item.kind === "trigger_group") return <TriggerCard item={item} timezone={timezone} />;
   if (item.kind === "observation") return <ObservationCard item={item} timezone={timezone} />;
   if (item.kind === "sleep") return <SleepCard item={item} timezone={timezone} />;
+  if (item.kind === "therapy") return <TherapyCard item={item} timezone={timezone} />;
   return <SymptomCard item={item} timezone={timezone} />;
 }

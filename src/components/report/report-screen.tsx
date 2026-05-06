@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { painColor, painGradient } from "@/lib/pain";
-import type { TriggerType } from "@/types/domain";
+import type { TriggerType, MedicationPhase } from "@/types/domain";
 
 type ReportTrendPoint = {
   dayKey: string;
@@ -39,6 +39,14 @@ type ReportAveragePain = {
   orbital: number;
 };
 
+type ReportMedication = {
+  name: string;
+  dosage: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  phases_json: string | null;
+};
+
 export type ReportData = {
   ok: true;
   userName: string | null;
@@ -54,6 +62,7 @@ export type ReportData = {
   trendPoints: ReportTrendPoint[];
   dropsPerDay: number | null;
   topTriggers: ReportTriggerStat[];
+  medications: ReportMedication[];
 };
 
 const TRIGGER_LABELS: Record<string, string> = {
@@ -601,6 +610,39 @@ export function ReportScreen({ data }: Props) {
               <p className="mt-1.5 text-[12px] text-[var(--text-muted)]">promedio diario</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Medications ────────────────────────────────────────── */}
+      {data.medications && data.medications.length > 0 && (
+        <div>
+          <p className="section-label">Medicamentos activos</p>
+          <ul className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface-card)]">
+            {data.medications.map((med, i) => {
+              const phases: MedicationPhase[] | null = med.phases_json
+                ? (() => { try { return JSON.parse(med.phases_json); } catch { return null; } })()
+                : null;
+              const today = new Date().toISOString().slice(0, 10);
+              const currentPhase = phases?.find(
+                (p) => today >= p.start_date && (p.end_date === null || today <= p.end_date),
+              );
+              return (
+                <li
+                  key={i}
+                  className={cn(
+                    "flex min-h-12 flex-col justify-center px-5 py-2.5",
+                    i < data.medications.length - 1 && "border-b border-[var(--border)]",
+                  )}
+                >
+                  <span className="text-[14px] text-[var(--text-primary)]">{med.name}</span>
+                  <span className="mono text-[11px] text-[var(--text-muted)]">
+                    {currentPhase ? `${currentPhase.label} — ${currentPhase.dosage}` : (med.dosage ?? "")}
+                    {med.end_date && ` · hasta ${med.end_date}`}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
 

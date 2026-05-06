@@ -27,6 +27,18 @@ export const SYMPTOM_OPTIONS = [
   { id: "hinchazon", label: "Hinchazon", value: "hinchazon" },
   { id: "enrojecimiento", label: "Enrojecimiento", value: "enrojecimiento" },
   { id: "dolor_cabeza", label: "Dolor de cabeza", value: "dolor_cabeza" },
+  { id: "destellos", label: "Destellos/Chispas", value: "destellos", isAlarm: true },
+  { id: "cortina_visual", label: "Cortina visual", value: "cortina_visual", isAlarm: true },
+  { id: "vision_doble", label: "Vision doble", value: "vision_doble", isAlarm: true },
+  { id: "moscas_empeoran", label: "Moscas que empeoran", value: "moscas_empeoran", isAlarm: true },
+] as const;
+
+export const PAIN_QUALITY_OPTIONS = [
+  { id: "ardor", label: "Ardor", value: "ardor" },
+  { id: "hormigueo", label: "Hormigueo", value: "hormigueo" },
+  { id: "electrico", label: "Electrico", value: "electrico" },
+  { id: "presion", label: "Presion", value: "presion" },
+  { id: "alodinia", label: "Alodinia", value: "alodinia" },
 ] as const;
 
 export const OBS_EYE_LABELS: Record<string, string> = {

@@ -1,4 +1,4 @@
-import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry } from "@/types/domain";
+import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry } from "@/types/domain";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -64,11 +64,16 @@ export const api = {
       orbital_pain: number;
       stress_level: number;
       trigger_type: string | null;
+      trigger_types: string | null;
+      pain_quality: string | null;
       notes: string | null;
     } | null>("/check-ins/last"),
 
-  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null }[]>("/drop-types"),
-  createDropType: (name: string, intervalHours: number | null) => api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours }),
+  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; end_date: string | null; suspension_note: string | null }[]>("/drop-types"),
+  createDropType: (name: string, intervalHours: number | null, endDate?: string | null, suspensionNote?: string | null) =>
+    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, endDate, suspensionNote }),
+  updateDropType: (id: string, body: { intervalHours?: number | null; endDate?: string | null; suspensionNote?: string | null }) =>
+    api.put(`/drop-types/${id}`, body),
   updateDropTypeInterval: (id: string, intervalHours: number | null) => api.put(`/drop-types/${id}`, { intervalHours }),
   deleteDropType: (id: string) => api.delete(`/drop-types/${id}`),
   reorderDropTypes: (ids: string[]) => api.put("/drop-types/reorder", { ids }),
@@ -112,7 +117,7 @@ export const api = {
   deleteObservation: (id: string) => api.delete(`/observations/${id}`),
   saveOccurrence: (observationId: string, body: Omit<SaveOccurrenceInput, "observationId">) => api.post(`/observations/${observationId}/occurrences`, body),
 
-  getMedications: () => api.get<{ id: string; name: string; dosage: string | null; frequency: string | null; notes: string | null; sort_order: number | null }[]>("/medications"),
+  getMedications: () => api.get<{ id: string; name: string; dosage: string | null; frequency: string | null; notes: string | null; sort_order: number | null; start_date: string | null; end_date: string | null; phases_json: string | null }[]>("/medications"),
   createMedication: (body: SaveMedicationInput) => api.post("/medications", body),
   updateMedication: (id: string, body: SaveMedicationInput) => api.put(`/medications/${id}`, body),
   deleteMedication: (id: string) => api.delete(`/medications/${id}`),
@@ -131,9 +136,16 @@ export const api = {
       { dropTypeId, dayKey },
     ),
 
-  getDashboard: () => api.get<unknown>("/dashboard"),
+  saveTherapySession: (input: SaveTherapySessionInput) =>
+    api.post<{ ok: boolean }>("/therapy-sessions", { id: input.id, loggedAt: input.loggedAt, therapyType: input.therapyType, notes: input.notes }),
+  getTherapySessions: (before?: string) => {
+    const qs = before ? `?before=${before}` : "";
+    return api.get<{ ok: boolean; sessions: TherapySessionRecord[] }>(`/therapy-sessions${qs}`);
+  },
+
+  getDashboard: () => api.get<{ ok: true; therapyCorrelation: TherapyCorrelation | null; [key: string]: unknown }>("/dashboard"),
   getHistory: () => api.get<HistoryFeed>("/history"),
   getHistoryMore: (before: string, limit = 5) =>
     api.get<HistoryFeed>(`/history/more?before=${before}&limit=${limit}`),
-  getReport: () => api.get<unknown>("/report"),
+  getReport: () => api.get<{ ok: true; medications: { name: string; dosage: string | null; start_date: string | null; end_date: string | null; phases_json: string | null }[]; [key: string]: unknown }>("/report"),
 };

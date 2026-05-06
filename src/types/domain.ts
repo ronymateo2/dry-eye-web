@@ -16,13 +16,21 @@ export type SleepRecord = {
   sleepQuality: SleepQuality;
 };
 
-export type DropTypeRecord = { id: string; name: string; sort_order?: number | null; interval_hours?: number | null };
+export type DropTypeRecord = {
+  id: string;
+  name: string;
+  sort_order?: number | null;
+  interval_hours?: number | null;
+  end_date?: string | null;
+  suspension_note?: string | null;
+};
 
 export type DropScheduleEntry = {
   drop_type_id: string;
   name: string;
   interval_hours: number | null;
   last_logged_at: string | null;
+  end_date?: string | null;
 };
 
 export type DropTypeStats = {
@@ -47,6 +55,13 @@ export type SaveDropInput = {
   eye: DropEye;
 };
 
+export type MedicationPhase = {
+  label: string;
+  dosage: string;
+  start_date: string;
+  end_date: string | null;
+};
+
 export type MedicationRecord = {
   id: string;
   name: string;
@@ -54,6 +69,9 @@ export type MedicationRecord = {
   frequency: string | null;
   notes: string | null;
   sort_order: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  phases_json: string | null;
 };
 
 export type SaveMedicationInput = {
@@ -62,6 +80,32 @@ export type SaveMedicationInput = {
   dosage?: string;
   frequency?: string;
   notes?: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  phasesJson?: string | null;
+};
+
+export type PainQuality = "ardor" | "hormigueo" | "electrico" | "presion" | "alodinia";
+export type TherapyType = "miofascial" | "other";
+
+export type SaveTherapySessionInput = {
+  id: string;
+  loggedAt: string;
+  therapyType: TherapyType;
+  notes?: string | null;
+};
+
+export type TherapySessionRecord = {
+  id: string;
+  logged_at: string;
+  therapy_type: TherapyType;
+  notes: string | null;
+};
+
+export type TherapyCorrelation = {
+  therapyDays: number;
+  avgPainAfterTherapy: number;
+  avgPainBaseline: number;
 };
 
 export type SaveOccurrenceInput = {

@@ -39,6 +39,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
+import { daysUntilEnd } from "@/lib/utils";
+import type { MedicationPhase } from "@/types/domain";
 
 type Medication = {
   id: string;
@@ -47,7 +49,38 @@ type Medication = {
   frequency: string | null;
   notes: string | null;
   sort_order: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  phases_json: string | null;
 };
+
+function MedPhaseTimeline({ phasesJson }: { phasesJson: string }) {
+  let phases: MedicationPhase[] = [];
+  try { phases = JSON.parse(phasesJson); } catch { return null; }
+  const today = new Date().toISOString().slice(0, 10);
+  const currentIdx = phases.findIndex(
+    (p) => today >= p.start_date && (p.end_date === null || today <= p.end_date),
+  );
+  return (
+    <div className="flex items-end gap-1 overflow-x-auto pt-1">
+      {phases.map((p, i) => {
+        const isCurrent = i === currentIdx;
+        const isPast = currentIdx > -1 && i < currentIdx;
+        return (
+          <div key={i} className="flex shrink-0 flex-col items-center gap-0.5">
+            <div className={[
+              "h-1.5 w-12 rounded-full",
+              isCurrent ? "bg-[var(--accent)]" : isPast ? "bg-[var(--text-faint)]" : "bg-[var(--border)]",
+            ].join(" ")} />
+            <span className={["text-[10px]", isCurrent ? "font-medium text-[var(--accent)]" : "text-[var(--text-faint)]"].join(" ")}>
+              {p.dosage}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 type MedRowProps = {
   med: Medication;
@@ -74,6 +107,9 @@ function SortableMedRow({
     position: isDragging ? ("relative" as const) : undefined,
   };
   const detail = [med.dosage, med.frequency].filter(Boolean).join(" · ");
+  const endDays = med.end_date ? daysUntilEnd(med.end_date) : null;
+  const isPastEnd = endDays !== null && endDays < 0;
+  const isUrgentEnd = endDays !== null && !isPastEnd && endDays <= 7;
 
   return (
     <li
@@ -113,6 +149,14 @@ function SortableMedRow({
           <div className="flex flex-1 flex-col gap-0.5 min-w-0">
             <span className="text-[15px] text-[var(--text-primary)] leading-tight">
               {med.name}
+              {(isPastEnd || isUrgentEnd) && (
+                <span className={[
+                  "ml-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
+                  isPastEnd ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]" : "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]",
+                ].join(" ")}>
+                  {isPastEnd ? "Suspendido" : `Suspender en ${endDays}d`}
+                </span>
+              )}
             </span>
             {detail ? (
               <span className="mono text-[11px] text-[var(--text-muted)] leading-tight">
@@ -124,6 +168,7 @@ function SortableMedRow({
                 {med.notes}
               </span>
             ) : null}
+            {med.phases_json && <MedPhaseTimeline phasesJson={med.phases_json} />}
           </div>
           <div className="flex shrink-0 items-center gap-0.5">
             <button
@@ -152,8 +197,8 @@ function SortableMedRow({
   );
 }
 
-type FormState = { name: string; dosage: string; frequency: string; notes: string };
-const EMPTY_FORM: FormState = { name: "", dosage: "", frequency: "", notes: "" };
+type FormState = { name: string; dosage: string; frequency: string; notes: string; startDate: string; endDate: string; phasesJson: string };
+const EMPTY_FORM: FormState = { name: "", dosage: "", frequency: "", notes: "", startDate: "", endDate: "", phasesJson: "" };
 
 export default function ProfilePage() {
   const user = useUser();
@@ -248,6 +293,9 @@ export default function ProfilePage() {
         dosage: form.dosage.trim() || undefined,
         frequency: form.frequency.trim() || undefined,
         notes: form.notes.trim() || undefined,
+        startDate: form.startDate.trim() || null,
+        endDate: form.endDate.trim() || null,
+        phasesJson: form.phasesJson.trim() || null,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["medications"] });
@@ -566,6 +614,32 @@ export default function ProfilePage() {
             value={form.notes}
             rows={2}
             onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <p className="text-[11px] text-[var(--text-faint)]">Inicio</p>
+              <input
+                type="date"
+                value={form.startDate}
+                onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
+                className="min-h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              />
+            </div>
+            <div className="space-y-1">
+              <p className="text-[11px] text-[var(--text-faint)]">Fin / suspensión</p>
+              <input
+                type="date"
+                value={form.endDate}
+                onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
+                className="min-h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              />
+            </div>
+          </div>
+          <TextInput
+            placeholder={`Fases JSON (opcional)\n[{"label":"Fase 1","dosage":"1g","start_date":"2026-05-01","end_date":"2026-06-01"}]`}
+            value={form.phasesJson}
+            rows={3}
+            onChange={(e) => setForm((f) => ({ ...f, phasesJson: e.target.value }))}
           />
           <Button
             className="w-full"

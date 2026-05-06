@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, daysUntilEnd } from "@/lib/utils";
 import type { DropScheduleEntry } from "@/types/domain";
 import { DayProjectionSheet, type DoseSlot } from "@/components/register/day-projection-sheet";
 
@@ -180,6 +180,9 @@ export function DropsScheduleCard() {
 
   if (scheduled.length === 0) return null;
 
+  const suspendedPast = entries.filter((e) => e.end_date && daysUntilEnd(e.end_date) < 0);
+  const suspendedUrgent = entries.filter((e) => e.end_date && daysUntilEnd(e.end_date) >= 0 && daysUntilEnd(e.end_date) <= 7);
+
   const hasOverdue = scheduled.some(
     (e) =>
       e.last_logged_at != null &&
@@ -189,6 +192,16 @@ export function DropsScheduleCard() {
 
   return (
     <>
+      {suspendedPast.length > 0 && (
+        <div className="rounded-[10px] border px-4 py-3 text-[13px]" style={{ borderColor: "var(--error)", background: "rgba(204,63,48,0.08)", color: "var(--error)" }}>
+          Suspende {suspendedPast.map((e) => e.name).join(", ")} — la fecha de suspensión ya pasó.
+        </div>
+      )}
+      {suspendedPast.length === 0 && suspendedUrgent.length > 0 && (
+        <div className="rounded-[10px] border border-[#ca8a04] bg-[rgba(234,179,8,0.08)] px-4 py-3 text-[13px] text-[#ca8a04]">
+          {suspendedUrgent.map((e) => `${e.name}: suspender en ${daysUntilEnd(e.end_date!)}d`).join(" · ")}
+        </div>
+      )}
       <div className="space-y-0.5">
         <div className="flex items-center justify-between">
           <p className="section-label mb-0">Próximas dosis</p>

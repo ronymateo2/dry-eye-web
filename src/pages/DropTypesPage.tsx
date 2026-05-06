@@ -14,6 +14,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { DropTypeRecord, ActionState } from "@/types/domain";
+import { daysUntilEnd, cn } from "@/lib/utils";
 
 const INTERVAL_OPTIONS: { label: string; value: number | null }[] = [
   { label: "A necesidad", value: null },
@@ -123,6 +124,10 @@ function SortableDropType({
     position: isDragging ? ("relative" as const) : undefined,
   };
 
+  const endDays = dt.end_date ? daysUntilEnd(dt.end_date) : null;
+  const isPastEnd = endDays !== null && endDays < 0;
+  const isUrgentEnd = endDays !== null && !isPastEnd && endDays <= 7;
+
   return (
     <li
       ref={setNodeRef}
@@ -133,7 +138,19 @@ function SortableDropType({
       ].filter(Boolean).join(" ")}
     >
       <div className="flex min-h-12 items-center px-4 text-[15px] text-[var(--text-primary)]">
-        <span className="flex-1 py-3">{dt.name}</span>
+        <span className={cn("flex-1 py-3", isPastEnd && "opacity-50 line-through")}>
+          {dt.name}
+          {dt.end_date && (
+            <span className={cn(
+              "ml-2 inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
+              isPastEnd ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]"
+              : isUrgentEnd ? "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]"
+              : "bg-[var(--surface-el)] text-[var(--text-muted)]",
+            )}>
+              {isPastEnd ? "Suspendido" : isUrgentEnd ? `Suspender en ${endDays}d` : `Hasta ${dt.end_date}`}
+            </span>
+          )}
+        </span>
         <button
           type="button"
           onClick={() => setEditingInterval((v) => !v)}

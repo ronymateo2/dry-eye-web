@@ -11,6 +11,7 @@ import {
   NotePencilIcon,
   BedIcon,
   EyeIcon,
+  HeartbeatIcon,
 } from "@phosphor-icons/react";
 import { SYMPTOM_OPTIONS, OBS_EYE_LABELS } from "@/lib/constants";
 import type { HygieneRecord } from "@/types/domain";
@@ -21,6 +22,7 @@ import type {
   DisplaySymptomGroup,
   DisplayObservation,
   DisplaySleep,
+  DisplayTherapy,
   ScoreField,
 } from "./types";
 import {
@@ -334,13 +336,26 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)]">
             {isMoon ? <MoonIcon size={15} color="var(--accent)" /> : <SunIcon size={15} color="var(--accent)" />}
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
-              {item.triggerType
-                ? `Trigger: ${item.triggerType === "other" && item.notes ? item.notes : TRIGGER_LABELS[item.triggerType]}`
-                : label}
+              {item.triggerTypes && item.triggerTypes.length > 0
+                ? item.triggerTypes.length === 1
+                  ? `Trigger: ${item.triggerTypes[0] === "other" && item.notes ? item.notes : TRIGGER_LABELS[item.triggerTypes[0] as keyof typeof TRIGGER_LABELS] ?? item.triggerTypes[0]}`
+                  : `Triggers (${item.triggerTypes.length})`
+                : item.triggerType
+                  ? `Trigger: ${item.triggerType === "other" && item.notes ? item.notes : TRIGGER_LABELS[item.triggerType]}`
+                  : label}
             </p>
             <p className="mono text-[11px] text-[var(--text-muted)]">{formatTime(item.loggedAt, timezone)}</p>
+            {item.triggerTypes && item.triggerTypes.length > 1 && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {item.triggerTypes.map((t) => (
+                  <span key={t} className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--text-faint)]">
+                    {TRIGGER_LABELS[t as keyof typeof TRIGGER_LABELS] ?? t}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div
@@ -393,6 +408,41 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
             />
           ))}
         </div>
+      </div>
+
+      {item.painQuality && item.painQuality.length > 0 && (
+        <div className="mt-3">
+          <div className="flex flex-wrap gap-1.5">
+            {item.painQuality.map((q) => (
+              <span
+                key={q}
+                className="rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)]"
+              >
+                {q}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}
+
+export function TherapyCard({ item, timezone }: { item: DisplayTherapy; timezone: string }) {
+  const time = formatTime(item.loggedAt, timezone);
+  return (
+    <article className="flex items-start gap-3 rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-4">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+        <HeartbeatIcon size={16} color="var(--accent)" weight="fill" />
+      </div>
+      <div className="flex flex-1 flex-col gap-0.5">
+        <span className="text-[13px] font-medium text-[var(--text-primary)]">
+          {item.therapyType === "miofascial" ? "Terapia miofascial" : "Terapia"}
+        </span>
+        <span className="mono text-[11px] text-[var(--text-faint)]">{time}</span>
+        {item.notes && (
+          <span className="mt-1 text-[12px] italic text-[var(--text-muted)]">"{item.notes}"</span>
+        )}
       </div>
     </article>
   );

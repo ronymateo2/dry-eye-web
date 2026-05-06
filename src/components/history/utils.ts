@@ -1,5 +1,5 @@
 import type { HistoryEntry, TriggerType } from "@/types/domain";
-import type { DisplayItem, DisplayCheckIn, DisplayDrop, DisplayObservation, DisplaySleep } from "./types";
+import type { DisplayItem, DisplayCheckIn, DisplayDrop, DisplayObservation, DisplaySleep, DisplayTherapy } from "./types";
 import { HYGIENE_STATUS_COLORS } from "./types";
 
 const timeFormatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -99,7 +99,13 @@ export function getDotColor(item: DisplayItem): string {
   }
   if (item.kind === "drop_group") return "var(--accent)";
   if (item.kind === "hygiene") return HYGIENE_STATUS_COLORS[item.record.status];
+  if (item.kind === "therapy") return "var(--accent)";
   return "var(--text-muted)";
+}
+
+function safeParseJson<T>(json: unknown): T | null {
+  if (!json || typeof json !== "string") return null;
+  try { return JSON.parse(json) as T; } catch { return null; }
 }
 
 export function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
@@ -108,7 +114,28 @@ export function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
 
   for (const entry of entries) {
     if (entry.kind === "check_in") {
-      result.push(entry as unknown as DisplayCheckIn);
+      const triggerTypes = safeParseJson<string[]>(entry.triggerTypes) ?? safeParseJson<string[]>(entry.trigger_types);
+      const painQuality = safeParseJson<string[]>(entry.painQuality) ?? safeParseJson<string[]>(entry.pain_quality);
+      const ci: DisplayCheckIn = {
+        kind: "check_in",
+        id: entry.id,
+        loggedAt: entry.loggedAt as string,
+        eyelidPain: entry.eyelidPain as number,
+        templePain: entry.templePain as number,
+        masseterPain: entry.masseterPain as number,
+        cervicalPain: entry.cervicalPain as number,
+        orbitalPain: entry.orbitalPain as number,
+        triggerType: (entry.triggerType ?? null) as TriggerType | null,
+        triggerTypes: triggerTypes ?? null,
+        painQuality: painQuality ?? null,
+        notes: (entry.notes ?? null) as string | null,
+      };
+      result.push(ci);
+      continue;
+    }
+
+    if (entry.kind === "therapy") {
+      result.push(entry as unknown as DisplayTherapy);
       continue;
     }
 
