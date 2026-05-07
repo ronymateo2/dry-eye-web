@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import {
   DropIcon,
   PillIcon,
@@ -24,8 +24,11 @@ const SECONDARY_ACTIONS = [
   { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación" },
 ] as const;
 
-const PANEL_SPRING = { type: "spring" as const, stiffness: 340, damping: 32 };
-const BACKDROP_FADE = { duration: 0.22, ease: "easeOut" as const };
+const ACTIONS = [...PRIMARY_ACTIONS, ...SECONDARY_ACTIONS];
+
+const PANEL_SPRING = { type: "spring" as const, duration: 0.5, bounce: 0.15 };
+const BACKDROP_FADE = { duration: 0.22, ease: [0.23, 1, 0.32, 1] as const };
+const ITEM_EASE = [0.23, 1, 0.32, 1] as const;
 
 type Props = {
   open: boolean;
@@ -35,6 +38,7 @@ type Props = {
 
 export function QuickActionsSheet({ open, onClose, onSelect }: Props) {
   const [mounted, setMounted] = useState(open);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (open) setMounted(true);
@@ -47,6 +51,30 @@ export function QuickActionsSheet({ open, onClose, onSelect }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  const listVariants = {
+    hidden: {
+      transition: {
+        staggerChildren: reducedMotion ? 0 : 0.03,
+        staggerDirection: -1,
+      },
+    },
+    visible: {
+      transition: {
+        staggerChildren: reducedMotion ? 0 : 0.05,
+        delayChildren: 0.06,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: reducedMotion ? 0 : 10 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reducedMotion ? 0.15 : 0.35, ease: ITEM_EASE },
+    },
+  };
+
   if (!mounted) return null;
 
   return createPortal(
@@ -57,7 +85,6 @@ export function QuickActionsSheet({ open, onClose, onSelect }: Props) {
             key="qs-backdrop"
             aria-label="Cerrar acciones rápidas"
             className="sheet-backdrop"
-            style={{ zIndex: 78 }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -78,21 +105,29 @@ export function QuickActionsSheet({ open, onClose, onSelect }: Props) {
           >
             <div className="sheet-handle" />
 
-            <div className="action-sheet-list">
-              {[...PRIMARY_ACTIONS, ...SECONDARY_ACTIONS].map(({ sheet, Icon, label }, i) => (
-                <button
+            <motion.div
+              className="action-sheet-list"
+              variants={listVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              {ACTIONS.map(({ sheet, Icon, label }) => (
+                <motion.button
                   key={sheet}
                   type="button"
                   aria-label={label}
                   className="action-row"
-                  style={i > 0 ? { borderTop: "1px solid var(--border)" } : undefined}
+                  variants={itemVariants}
+                  whileTap={{ scale: reducedMotion ? 1 : 0.97 }}
+                  transition={{ duration: 0.16, ease: ITEM_EASE }}
                   onClick={() => { onSelect(sheet); onClose(); }}
                 >
-                  <Icon size={20} color="var(--text-muted)" />
+                  <Icon size={20} color="var(--accent)" />
                   <span className="action-row-label">{label}</span>
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
 
             <div className="action-sheet-safe-bottom" />
           </motion.div>

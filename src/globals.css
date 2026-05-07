@@ -551,7 +551,7 @@ img, svg { display: block; max-width: 100%; }
 .action-sheet-panel {
   position: fixed;
   right: 0; bottom: 0; left: 0;
-  z-index: 79;
+  z-index: 81;
   display: flex;
   flex-direction: column;
   width: min(100%, 480px);
@@ -634,10 +634,23 @@ img, svg { display: block; max-width: 100%; }
   background: transparent;
   border: none;
   text-align: left;
-  transition: opacity 150ms;
+  cursor: pointer;
+  transition: transform 160ms var(--ease-out), opacity 120ms ease-out;
+  will-change: transform;
   -webkit-tap-highlight-color: transparent;
 }
-.action-row:active { opacity: 0.55; }
+.action-row:not(:first-child) {
+  border-top: 1px solid var(--border);
+}
+.action-row:active {
+  transform: scale(0.97);
+  opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  .action-row:hover {
+    opacity: 0.85;
+  }
+}
 .action-row-label {
   font-size: 15px;
   font-weight: 500;

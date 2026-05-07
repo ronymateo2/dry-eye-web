@@ -179,7 +179,7 @@ Light mode is available for users who prefer or require it (e.g., bright environ
   medium: 250-400ms — screen transitions (push/pop), sheet presentation
   long:   400-700ms — save confirmation feedback
   ```
-- **No bounce or spring animations.** The user may be in pain. Playful motion is inappropriate.
+- **Spring animations:** Use type: "spring" with duration + bounce for natural, physics-based motion. Keep bounce subtle (0.1–0.2) — never playful or bouncy. Springs feel more organic than fixed-duration curves for sheet presentations and FAB interactions.
 - **No celebration animations.** No confetti, no streaks, no achievement badges. This is a medical tool.
 - **prefers-reduced-motion:** Respect this media query. All decorative transitions off.
 
@@ -255,7 +255,6 @@ Used for Gotas and Triggers screens (launched from FAB).
 - **No custom UI web fonts.** Use the system font stack (`-apple-system`) — zero download, native rendering.
 - **No purple/violet gradients.** Generic wellness app slop.
 - **No gamification.** No streaks, no badges, no progress bars with encouragement messages. Medical tool.
-- **No bounce/spring animations.** User may be in pain.
 - **No bright illustrations or mascots.**
 - **No 3-column feature grids.** Mobile-first, single-column.
 - **No reduced touch targets.** 48px minimum, always.
@@ -279,3 +278,4 @@ Used for Gotas and Triggers screens (launched from FAB).
 | 2026-04-16 | Aumento de contraste base y pesos tipográficos mínimos (`var(--text-faint)` y `font-weight: 400` en *Geist Mono*) | Pacientes con fotofobia y ojo seco usan el dispositivo con **50-60% de brillo**. Tonos muy tenues (`#5a4e3a`) o pesos finos (`300`) desaparecen. Todo elemento requiere legibilidad clínica bajo atenuación extrema de luminancia, sin migrar a tonos azules. |
 | 2026-04-27 | Toast: dark surface + colored border + colored icon (no solid color bg) | Solid color backgrounds (bright green/red) flash high luminance against the dark UI — a direct photophobia trigger. Severity still readable via border and icon color. Consistent with how info toasts already worked. |
 | 2026-04-27 | Added opt-in light theme (`[data-theme="light"]`) | Some users operate in bright environments or have accessibility needs not related to photophobia. Dark remains default; light is user-selectable. Violet accent (#7C6DCD) chosen to stay out of the blue/cyan photosensitive zone while providing sufficient contrast on light backgrounds. |
+| 2026-05-07 | Spring animations permitted for sheet presentations and FAB | After user testing, subtle springs (duration-based with bounce 0.1–0.2) feel more natural and responsive than fixed-duration curves. Bounce is kept intentionally low to avoid playful motion. `prefers-reduced-motion` still honored. |
