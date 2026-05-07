@@ -493,15 +493,13 @@ export function HygieneSheet({
                               className="text-[42px] font-semibold leading-none tracking-tight"
                               style={{ color: "var(--text-primary)" }}
                             >
-                              LO
-                              <br />
-                              HICE
+                              ANOTAR
                             </p>
                             <p
                               className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em]"
                               style={{ color: "var(--text-faint)" }}
                             >
-                              REGISTRAR ACCIÓN
+                              MI HIGIENE DE HOY
                             </p>
                           </>
                         )}
