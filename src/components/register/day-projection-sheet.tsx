@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ClockCountdownIcon, DropIcon } from "@phosphor-icons/react";
+import { ClockCountdownIcon, DropIcon, ArrowUUpLeftIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 
 export type DoseSlot = {
@@ -24,14 +24,24 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
   const slotKey = (s: DoseSlot) => `${s.drop_type_id}-${s.time}`;
   const defaultKey = next ? slotKey(next) : null;
 
-  const [selectedKey, setSelectedKey] = useState<string | null>(defaultKey);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const hasOpened = useRef(false);
 
   useEffect(() => {
-    if (!open) return;
-    setSelectedKey(defaultKey);
+    if (!open) {
+      hasOpened.current = false;
+      return;
+    }
+    if (hasOpened.current) return;
+    hasOpened.current = true;
+    setSelectedKey((prev) => prev ?? defaultKey);
   }, [open, defaultKey]);
 
-  const selected = sorted.find((s) => slotKey(s) === selectedKey) ?? next ?? null;
+  const selected = useMemo(() => {
+    if (selectedKey == null) return next;
+    const match = sorted.find((s) => slotKey(s) === selectedKey);
+    return match ?? next;
+  }, [selectedKey, sorted, next]);
 
   const timeLabel = (t: number) => new Date(t).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 
@@ -49,12 +59,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
   const pct = (t: number) => Math.max(1, Math.min(99, ((t - tMin) / range) * 100));
   const nowPct = pct(now);
 
-  const selectedKind: "next" | "later" | null = selected
-    ? selected === next
-      ? "next"
-      : "later"
-    : null;
-
+  const selectedKind: "next" | "later" | null = selected ? (selected === next ? "next" : "later") : null;
   const heroAccent = selectedKind === "next" ? "var(--pain-low)" : "var(--accent)";
   const heroLabel = selectedKind === "next" ? "Próxima dosis" : "Programada";
 
@@ -267,12 +272,26 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                       {selected.name}
                     </p>
                   </div>
-                  <span
-                    className="font-mono text-[13px] font-semibold mt-1 shrink-0"
-                    style={{ color: heroAccent }}
-                  >
-                    {countdown(selected.time)}
-                  </span>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <span
+                      className="font-mono text-[13px] font-semibold mt-1"
+                      style={{ color: heroAccent }}
+                    >
+                      {countdown(selected.time)}
+                    </span>
+                    {selectedKind !== "next" && next && (
+                      <button
+                        type="button"
+                        onClick={() => setSelectedKey(slotKey(next))}
+                        className="flex items-center gap-1 text-[11px] font-medium transition-opacity duration-150 hover:opacity-70"
+                        style={{ color: "var(--pain-low)" }}
+                        aria-label="Volver a próxima dosis"
+                      >
+                        <ArrowUUpLeftIcon size={12} weight="bold" />
+                        Próxima
+                      </button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ) : (
