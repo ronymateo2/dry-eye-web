@@ -95,16 +95,18 @@ export function HygieneSheet({
       cycleStartDate.setUTCDate(firstDate.getUTCDate() + (cycle - 1) * 21);
       const cycleStart = cycleStartDate.toISOString().slice(0, 10);
 
+      const completedThisCycle = recentRecords.filter((r) => r.dayKey >= cycleStart).length;
+
       return {
-        totalCompleted: totalCompletedDays,
+        totalCompleted: completedThisCycle,
         cycleNumber: cycle,
         sessionInCycle: dayInCycle,
         progressPct: Math.round((dayInCycle / 21) * 100),
-        identity: identityLabel(totalCompletedDays % 21),
+        identity: identityLabel(completedThisCycle),
         todaySessions: todayCompletedCount,
         cycleStartKey: cycleStart,
       };
-    }, [firstDayKey, totalCompletedDays, todayCompletedCount, todayKey]);
+    }, [firstDayKey, totalCompletedDays, recentRecords, todayCompletedCount, todayKey]);
 
   async function saveHygiene(input: SaveHygieneInput): Promise<boolean> {
     try {
