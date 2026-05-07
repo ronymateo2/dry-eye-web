@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
-import { DropIcon, PlusIcon, NotePencilIcon, MoonIcon, EyeIcon, HeartbeatIcon, PillIcon } from "@phosphor-icons/react";
+import { motion } from "motion/react";
+import { PlusIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { MobileSheet } from "./mobile-sheet";
+import { QuickActionsSheet } from "./quick-actions-sheet";
 import { cn } from "@/lib/utils";
 
 const DropSheet = lazy(() => import("@/components/forms/drop-sheet").then((m) => ({ default: m.DropSheet })));
@@ -17,15 +17,6 @@ const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then(
 const MedicationIntakeSheet = lazy(() => import("@/components/forms/medication-intake-sheet").then((m) => ({ default: m.MedicationIntakeSheet })));
 
 type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | null;
-
-const ACTION_ITEMS = [
-  { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
-  { sheet: "medication-intake" as Sheet, Icon: PillIcon, label: "Pastilla" },
-  { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
-  { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },
-  { sheet: "therapy" as Sheet, Icon: HeartbeatIcon, label: "Terapia" },
-  { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación" },
-];
 
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
@@ -62,59 +53,24 @@ export function FloatingQuickActions() {
 
   return (
     <>
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            key="fab-backdrop"
-            className="fixed inset-0 z-[29] bg-[rgba(0,0,0,0.06)]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            onClick={() => setMenuOpen(false)}
-            aria-hidden="true"
-          />
-        )}
-      </AnimatePresence>
+      <QuickActionsSheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        onSelect={(s) => setSheet(s)}
+      />
 
       {isVisible && <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>
         <div className="mx-auto flex w-[min(100%,480px)] flex-col items-end px-[var(--screen-padding)]">
-          <div className="pointer-events-auto flex flex-col items-end gap-3">
-            <AnimatePresence>
-              {menuOpen && ACTION_ITEMS.map(({ sheet: s, Icon, label }, i) => {
-                const reverseI = ACTION_ITEMS.length - 1 - i;
-                return (
-                  <motion.div
-                    key={s}
-                    initial={{ opacity: 0, y: 8, scale: 0.92 }}
-                    animate={{
-                      opacity: 1, y: 0, scale: 1,
-                      transition: { type: "spring", stiffness: 340, damping: 26, delay: reverseI * 0.04 },
-                    }}
-                    exit={{
-                      opacity: 0, y: 6, scale: 0.94,
-                      transition: { duration: 0.13, ease: "easeIn", delay: reverseI * 0.03 },
-                    }}
-                  >
-                    <Button
-                      className="min-w-[132px] justify-start gap-2.5 border-[var(--border)] bg-[var(--surface)] shadow-[0_8px_20px_rgba(0,0,0,0.22)]"
-                      variant="subtle"
-                      onClick={() => setSheet(s)}
-                    >
-                      <Icon size={18} color="var(--accent)" /> {label}
-                    </Button>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-
-            <button
-              aria-label="Acciones rapidas"
+          <div className="pointer-events-auto">
+            <motion.button
+              aria-label="Acciones rápidas"
               aria-expanded={menuOpen}
+              animate={{ rotate: menuOpen ? 45 : 0 }}
+              transition={{ type: "spring", stiffness: 340, damping: 26 }}
               className={cn(
-                "flex h-12 w-12 items-center justify-center rounded-full border transition-[transform,background-color,border-color,color,box-shadow] duration-200 active:scale-[0.90]",
+                "flex h-12 w-12 items-center justify-center rounded-full border transition-[background-color,border-color,color,box-shadow] duration-200 active:scale-[0.90]",
                 menuOpen
-                  ? "rotate-45 border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] shadow-[0_0_0_6px_var(--accent-dim),0_8px_20px_var(--fab-shadow)]"
+                  ? "border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] shadow-[0_0_0_6px_var(--accent-dim),0_8px_20px_var(--fab-shadow)]"
                   : "border-[var(--border)] bg-[var(--surface)] text-[var(--accent)] shadow-[0_8px_18px_rgba(0,0,0,0.20)] hover:bg-[var(--surface-el)]",
               )}
               type="button"
@@ -122,7 +78,7 @@ export function FloatingQuickActions() {
               style={{ WebkitTapHighlightColor: "transparent" }}
             >
               <PlusIcon size={22} />
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>}
