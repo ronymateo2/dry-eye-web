@@ -147,7 +147,8 @@ export const api = {
     return api.get<{ ok: boolean; sessions: TherapySessionRecord[] }>(`/therapy-sessions${qs}`);
   },
 
-  getDashboard: () => api.get<{ ok: true; therapyCorrelation: TherapyCorrelation | null; [key: string]: unknown }>("/dashboard"),
+  getDashboardSummary: () => api.get<{ ok: true; [key: string]: unknown }>("/dashboard/summary"),
+  getDashboardCorrelations: () => api.get<{ ok: true; therapyCorrelation: TherapyCorrelation | null; [key: string]: unknown }>("/dashboard/correlations"),
   getHistory: () => api.get<HistoryFeed>("/history"),
   getHistoryMore: (before: string, limit = 5) =>
     api.get<HistoryFeed>(`/history/more?before=${before}&limit=${limit}`),
