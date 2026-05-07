@@ -1,16 +1,13 @@
 import type { DisplayItem } from "./types";
-import {
-  CheckInCard,
-  DropsBlock,
-  HygieneCard,
-  TriggerCard,
-  ObservationCard,
-  SleepCard,
-  SymptomCard,
-  TherapyCard,
-  MedicationIntakeCard,
-  MedicationGroupCard,
-} from "./history-cards";
+import { CheckInCard } from "./checkin-card";
+import { DropsBlock } from "./drops-card";
+import { HygieneCard } from "./hygiene-card";
+import { TriggerCard } from "./trigger-card";
+import { ObservationCard } from "./observation-card";
+import { SleepCard } from "./sleep-card";
+import { SymptomCard } from "./symptom-card";
+import { TherapyCard } from "./therapy-card";
+import { MedicationGroupCard, MedicationIntakeCard } from "./medication-cards";
 
 export function HistoryItem({ item, timezone }: { item: DisplayItem; timezone: string }) {
   if (item.kind === "check_in") return <CheckInCard item={item} timezone={timezone} />;

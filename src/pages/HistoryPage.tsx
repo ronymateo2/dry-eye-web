@@ -11,6 +11,75 @@ import { DropsTab } from "@/components/history/drops-tab";
 import { HistoryList } from "@/components/history/history-list";
 import { HISTORY_TABS, type HistoryTab } from "@/components/history/types";
 
+function TabBar({ activeTab, onTabChange }: { activeTab: HistoryTab; onTabChange: (tab: HistoryTab) => void }) {
+  return (
+    <div className="mb-6 flex gap-6 border-b border-[var(--border)]">
+      {HISTORY_TABS.map((tab) => (
+        <button
+          key={tab.value}
+          onClick={() => onTabChange(tab.value)}
+          className="relative pb-2.5 text-[14px] font-semibold transition-colors duration-150"
+          style={{
+            color: activeTab === tab.value ? "var(--text-primary)" : "var(--text-faint)",
+          }}
+        >
+          {tab.label}
+          {activeTab === tab.value && (
+            <span
+              className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
+              style={{ background: "var(--accent)" }}
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function EmptyFeed() {
+  return (
+    <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
+      Aún no tienes registros. Ve a Registrar para empezar.
+    </div>
+  );
+}
+
+function LoadMoreFooter({
+  loadError,
+  hasMore,
+  isLoadingMore,
+  onLoadMore,
+}: {
+  loadError: string | null;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
+}) {
+  return (
+    <div className="mt-6 flex flex-col items-center gap-3 pb-4">
+      {loadError && (
+        <div className="w-full rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
+          {loadError}
+        </div>
+      )}
+      {hasMore && (
+        <button
+          onClick={onLoadMore}
+          disabled={isLoadingMore}
+          className="mono text-[11px] tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
+        >
+          {isLoadingMore ? "CARGANDO..." : "CARGAR MÁS"}
+        </button>
+      )}
+      {!hasMore && (
+        <p className="mono text-[10px] tracking-[0.12em] text-[var(--text-faint)]">
+          INICIO DEL HISTORIAL
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function HistoryPage() {
   const user = useUser();
   const [feed, setFeed] = useState<HistoryFeed | null>(null);
@@ -82,86 +151,44 @@ export default function HistoryPage() {
     }
   };
 
+  if (isLoading) return <section><FeedSkeleton /></section>;
+
   return (
     <section>
-      {isLoading ? (
-        <FeedSkeleton />
-      ) : (
-        <>
-          {/* Minimal underline tabs */}
-          <div className="mb-6 flex gap-6 border-b border-[var(--border)]">
-            {HISTORY_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className="relative pb-2.5 text-[14px] font-semibold transition-colors duration-150"
-                style={{
-                  color: activeTab === tab.value ? "var(--text-primary)" : "var(--text-faint)",
-                }}
-              >
-                {tab.label}
-                {activeTab === tab.value && (
-                  <span
-                    className="absolute bottom-0 left-0 right-0 h-[2px] rounded-full"
-                    style={{ background: "var(--accent)" }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
+      <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-          <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -3 }}
-            transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
-          >
-            {activeTab === "observations" ? (
-              <ObservationsTab timezone={timezone} />
-            ) : activeTab === "drops" ? (
-              <DropsTab timezone={timezone} />
-            ) : !feed || (feed.groups.length === 0 && feed.hygiene.length === 0) ? (
-              <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
-                Aún no tienes registros. Ve a Registrar para empezar.
-              </div>
-            ) : (
-              <>
-                <HistoryList
-                  feed={feed}
-                  timezone={timezone}
-                  expandedDays={expandedDays}
-                  toggleDay={toggleDay}
-                />
-
-                <div className="mt-6 flex flex-col items-center gap-3 pb-4">
-                  {loadError && (
-                    <div className="w-full rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
-                      {loadError}
-                    </div>
-                  )}
-                  {feed.hasMore && (
-                    <button
-                      onClick={loadMore}
-                      disabled={isLoadingMore}
-                      className="mono text-[11px] tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
-                    >
-                      {isLoadingMore ? "CARGANDO..." : "CARGAR MÁS"}
-                    </button>
-                  )}
-                  {!feed.hasMore && (
-                    <p className="mono text-[10px] tracking-[0.12em] text-[var(--text-faint)]">
-                      INICIO DEL HISTORIAL
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-          </motion.div>
-          </AnimatePresence>
-        </>
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -3 }}
+          transition={{ duration: 0.18, ease: [0.25, 1, 0.5, 1] }}
+        >
+          {activeTab === "observations" ? (
+            <ObservationsTab timezone={timezone} />
+          ) : activeTab === "drops" ? (
+            <DropsTab timezone={timezone} />
+          ) : !feed || (feed.groups.length === 0 && feed.hygiene.length === 0) ? (
+            <EmptyFeed />
+          ) : (
+            <>
+              <HistoryList
+                feed={feed}
+                timezone={timezone}
+                expandedDays={expandedDays}
+                toggleDay={toggleDay}
+              />
+              <LoadMoreFooter
+                loadError={loadError}
+                hasMore={feed.hasMore}
+                isLoadingMore={isLoadingMore}
+                onLoadMore={loadMore}
+              />
+            </>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </section>
   );
 }
