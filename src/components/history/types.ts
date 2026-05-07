@@ -88,6 +88,13 @@ export type DisplayMedicationIntake = {
   notes: string | null;
 };
 
+export type DisplayMedicationGroup = {
+  kind: "medication_group";
+  id: string;
+  loggedAt: string;
+  intakes: DisplayMedicationIntake[];
+};
+
 export type DisplayItem =
   | DisplayCheckIn
   | DisplayDropGroup
@@ -97,7 +104,8 @@ export type DisplayItem =
   | DisplaySleep
   | DisplayHygiene
   | DisplayTherapy
-  | DisplayMedicationIntake;
+  | DisplayMedicationIntake
+  | DisplayMedicationGroup;
 
 export type OccurrenceRow = {
   id: string;

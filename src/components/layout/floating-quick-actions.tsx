@@ -14,7 +14,7 @@ const ObservationsListSheet = lazy(() => import("@/components/forms/observations
 const LogOccurrenceSheet = lazy(() => import("@/components/forms/log-occurrence-sheet").then((m) => ({ default: m.LogOccurrenceSheet })));
 const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet").then((m) => ({ default: m.ObservationSheet })));
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
-const MedicationIntakeSheet = lazy(() => import("@/components/forms/medication-intake-sheet").then((m) => ({ default: m.MedicationIntakeSheet })));
+const MedicationSessionSheet = lazy(() => import("@/components/forms/medication-session-sheet").then((m) => ({ default: m.MedicationSessionSheet })));
 
 type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | null;
 
@@ -47,6 +47,9 @@ export function FloatingQuickActions() {
   const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); setInitialDropTypeId(undefined); };
   const savedAndClose = () => {
     window.dispatchEvent(new CustomEvent("history:refresh"));
+    queryClient.invalidateQueries({ queryKey: ["history"] });
+    queryClient.invalidateQueries({ queryKey: ["medications"] });
+    queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
     closeAll();
   };
@@ -108,8 +111,8 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "therapy"} title="Registrar terapia" description="Registra una sesion de terapia miofascial." onClose={closeAll}>
           <TherapySheet onSaved={savedAndClose} />
         </MobileSheet>
-        <MobileSheet open={sheet === "medication-intake"} title="Registrar pastilla" description="Registra una toma de medicamento." onClose={closeAll}>
-          <MedicationIntakeSheet onSaved={savedAndClose} />
+        <MobileSheet open={sheet === "medication-intake"} title="Registrar pastilla" description="Registra una toma de medicamento." onClose={closeAll} panelClassName="!h-[92dvh]">
+          <MedicationSessionSheet onSaved={savedAndClose} />
         </MobileSheet>
       </Suspense>
     </>

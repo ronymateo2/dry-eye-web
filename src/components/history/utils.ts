@@ -1,5 +1,5 @@
 import type { HistoryEntry, TriggerType } from "@/types/domain";
-import type { DisplayItem, DisplayCheckIn, DisplayDrop, DisplayObservation, DisplaySleep, DisplayTherapy, DisplayMedicationIntake } from "./types";
+import type { DisplayItem, DisplayCheckIn, DisplayDrop, DisplayObservation, DisplaySleep, DisplayTherapy, DisplayMedicationIntake, DisplayMedicationGroup } from "./types";
 import { HYGIENE_STATUS_COLORS } from "./types";
 
 const timeFormatterCache = new Map<string, Intl.DateTimeFormat>();
@@ -100,6 +100,7 @@ export function getDotColor(item: DisplayItem): string {
   if (item.kind === "drop_group") return "var(--accent)";
   if (item.kind === "hygiene") return HYGIENE_STATUS_COLORS[item.record.status];
   if (item.kind === "therapy") return "var(--accent)";
+  if (item.kind === "medication_group") return "var(--accent)";
   return "var(--text-muted)";
 }
 
@@ -201,5 +202,52 @@ export function collapseEntries(entries: HistoryEntry[]): DisplayItem[] {
     result.push({ kind: "drop_group", id: latest.id, loggedAt: latest.loggedAt, drops });
   }
 
-  return result;
+  // ─── Group consecutive medication intakes within a 5-min window ──────────
+  const WINDOW_MS = 5 * 60 * 1000;
+
+  const finalResult: DisplayItem[] = [];
+  let medBuffer: DisplayMedicationIntake[] = [];
+
+  function flushMeds() {
+    if (medBuffer.length === 0) return;
+    if (medBuffer.length === 1) {
+      finalResult.push(medBuffer[0]);
+    } else {
+      const latest = medBuffer.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
+      const group: DisplayMedicationGroup = {
+        kind: "medication_group",
+        id: latest.id,
+        loggedAt: latest.loggedAt,
+        intakes: [...medBuffer],
+      };
+      finalResult.push(group);
+    }
+    medBuffer = [];
+  }
+
+  for (const item of result) {
+    if (item.kind === "medication-intake") {
+      const intake = item as DisplayMedicationIntake;
+      if (medBuffer.length === 0) {
+        medBuffer.push(intake);
+      } else {
+        const first = medBuffer[0];
+        const dt = Math.abs(
+          new Date(intake.loggedAt).getTime() - new Date(first.loggedAt).getTime(),
+        );
+        if (dt <= WINDOW_MS) {
+          medBuffer.push(intake);
+        } else {
+          flushMeds();
+          medBuffer.push(intake);
+        }
+      }
+    } else {
+      flushMeds();
+      finalResult.push(item);
+    }
+  }
+  flushMeds();
+
+  return finalResult;
 }
