@@ -732,12 +732,14 @@ export function MedicationGroupCard({ item, timezone }: { item: import("./types"
             <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
           </div>
         </div>
-        <span
-          className="mono text-[18px] font-semibold tabular-nums"
-          style={{ color: "var(--accent)" }}
-        >
-          {item.intakes.length}
-        </span>
+        <div
+          className="flex shrink-0 items-center gap-2 rounded-[10px] px-2.5 py-1.5"
+          style={{ background: "color-mix(in srgb, var(--pain-low) 12%, transparent)" }}
+        ><CheckIcon style={{ color: "var(--pain-low)" }} size={13} weight="bold" />
+          <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: "var(--pain-low)" }}>
+            {item.intakes.length}
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-col">
