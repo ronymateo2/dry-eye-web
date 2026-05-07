@@ -49,7 +49,7 @@ export const api = {
 
   // Named endpoints
   getMe: () => api.get<{ id: string; name: string | null; email: string | null; image: string | null; timezone: string; theme: "dark" | "light" }>("/user/me"),
-  updateMe: (body: { timezone?: string; name?: string; theme?: "dark" | "light" }) => api.put("/user/me", body),
+  updateMe: (body: { timezone?: string; name?: string; theme?: "dark" | "light" }) => api.put<{ token?: string } & Record<string, unknown>>("/user/me", body),
 
   saveCheckIn: (body: unknown) => api.post("/check-ins", body),
   getLastCheckIn: () =>

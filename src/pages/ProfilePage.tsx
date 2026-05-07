@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { TextInput } from "@/components/ui/text-input";
-import { api } from "@/lib/api";
+import { api, setToken } from "@/lib/api";
 import { useAuth, useUser } from "@/lib/auth";
 import {
   ArrowCounterClockwiseIcon,
@@ -93,7 +93,8 @@ export default function ProfilePage() {
   const handleTimezoneSelect = async (tz: string) => {
     setTzPending(true);
     try {
-      await api.updateMe({ timezone: tz });
+      const res = await api.updateMe({ timezone: tz });
+      if (res.token) setToken(res.token);
       await refreshUser();
       setTimezone(tz);
       setTzSheetOpen(false);
