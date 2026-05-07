@@ -16,6 +16,7 @@ import {
   SignOutIcon,
   SunIcon,
 } from "@phosphor-icons/react";
+import { motion } from "motion/react";
 import { useTheme } from "@/lib/theme";
 import { toast } from "sonner";
 
@@ -184,12 +185,23 @@ export default function ProfilePage() {
               </div>
               <button
                 type="button"
+                role="switch"
+                aria-checked={theme === "dark"}
                 onClick={handleThemeToggle}
                 aria-label="Cambiar tema"
                 disabled={themePending}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-40"
+                className="relative h-7 w-[48px] shrink-0 rounded-full disabled:opacity-40"
+                style={{ background: theme === "dark" ? "var(--accent)" : "var(--surface-el)", border: "1.5px solid var(--border)", transition: "background 0.25s" }}
               >
-                {theme === "light" ? <MoonIcon size={15} /> : <SunIcon size={15} />}
+                <motion.span
+                  layout
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  style={{ position: "absolute", top: 2, width: 21, height: 21, borderRadius: "50%", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", left: theme === "dark" ? "calc(100% - 23px)" : 2 }}
+                >
+                  {theme === "dark"
+                    ? <MoonIcon size={11} color="var(--accent)" weight="fill" />
+                    : <SunIcon size={11} color="var(--text-faint)" weight="fill" />}
+                </motion.span>
               </button>
             </div>
           </div>
