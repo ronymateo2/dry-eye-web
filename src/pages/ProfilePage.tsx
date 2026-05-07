@@ -16,7 +16,7 @@ import {
   SignOutIcon,
   SunIcon,
 } from "@phosphor-icons/react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useTheme } from "@/lib/theme";
 import { toast } from "sonner";
 
@@ -70,6 +70,9 @@ export default function ProfilePage() {
 
   const { theme, setTheme } = useTheme();
   const [themePending, setThemePending] = useState(false);
+  const reducedMotion = useReducedMotion();
+  const spring = reducedMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 400, damping: 28, mass: 0.8 };
+  const fade = reducedMotion ? { duration: 0 } : { duration: 0.2 };
 
   // Timezone state
   const [timezone, setTimezone] = useState(user.timezone ?? "");
@@ -190,17 +193,69 @@ export default function ProfilePage() {
                 onClick={handleThemeToggle}
                 aria-label="Cambiar tema"
                 disabled={themePending}
-                className="relative h-7 w-[48px] shrink-0 rounded-full disabled:opacity-40"
-                style={{ background: theme === "dark" ? "var(--accent)" : "var(--surface-el)", border: "1.5px solid var(--border)", transition: "background 0.25s" }}
+                className="relative shrink-0 disabled:opacity-40"
+                style={{ width: 76, height: 42, border: "none", background: "transparent" }}
               >
-                <motion.span
-                  layout
-                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                  style={{ position: "absolute", top: 2, width: 21, height: 21, borderRadius: "50%", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", left: theme === "dark" ? "calc(100% - 23px)" : 2 }}
+                <span
+                  style={{
+                    position: "absolute", inset: 0, borderRadius: "500px",
+                    backgroundColor: theme === "dark" ? "var(--surface)" : "var(--surface-el)",
+                    boxShadow: theme === "dark"
+                      ? "inset 0px 2px 5px rgba(0,0,0,0.55), inset 0px -1px 2px rgba(255,255,255,0.03)"
+                      : "inset 0px 2px 4px rgba(0,0,0,0.1), inset 0px -1px 2px rgba(255,255,255,0.6)",
+                    transition: "background-color 0.25s ease, box-shadow 0.25s ease",
+                    overflow: "hidden",
+                  }}
                 >
-                  {theme === "dark"
-                    ? <MoonIcon size={11} color="var(--accent)" weight="fill" />
-                    : <SunIcon size={11} color="var(--text-faint)" weight="fill" />}
+                  <motion.span
+                    aria-hidden
+                    animate={{ opacity: theme === "dark" ? 0.4 : 0 }}
+                    transition={fade}
+                    style={{ position: "absolute", left: 11, top: "50%", translateY: "-50%", display: "flex", pointerEvents: "none" }}
+                  >
+                    <SunIcon size={16} color="var(--text-faint)" weight="regular" />
+                  </motion.span>
+                  <motion.span
+                    aria-hidden
+                    animate={{ opacity: theme === "light" ? 0.45 : 0 }}
+                    transition={fade}
+                    style={{ position: "absolute", right: 11, top: "50%", translateY: "-50%", display: "flex", pointerEvents: "none" }}
+                  >
+                    <MoonIcon size={16} color="var(--text-faint)" weight="regular" />
+                  </motion.span>
+                </span>
+                <motion.span
+                  animate={{ x: theme === "dark" ? 34 : 0 }}
+                  transition={spring}
+                  style={{
+                    position: "absolute", top: 4, left: 4,
+                    width: 34, height: 34, borderRadius: "500px",
+                    background: theme === "dark"
+                      ? "linear-gradient(145deg, var(--surface-el) 0%, var(--surface) 100%)"
+                      : "linear-gradient(145deg, var(--surface) 0%, var(--surface-el) 100%)",
+                    boxShadow: theme === "dark"
+                      ? "0px 2px 5px rgba(0,0,0,0.55), 0px 1px 2px rgba(0,0,0,0.4), inset 0px 1px 1px rgba(240,228,200,0.06)"
+                      : "0px 2px 8px rgba(0,0,0,0.12), 0px 1px 3px rgba(0,0,0,0.08), inset 0px 1px 1px rgba(255,255,255,0.9)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "background 0.25s ease, box-shadow 0.25s ease",
+                  }}
+                >
+                  <motion.span
+                    aria-hidden
+                    animate={{ opacity: theme === "light" ? 1 : 0 }}
+                    transition={fade}
+                    style={{ position: "absolute", display: "flex" }}
+                  >
+                    <SunIcon size={18} color="var(--accent)" weight="fill" />
+                  </motion.span>
+                  <motion.span
+                    aria-hidden
+                    animate={{ opacity: theme === "dark" ? 1 : 0 }}
+                    transition={fade}
+                    style={{ position: "absolute", display: "flex" }}
+                  >
+                    <MoonIcon size={18} color="var(--accent)" weight="regular" />
+                  </motion.span>
                 </motion.span>
               </button>
             </div>
