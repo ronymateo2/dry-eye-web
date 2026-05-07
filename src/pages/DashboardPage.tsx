@@ -1,14 +1,12 @@
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { DashboardScreen, type DashboardSummaryData, type DashboardCorrelationsData } from "@/components/dashboard/dashboard-screen";
 import { Button } from "@/components/ui/button";
+import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 
 export default function DashboardPage() {
-  const [showCorrelations, setShowCorrelations] = useState(() => {
-    return localStorage.getItem("weqe_show_correlations") === "true";
-  });
+  const [showCorrelations, setShowCorrelations] = useLocalStorage("weqe_show_correlations", false);
 
   const { data: summary, isLoading: isLoadingSummary } = useQuery<DashboardSummaryData>({
     queryKey: ["dashboard", "summary"],
@@ -20,11 +18,6 @@ export default function DashboardPage() {
     queryFn: api.getDashboardCorrelations as () => Promise<DashboardCorrelationsData>,
     enabled: showCorrelations,
   });
-
-  const handleShowCorrelations = () => {
-    setShowCorrelations(true);
-    localStorage.setItem("weqe_show_correlations", "true");
-  };
 
   if (isLoadingSummary || !summary) {
     return (
@@ -46,7 +39,7 @@ export default function DashboardPage() {
         <div className="flex justify-center pb-6">
           <Button 
             variant="subtle" 
-            onClick={handleShowCorrelations}
+            onClick={() => setShowCorrelations(true)}
             className="w-full max-w-[300px]"
           >
             Generar Analíticas Clínicas
