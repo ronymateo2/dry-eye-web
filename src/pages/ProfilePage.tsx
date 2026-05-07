@@ -191,9 +191,9 @@ export default function ProfilePage() {
                 role="switch"
                 aria-checked={theme === "dark"}
                 onClick={handleThemeToggle}
-                aria-label="Cambiar tema"
+                aria-label="Tema oscuro"
                 disabled={themePending}
-                className="relative shrink-0 disabled:opacity-40"
+                className="relative shrink-0 transition-transform active:scale-[0.97] disabled:opacity-40"
                 style={{ width: 76, height: 42, border: "none", background: "transparent" }}
               >
                 <span
@@ -203,7 +203,7 @@ export default function ProfilePage() {
                     boxShadow: theme === "dark"
                       ? "inset 0px 2px 5px rgba(0,0,0,0.55), inset 0px -1px 2px rgba(255,255,255,0.03)"
                       : "inset 0px 2px 4px rgba(0,0,0,0.1), inset 0px -1px 2px rgba(255,255,255,0.6)",
-                    transition: "background-color 0.25s ease, box-shadow 0.25s ease",
+                    transition: "background-color 0.25s cubic-bezier(0.23,1,0.32,1), box-shadow 0.25s cubic-bezier(0.23,1,0.32,1)",
                     overflow: "hidden",
                   }}
                 >
@@ -225,7 +225,7 @@ export default function ProfilePage() {
                   </motion.span>
                 </span>
                 <motion.span
-                  animate={{ x: theme === "dark" ? 34 : 0 }}
+                  animate={{ transform: theme === "dark" ? "translateX(34px)" : "translateX(0px)" }}
                   transition={spring}
                   style={{
                     position: "absolute", top: 4, left: 4,
@@ -237,7 +237,7 @@ export default function ProfilePage() {
                       ? "0px 2px 5px rgba(0,0,0,0.55), 0px 1px 2px rgba(0,0,0,0.4), inset 0px 1px 1px rgba(240,228,200,0.06)"
                       : "0px 2px 8px rgba(0,0,0,0.12), 0px 1px 3px rgba(0,0,0,0.08), inset 0px 1px 1px rgba(255,255,255,0.9)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    transition: "background 0.25s ease, box-shadow 0.25s ease",
+                    transition: "background 0.25s cubic-bezier(0.23,1,0.32,1), box-shadow 0.25s cubic-bezier(0.23,1,0.32,1)",
                   }}
                 >
                   <motion.span
