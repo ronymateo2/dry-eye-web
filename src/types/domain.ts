@@ -74,6 +74,7 @@ export type MedicationRecord = {
   start_date: string | null;
   end_date: string | null;
   phases_json: string | null;
+  times_json: string | null;
   archived_at?: string | null;
 };
 
@@ -103,6 +104,7 @@ export type SaveMedicationInput = {
   startDate?: string | null;
   endDate?: string | null;
   phasesJson?: string | null;
+  timesJson?: string[] | null;
 };
 
 export type PainQuality = "ardor" | "hormigueo" | "electrico" | "presion" | "alodinia";

@@ -117,7 +117,7 @@ export const api = {
   deleteObservation: (id: string) => api.delete(`/observations/${id}`),
   saveOccurrence: (observationId: string, body: Omit<SaveOccurrenceInput, "observationId">) => api.post(`/observations/${observationId}/occurrences`, body),
 
-  getMedications: () => api.get<{ id: string; name: string; dosage: string | null; frequency: string | null; notes: string | null; sort_order: number | null; start_date: string | null; end_date: string | null; phases_json: string | null }[]>("/medications"),
+  getMedications: () => api.get<{ id: string; name: string; dosage: string | null; frequency: string | null; notes: string | null; sort_order: number | null; start_date: string | null; end_date: string | null; phases_json: string | null; times_json: string | null }[]>("/medications"),
   createMedication: (body: SaveMedicationInput) => api.post("/medications", body),
   updateMedication: (id: string, body: SaveMedicationInput) => api.put(`/medications/${id}`, body),
   deleteMedication: (id: string) => api.delete(`/medications/${id}`),

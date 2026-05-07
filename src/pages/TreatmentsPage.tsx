@@ -122,6 +122,76 @@ function IntervalPills({
   );
 }
 
+// ─── Times Picker ─────────────────────────────────────────────────────────────
+
+function sortTimes(arr: string[]): string[] {
+  return [...arr].sort();
+}
+
+function TimesPicker({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const sorted = sortTimes(value);
+
+  const handleAddSlot = () => onChange(sortTimes([...sorted, "08:00"]));
+
+  const handleUpdateSlot = (i: number, next: string) => {
+    const arr = [...sorted];
+    arr[i] = next;
+    onChange(sortTimes(arr));
+  };
+
+  const handleRemoveSlot = (i: number) => {
+    onChange(sorted.filter((_, j) => j !== i));
+  };
+
+  return (
+    <div className="space-y-1.5">
+      {sorted.map((t, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input
+            type="time"
+            value={t}
+            onChange={(e) => handleUpdateSlot(i, e.target.value)}
+            className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+          />
+          <button
+            type="button"
+            aria-label="Eliminar hora"
+            onClick={() => handleRemoveSlot(i)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[var(--error)] opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <TrashIcon size={15} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={handleAddSlot}
+        className="flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-[var(--border)] py-2 text-[13px] text-[var(--text-faint)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+      >
+        <PlusIcon size={12} weight="bold" />
+        Agregar hora
+      </button>
+    </div>
+  );
+}
+
+function parseTimesJson(json: string | null | undefined): string[] {
+  if (!json) return [];
+  try {
+    const parsed = JSON.parse(json);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((t): t is string => typeof t === "string" && /^\d{2}:\d{2}$/.test(t));
+  } catch {
+    return [];
+  }
+}
+
 // ─── Med Phase Timeline ───────────────────────────────────────────────────────
 
 function MedPhaseTimeline({ phasesJson }: { phasesJson: string }) {
@@ -563,6 +633,7 @@ type MedForm = {
   startDate: string;
   endDate: string;
   phases: MedicationPhase[];
+  times: string[];
 };
 
 const EMPTY_MED_FORM: MedForm = {
@@ -573,6 +644,7 @@ const EMPTY_MED_FORM: MedForm = {
   startDate: "",
   endDate: "",
   phases: [],
+  times: [],
 };
 
 function parsePhasesJson(json: string | null | undefined): MedicationPhase[] {
@@ -610,6 +682,7 @@ function MedSheet({
               startDate: item.start_date ?? "",
               endDate: item.end_date ?? "",
               phases: parsePhasesJson(item.phases_json),
+              times: parseTimesJson(item.times_json),
             }
           : EMPTY_MED_FORM,
       );
@@ -627,6 +700,7 @@ function MedSheet({
         startDate: form.startDate.trim() || null,
         endDate: form.endDate.trim() || null,
         phasesJson: form.phases.length > 0 ? JSON.stringify(form.phases) : null,
+        timesJson: form.times.length > 0 ? form.times : null,
       };
       return isEdit ? api.updateMedication(item!.id, body) : api.createMedication(body);
     },
@@ -656,31 +730,50 @@ function MedSheet({
       onClose={onClose}
     >
       <div className="space-y-3">
-        <TextInput
-          placeholder="Nombre (ej. Ciclosporina 0.1%)"
-          value={form.name}
-          autoFocus={!isEdit}
-          rows={1}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-        />
-        <TextInput
-          placeholder="Dosis (ej. 1 gota)"
-          value={form.dosage}
-          rows={1}
-          onChange={(e) => setForm((f) => ({ ...f, dosage: e.target.value }))}
-        />
-        <TextInput
-          placeholder="Frecuencia (ej. 2 veces al día)"
-          value={form.frequency}
-          rows={1}
-          onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value }))}
-        />
-        <TextInput
-          placeholder="Notas (opcional)"
-          value={form.notes}
-          rows={2}
-          onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-        />
+        <div className="space-y-1.5">
+          <p className="text-[12px] text-[var(--text-faint)]">Nombre</p>
+          <TextInput
+            placeholder="ej. Ciclosporina 0.1%"
+            value={form.name}
+            autoFocus={!isEdit}
+            rows={1}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-[12px] text-[var(--text-faint)]">Dosis</p>
+          <TextInput
+            placeholder="ej. 1 gota, 600mg"
+            value={form.dosage}
+            rows={1}
+            onChange={(e) => setForm((f) => ({ ...f, dosage: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-[12px] text-[var(--text-faint)]">Frecuencia</p>
+          <TextInput
+            placeholder="ej. 2 veces al día"
+            value={form.frequency}
+            rows={1}
+            onChange={(e) => setForm((f) => ({ ...f, frequency: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-[12px] text-[var(--text-faint)]">Horarios (Google Calendar)</p>
+          <TimesPicker
+            value={form.times}
+            onChange={(times) => setForm((f) => ({ ...f, times }))}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-[12px] text-[var(--text-faint)]">Notas</p>
+          <TextInput
+            placeholder="opcional"
+            value={form.notes}
+            rows={2}
+            onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+          />
+        </div>
         <div className="space-y-1.5">
           <p className="text-[12px] text-[var(--text-faint)]">Ciclo (opcional)</p>
           <DateRangePicker
@@ -849,6 +942,7 @@ function MedicationsPanel() {
                 <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
                   {medications.map((med) => {
                     const detail = [med.dosage, med.frequency].filter(Boolean).join(" · ");
+                    const times = parseTimesJson(med.times_json);
                     return (
                       <SortableRow
                         key={med.id}
@@ -858,6 +952,11 @@ function MedicationsPanel() {
                         isOnly={medications.length === 1}
                         onClick={() => setEditingItem(med)}
                       >
+                        {times.length > 0 && (
+                          <span className="mono text-[11px] text-[var(--accent)] leading-tight">
+                            {times.join(" · ")}
+                          </span>
+                        )}
                         {med.phases_json && <MedPhaseTimeline phasesJson={med.phases_json} />}
                         {med.notes && (
                           <span className="text-[12px] text-[var(--text-faint)] leading-tight">
