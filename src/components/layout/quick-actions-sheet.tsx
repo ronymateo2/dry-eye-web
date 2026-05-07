@@ -119,8 +119,8 @@ export function QuickActionsSheet({ open, onClose, onSelect }: Props) {
                   aria-label={label}
                   className="action-row"
                   variants={itemVariants}
-                  whileTap={{ scale: reducedMotion ? 1 : 0.97 }}
-                  transition={{ duration: 0.16, ease: ITEM_EASE }}
+                  whileHover={{ opacity: 0.85 }}
+                  whileTap={{ scale: reducedMotion ? 1 : 0.97, opacity: reducedMotion ? 1 : 0.7 }}
                   onClick={() => { onSelect(sheet); onClose(); }}
                 >
                   <Icon size={20} color="var(--accent)" />
