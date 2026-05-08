@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { ArrowRightIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretRightIcon, WarningIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn, daysUntilEnd } from "@/lib/utils";
@@ -77,9 +77,15 @@ function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: n
       : computed!.nextTime;
   const badgeLabel = noRecord ? "Sin registro" : computed!.label;
   const badgeColor = computed?.color ?? "var(--text-muted)";
+
+  const suspDays = entry.end_date ? daysUntilEnd(entry.end_date) : null;
+  const isUrgentSuspension = suspDays != null && suspDays >= 0 && suspDays <= 7;
+
   const ariaLabel = noRecord
     ? `Registrar ${entry.name}. Sin registro previo, intervalo cada ${entry.interval_hours} horas.`
-    : `Registrar ${entry.name}. Proxima dosis ${computed!.label}, a las ${computed!.nextTime}.`;
+    : isUrgentSuspension
+      ? `Registrar ${entry.name}. Suspender en ${suspDays}d. Próxima dosis ${computed!.label}.`
+      : `Registrar ${entry.name}. Próxima dosis ${computed!.label}, a las ${computed!.nextTime}.`;
 
   const openDropSheet = () => {
     window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop", dropTypeId: entry.drop_type_id } }));
@@ -100,10 +106,14 @@ function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: n
       onClick={openDropSheet}
     >
       <span className="flex min-w-0 items-center gap-2.5">
-        <span
-          className="h-4 w-[3px] shrink-0 rounded-full opacity-90 transition-[height,opacity] duration-[160ms] ease-out group-hover:h-5 group-hover:opacity-100"
-          style={{ background: badgeColor }}
-        />
+        {isUrgentSuspension ? (
+          <WarningIcon size={14} className="shrink-0 text-[var(--warning)]" weight="fill" />
+        ) : (
+          <span
+            className="h-4 w-[3px] shrink-0 rounded-full opacity-90 transition-[height,opacity] duration-[160ms] ease-out group-hover:h-5 group-hover:opacity-100"
+            style={{ background: badgeColor }}
+          />
+        )}
         <span className="flex min-w-0 items-baseline gap-1.5">
           <span
             className="truncate text-[13px] font-medium capitalize leading-none"
@@ -111,6 +121,14 @@ function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: n
           >
             {entry.name}
           </span>
+          {isUrgentSuspension && (
+            <>
+              <span className="shrink-0 text-[11px] leading-none" style={{ color: "var(--text-faint)" }}>·</span>
+              <span className="truncate font-mono text-[11px] leading-none tabular-nums" style={{ color: "var(--warning)" }}>
+                suspender {suspDays}d
+              </span>
+            </>
+          )}
           <span className="shrink-0 text-[11px] leading-none" style={{ color: "var(--text-faint)" }}>
             ·
           </span>
@@ -158,6 +176,7 @@ export function DropsScheduleCard() {
     () =>
       entries
         .filter((e) => e.interval_hours != null)
+        .filter((e) => !(e.end_date && daysUntilEnd(e.end_date) < 0))
         .sort((a, b) => getNextMs(a) - getNextMs(b)),
     [entries],
   );
@@ -180,28 +199,8 @@ export function DropsScheduleCard() {
 
   if (scheduled.length === 0) return null;
 
-  const suspendedPast = entries.filter((e) => e.end_date && daysUntilEnd(e.end_date) < 0);
-  const suspendedUrgent = entries.filter((e) => e.end_date && daysUntilEnd(e.end_date) >= 0 && daysUntilEnd(e.end_date) <= 7);
-
-  const hasOverdue = scheduled.some(
-    (e) =>
-      e.last_logged_at != null &&
-      e.interval_hours != null &&
-      getCountdown(e.last_logged_at, e.interval_hours, now).overdue,
-  );
-
   return (
     <>
-      {suspendedPast.length > 0 && (
-        <div className="rounded-[10px] border px-4 py-3 text-[13px]" style={{ borderColor: "var(--error)", background: "rgba(204,63,48,0.08)", color: "var(--error)" }}>
-          Suspende {suspendedPast.map((e) => e.name).join(", ")} — la fecha de suspensión ya pasó.
-        </div>
-      )}
-      {suspendedPast.length === 0 && suspendedUrgent.length > 0 && (
-        <div className="rounded-[10px] border border-[#ca8a04] bg-[rgba(234,179,8,0.08)] px-4 py-3 text-[13px] text-[#ca8a04]">
-          {suspendedUrgent.map((e) => `${e.name}: suspender en ${daysUntilEnd(e.end_date!)}d`).join(" · ")}
-        </div>
-      )}
       <div className="space-y-0.5">
         <div className="flex items-center justify-between">
           <p className="section-label mb-0">Próximas dosis</p>
@@ -211,12 +210,6 @@ export function DropsScheduleCard() {
             aria-label="Ver proyección del día"
             className="flex items-center gap-1 rounded-sm text-[11px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
           >
-            {hasOverdue && (
-              <>
-                <span style={{ color: "var(--pain-high)" }}>Vencida</span>
-                <span style={{ color: "var(--text-faint)" }}>·</span>
-              </>
-            )}
             <span style={{ color: "var(--accent)" }}>Ver día</span>
             <ArrowRightIcon size={10} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
           </button>

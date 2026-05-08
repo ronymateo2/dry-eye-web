@@ -101,7 +101,7 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group grid min-h-[48px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[9px] px-2 py-1.5 text-left",
+        "group grid min-h-[34px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[9px] px-1 py-1 text-left",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40",
       )}
@@ -132,7 +132,7 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
       <span className="flex shrink-0 items-center gap-1.5">
         <span
           className="font-mono text-[11px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
-          style={{ color: item.badgeColor }}
+          style={{ color: item.badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
           {item.badgeLabel}
         </span>
@@ -170,8 +170,6 @@ export function MedicationsAgenda() {
   const scheduled = useMemo(() => {
     return buildSchedule(medications, intakes, now);
   }, [medications, intakes, now]);
-
-  const hasOverdue = scheduled.some((s) => s.overdue);
 
   const openMedSheet = (medicationId?: string) => {
     window.dispatchEvent(
@@ -223,9 +221,6 @@ export function MedicationsAgenda() {
     <div className="space-y-0.5">
       <div className="flex items-center justify-between">
         <p className="section-label mb-0">Próximas pastillas</p>
-        {hasOverdue && (
-          <span className="text-[11px] font-medium text-[var(--pain-high)]">Vencida</span>
-        )}
       </div>
       <div className="space-y-0">
         {scheduled.map((item, i) => (
