@@ -77,6 +77,8 @@ export const api = {
   updateDropTypeInterval: (id: string, intervalHours: number | null) => api.put(`/drop-types/${id}`, { intervalHours }),
   deleteDropType: (id: string) => api.delete(`/drop-types/${id}`),
   reorderDropTypes: (ids: string[]) => api.put("/drop-types/reorder", { ids }),
+  getArchivedDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null; archived_at: string }[]>("/drop-types/archived"),
+  unarchiveDropType: (id: string) => api.post<{ ok: boolean }>(`/drop-types/${id}/unarchive`, {}),
 
   saveDrop: (body: SaveDropInput) => api.post("/drops", body),
   getLastDrop: () => api.get<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_name: string; drop_type_id: string } | null>("/drops/last"),
@@ -122,6 +124,8 @@ export const api = {
   updateMedication: (id: string, body: SaveMedicationInput) => api.put(`/medications/${id}`, body),
   deleteMedication: (id: string) => api.delete(`/medications/${id}`),
   reorderMedications: (ids: string[]) => api.put("/medications/reorder", { ids }),
+  getArchivedMedications: () => api.get<{ id: string; name: string; dosage: string | null; frequency: string | null; notes: string | null; sort_order: number | null; start_date: string | null; end_date: string | null; phases_json: string | null; times_json: string | null; archived_at: string }[]>("/medications/archived"),
+  unarchiveMedication: (id: string) => api.post<{ ok: boolean }>(`/medications/${id}/unarchive`, {}),
 
   saveMedicationIntake: (body: SaveMedicationIntakeInput) => api.post<{ ok: boolean }>("/medications/intakes", body),
   getLastIntakePerMedication: () => api.get<{ medication_id: string; last_logged_at: string | null }[]>("/medications/intakes/last-per-med"),
