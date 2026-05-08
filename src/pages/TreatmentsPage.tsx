@@ -1,14 +1,26 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { TextInput } from "@/components/ui/text-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { api } from "@/lib/api";
-import { DotsSixVerticalIcon, PlusIcon, TrashIcon, ArchiveIcon, ArrowUUpLeftIcon } from "@phosphor-icons/react";
+import {
+  DotsSixVerticalIcon,
+  PlusIcon,
+  TrashIcon,
+  ArchiveIcon,
+  ArrowUUpLeftIcon,
+  EyeIcon,
+  PillIcon,
+  NotePencilIcon,
+  CaretRightIcon,
+} from "@phosphor-icons/react";
 import {
   DndContext,
   closestCenter,
@@ -206,17 +218,26 @@ function MedPhaseTimeline({ phasesJson }: { phasesJson: string }) {
     (p) => today >= p.start_date && (p.end_date === null || today <= p.end_date),
   );
   return (
-    <div className="flex items-end gap-1 overflow-x-auto pt-1">
+    <div className="flex items-stretch gap-1 pt-1">
       {phases.map((p, i) => {
         const isCurrent = i === currentIdx;
         const isPast = currentIdx > -1 && i < currentIdx;
         return (
-          <div key={i} className="flex shrink-0 flex-col items-center gap-0.5">
-            <div className={[
-              "h-1.5 w-12 rounded-full",
-              isCurrent ? "bg-[var(--accent)]" : isPast ? "bg-[var(--text-faint)]" : "bg-[var(--border)]",
-            ].join(" ")} />
-            <span className={["text-[10px]", isCurrent ? "font-medium text-[var(--accent)]" : "text-[var(--text-faint)]"].join(" ")}>
+          <div key={i} className="flex min-w-[44px] flex-1 flex-col items-center gap-1">
+            <div
+              className={cn(
+                "h-2 w-full rounded-full",
+                isCurrent && "bg-[var(--accent)]",
+                isPast && "bg-[var(--text-faint)] opacity-40",
+                !isCurrent && !isPast && "border border-[var(--border)] bg-transparent",
+              )}
+            />
+            <span
+              className={cn(
+                "mono text-[10px] leading-none",
+                isCurrent ? "font-medium text-[var(--accent)]" : "text-[var(--text-faint)]",
+              )}
+            >
               {p.dosage}
             </span>
           </div>
@@ -237,6 +258,7 @@ function SortableRow({
   isOnly,
   onClick,
   children,
+  icon,
 }: {
   item: RowBase;
   name: string;
@@ -244,6 +266,7 @@ function SortableRow({
   isOnly: boolean;
   onClick: () => void;
   children?: React.ReactNode;
+  icon?: React.ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: item.id });
@@ -259,7 +282,6 @@ function SortableRow({
         transform: CSS.Transform.toString(transform),
         transition,
         zIndex: isDragging ? 10 : undefined,
-        position: isDragging ? ("relative" as const) : undefined,
       }}
       className={cn(
         "border-b border-[var(--border)] last:border-b-0",
@@ -276,29 +298,34 @@ function SortableRow({
             isPastEnd && "opacity-50",
           )}
         >
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span className={cn(
-              "text-[15px] font-medium text-[var(--text-primary)] leading-snug",
-              isPastEnd && "line-through",
-            )}>
-              {name}
-            </span>
-            {(isPastEnd || isUrgentEnd) && (
-              <span className={cn(
-                "inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
-                isPastEnd
-                  ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]"
-                  : "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]",
-              )}>
-                {isPastEnd ? "Suspendido" : `Suspender en ${endDays}d`}
-              </span>
-            )}
+          <div className="flex items-center gap-2.5">
+            {icon}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <span className={cn(
+                  "text-[15px] font-medium text-[var(--text-primary)] leading-snug",
+                  isPastEnd && "line-through",
+                )}>
+                  {name}
+                </span>
+                {(isPastEnd || isUrgentEnd) && (
+                  <span className={cn(
+                    "inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium",
+                    isPastEnd
+                      ? "bg-[rgba(204,63,48,0.12)] text-[var(--error)]"
+                      : "bg-[rgba(234,179,8,0.12)] text-[#ca8a04]",
+                  )}>
+                    {isPastEnd ? "Suspendido" : `Suspender en ${endDays}d`}
+                  </span>
+                )}
+              </div>
+              {detail && (
+                <span className="mono text-[11px] text-[var(--text-muted)] leading-tight">
+                  {detail}
+                </span>
+              )}
+            </div>
           </div>
-          {detail && (
-            <span className="mono text-[11px] text-[var(--text-muted)] leading-tight">
-              {detail}
-            </span>
-          )}
           {children}
         </button>
 
@@ -357,15 +384,34 @@ function ArchiveConfirm({
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 
-function EmptyAdd({ label, onClick }: { label: string; onClick: () => void }) {
+function EmptyAdd({
+  label,
+  description,
+  icon,
+  onClick,
+}: {
+  label: string;
+  description?: string;
+  icon?: React.ReactNode;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex min-h-14 w-full items-center justify-center gap-2 rounded-[16px] border border-dashed border-[var(--border)] text-[13px] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] active:bg-[var(--surface-el)]"
+      className="flex w-full flex-col items-center gap-3 rounded-[16px] border border-dashed border-[var(--border)] py-8 px-4 text-center transition-colors hover:border-[var(--accent)] active:bg-[var(--surface-el)]"
     >
-      <PlusIcon size={14} weight="bold" />
-      {label}
+      {icon && (
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-dim)]">
+          {icon}
+        </div>
+      )}
+      <div>
+        <p className="text-[15px] font-medium text-[var(--text-primary)]">{label}</p>
+        {description && (
+          <p className="mt-1 text-[13px] text-[var(--text-muted)]">{description}</p>
+        )}
+      </div>
     </button>
   );
 }
@@ -630,7 +676,12 @@ function DropsPanel() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="section-label mb-0">Gotas guardadas</p>
+        <p className="section-label mb-0">
+          Gotas guardadas
+          {dropTypes.length > 0 && (
+            <span className="ml-1.5 mono text-[11px] font-normal text-[var(--text-faint)]">({dropTypes.length})</span>
+          )}
+        </p>
         <button
           type="button"
           onClick={() => setEditingItem("new")}
@@ -650,7 +701,12 @@ function DropsPanel() {
           ))}
         </div>
       ) : dropTypes.length === 0 ? (
-        <EmptyAdd label="Agregar primera gota" onClick={() => setEditingItem("new")} />
+        <EmptyAdd
+          label="Agregar primera gota"
+          description="Registra los tipos de gota que usas"
+          icon={<EyeIcon size={20} color="var(--accent)" weight="fill" />}
+          onClick={() => setEditingItem("new")}
+        />
       ) : (
         <>
           {dropTypes.length > 1 && (
@@ -678,6 +734,11 @@ function DropsPanel() {
                       detail={detail}
                       isOnly={dropTypes.length === 1}
                       onClick={() => setEditingItem(dt)}
+                      icon={
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                          <EyeIcon size={16} color="var(--accent)" weight="fill" />
+                        </div>
+                      }
                     />
                   );
                 })}
@@ -699,7 +760,7 @@ function DropsPanel() {
       />
 
       <button
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-[999px] border border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-[15px] font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-el)]"
+        type="button"
         onClick={() => {
           navigate("/register");
           setTimeout(
@@ -707,8 +768,13 @@ function DropsPanel() {
             50,
           );
         }}
+        className="flex min-h-[56px] w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] px-4 transition-colors hover:border-[var(--accent)]"
       >
-        Volver a Registrar
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+          <NotePencilIcon size={16} color="var(--accent)" weight="fill" />
+        </div>
+        <span className="flex-1 text-left text-[15px] text-[var(--text-primary)]">Volver a Registrar</span>
+        <CaretRightIcon size={14} color="var(--text-faint)" />
       </button>
 
       <DropSheet
@@ -1009,7 +1075,12 @@ function MedicationsPanel() {
     <>
       <div className="space-y-5">
         <div className="flex items-center justify-between">
-          <p className="section-label mb-0">Pastillas y medicamentos</p>
+          <p className="section-label mb-0">
+            Pastillas y medicamentos
+            {medications.length > 0 && (
+              <span className="ml-1.5 mono text-[11px] font-normal text-[var(--text-faint)]">({medications.length})</span>
+            )}
+          </p>
           <button
             type="button"
             onClick={() => setEditingItem("new")}
@@ -1029,7 +1100,12 @@ function MedicationsPanel() {
             ))}
           </div>
         ) : medications.length === 0 ? (
-          <EmptyAdd label="Agregar primer medicamento" onClick={() => setEditingItem("new")} />
+          <EmptyAdd
+            label="Agregar primer medicamento"
+            description="Registra tus medicamentos y dosis"
+            icon={<PillIcon size={20} color="var(--accent)" weight="fill" />}
+            onClick={() => setEditingItem("new")}
+          />
         ) : (
           <>
             {medications.length > 1 && (
@@ -1049,15 +1125,24 @@ function MedicationsPanel() {
                         detail={detail || undefined}
                         isOnly={medications.length === 1}
                         onClick={() => setEditingItem(med)}
+                        icon={
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                            <PillIcon size={16} color="var(--accent)" weight="fill" />
+                          </div>
+                        }
                       >
                         {times.length > 0 && (
-                          <span className="mono text-[11px] text-[var(--accent)] leading-tight">
-                            {times.join(" · ")}
-                          </span>
+                          <div className="flex flex-wrap gap-1 pt-0.5">
+                            {times.map((t) => (
+                              <span key={t} className="inline-flex rounded-[6px] bg-[var(--surface-el)] px-1.5 py-0.5 mono text-[11px] text-[var(--accent)] leading-none">
+                                {t}
+                              </span>
+                            ))}
+                          </div>
                         )}
                         {med.phases_json && <MedPhaseTimeline phasesJson={med.phases_json} />}
                         {med.notes && (
-                          <span className="text-[12px] text-[var(--text-faint)] leading-tight">
+                          <span className="text-[12px] text-[var(--text-faint)] leading-tight pt-0.5">
                             {med.notes}
                           </span>
                         )}
@@ -1097,47 +1182,31 @@ export default function TreatmentsPage() {
   const [tab, setTab] = useState<"drops" | "pills">(
     () => new URLSearchParams(window.location.search).get("tab") === "pills" ? "pills" : "drops",
   );
+  const reducedMotion = useReducedMotion();
 
   return (
     <section className="space-y-6">
-      <div
-        className="relative flex gap-1 rounded-full border border-[var(--border)] bg-[var(--surface)] p-1"
-        role="tablist"
-        aria-label="Tipo de tratamiento"
-      >
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            top: 4,
-            bottom: 4,
-            left: 4,
-            width: "calc(50% - 6px)",
-            borderRadius: "999px",
-            background: "var(--accent)",
-            transform: tab === "drops" ? "translateX(0)" : "translateX(calc(100% + 4px))",
-            transition: "transform 280ms cubic-bezier(0.32, 0.72, 0, 1)",
-          }}
-        />
-        {(["drops", "pills"] as const).map((v) => (
-          <button
-            key={v}
-            type="button"
-            role="tab"
-            aria-selected={tab === v}
-            onClick={() => setTab(v)}
-            className="relative z-10 flex-1 rounded-full py-2.5 text-[14px] font-medium"
-            style={{
-              background: "transparent",
-              color: tab === v ? "var(--btn-primary-text)" : "var(--text-muted)",
-              transition: "color 280ms cubic-bezier(0.32, 0.72, 0, 1)",
-            }}
-          >
-            {v === "drops" ? "Gotas" : "Pastillas"}
-          </button>
-        ))}
-      </div>
-      {tab === "drops" ? <DropsPanel /> : <MedicationsPanel />}
+      <SegmentedControl
+        label="Tipo de tratamiento"
+        options={[
+          { label: "Gotas", value: "drops" },
+          { label: "Pastillas", value: "pills" },
+        ]}
+        value={tab}
+        onChange={setTab}
+        tone="quiet"
+      />
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={tab}
+          initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
+          animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          exit={reducedMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
+          transition={{ duration: 0.15, ease: [0.25, 1, 0.5, 1] }}
+        >
+          {tab === "drops" ? <DropsPanel /> : <MedicationsPanel />}
+        </motion.div>
+      </AnimatePresence>
     </section>
   );
 }
