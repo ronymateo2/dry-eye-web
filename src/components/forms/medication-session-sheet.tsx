@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
-import { Pill, CaretDown } from "@phosphor-icons/react";
+import { PillIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +20,7 @@ type MedFormState = {
 
 export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const { data: medications = [], isLoading } = useQuery({
     queryKey: ["medications"],
     queryFn: api.getMedications,
@@ -142,10 +144,17 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
   if (activeMeds.length === 0) {
     return (
       <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-5 text-center">
-        <Pill className="mx-auto mb-3 size-8 text-[var(--text-faint)]" weight="duotone" />
+        <PillIcon className="mx-auto mb-3 size-8 text-[var(--text-faint)]" weight="duotone" />
         <p className="text-[15px] font-medium text-[var(--text-primary)]">No tienes medicamentos activos</p>
         <p className="mt-1 text-[13px] text-[var(--text-muted)]">
-          Gestiona tus medicamentos en la pestaña Tratamientos.
+          Gestiona tus medicamentos en{" "}
+          <button
+            type="button"
+            className="text-[var(--accent)] hover:text-[var(--accent-bright)]"
+            onClick={() => { onSaved(); navigate("/treatments"); }}
+          >
+            Tratamientos
+          </button>.
         </p>
       </div>
     );
@@ -154,7 +163,7 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
   return (
     <div className="flex flex-col" style={{ minHeight: "calc(80dvh - env(safe-area-inset-bottom) - 48px)" }}>
       {/* Global time */}
-      <div className="mb-4 space-y-1.5">
+      <div className="mb-5 space-y-2">
         <p className="section-label mb-0">Hora de la toma</p>
         <DateTimePicker value={globalTime} onChange={setGlobalTime} max={new Date()} />
         <p className="text-[12px] text-[var(--text-faint)]">
@@ -172,10 +181,10 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
             <div
               key={med.id}
               className={cn(
-                "relative overflow-hidden rounded-[var(--radius-md)] border bg-[var(--surface)] transition-all duration-200",
+                "relative overflow-hidden rounded-[var(--radius-md)] border transition-[border-color,background-color,box-shadow] duration-200",
                 s.checked
-                  ? "border-[var(--accent)]/30 ring-1 ring-inset ring-[var(--accent)]/10"
-                  : "border-[var(--border)]",
+                  ? "border-[var(--accent)]/40 bg-[var(--accent-dim)] ring-1 ring-inset ring-[var(--accent)]/15"
+                  : "border-[var(--border)] bg-[var(--surface)]",
               )}
             >
               {/* Active indicator: left edge amber line */}
@@ -193,29 +202,39 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
                   aria-label={s.checked ? "Desmarcar" : "Marcar como tomada"}
                   onClick={() => toggleCheck(med.id)}
                   className={cn(
-                    "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-200",
+                    "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-all duration-200",
                     s.checked
-                      ? "border-[var(--accent)] bg-[var(--accent)]/10"
-                      : "border-[var(--text-faint)] bg-transparent hover:border-[var(--text-muted)]",
+                      ? ""
+                      : "hover:bg-[var(--surface-el)]",
                   )}
                 >
-                  {s.checked && (
-                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                      <path
-                        d="M2.5 7.5L5.5 10.5L11.5 4.5"
-                        stroke="var(--accent)"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  )}
+                  <div
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full border-[1.5px] transition-all duration-200",
+                      s.checked
+                        ? "border-[var(--accent)] bg-[var(--accent)]"
+                        : "border-[var(--text-faint)] bg-transparent",
+                    )}
+                  >
+                    {s.checked && (
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ animation: "checkScale 200ms ease-out" }}>
+                        <path
+                          d="M2.5 7.5L5.5 10.5L11.5 4.5"
+                          stroke="var(--btn-primary-text)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
                 </button>
 
                 <button
                   type="button"
-                  className="flex flex-1 flex-col items-start text-left"
-                  onClick={() => toggleExpanded(med.id)}
+                  className="flex flex-1 flex-col items-start text-left active:scale-[0.98] transition-transform duration-75"
+                  aria-pressed={s.checked}
+                  onClick={() => toggleCheck(med.id)}
                 >
                   <span className={cn("text-[15px] font-semibold transition-colors duration-200", s.checked ? "text-[var(--accent-bright)]" : "text-[var(--text-primary)]")}>
                     {med.name}
@@ -230,11 +249,11 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
                   aria-label={s.expanded ? "Contraer detalles" : "Expandir detalles"}
                   onClick={() => toggleExpanded(med.id)}
                   className={cn(
-                    "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[var(--text-muted)] transition-transform duration-200",
+                    "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-[var(--text-muted)] transition-transform duration-200 hover:bg-[var(--surface-el)]",
                     s.expanded && "rotate-180",
                   )}
                 >
-                  <CaretDown size={16} />
+                  <CaretDownIcon size={16} />
                 </button>
               </div>
 
@@ -245,13 +264,13 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                     className="overflow-hidden"
                   >
                     <div className="space-y-3 border-t border-[var(--border)] px-3 pb-3 pt-3">
                       {/* Individual time */}
                       <div className="space-y-1">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.10em] text-[var(--text-faint)] mb-1">
                           Hora específica
                         </p>
                         <DateTimePicker
@@ -268,11 +287,11 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
 
                       {/* Dosage */}
                       <div className="space-y-1">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.10em] text-[var(--text-faint)] mb-1">
                           Dosis tomada
                         </p>
                         <input
-                          className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--accent)]"
+                          className="text-input"
                           placeholder="ej. 1 comprimido"
                           value={s.dosageTaken}
                           onChange={(e) => updateField(med.id, { dosageTaken: e.target.value })}
@@ -281,11 +300,11 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
 
                       {/* Notes */}
                       <div className="space-y-1">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.10em] text-[var(--text-faint)] mb-1">
                           Notas
                         </p>
                         <input
-                          className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--accent)]"
+                          className="text-input"
                           placeholder="ej. con comida"
                           value={s.notes}
                           onChange={(e) => updateField(med.id, { notes: e.target.value })}

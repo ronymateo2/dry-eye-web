@@ -273,6 +273,20 @@ img, svg { display: block; max-width: 100%; }
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
+.text-input {
+  min-height: 48px;
+  width: 100%;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 160ms ease-out;
+}
+.text-input::placeholder { color: var(--text-faint); }
+.text-input:focus { border-color: var(--accent); }
 
 /* ── App header ──────────────────────────────────────────────────────────── */
 .app-header {
