@@ -98,9 +98,9 @@ export type SaveMedicationIntakeInput = {
 export type SaveMedicationInput = {
   id?: string;
   name: string;
-  dosage?: string;
-  frequency?: string;
-  notes?: string;
+  dosage?: string | null;
+  frequency?: string | null;
+  notes?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   phasesJson?: string | null;
