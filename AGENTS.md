@@ -1,159 +1,137 @@
 # AGENTS.md — dry-eye-web
 
-## Qué es este proyecto
+PWA de salud para pacientes hispanohablantes con ojo seco neuropático. Registra dolor (5 zonas), gotas, sueño, higiene palpebral, síntomas, triggers, medicamentos y observaciones clínicas. Dashboard con correlaciones Spearman. UI en español, dark-first con light opt-in.
 
-**NeuroEye Log (Weqe) — Web** es una PWA de salud para pacientes con ojo seco neuropático. Permite registrar diariamente dolor en 5 zonas (párpado, sien, masetero, cervical, orbital), gotas oculares, sueño, higiene palpebral, síntomas, triggers y observaciones clínicas. El dashboard calcula correlaciones Spearman entre sueño y dolor. La UI es oscura, sin modo claro.
-
-**Público objetivo:** pacientes hispanohablantes con ojo seco neuropático. Toda la UI está en español.
-
-El backend vive en https://github.com/ronymateo2/dry_eye_api (Hono + Cloudflare Workers + D1).
-
----
+Backend: https://github.com/ronymateo2/dry_eye_api (Hono + Cloudflare Workers + D1)
 
 ## Stack
 
-| Capa | Tecnología |
-|---|---|
-| Framework | React 19 + Vite 6 |
-| Estilos | Tailwind CSS 4 + TypeScript 5.8 |
-| Auth | Google OAuth2 + JWT HS256 (tokens del API) |
-| Estado cliente | TanStack React Query v5 |
-| Offline | IndexedDB (`idb-keyval`) + PWA (`vite-plugin-pwa`) |
-| Deploy | Cloudflare Pages |
+React 19 · Vite 6 · TypeScript 5.8 (strict) · Tailwind CSS 4 · TanStack React Query v5 · react-router-dom v7 · Recharts · jsPDF + html2canvas · motion · sonner · idb-keyval · vite-plugin-pwa · Cloudflare Workers (wrangler)
 
----
-
-## Comandos
+## Commands
 
 ```bash
-npm run dev     # vite (puerto 5173)
-npm run build   # tsc -b && vite build
-npm run deploy  # npm run build && wrangler pages deploy dist --project-name weqe
+npm run dev       # vite — puerto 5173, proxy /api → localhost:8787
+npm run build     # tsc -b && vite build (CI runs this)
+npm run check     # tsc && vite build (full type+build check)
+npm run lint      # eslint .
+npm run deploy    # wrangler deploy (production)
+npm run cf-typegen  # wrangler types (Cloudflare bindings)
 ```
 
----
+**Verification order:** `lint → check` (lint first, then typecheck+build).
 
-## Estructura
+## Deploy & CI
+
+- `.github/workflows/deploy.yml`: pushes `main` → production, `staging` → staging env
+- CI sets `VITE_API_URL` from GitHub vars; runs `npm ci → build → wrangler deploy`
+- Production API: `https://dry-eye-api.ronymateo.workers.dev/api`
+- Local: `VITE_API_URL=http://localhost:8787/api` in `.env.local`
+- Wrangler config: `wrangler.json` (Workers with SPA assets, not Pages)
+- Node: `.nvmrc` = v25, CI uses Node 22
+
+## Architecture
 
 ```
 src/
-├── main.tsx          # QueryClient + AuthProvider + App
-├── App.tsx           # Router, lazy pages, auth guard
-├── globals.css       # Variables CSS + base styles
-├── lib/
-│   ├── api.ts        # Fetch wrapper tipado con todos los endpoints
-│   ├── auth.tsx      # AuthContext, useAuth(), useUser()
-│   ├── constants.ts  # APP_TABS, DROP_EYES, SYMPTOM_OPTIONS, TRIGGER_OPTIONS…
-│   ├── utils.ts      # cn(), getDayKey()
-│   ├── pain.ts       # Color helpers para nivel de dolor
-│   ├── stats.ts      # Spearman (cliente)
-│   ├── hooks/use-offline-sync.ts
-│   └── offline/drops-queue.ts  # IndexedDB queue (idb-keyval)
-├── types/domain.ts   # Todos los tipos de dominio compartidos
-├── pages/            # Páginas lazy-loaded
-└── components/
-    ├── layout/       # app-shell, bottom-nav, screen-header, floating-quick-actions, mobile-sheet
-    ├── dashboard/    # dashboard-screen, dashboard-charts (Recharts)
-    ├── forms/        # drop-sheet, sleep-sheet, hygiene-sheet, observation-sheet…
-    ├── report/       # report-screen (jsPDF + html2canvas)
-    └── ui/           # button, wheel-picker, pain-slider, segmented-control, date-time-picker…
+  main.tsx              # QueryClient + App bootstrap + SW reload
+  App.tsx               # BrowserRouter → AuthProvider → ThemeProvider → routes
+  globals.css           # CSS variables (dual theme)
+  lib/
+    api.ts              # Typed fetch wrapper; all endpoints as named methods
+    auth.tsx             # AuthProvider, useAuth(), useUser() — JWT from localStorage
+    theme.tsx            # ThemeProvider — dark default, light opt-in, persisted to server
+    constants.ts         # UI constants, options lists
+    utils.ts             # cn(), getDayKey()
+    pain.ts              # Color helpers for pain levels
+    stats.ts             # Spearman correlation (client-side)
+    last-drop-store.ts   # Local state for last-drop widget
+    hooks/
+      use-offline-sync.ts
+      use-local-storage.ts
+      use-last-drop-widget.ts
+    offline/
+      drops-queue.ts     # IndexedDB queue (idb-keyval)
+  types/domain.ts       # All shared domain types — single source of truth
+  pages/                 # Lazy-loaded route pages
+  components/
+    layout/              # app-shell, bottom-nav, screen-header, floating-quick-actions, mobile-sheet, splash-screen
+    dashboard/           # dashboard-screen, dashboard-charts (Recharts)
+    forms/               # *-sheet.tsx = mobile modals; lazy-mounted in FloatingQuickActions
+    history/              # timeline cards, tabs, feed
+    register/             # day-projection, drops-schedule cards
+    report/               # report-screen (jsPDF + html2canvas)
+    ui/                   # button, wheel-picker, pain-slider, segmented-control, date-time-picker, etc.
 ```
 
----
+**Path alias:** `@/` → `src/` (configured in tsconfig + vite.config.ts)
 
-## Rutas
+## Routes
 
-| Ruta | Página | Auth |
+| Route | Page | Auth |
 |---|---|---|
+| `/login` | LoginPage | ✗ |
 | `/register` | RegisterPage | ✓ |
 | `/history` | HistoryPage | ✓ |
 | `/dashboard` | DashboardPage | ✓ |
 | `/report` | ReportPage | ✓ |
 | `/profile` | ProfilePage | ✓ |
-| `/drop-types` | DropTypesPage | ✓ |
+| `/treatments` | TreatmentsPage | ✓ |
 | `/auth/callback` | AuthCallbackPage | — |
 
-Ruta por defecto: `/register`.
-
----
+- Unauthenticated → `/login`. Authenticated default → `/register`.
+- 401 → `clearToken()` + redirect to `/`.
 
 ## Auth
 
-1. Google OAuth → API redirige a `/auth/callback?token=<jwt>`
-2. `AuthCallbackPage` extrae token, lo guarda en `localStorage.weqe_token`, limpia URL
-3. `api.ts` inyecta `Authorization: Bearer <token>` en cada request
-4. 401 → `clearToken()` + `window.location.href = "/"`
+1. Google OAuth button → API redirect to `/auth/callback?token=<jwt>`
+2. `AuthCallbackPage` extracts token → `localStorage.weqe_token` → cleans URL
+3. `api.ts` injects `Authorization: Bearer <token>` on every request
+4. 401 response → `clearToken()` + `window.location.href = "/"`
 
----
+## Theme
 
-## Tipos de dominio (`src/types/domain.ts`)
+Dual theme: dark (default, clinical necessity for photophobia) and light (opt-in). `ThemeProvider` reads user preference from server (`auth.user.theme`), persists via `api.updateMe({ theme })`. Toggle: `document.documentElement.dataset.theme = "light"|"dark"`. **Always use CSS variables — never hardcode colors.** Full palette in `DESIGN.md`.
 
-Tipos exportados principales:
+## Offline
+
+- Only **drops** queue offline (IndexedDB via `idb-keyval`)
+- `useOfflineSync`: on `navigator.onLine`, syncs queue then invalidates `["drops/last"]`
+- `DropSheet` detects offline and queues directly
+
+## Domain types (`src/types/domain.ts`)
+
+Single source of truth for all shared types. Key exports:
 
 ```ts
-User, DropTypeRecord, SaveDropInput, SaveHygieneInput,
-SaveOccurrenceInput, SaveMedicationInput, HygieneRecord,
-HistoryEntry, HistoryDayGroup, HistoryFeed,
-ActionState, SleepQuality, DropEye, TriggerType, ObservationEye, HygieneStatus, FrictionType
+User, DropTypeRecord, SaveDropInput, SaveHygieneInput, SaveOccurrenceInput,
+SaveMedicationInput, SaveMedicationIntakeInput, MedicationRecord, MedicationIntakeRecord,
+SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation,
+HygieneRecord, HistoryEntry, HistoryDayGroup, HistoryFeed,
+CalendarStatus, CalendarEventEntry, DropScheduleEntry, DropTypeStats,
+ActionState, SleepQuality, DropEye, TriggerType, ObservationEye,
+HygieneStatus, FrictionType, PainQuality, TherapyType, MedicationPhase
 ```
 
-Siempre definir nuevos tipos aquí si son compartidos por `api.ts` y páginas.
+Always define new shared types here.
 
----
-
-## Query keys (convención)
-
-Usar **kebab-case** en arrays:
+## Query keys — kebab-case
 
 ```ts
-["drop-types"]     // ✓
+["drop-types"]    // ✓
 ["drops/last"]     // ✓
-["dashboard"]      // ✓
-["dropTypes"]      // ✗
+["dashboard"]     // ✓
+["dropTypes"]     // ✗
 ```
 
----
+## Conventions
 
-## Sistema de temas (CSS variables)
-
-Ver [DESIGN.md](./DESIGN.md) para el sistema completo de diseño.
-
-```css
---bg            /* #121008 — fondo principal */
---surface       /* tarjetas / inputs */
---surface-el    /* elementos elevados */
---border        /* bordes */
---text-primary / --text-muted / --text-faint / --text-secondary
---accent        /* #d4a24c — dorado */
---accent-dim / --accent-bright
---pain-low      /* verde */
---pain-mid      /* naranja */
---pain-high     /* rojo */
---screen-padding: 20px
---tabbar-height: 92px
---radius-sm / --radius-md / --radius-lg / --radius-full
-```
-
-**No hay modo claro.** Usar siempre variables CSS, nunca colores hardcoded en componentes nuevos.
-
----
-
-## Estrategia offline
-
-- Solo las **gotas** se encolan offline (IndexedDB via `idb-keyval`)
-- `useOfflineSync` hook: en `navigator.onLine = true`, sincroniza la cola e invalida `["drops/last"]`
-- `DropSheet` detecta `navigator.onLine` y cola directamente si está offline o si el POST falla
-
----
-
-## Convenciones de código
-
-- **TypeScript strict** activado
-- **Sin imports `React` o `* as React`** — usar named imports (`useState`, `type ReactNode`, etc.)
-- **Sin comentarios** salvo que el WHY no sea obvio
-- **Sin validación de frontend con Zod/Yup** — validación manual o por constraints del API
-- **Componentes hoja (`*-sheet.tsx`)** = modales móviles con animación; se montan lazy en `FloatingQuickActions`
-- **`cn()`** de `@/lib/utils` para combinar clases Tailwind condicionales
-- **Accesibilidad**: `aria-label` en todos los controles interactivos, `aria-modal` + `aria-labelledby` en sheets
-- Simplicity First — mínimo código que resuelve el problema
-- Cambios quirúrgicos — no "mejorar" código adyacente que no es parte de la tarea
+- **TypeScript strict** + `noUnusedLocals` + `noUnusedParameters` + `noImplicitReturns` (in tsconfig.app.json)
+- **No `React` or `* as React` imports** — use named imports (`useState`, `type ReactNode`)
+- **No comments** unless the WHY is non-obvious
+- **No Zod/Yup** — manual validation or API constraints
+- **`*-sheet.tsx` components** = animated mobile modals, lazy-mounted in `FloatingQuickActions`
+- **`cn()`** from `@/lib/utils` for conditional Tailwind classes
+- **Accessibility**: `aria-label` on interactive controls, `aria-modal` + `aria-labelledby` on sheets
+- **Simplicity First** — minimum code that solves the problem
+- **Surgical changes** — don't "improve" adjacent code outside the task scope
