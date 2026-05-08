@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { DropIcon, EyedropperIcon, CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
+import { DropIcon, EyedropperIcon, CaretRightIcon, CheckIcon, ListIcon } from "@phosphor-icons/react";
 import type { DisplayDrop } from "./types";
 import { EYE_LABELS, EYE_SHORT } from "./types";
 import { formatTime, formatGap } from "./utils";
-import { TimelineRow, TimelineDot, TimelineGap } from "./timeline-ui";
+import { TimelineRow, TimelineDot, TimelineGap, CheckBadge } from "./timeline-ui";
+import { MobileSheet } from "@/components/layout/mobile-sheet";
 
 function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
   const sorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
@@ -70,6 +71,7 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
 
 export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
   const [expandedType, setExpandedType] = useState<string | null>(null);
+  const [showAllTimeline, setShowAllTimeline] = useState(false);
 
   const groups = new Map<string, DisplayDrop[]>();
   for (const d of drops) {
@@ -81,33 +83,47 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
   const lastDrop = drops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
   const lastTime = formatTime(lastDrop.loggedAt, timezone);
 
+  const allSorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
+  const totalQuantity = drops.reduce((s, d) => s + d.quantity, 0);
+
   return (
-    <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3 pb-2">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-            style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)" }}
-          >
-            <DropIcon size={15} color="var(--accent)" />
+    <>
+      <div className="overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 pt-3 pb-2">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+              style={{ background: "color-mix(in srgb, var(--accent) 12%, transparent)" }}
+            >
+              <DropIcon size={15} color="var(--accent)" />
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
+                Gotas
+              </p>
+              <p className="mono text-[11px] text-[var(--text-muted)]">{lastTime}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
-              Gotas
-            </p>
-            <p className="mono text-[11px] text-[var(--text-muted)]">{lastTime}</p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAllTimeline(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-[120ms] ease-out active:scale-[0.92]"
+              style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)" }}
+              aria-label="Ver línea de tiempo completa"
+            >
+              <ListIcon size={14} color="var(--accent)" />
+            </button>
+            <div
+              className="flex shrink-0 items-center gap-2 rounded-[10px] px-2.5 py-1.5"
+              style={{ background: "color-mix(in srgb, var(--pain-low) 12%, transparent)" }}
+            >
+              <EyedropperIcon size={15} color="var(--pain-low)" />
+              <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: "var(--pain-low)" }}>
+                {drops.length}
+              </span>
+            </div>
           </div>
         </div>
-        <div
-          className="flex shrink-0 items-center gap-2 rounded-[10px] px-2.5 py-1.5"
-          style={{ background: "color-mix(in srgb, var(--pain-low) 12%, transparent)" }}
-        >
-          <EyedropperIcon size={15} color="var(--pain-low)" />
-          <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: "var(--pain-low)" }}>
-            {drops.length}
-          </span>
-        </div>
-      </div>
 
       <div>
         {groupEntries.map(([name, typedDrops]) => {
@@ -176,5 +192,51 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
         })}
       </div>
     </div>
+
+      <MobileSheet
+        open={showAllTimeline}
+        title="Todas las gotas"
+        description={`${totalQuantity} ${totalQuantity === 1 ? "gota" : "gotas"} en total`}
+        onClose={() => setShowAllTimeline(false)}
+      >
+        <div className="relative">
+          {allSorted.map((d, i) => {
+            const next = allSorted[i + 1];
+            const isLast = i === allSorted.length - 1;
+            const gap = next ? formatGap(next.loggedAt, d.loggedAt) : null;
+
+            return (
+              <div key={d.id}>
+                <TimelineRow time={formatTime(d.loggedAt, timezone)}>
+                  <TimelineDot color="var(--accent)" />
+                  <div className="flex min-w-0 items-center justify-end gap-2">
+                    <span className="truncate text-[13px] text-[var(--text-primary)]">
+                      {d.name}
+                    </span>
+                    <span className="shrink-0 text-[12px] text-[var(--text-muted)]">
+                      {d.quantity}
+                    </span>
+                    <span className="mono shrink-0 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                      {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
+                    </span>
+                    <CheckBadge />
+                  </div>
+                </TimelineRow>
+                {!isLast && (
+                  <TimelineGap>
+                    <span className="mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                      {gap}
+                    </span>
+                  </TimelineGap>
+                )}
+              </div>
+            );
+          })}
+          {allSorted.length === 0 && (
+            <p className="text-[13px] text-[var(--text-muted)]">Sin registros de gotas.</p>
+          )}
+        </div>
+      </MobileSheet>
+    </>
   );
 }
