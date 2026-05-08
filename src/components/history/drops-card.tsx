@@ -125,77 +125,78 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
           </div>
         </div>
 
-      <div>
-        {groupEntries.map(([name, typedDrops]) => {
-          const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
-          const isExpanded = expandedType === name;
-          const typeQuantity = typedDrops.reduce((s, d) => s + d.quantity, 0);
+        <div>
+          {groupEntries.map(([name, typedDrops]) => {
+            const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
+            const isExpanded = expandedType === name;
+            const typeQuantity = typedDrops.reduce((s, d) => s + d.quantity, 0);
 
-          return (
-            <div key={name}>
-              <button
-                className="w-full flex items-center gap-3 py-2 text-left transition-transform duration-[120ms] ease-out active:scale-[0.98]"
-                onClick={() => setExpandedType(isExpanded ? null : name)}
-                aria-expanded={isExpanded}
-              >
-                <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
-                  {name}
-                </span>
-                <span
-                  className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+            return (
+              <div key={name}>
+                <button
+                  className="w-full flex items-center gap-3 py-2 text-left transition-transform duration-[120ms] ease-out active:scale-[0.98]"
+                  onClick={() => setExpandedType(isExpanded ? null : name)}
+                  aria-expanded={isExpanded}
+                >
+                  <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
+                    {name}
+                  </span>
+                  <span
+                    className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+                    style={{
+                      color: "var(--pain-low)",
+                      background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
+                    }}
+                  >
+                    {typedDrops.length}×
+                  </span>
+                  <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
+                    {formatTime(last.loggedAt, timezone)}
+                  </span>
+                  <span className="mono w-[26px] shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                    {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
+                  </span>
+                  <div
+                    className="shrink-0 transition-transform duration-200"
+                    style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
+                  >
+                    <CaretRightIcon size={12} color="var(--text-faint)" />
+                  </div>
+                </button>
+
+                <div
                   style={{
-                    color: "var(--pain-low)",
-                    background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
+                    display: "grid",
+                    gridTemplateRows: isExpanded ? "1fr" : "0fr",
+                    transition: "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1)",
                   }}
                 >
-                  {typedDrops.length}×
-                </span>
-                <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
-                  {formatTime(last.loggedAt, timezone)}
-                </span>
-                <span className="mono w-[26px] shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
-                  {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
-                </span>
-                <div
-                  className="shrink-0 transition-transform duration-200"
-                  style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
-                >
-                  <CaretRightIcon size={12} color="var(--text-faint)" />
-                </div>
-              </button>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateRows: isExpanded ? "1fr" : "0fr",
-                  transition: "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                <div className="overflow-hidden">
-                  <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
-                    <div className="mb-2 flex items-baseline justify-between">
-                      <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-                        {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
-                      </p>
-                      {typedDrops.length > 1 && (
+                  <div className="overflow-hidden">
+                    <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
+                      <div className="mb-2 flex items-baseline justify-between">
                         <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-                          Intervalos
+                          {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
                         </p>
-                      )}
+                        {typedDrops.length > 1 && (
+                          <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                            Intervalos
+                          </p>
+                        )}
+                      </div>
+                      <DropsTimeline drops={typedDrops} timezone={timezone} />
                     </div>
-                    <DropsTimeline drops={typedDrops} timezone={timezone} />
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
 
       <MobileSheet
         open={showAllTimeline}
         title="Todas las gotas"
+        panelClassName="!h-[90dvh]"
         description={`${totalQuantity} ${totalQuantity === 1 ? "gota" : "gotas"} en total`}
         onClose={() => setShowAllTimeline(false)}
       >
