@@ -1,5 +1,5 @@
 export const APP_TABS = [
-  { href: "/register", label: "Registrar" },
+  { href: "/today", label: "Hoy" },
   { href: "/history", label: "Historial" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/report", label: "Reporte" },

@@ -71,7 +71,9 @@ src/
 | Route | Page | Auth |
 |---|---|---|
 | `/login` | LoginPage | ✗ |
-| `/register` | RegisterPage | ✓ |
+| `/today` | TodayPage | ✓ |
+| `/check-in` | RegisterPage (pain form) | ✓ |
+| `/register` | RegisterPage (pain form) | ✓ |
 | `/history` | HistoryPage | ✓ |
 | `/dashboard` | DashboardPage | ✓ |
 | `/report` | ReportPage | ✓ |
@@ -79,7 +81,7 @@ src/
 | `/treatments` | TreatmentsPage | ✓ |
 | `/auth/callback` | AuthCallbackPage | — |
 
-- Unauthenticated → `/login`. Authenticated default → `/register`.
+- Unauthenticated → `/login`. Authenticated default → `/today`.
 - 401 → `clearToken()` + redirect to `/`.
 
 ## Auth

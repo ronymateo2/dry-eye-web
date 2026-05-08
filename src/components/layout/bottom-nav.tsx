@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, LayoutGroup } from "motion/react";
 import {
   ChartLineIcon,
-  ClipboardIcon,
+  HouseIcon,
   FileTextIcon,
   ClockCounterClockwiseIcon,
   UserIcon,
@@ -10,7 +10,7 @@ import {
 import { APP_TABS } from "@/lib/constants";
 
 const icons = {
-  "/register": ClipboardIcon,
+  "/today": HouseIcon,
   "/history": ClockCounterClockwiseIcon,
   "/dashboard": ChartLineIcon,
   "/report": FileTextIcon,

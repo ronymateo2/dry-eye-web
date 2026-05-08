@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth, storeTokenFromUrl } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
@@ -7,6 +7,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { SplashScreen } from "@/components/layout/splash-screen";
 
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const TodayPage = lazy(() => import("@/pages/TodayPage"));
 const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
 const HistoryPage = lazy(() => import("@/pages/HistoryPage"));
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
@@ -30,14 +31,16 @@ function AppRoutes() {
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               {isAuthenticated ? (
                 <>
+    <Route path="/today" element={<TodayPage />} />
+                  <Route path="/check-in" element={<RegisterPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/history" element={<HistoryPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/report" element={<ReportPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/treatments" element={<TreatmentsPage />} />
-                  <Route path="/login" element={<Navigate to="/register" replace />} />
-                  <Route path="*" element={<Navigate to="/register" replace />} />
+                  <Route path="/login" element={<Navigate to="/today" replace />} />
+                  <Route path="*" element={<Navigate to="/today" replace />} />
                 </>
               ) : (
                 <>
@@ -60,9 +63,19 @@ function TokenInit() {
   return null;
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const frame = document.querySelector(".app-frame");
+    if (frame) frame.scrollTop = 0;
+  }, [pathname]);
+  return null;
+}
+
 export function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <TokenInit />
       <AuthProvider>
         <ThemeProvider>

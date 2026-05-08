@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PainSlider } from "@/components/ui/pain-slider";
@@ -16,9 +17,9 @@ import {
   ActivityIcon,
   TargetIcon,
   WarningIcon,
+  ArrowLeftIcon,
 } from "@phosphor-icons/react";
-import { SleepNudge } from "@/components/ui/sleep-nudge";
-import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
+
 import { LastCheckInRecall } from "@/components/forms/last-check-in-recall";
 import eyelidsImg from "@/assets/pain-areas/eyelids.webp";
 import templesImg from "@/assets/pain-areas/temples.webp";
@@ -65,6 +66,7 @@ const accordionToggleClass = (expanded: boolean, hasSelection: boolean) =>
   );
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [pain, setPain] = useState(defaultPain);
   const [selectedTriggers, setSelectedTriggers] = useState<Set<string>>(new Set());
@@ -268,9 +270,18 @@ export default function RegisterPage() {
 
   return (
     <section>
+      <div className="px-[var(--screen-padding)] pt-2 pb-1">
+        <button
+          type="button"
+          onClick={() => navigate("/today")}
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-muted)] transition-colors duration-[160ms] hover:text-[var(--accent)]"
+          aria-label="Volver a Hoy"
+        >
+          <ArrowLeftIcon size={14} weight="bold" />
+          Volver a Hoy
+        </button>
+      </div>
       <div className="relative pb-[calc(var(--sticky-cta-height,88px)+44px)] space-y-6">
-        <DropsScheduleCard />
-        <SleepNudge />
         {/* Context */}
         <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
           <div className="flex items-center justify-between px-4 pt-4 pb-3">

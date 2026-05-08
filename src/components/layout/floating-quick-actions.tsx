@@ -36,12 +36,10 @@ export function FloatingQuickActions() {
     return () => window.removeEventListener("quickactions:open", handler);
   }, []);
 
-  const isRegisterPage = pathname === "/register";
-  const isVisible = isRegisterPage || pathname === "/history";
+  const isTodayPage = pathname === "/today";
+  const isVisible = isTodayPage || pathname === "/history";
   const fabBottomOffsetClass =
-    isRegisterPage
-      ? "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+var(--sticky-cta-height)+16px)]"
-      : "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
+    "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
 
   const queryClient = useQueryClient();
   const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); setInitialDropTypeId(undefined); };
