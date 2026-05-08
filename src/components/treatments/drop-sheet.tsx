@@ -8,6 +8,8 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { IntervalPills } from "@/components/treatments/interval-pills";
 import { ArchiveConfirm } from "@/components/treatments/archive-confirm";
 import { api } from "@/lib/api";
+import { useUser } from "@/lib/auth";
+import { getDayKey } from "@/lib/utils";
 import type { DropTypeRecord } from "@/types/domain";
 
 export type DropForm = { name: string; intervalHours: number | null; startDate: string; endDate: string };
@@ -20,6 +22,7 @@ function DropFormContent({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const user = useUser();
   const isEdit = item !== null;
 
   const [form, setForm] = useState<DropForm>(
@@ -43,9 +46,21 @@ function DropFormContent({
             endDate: form.endDate || null,
           })
         : api.createDropType(form.name.trim(), form.intervalHours, form.startDate || null, form.endDate || null),
-    onSuccess: () => {
+    onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["drop-types"] });
       qc.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+
+      if (isEdit) {
+        try {
+          const dayKey = getDayKey(new Date().toISOString(), user.timezone);
+          await api.reprocessCalendarDay(item!.id, dayKey);
+          qc.invalidateQueries({ queryKey: ["calendar/events/today"] });
+          qc.invalidateQueries({ queryKey: ["calendar/status"] });
+        } catch {
+          // Calendar reprocess failure is non-blocking
+        }
+      }
+
       toast.success(isEdit ? "Gota actualizada." : "Gota guardada.");
       onClose();
     },
