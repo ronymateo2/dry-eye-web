@@ -15,8 +15,9 @@ const LogOccurrenceSheet = lazy(() => import("@/components/forms/log-occurrence-
 const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet").then((m) => ({ default: m.ObservationSheet })));
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
 const MedicationSessionSheet = lazy(() => import("@/components/forms/medication-session-sheet").then((m) => ({ default: m.MedicationSessionSheet })));
+const VialSheet = lazy(() => import("@/components/forms/vial-sheet").then((m) => ({ default: m.VialSheet })));
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | null;
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
 
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
@@ -50,6 +51,8 @@ export function FloatingQuickActions() {
     queryClient.invalidateQueries({ queryKey: ["medications"] });
     queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
+    queryClient.invalidateQueries({ queryKey: ["vial-instances/active"] });
+    queryClient.invalidateQueries({ queryKey: ["vial-instances/history"] });
     closeAll();
   };
 
@@ -121,6 +124,9 @@ export function FloatingQuickActions() {
         </MobileSheet>
         <MobileSheet open={sheet === "medication-intake"} title="Registrar pastilla" description="Registra una toma de medicamento." onClose={closeAll} panelClassName="!h-[92dvh]">
           <MedicationSessionSheet onSaved={savedAndClose} />
+        </MobileSheet>
+        <MobileSheet open={sheet === "vial"} title="Gestionar vial" description="Abre o descarta un vial de gotas." onClose={closeAll} panelClassName="!h-[85dvh]">
+          <VialSheet onSaved={savedAndClose} onClose={closeAll} />
         </MobileSheet>
       </Suspense>
     </>

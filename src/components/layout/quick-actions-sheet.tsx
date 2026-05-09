@@ -9,9 +9,10 @@ import {
   HeartbeatIcon,
   NotePencilIcon,
   PulseIcon,
+  EyedropperSampleIcon,
 } from "@phosphor-icons/react";
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | null;
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
 
 const PRIMARY_ACTIONS = [
   { sheet: "pain" as Sheet, Icon: PulseIcon, label: "Dolor" },
@@ -24,6 +25,7 @@ const SECONDARY_ACTIONS = [
   { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
   { sheet: "therapy" as Sheet, Icon: HeartbeatIcon, label: "Terapia" },
   { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación" },
+  { sheet: "vial" as Sheet, Icon: EyedropperSampleIcon, label: "Vial" },
 ] as const;
 
 const ACTIONS = [...PRIMARY_ACTIONS, ...SECONDARY_ACTIONS];

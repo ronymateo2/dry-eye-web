@@ -1,6 +1,6 @@
 # AGENTS.md — dry-eye-web
 
-PWA de salud para pacientes hispanohablantes con ojo seco neuropático. Registra dolor (5 zonas), gotas, sueño, higiene palpebral, síntomas, triggers, medicamentos y observaciones clínicas. Dashboard con correlaciones Spearman. UI en español, dark-first con light opt-in.
+PWA de salud para pacientes hispanohablantes con ojo seco neuropático. Registra dolor (5 zonas), gotas, viales desechables, sueño, higiene palpebral, síntomas, triggers, medicamentos y observaciones clínicas. Dashboard con correlaciones Spearman. UI en español, dark-first con light opt-in.
 
 Backend: https://github.com/ronymateo2/dry_eye_api (Hono + Cloudflare Workers + D1)
 
@@ -58,7 +58,7 @@ src/
     layout/              # app-shell, bottom-nav, screen-header, floating-quick-actions, mobile-sheet, splash-screen
     dashboard/           # dashboard-screen, dashboard-charts (Recharts)
     forms/               # *-sheet.tsx = mobile modals; lazy-mounted in FloatingQuickActions
-    history/              # timeline cards, tabs, feed
+    history/              # timeline cards, tabs, feed, vials-tab
     register/             # day-projection, drops-schedule cards
     report/               # report-screen (jsPDF + html2canvas)
     ui/                   # button, wheel-picker, pain-slider, segmented-control, date-time-picker, etc.
@@ -79,6 +79,7 @@ src/
 | `/report` | ReportPage | ✓ |
 | `/profile` | ProfilePage | ✓ |
 | `/treatments` | TreatmentsPage | ✓ |
+| `/vials` | VialsPage | ✓ |
 | `/auth/callback` | AuthCallbackPage | — |
 
 - Unauthenticated → `/login`. Authenticated default → `/today`.
@@ -111,6 +112,7 @@ SaveMedicationInput, SaveMedicationIntakeInput, MedicationRecord, MedicationInta
 SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation,
 HygieneRecord, HistoryEntry, HistoryDayGroup, HistoryFeed,
 CalendarStatus, CalendarEventEntry, DropScheduleEntry, DropTypeStats,
+VialRecord, VialInstanceRecord, SaveVialInput,
 ActionState, SleepQuality, DropEye, TriggerType, ObservationEye,
 HygieneStatus, FrictionType, PainQuality, TherapyType, MedicationPhase
 ```

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PulseIcon, CaretRightIcon, GearIcon } from "@phosphor-icons/react";
+import { PulseIcon, CaretRightIcon, GearIcon, EyedropperSampleIcon } from "@phosphor-icons/react";
 import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
 import { SleepStatus } from "@/components/ui/sleep-status";
@@ -114,6 +114,21 @@ export default function TodayPage() {
         >
           <GearIcon size={16} className="shrink-0" />
           Gestionar tratamientos
+          <CaretRightIcon size={10} className="ml-auto shrink-0 text-[var(--text-faint)]" />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/vials")}
+          className={cn(
+            "flex min-h-[48px] w-full items-center gap-3 rounded-[9px] px-2 py-1.5 text-left",
+            "text-[13px] text-[var(--text-muted)]",
+            "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
+            "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
+          )}
+          aria-label="Gestionar viales"
+        >
+          <EyedropperSampleIcon size={16} className="shrink-0" />
+          Gestionar viales
           <CaretRightIcon size={10} className="ml-auto shrink-0 text-[var(--text-faint)]" />
         </button>
       </div>

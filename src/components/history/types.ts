@@ -182,6 +182,7 @@ export const HISTORY_TABS = [
   { label: "Todo", value: "all" },
   { label: "Gotas", value: "drops" },
   { label: "Observaciones", value: "observations" },
+  { label: "Viales", value: "vials" },
 ] as const;
 
 export type HistoryTab = (typeof HISTORY_TABS)[number]["value"];

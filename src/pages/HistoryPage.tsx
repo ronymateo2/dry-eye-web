@@ -8,6 +8,7 @@ import type { HistoryFeed, HygieneRecord } from "@/types/domain";
 import { FeedSkeleton } from "@/components/history/feed-skeleton";
 import { ObservationsTab } from "@/components/history/observations-tab";
 import { DropsTab } from "@/components/history/drops-tab";
+import { VialsTab } from "@/components/history/vials-tab";
 import { HistoryList } from "@/components/history/history-list";
 import { HISTORY_TABS, type HistoryTab } from "@/components/history/types";
 
@@ -169,6 +170,8 @@ export default function HistoryPage() {
             <ObservationsTab timezone={timezone} />
           ) : activeTab === "drops" ? (
             <DropsTab timezone={timezone} />
+          ) : activeTab === "vials" ? (
+            <VialsTab />
           ) : !feed || (feed.groups.length === 0 && feed.hygiene.length === 0) ? (
             <EmptyFeed />
           ) : (

@@ -192,3 +192,36 @@ export type User = {
   timezone: string;
   theme: "dark" | "light";
 };
+
+export type VialRecord = {
+  id: string;
+  drop_type_id: string;
+  drop_type_name: string;
+  duration_hours: number;
+  name: string | null;
+  created_at: string;
+};
+
+export type VialInstanceRecord = {
+  id: string;
+  vial_id: string;
+  started_at: string;
+  ended_at: string | null;
+  status: "active" | "discarded";
+  vial_name: string | null;
+  drop_type_name: string;
+  duration_hours: number;
+};
+
+export type SaveVialInput = {
+  id: string;
+  dropTypeId: string;
+  durationHours?: number;
+  name?: string | null;
+};
+
+export type SaveVialInstanceInput = {
+  id: string;
+  vialId: string;
+  startedAt: string;
+};

@@ -157,4 +157,29 @@ export const api = {
   getHistoryMore: (before: string, limit = 5) =>
     api.get<HistoryFeed>(`/history/more?before=${before}&limit=${limit}`),
   getReport: () => api.get<{ ok: true; medications: { name: string; dosage: string | null; start_date: string | null; end_date: string | null; phases_json: string | null }[]; [key: string]: unknown }>("/report"),
+
+  getVials: () => api.get<{ id: string; drop_type_id: string; drop_type_name: string; duration_hours: number; name: string | null; created_at: string }[]>("/vials"),
+  createVial: (body: { id: string; drop_type_id: string; duration_hours?: number; name?: string | null }) => api.post<{ ok: boolean; id: string }>("/vials", body),
+  updateVial: (id: string, body: { duration_hours?: number; name?: string | null }) => api.put<{ ok: boolean }>(`/vials/${id}`, body),
+  deleteVial: (id: string) => api.delete<{ ok: boolean }>(`/vials/${id}`),
+
+  getActiveVialInstances: () => api.get<{
+    id: string;
+    vial_id: string;
+    started_at: string;
+    ended_at: string | null;
+    status: string;
+    vial_name: string | null;
+    drop_type_name: string;
+    duration_hours: number;
+  }[]>("/vial-instances/active"),
+  getVialInstanceHistory: (params?: { limit?: number; before?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.before) qs.set("before", params.before);
+    const q = qs.toString();
+    return api.get<{ ok: boolean; instances: { id: string; vial_id: string; started_at: string; ended_at: string | null; status: string; vial_name: string | null; drop_type_name: string; duration_hours: number }[]; hasMore: boolean }>(`/vial-instances/history${q ? `?${q}` : ""}`);
+  },
+  openVialInstance: (body: { id: string; vial_id: string; started_at: string }) => api.post<{ ok: boolean; id: string }>("/vial-instances", body),
+  discardVialInstance: (id: string, ended_at: string) => api.put<{ ok: boolean }>(`/vial-instances/${id}/discard`, { ended_at }),
 };
