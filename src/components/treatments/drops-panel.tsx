@@ -12,7 +12,7 @@ import { ArchivedItems } from "@/components/treatments/archived-items";
 import { DropSheet } from "@/components/treatments/drop-sheet";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
-import { EyeIcon, NotePencilIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { EyeIcon, NotePencilIcon, CaretRightIcon, EyedropperSampleIcon } from "@phosphor-icons/react";
 
 export function DropsPanel() {
   const navigate = useNavigate();
@@ -86,6 +86,7 @@ export function DropsPanel() {
                     dt.start_date || dt.end_date
                       ? `${dt.start_date ?? "—"} → ${dt.end_date ?? "∞"}`
                       : null,
+                    dt.is_vial ? `Vial · ${dt.vial_duration ?? 24}h` : null,
                   ]
                     .filter(Boolean)
                     .join("  ·  ");

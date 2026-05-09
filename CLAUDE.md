@@ -58,10 +58,11 @@ src/
     layout/              # app-shell, bottom-nav, screen-header, floating-quick-actions, mobile-sheet, splash-screen
     dashboard/           # dashboard-screen, dashboard-charts (Recharts)
     forms/               # *-sheet.tsx = mobile modals; lazy-mounted in FloatingQuickActions
-    history/              # timeline cards, tabs, feed
+    history/              # timeline cards, tabs, feed, vials-tab
     register/             # day-projection, drops-schedule cards
     report/               # report-screen (jsPDF + html2canvas)
     ui/                   # button, wheel-picker, pain-slider, segmented-control, date-time-picker, etc.
+    treatments/           # drops-panel, drop-sheet (tipo de gota), medications-panel
 ```
 
 **Path alias:** `@/` → `src/` (configured in tsconfig + vite.config.ts)

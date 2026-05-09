@@ -12,7 +12,7 @@ import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import type { DropTypeRecord } from "@/types/domain";
 
-export type DropForm = { name: string; intervalHours: number | null; startDate: string; endDate: string };
+export type DropForm = { name: string; intervalHours: number | null; startDate: string; endDate: string; isVial: boolean; vialDuration: number | null };
 
 function DropFormContent({
   item,
@@ -32,8 +32,10 @@ function DropFormContent({
           intervalHours: item.interval_hours ?? null,
           startDate: item.start_date ?? "",
           endDate: item.end_date ?? "",
+          isVial: item.is_vial ?? false,
+          vialDuration: item.vial_duration ?? 24,
         }
-      : { name: "", intervalHours: null, startDate: "", endDate: "" },
+      : { name: "", intervalHours: null, startDate: "", endDate: "", isVial: false, vialDuration: 24 },
   );
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -44,8 +46,10 @@ function DropFormContent({
             intervalHours: form.intervalHours,
             startDate: form.startDate || null,
             endDate: form.endDate || null,
+            isVial: form.isVial,
+            vialDuration: form.isVial ? form.vialDuration : null,
           })
-        : api.createDropType(form.name.trim(), form.intervalHours, form.startDate || null, form.endDate || null),
+        : api.createDropType(form.name.trim(), form.intervalHours, form.startDate || null, form.endDate || null, undefined, form.isVial, form.isVial ? form.vialDuration : null),
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["drop-types"] });
       qc.invalidateQueries({ queryKey: ["drops/last-per-type"] });
@@ -108,6 +112,49 @@ function DropFormContent({
           to={form.endDate || null}
           onChange={(f, t) => setForm((fm) => ({ ...fm, startDate: f ?? "", endDate: t ?? "" }))}
         />
+      </div>
+
+      <div className="space-y-3">
+        <label className="flex items-center gap-3 min-h-[48px] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.isVial}
+            onChange={(e) => setForm((f) => ({ ...f, isVial: e.target.checked }))}
+            className="h-5 w-5 accent-[var(--accent)]"
+          />
+          <span className="text-[14px] text-[var(--text-primary)]">Es vial desechable</span>
+        </label>
+
+        {form.isVial && (
+          <div className="space-y-1.5">
+            <p className="text-[12px] text-[var(--text-faint)]">Duración del vial (horas)</p>
+            <div className="flex flex-wrap gap-2">
+              {[12, 24, 48, 72].map((h) => (
+                <button
+                  key={h}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, vialDuration: h }))}
+                  className={`min-h-[40px] rounded-full border px-4 text-[13px] font-medium transition-colors ${
+                    form.vialDuration === h
+                      ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
+                      : "border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--surface-el)]"
+                  }`}
+                >
+                  {h}h
+                </button>
+              ))}
+              <input
+                type="number"
+                min={1}
+                max={168}
+                value={form.vialDuration ?? ""}
+                onChange={(e) => setForm((f) => ({ ...f, vialDuration: Number(e.target.value) || 1 }))}
+                placeholder="Otro"
+                className="h-10 w-20 rounded-full border border-[var(--border)] bg-[var(--bg)] px-3 text-center text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <Button

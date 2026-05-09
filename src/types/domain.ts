@@ -25,6 +25,8 @@ export type DropTypeRecord = {
   end_date?: string | null;
   suspension_note?: string | null;
   archived_at?: string | null;
+  is_vial?: boolean;
+  vial_duration?: number | null;
 };
 
 export type DropScheduleEntry = {
@@ -197,31 +199,8 @@ export type VialRecord = {
   id: string;
   drop_type_id: string;
   drop_type_name: string;
-  duration_hours: number;
-  name: string | null;
-  created_at: string;
-};
-
-export type VialInstanceRecord = {
-  id: string;
-  vial_id: string;
   started_at: string;
   ended_at: string | null;
   status: "active" | "discarded";
-  vial_name: string | null;
-  drop_type_name: string;
-  duration_hours: number;
-};
-
-export type SaveVialInput = {
-  id: string;
-  dropTypeId: string;
-  durationHours?: number;
-  name?: string | null;
-};
-
-export type SaveVialInstanceInput = {
-  id: string;
-  vialId: string;
-  startedAt: string;
+  vial_duration: number | null;
 };

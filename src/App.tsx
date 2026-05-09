@@ -15,7 +15,6 @@ const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const ReportPage = lazy(() => import("@/pages/ReportPage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const TreatmentsPage = lazy(() => import("@/pages/TreatmentsPage"));
-const VialsPage = lazy(() => import("@/pages/VialsPage"));
 const AuthCallbackPage = lazy(() => import("@/pages/AuthCallbackPage"));
 
 function AppRoutes() {
@@ -48,7 +47,6 @@ function AppRoutes() {
                     <Route path="/report" element={<ReportPage />} />
                     <Route path="/profile" element={<ProfilePage />} />
                     <Route path="/treatments" element={<TreatmentsPage />} />
-                    <Route path="/vials" element={<VialsPage />} />
                     <Route path="/login" element={<Navigate to="/today" replace />} />
                     <Route path="*" element={<Navigate to="/today" replace />} />
                   </>

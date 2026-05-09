@@ -69,15 +69,15 @@ export const api = {
       notes: string | null;
     } | null>("/check-ins/last"),
 
-  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null }[]>("/drop-types"),
-  createDropType: (name: string, intervalHours: number | null, startDate?: string | null, endDate?: string | null, suspensionNote?: string | null) =>
-    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, startDate, endDate, suspensionNote }),
-  updateDropType: (id: string, body: { intervalHours?: number | null; startDate?: string | null; endDate?: string | null; suspensionNote?: string | null }) =>
+  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null; is_vial: boolean; vial_duration: number | null }[]>("/drop-types"),
+  createDropType: (name: string, intervalHours: number | null, startDate?: string | null, endDate?: string | null, suspensionNote?: string | null, isVial?: boolean, vialDuration?: number | null) =>
+    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, startDate, endDate, suspensionNote, isVial, vialDuration }),
+  updateDropType: (id: string, body: { intervalHours?: number | null; startDate?: string | null; endDate?: string | null; suspensionNote?: string | null; isVial?: boolean; vialDuration?: number | null }) =>
     api.put(`/drop-types/${id}`, body),
   updateDropTypeInterval: (id: string, intervalHours: number | null) => api.put(`/drop-types/${id}`, { intervalHours }),
   deleteDropType: (id: string) => api.delete(`/drop-types/${id}`),
   reorderDropTypes: (ids: string[]) => api.put("/drop-types/reorder", { ids }),
-  getArchivedDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null; archived_at: string }[]>("/drop-types/archived"),
+  getArchivedDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null; archived_at: string; is_vial: boolean; vial_duration: number | null }[]>("/drop-types/archived"),
   unarchiveDropType: (id: string) => api.post<{ ok: boolean }>(`/drop-types/${id}/unarchive`, {}),
 
   saveDrop: (body: SaveDropInput) => api.post("/drops", body),
@@ -158,28 +158,21 @@ export const api = {
     api.get<HistoryFeed>(`/history/more?before=${before}&limit=${limit}`),
   getReport: () => api.get<{ ok: true; medications: { name: string; dosage: string | null; start_date: string | null; end_date: string | null; phases_json: string | null }[]; [key: string]: unknown }>("/report"),
 
-  getVials: () => api.get<{ id: string; drop_type_id: string; drop_type_name: string; duration_hours: number; name: string | null; created_at: string }[]>("/vials"),
-  createVial: (body: { id: string; drop_type_id: string; duration_hours?: number; name?: string | null }) => api.post<{ ok: boolean; id: string }>("/vials", body),
-  updateVial: (id: string, body: { duration_hours?: number; name?: string | null }) => api.put<{ ok: boolean }>(`/vials/${id}`, body),
-  deleteVial: (id: string) => api.delete<{ ok: boolean }>(`/vials/${id}`),
-
-  getActiveVialInstances: () => api.get<{
+  getActiveVials: () => api.get<{
     id: string;
-    vial_id: string;
+    drop_type_id: string;
+    drop_type_name: string;
     started_at: string;
     ended_at: string | null;
     status: string;
-    vial_name: string | null;
-    drop_type_name: string;
-    duration_hours: number;
-  }[]>("/vial-instances/active"),
-  getVialInstanceHistory: (params?: { limit?: number; before?: string }) => {
+    vial_duration: number | null;
+  }[]>("/vials/active"),
+  getVialHistory: (params?: { limit?: number; before?: string }) => {
     const qs = new URLSearchParams();
     if (params?.limit) qs.set("limit", String(params.limit));
     if (params?.before) qs.set("before", params.before);
     const q = qs.toString();
-    return api.get<{ ok: boolean; instances: { id: string; vial_id: string; started_at: string; ended_at: string | null; status: string; vial_name: string | null; drop_type_name: string; duration_hours: number }[]; hasMore: boolean }>(`/vial-instances/history${q ? `?${q}` : ""}`);
+    return api.get<{ ok: boolean; vials: { id: string; drop_type_id: string; drop_type_name: string; started_at: string; ended_at: string | null; status: string; vial_duration: number | null }[]; hasMore: boolean }>(`/vials/history${q ? `?${q}` : ""}`);
   },
-  openVialInstance: (body: { id: string; vial_id: string; started_at: string }) => api.post<{ ok: boolean; id: string }>("/vial-instances", body),
-  discardVialInstance: (id: string, ended_at: string) => api.put<{ ok: boolean }>(`/vial-instances/${id}/discard`, { ended_at }),
+  discardVial: (id: string) => api.put<{ ok: boolean }>(`/vials/${id}/discard`, {}),
 };

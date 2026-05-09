@@ -7,14 +7,14 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { WheelPicker } from "@/components/ui/wheel-picker";
-import { EyedropperIcon } from "@phosphor-icons/react";
+import { EyedropperIcon, TimerIcon, XCircleIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import { queueDrop } from "@/lib/offline/drops-queue";
 import { setLastDrop } from "@/lib/last-drop-store";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, DropEye } from "@/types/domain";
 
 export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void; initialDropTypeId?: string }) {
@@ -30,11 +30,24 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [isPending, setIsPending] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [confirmingDiscardId, setConfirmingDiscardId] = useState<string | null>(null);
 
   const { data: lastDrop, isLoading: lastDropLoading } = useQuery({
     queryKey: ["drops/last"],
     queryFn: api.getLastDrop,
     staleTime: 0,
+  });
+
+  const { data: activeVials = [] } = useQuery({
+    queryKey: ["vials/active"],
+    queryFn: api.getActiveVials,
+  });
+
+  const discardVialMutation = useMutation({
+    mutationFn: (id: string) => api.discardVial(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+    },
   });
 
   useEffect(() => {
@@ -84,6 +97,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
       toast.success("Gota registrada.");
@@ -97,6 +111,21 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       onSaved();
     }
   };
+
+  const selectedDropTypeInfo = useMemo(() => dropTypes.find((dt) => dt.id === selectedDropType), [dropTypes, selectedDropType]);
+  const activeVialForType = useMemo(() => activeVials.find((v) => v.drop_type_id === selectedDropType), [activeVials, selectedDropType]);
+
+  const vialStatus = useMemo(() => {
+    if (!selectedDropTypeInfo?.is_vial) return null;
+    if (!activeVialForType) return { kind: "new" as const };
+    const durationMs = (selectedDropTypeInfo.vial_duration ?? 24) * 3_600_000;
+    const expiresAt = new Date(activeVialForType.started_at).getTime() + durationMs;
+    const remainingMs = expiresAt - Date.now();
+    if (remainingMs <= 0) return { kind: "expired" as const };
+    const hrs = Math.floor(remainingMs / 3_600_000);
+    const mins = Math.floor((remainingMs % 3_600_000) / 60_000);
+    return { kind: "active" as const, id: activeVialForType.id, remaining: `${hrs}h ${mins}m` };
+  }, [selectedDropTypeInfo, activeVialForType]);
 
   const canSave = !!selectedDropType;
 
@@ -209,6 +238,62 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
           </div>
         ) : (
           <WheelPicker label="Seleccionar tipo de gota" options={wheelOptions} value={selectedDropType} onChange={setSelectedDropType} />
+        )}
+
+        {vialStatus && (
+          <div className="rounded-[10px] border px-3 py-2.5" style={{ background: "var(--surface-el)", borderColor: "var(--border)" }}>
+            {vialStatus.kind === "active" ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <TimerIcon size={14} style={{ color: "var(--accent)" }} />
+                    <span className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
+                      Vial activo · expira en {vialStatus.remaining}
+                    </span>
+                  </div>
+                  {confirmingDiscardId !== vialStatus.id && (
+                    <button
+                      type="button"
+                      onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
+                      className="flex items-center gap-1 rounded-full bg-[var(--pain-high)]/10 px-3 py-1 text-[12px] font-medium text-[var(--pain-high)] transition-colors active:bg-[var(--pain-high)]/20"
+                    >
+                      <XCircleIcon size={12} />
+                      Descartar
+                    </button>
+                  )}
+                </div>
+                {confirmingDiscardId === vialStatus.id && (
+                  <div className="flex items-center justify-between gap-2 rounded-[8px] border border-[var(--pain-high)]/20 bg-[var(--pain-high)]/5 px-2.5 py-2">
+                    <span className="text-[12px] font-medium text-[var(--text-primary)]">¿Descartar vial?</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setConfirmingDiscardId(null)}
+                        className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface)]"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
+                        disabled={discardVialMutation.isPending}
+                        className="rounded-full bg-[var(--pain-high)]/15 px-3 py-1 text-[12px] font-medium text-[var(--pain-high)] transition-colors active:bg-[var(--pain-high)]/25 disabled:opacity-50"
+                      >
+                        {discardVialMutation.isPending ? "..." : "Sí, descartar"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <TimerIcon size={14} style={{ color: "var(--warning)" }} />
+                <span className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
+                  {vialStatus.kind === "expired" ? "Vial vencido · se abrirá nuevo al guardar" : "Se abrirá nuevo vial al guardar"}
+                </span>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
