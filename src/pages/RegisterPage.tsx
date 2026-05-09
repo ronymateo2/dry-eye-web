@@ -270,17 +270,6 @@ export default function RegisterPage() {
 
   return (
     <section>
-      <div className="px-[var(--screen-padding)] pt-2 pb-1">
-        <button
-          type="button"
-          onClick={() => navigate("/today")}
-          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-muted)] transition-colors duration-[160ms] hover:text-[var(--accent)]"
-          aria-label="Volver a Hoy"
-        >
-          <ArrowLeftIcon size={14} weight="bold" />
-          Volver a Hoy
-        </button>
-      </div>
       <div className="relative pb-[calc(var(--sticky-cta-height,88px)+44px)] space-y-6">
         {/* Context */}
         <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">

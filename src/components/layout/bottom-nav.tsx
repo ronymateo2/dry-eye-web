@@ -24,7 +24,6 @@ export function BottomNav() {
   const activeIndex = APP_TABS.findIndex(
     (tab) => pathname === tab.href || pathname.startsWith(`${tab.href}/`),
   );
-  const safeActiveIndex = activeIndex >= 0 ? activeIndex : 0;
 
   return (
     <nav className="bottom-nav" aria-label="Navegacion principal">
@@ -33,7 +32,7 @@ export function BottomNav() {
           <div className="bottom-nav__rail">
             {APP_TABS.map((tab, index) => {
               const Icon = icons[tab.href];
-              const isActive = index === safeActiveIndex;
+              const isActive = index === activeIndex;
               return (
                 <Link
                   key={tab.href}
