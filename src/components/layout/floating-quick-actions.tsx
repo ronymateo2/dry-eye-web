@@ -126,7 +126,7 @@ export function FloatingQuickActions() {
           <MedicationSessionSheet onSaved={savedAndClose} />
         </MobileSheet>
         <MobileSheet open={sheet === "vial"} title="Gestionar vial" description="Abre o descarta un vial de gotas." onClose={closeAll} panelClassName="!h-[85dvh]">
-          <VialSheet onSaved={savedAndClose} onClose={closeAll} />
+          <VialSheet onClose={closeAll} />
         </MobileSheet>
       </Suspense>
     </>

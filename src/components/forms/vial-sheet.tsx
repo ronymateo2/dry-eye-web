@@ -120,7 +120,7 @@ function VialCountdown({ startedAt, durationHours }: { startedAt: string; durati
   );
 }
 
-export function VialSheet({ onSaved, onClose }: { onSaved: () => void; onClose: () => void }) {
+export function VialSheet({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
   const [confirmingVialId, setConfirmingVialId] = useState<string | null>(null);
   const [confirmingDiscardId, setConfirmingDiscardId] = useState<string | null>(null);

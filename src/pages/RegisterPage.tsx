@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { PainSlider } from "@/components/ui/pain-slider";
@@ -17,7 +17,6 @@ import {
   ActivityIcon,
   TargetIcon,
   WarningIcon,
-  ArrowLeftIcon,
 } from "@phosphor-icons/react";
 
 import { LastCheckInRecall } from "@/components/forms/last-check-in-recall";
@@ -66,7 +65,6 @@ const accordionToggleClass = (expanded: boolean, hasSelection: boolean) =>
   );
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [pain, setPain] = useState(defaultPain);
   const [selectedTriggers, setSelectedTriggers] = useState<Set<string>>(new Set());
