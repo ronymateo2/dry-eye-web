@@ -205,6 +205,18 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
   );
   const totalQuantity = useMemo(() => drops.reduce((s, d) => s + d.quantity, 0), [drops]);
 
+  const occurrenceById = useMemo(() => {
+    const asc = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? 1 : -1));
+    const counts = new Map<string, number>();
+    const map = new Map<string, number>();
+    for (const d of asc) {
+      const next = (counts.get(d.name) ?? 0) + 1;
+      counts.set(d.name, next);
+      map.set(d.id, next);
+    }
+    return map;
+  }, [drops]);
+
   const handleToggle = useCallback((name: string) => {
     setExpandedType((prev) => (prev === name ? null : name));
   }, []);
@@ -325,17 +337,25 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
               <div key={d.id}>
                 <TimelineRow time={formatTime(d.loggedAt, timezone)}>
                   <TimelineDot color="var(--accent)" />
-                  <div className="flex min-w-0 items-center justify-end gap-2">
-                    <span className="truncate text-[13px] text-[var(--text-primary)]">
+                  <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+                    <span className="truncate text-[13px] font-medium text-[var(--text-primary)]">
                       {d.name}
                     </span>
-                    <span className="shrink-0 text-[12px] text-[var(--text-muted)]">
-                      {d.quantity}
-                    </span>
-                    <span className="mono shrink-0 text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
-                      {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
-                    </span>
-                    <CheckBadge />
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <span
+                        className="mono inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[10px] font-bold tracking-wider text-[var(--text-faint)]"
+                        style={{
+                          background:
+                            "color-mix(in srgb, var(--surface-el) 60%, transparent)",
+                        }}
+                      >
+                        #{occurrenceById.get(d.id)}
+                      </span>
+                      <span className="mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
+                        {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
+                      </span>
+                      <CheckBadge />
+                    </div>
                   </div>
                 </TimelineRow>
                 {!isLast && (
