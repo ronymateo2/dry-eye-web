@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { PulseIcon, CaretRightIcon, GearIcon, XCircleIcon } from "@phosphor-icons/react";
+import { PulseIcon, CaretRightIcon, GearIcon, TrashIcon } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
@@ -103,7 +103,7 @@ function VialRow({
             className="flex items-center justify-center w-12 h-12 -m-3 rounded-full text-[var(--text-faint)] opacity-50 active:opacity-100 active:bg-[var(--surface-el)] active:text-[var(--error)] transition-all duration-[160ms]"
             aria-label={`Descartar ${vial.drop_type_name}`}
           >
-            <XCircleIcon size={16} weight="regular" />
+            <TrashIcon size={16} weight="regular" />
           </button>
         </span>
       </motion.div>
@@ -168,7 +168,7 @@ function ActiveVialsSection() {
     },
   });
 
-  const handleConfirm = useCallback((id: string) => setConfirmingId(id), []);
+  const handleConfirm = useCallback((id: string) => setConfirmingId((prev) => (prev === id ? null : id)), []);
   const handleCancel = useCallback(() => setConfirmingId(null), []);
 
   if (activeVials.length === 0) return null;
