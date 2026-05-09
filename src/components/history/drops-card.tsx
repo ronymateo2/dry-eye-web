@@ -349,7 +349,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                             "color-mix(in srgb, var(--surface-el) 60%, transparent)",
                         }}
                       >
-                        #{occurrenceById.get(d.id)}
+                        {occurrenceById.get(d.id)}×
                       </span>
                       <span className="mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
                         {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
