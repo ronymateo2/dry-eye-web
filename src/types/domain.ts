@@ -204,3 +204,10 @@ export type VialRecord = {
   status: "active" | "discarded";
   vial_duration: number | null;
 };
+
+export type SaveVialInput = {
+  id: string;
+  dropTypeId: string;
+  startedAt: string;
+  dropId?: string;
+};

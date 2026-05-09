@@ -15,7 +15,9 @@ const LogOccurrenceSheet = lazy(() => import("@/components/forms/log-occurrence-
 const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet").then((m) => ({ default: m.ObservationSheet })));
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
 const MedicationSessionSheet = lazy(() => import("@/components/forms/medication-session-sheet").then((m) => ({ default: m.MedicationSessionSheet })));
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | null;
+const VialSheet = lazy(() => import("@/components/forms/vial-sheet").then((m) => ({ default: m.VialSheet })));
+
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
 
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
@@ -122,6 +124,9 @@ export function FloatingQuickActions() {
         </MobileSheet>
         <MobileSheet open={sheet === "medication-intake"} title="Registrar pastilla" description="Registra una toma de medicamento." onClose={closeAll} panelClassName="!h-[92dvh]">
           <MedicationSessionSheet onSaved={savedAndClose} />
+        </MobileSheet>
+        <MobileSheet open={sheet === "vial"} title="Abrir vial" description="Vincula un vial a una gota ya registrada." onClose={closeAll} panelClassName="!h-[85dvh]">
+          <VialSheet onClose={closeAll} />
         </MobileSheet>
       </Suspense>
     </>

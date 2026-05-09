@@ -84,6 +84,8 @@ export const api = {
   getLastDrop: () => api.get<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_name: string; drop_type_id: string } | null>("/drops/last"),
   getLastDropPerType: () => api.get<DropScheduleEntry[]>("/drops/last-per-type"),
   getDropStatsPerType: () => api.get<DropTypeStats[]>("/drops/stats-per-type"),
+  getRecentDrops: (dropTypeId: string, hours: number) =>
+    api.get<{ id: string; logged_at: string; quantity: number; eye: string }[]>(`/drops/recent?dropTypeId=${dropTypeId}&hours=${hours}`),
 
   getTodaySleep: () => api.get<{ id: string; day_key: string; logged_at: string; sleep_hours: number; sleep_quality: string } | null>("/sleep/today"),
   saveSleep: (body: unknown) => api.put("/sleep", body),
@@ -167,6 +169,8 @@ export const api = {
     status: string;
     vial_duration: number | null;
   }[]>("/vials/active"),
+  createVial: (body: { id: string; dropTypeId: string; startedAt: string; dropId?: string }) =>
+    api.post<{ ok: boolean; id: string }>("/vials", body),
   getVialHistory: (params?: { limit?: number; before?: string }) => {
     const qs = new URLSearchParams();
     if (params?.limit) qs.set("limit", String(params.limit));

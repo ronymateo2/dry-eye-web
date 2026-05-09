@@ -21,15 +21,6 @@ function timeAgo(dateStr: string | null): string | null {
   return "ahora";
 }
 
-function formatVialCountdown(targetIso: string): string {
-  const diffMs = new Date(targetIso).getTime() - Date.now();
-  if (diffMs <= 0) return "Vencido";
-  const hrs = Math.floor(diffMs / 3_600_000);
-  const mins = Math.floor((diffMs % 3_600_000) / 60_000);
-  if (hrs > 0) return `${hrs}h ${mins}m`;
-  return `${mins}m`;
-}
-
 function VialRow({
   vial,
   index,
@@ -50,12 +41,23 @@ function VialRow({
   isPending: boolean;
 }) {
   const durationMs = (vial.vial_duration ?? 24) * 3_600_000;
-  const expiresAt = new Date(new Date(vial.started_at).getTime() + durationMs).toISOString();
-  const remainingText = formatVialCountdown(expiresAt);
-  const isExpired = remainingText === "Vencido";
-  const isWarning = !isExpired && new Date(expiresAt).getTime() - now < 2 * 3_600_000;
+  const expiresAtMs = new Date(vial.started_at).getTime() + durationMs;
+  const diffMs = expiresAtMs - now;
+  const isExpired = diffMs <= 0;
+  const isWarning = !isExpired && diffMs < 2 * 3_600_000;
   const barColor = isExpired ? "var(--pain-high)" : isWarning ? "var(--warning)" : "var(--accent)";
-  const countdownLabel = isExpired ? "Vencido" : remainingText;
+
+  let rightLabel: string;
+  if (isExpired) {
+    const abs = -diffMs;
+    const h = Math.floor(abs / 3_600_000);
+    const m = Math.floor((abs % 3_600_000) / 60_000);
+    rightLabel = h > 0 ? `vencido hace ${h}h ${m}m` : `vencido hace ${m}m`;
+  } else {
+    const h = Math.floor(diffMs / 3_600_000);
+    const m = Math.floor((diffMs % 3_600_000) / 60_000);
+    rightLabel = h > 0 ? `expira en ${h}h ${m}m` : `expira en ${m}m`;
+  }
 
   return (
     <div>
@@ -76,16 +78,10 @@ function VialRow({
           />
           <span className="flex min-w-0 items-baseline gap-1.5">
             <span
-              className={cn(
-                "truncate text-[13px] font-medium capitalize leading-none",
-                isExpired ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]",
-              )}
+              className="truncate text-[13px] font-medium capitalize leading-none"
+              style={{ color: isExpired ? "var(--text-primary)" : "var(--text-muted)" }}
             >
               {vial.drop_type_name}
-            </span>
-            <span className="shrink-0 text-[11px] leading-none text-[var(--text-faint)]">·</span>
-            <span className="truncate font-mono text-[11px] leading-none tabular-nums text-[var(--text-faint)]">
-              {isExpired ? "Vencido" : `expira en ${remainingText}`}
             </span>
           </span>
         </span>
@@ -95,7 +91,7 @@ function VialRow({
             className="font-mono text-[11px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
             style={{ color: barColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
           >
-            {countdownLabel}
+            {rightLabel}
           </span>
           <button
             type="button"
