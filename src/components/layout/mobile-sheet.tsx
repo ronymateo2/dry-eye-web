@@ -14,8 +14,8 @@ type MobileSheetProps = {
   panelClassName?: string;
 };
 
-const PANEL_SPRING = { type: "spring" as const, stiffness: 340, damping: 32 };
-const BACKDROP_FADE = { duration: 0.22, ease: "easeOut" as const };
+const PANEL_SPRING = { type: "spring" as const, stiffness: 260, damping: 30, mass: 0.85 };
+const BACKDROP_FADE = { duration: 0.25, ease: [0.32, 0.72, 0, 1] as const };
 
 export function MobileSheet({
   open,
