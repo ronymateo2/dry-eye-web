@@ -8,11 +8,13 @@ import {
   MoonIcon,
   HeartbeatIcon,
   NotePencilIcon,
+  PulseIcon,
 } from "@phosphor-icons/react";
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | null;
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | null;
 
 const PRIMARY_ACTIONS = [
+  { sheet: "pain" as Sheet, Icon: PulseIcon, label: "Dolor" },
   { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
   { sheet: "medication-intake" as Sheet, Icon: PillIcon, label: "Pastilla" },
   { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },

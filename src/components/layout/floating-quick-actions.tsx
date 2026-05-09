@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -16,10 +16,11 @@ const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
 const MedicationSessionSheet = lazy(() => import("@/components/forms/medication-session-sheet").then((m) => ({ default: m.MedicationSessionSheet })));
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | null;
+type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | null;
 
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
   const [selectedObservation, setSelectedObservation] = useState<{ id: string; title: string; eye: string } | null>(null);
@@ -52,12 +53,21 @@ export function FloatingQuickActions() {
     closeAll();
   };
 
+  const handleSelect = (s: Sheet) => {
+    if (s === "pain") {
+      navigate("/register");
+      setMenuOpen(false);
+    } else {
+      setSheet(s);
+    }
+  };
+
   return (
     <>
       <QuickActionsSheet
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
-        onSelect={(s) => setSheet(s)}
+        onSelect={handleSelect}
       />
 
       {isVisible && <div className={cn("pointer-events-none fixed inset-x-0 z-30", fabBottomOffsetClass)}>

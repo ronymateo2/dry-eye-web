@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { motion } from "motion/react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth, storeTokenFromUrl } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
@@ -18,6 +19,7 @@ const AuthCallbackPage = lazy(() => import("@/pages/AuthCallbackPage"));
 
 function AppRoutes() {
   const { auth } = useAuth();
+  const location = useLocation();
   const isAuthenticated = auth.status === "authenticated";
   const isLoading = auth.status === "loading";
 
@@ -27,28 +29,35 @@ function AppRoutes() {
       {!isLoading && (
         <AppShell isAuthenticated={isAuthenticated}>
           <Suspense fallback={null}>
-            <Routes>
-              <Route path="/auth/callback" element={<AuthCallbackPage />} />
-              {isAuthenticated ? (
-                <>
-    <Route path="/today" element={<TodayPage />} />
-                  <Route path="/check-in" element={<RegisterPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/history" element={<HistoryPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/report" element={<ReportPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/treatments" element={<TreatmentsPage />} />
-                  <Route path="/login" element={<Navigate to="/today" replace />} />
-                  <Route path="*" element={<Navigate to="/today" replace />} />
-                </>
-              ) : (
-                <>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="*" element={<Navigate to="/login" replace />} />
-                </>
-              )}
-            </Routes>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <Routes location={location}>
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                {isAuthenticated ? (
+                  <>
+                    <Route path="/today" element={<TodayPage />} />
+                    <Route path="/check-in" element={<RegisterPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/history" element={<HistoryPage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
+                    <Route path="/report" element={<ReportPage />} />
+                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/treatments" element={<TreatmentsPage />} />
+                    <Route path="/login" element={<Navigate to="/today" replace />} />
+                    <Route path="*" element={<Navigate to="/today" replace />} />
+                  </>
+                ) : (
+                  <>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="*" element={<Navigate to="/login" replace />} />
+                  </>
+                )}
+              </Routes>
+            </motion.div>
           </Suspense>
         </AppShell>
       )}
