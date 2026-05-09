@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PulseIcon, CaretRightIcon, GearIcon } from "@phosphor-icons/react";
 import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
@@ -53,6 +54,40 @@ function PainCheckInCompact() {
 
 export default function TodayPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    void queryClient.prefetchQuery({
+      queryKey: ["check-ins/last"],
+      queryFn: api.getLastCheckIn,
+      staleTime: 60_000,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: ["sleep/today"],
+      queryFn: api.getTodaySleep,
+      staleTime: 60_000,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: ["drops/last-per-type"],
+      queryFn: api.getLastDropPerType,
+      staleTime: 60_000,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: ["calendar/events/today"],
+      queryFn: api.getCalendarEventsToday,
+      staleTime: 60_000,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: ["medications"],
+      queryFn: api.getMedications,
+      staleTime: 60_000,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: ["medication-intakes/last-per-med"],
+      queryFn: api.getLastIntakePerMedication,
+      staleTime: 60_000,
+    });
+  }, [queryClient]);
 
   return (
     <section className="space-y-5">

@@ -1,13 +1,118 @@
-import { useState } from "react";
-import { DropIcon, EyedropperIcon, CaretRightIcon, CheckIcon, ListIcon } from "@phosphor-icons/react";
+import { useState, useEffect, useMemo, useCallback, useRef, memo } from "react";
+import {
+  DropIcon,
+  EyedropperIcon,
+  CaretRightIcon,
+  CheckIcon,
+  ListIcon,
+  CaretDoubleDownIcon,
+} from "@phosphor-icons/react";
 import type { DisplayDrop } from "./types";
 import { EYE_LABELS, EYE_SHORT } from "./types";
 import { formatTime, formatGap } from "./utils";
 import { TimelineRow, TimelineDot, TimelineGap, CheckBadge } from "./timeline-ui";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 
+/* ─── GPU-friendly expand animation ─────────────────────────────────────── */
+const EXPAND_EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
+
+/* ─── Memoized sub-components ───────────────────────────────────────────── */
+
+const DropGroupItemInner = ({
+  name,
+  typedDrops,
+  timezone,
+  expandedType,
+  onToggle,
+}: {
+  name: string;
+  typedDrops: DisplayDrop[];
+  timezone: string;
+  expandedType: string | null;
+  onToggle: (name: string) => void;
+}) => {
+  const last = useMemo(
+    () => typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b)),
+    [typedDrops],
+  );
+  const typeQuantity = useMemo(
+    () => typedDrops.reduce((s, d) => s + d.quantity, 0),
+    [typedDrops],
+  );
+  const isExpanded = expandedType === name;
+
+  const handleClick = useCallback(() => onToggle(name), [name, onToggle]);
+
+  return (
+    <div key={name}>
+      <button
+        className="w-full flex items-center gap-3 py-2 text-left transition-transform duration-[120ms] ease-out active:scale-[0.98]"
+        onClick={handleClick}
+        aria-expanded={isExpanded}
+      >
+        <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
+          {name}
+        </span>
+        <span
+          className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+          style={{
+            color: "var(--pain-low)",
+            background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
+          }}
+        >
+          {typedDrops.length}×
+        </span>
+        <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
+          {formatTime(last.loggedAt, timezone)}
+        </span>
+        <span className="mono w-[26px] shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+          {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
+        </span>
+        <div
+          className="shrink-0 will-change-transform"
+          style={{
+            transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 200ms cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <CaretRightIcon size={12} color="var(--text-faint)" />
+        </div>
+      </button>
+
+      {/* GPU-accelerated: max-height + opacity instead of grid-template-rows */}
+      <div
+        className="overflow-hidden will-change-[max-height,opacity]"
+        style={{
+          maxHeight: isExpanded ? 800 : 0,
+          opacity: isExpanded ? 1 : 0,
+          transition: `max-height 200ms ${EXPAND_EASE}, opacity 180ms ${EXPAND_EASE}`,
+        }}
+      >
+        <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
+          <div className="mb-2 flex items-baseline justify-between">
+            <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+              {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
+            </p>
+            {typedDrops.length > 1 && (
+              <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                Intervalos
+              </p>
+            )}
+          </div>
+          <DropsTimeline drops={typedDrops} timezone={timezone} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DropGroupItem = memo(DropGroupItemInner);
+
 function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
-  const sorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
+  const sorted = useMemo(
+    () => [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1)),
+    [drops],
+  );
   const showTimeline = sorted.length > 1;
 
   if (!showTimeline) {
@@ -19,7 +124,8 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
         </span>
         <div className="flex items-center gap-2">
           <span className="text-[12px] text-[var(--text-muted)]">
-            {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} · {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
+            {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} ·{" "}
+            {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
           </span>
           <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
             <CheckIcon size={9} color="var(--pain-low)" />
@@ -69,22 +175,82 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
   );
 }
 
+/* ─── Main component ────────────────────────────────────────────────────── */
+
 export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone: string }) {
   const [expandedType, setExpandedType] = useState<string | null>(null);
   const [showAllTimeline, setShowAllTimeline] = useState(false);
 
-  const groups = new Map<string, DisplayDrop[]>();
-  for (const d of drops) {
-    if (!groups.has(d.name)) groups.set(d.name, []);
-    groups.get(d.name)!.push(d);
-  }
+  /* Memoized heavy computations */
+  const groups = useMemo(() => {
+    const map = new Map<string, DisplayDrop[]>();
+    for (const d of drops) {
+      if (!map.has(d.name)) map.set(d.name, []);
+      map.get(d.name)!.push(d);
+    }
+    return map;
+  }, [drops]);
 
-  const groupEntries = Array.from(groups.entries());
-  const lastDrop = drops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
-  const lastTime = formatTime(lastDrop.loggedAt, timezone);
+  const groupEntries = useMemo(() => Array.from(groups.entries()), [groups]);
 
-  const allSorted = [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1));
-  const totalQuantity = drops.reduce((s, d) => s + d.quantity, 0);
+  const lastDrop = useMemo(
+    () => drops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b)),
+    [drops],
+  );
+  const lastTime = useMemo(() => formatTime(lastDrop.loggedAt, timezone), [lastDrop, timezone]);
+
+  const allSorted = useMemo(
+    () => [...drops].sort((a, b) => (a.loggedAt > b.loggedAt ? -1 : 1)),
+    [drops],
+  );
+  const totalQuantity = useMemo(() => drops.reduce((s, d) => s + d.quantity, 0), [drops]);
+
+  const handleToggle = useCallback((name: string) => {
+    setExpandedType((prev) => (prev === name ? null : name));
+  }, []);
+
+  /* Scroll hint ─────── ref-based to avoid re-renders of the whole sheet */
+  const [sentinelEl, setSentinelEl] = useState<HTMLDivElement | null>(null);
+  const showScrollHintRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showAllTimeline || !sentinelEl) return;
+
+    let scrollContainer: HTMLElement | null = sentinelEl.parentElement;
+    while (scrollContainer) {
+      const style = getComputedStyle(scrollContainer);
+      if (/(auto|scroll)/.test(style.overflowY)) break;
+      scrollContainer = scrollContainer.parentElement;
+    }
+    if (!scrollContainer) return;
+
+    const hintEl = showScrollHintRef.current;
+    const container = scrollContainer;
+
+    function check() {
+      const hasScroll = container.scrollHeight > container.clientHeight;
+      const nearBottom =
+        container.scrollTop + container.clientHeight >= container.scrollHeight - 16;
+      const show = hasScroll && !nearBottom;
+      if (hintEl) {
+        hintEl.style.opacity = show ? "1" : "0";
+      }
+    }
+
+    const timer = setTimeout(check, 400);
+    container.addEventListener("scroll", check, { passive: true });
+
+    const ro = new ResizeObserver(check);
+    ro.observe(container);
+
+    return () => {
+      clearTimeout(timer);
+      container.removeEventListener("scroll", check);
+      ro.disconnect();
+    };
+  }, [showAllTimeline, sentinelEl]);
+
+  const openSheet = useCallback(() => setShowAllTimeline(true), []);
 
   return (
     <>
@@ -106,7 +272,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowAllTimeline(true)}
+              onClick={openSheet}
               className="flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-[120ms] ease-out active:scale-[0.92]"
               style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)" }}
               aria-label="Ver línea de tiempo completa"
@@ -118,7 +284,10 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
               style={{ background: "color-mix(in srgb, var(--pain-low) 12%, transparent)" }}
             >
               <EyedropperIcon size={15} color="var(--pain-low)" />
-              <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: "var(--pain-low)" }}>
+              <span
+                className="mono text-[15px] font-semibold tabular-nums"
+                style={{ color: "var(--pain-low)" }}
+              >
                 {drops.length}
               </span>
             </div>
@@ -126,70 +295,16 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
         </div>
 
         <div>
-          {groupEntries.map(([name, typedDrops]) => {
-            const last = typedDrops.reduce((a, b) => (a.loggedAt > b.loggedAt ? a : b));
-            const isExpanded = expandedType === name;
-            const typeQuantity = typedDrops.reduce((s, d) => s + d.quantity, 0);
-
-            return (
-              <div key={name}>
-                <button
-                  className="w-full flex items-center gap-3 py-2 text-left transition-transform duration-[120ms] ease-out active:scale-[0.98]"
-                  onClick={() => setExpandedType(isExpanded ? null : name)}
-                  aria-expanded={isExpanded}
-                >
-                  <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
-                    {name}
-                  </span>
-                  <span
-                    className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
-                    style={{
-                      color: "var(--pain-low)",
-                      background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
-                    }}
-                  >
-                    {typedDrops.length}×
-                  </span>
-                  <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
-                    {formatTime(last.loggedAt, timezone)}
-                  </span>
-                  <span className="mono w-[26px] shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
-                    {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
-                  </span>
-                  <div
-                    className="shrink-0 transition-transform duration-200"
-                    style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
-                  >
-                    <CaretRightIcon size={12} color="var(--text-faint)" />
-                  </div>
-                </button>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateRows: isExpanded ? "1fr" : "0fr",
-                    transition: "grid-template-rows 200ms cubic-bezier(0.4, 0, 0.2, 1)",
-                  }}
-                >
-                  <div className="overflow-hidden">
-                    <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
-                      <div className="mb-2 flex items-baseline justify-between">
-                        <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-                          {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
-                        </p>
-                        {typedDrops.length > 1 && (
-                          <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
-                            Intervalos
-                          </p>
-                        )}
-                      </div>
-                      <DropsTimeline drops={typedDrops} timezone={timezone} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {groupEntries.map(([name, typedDrops]) => (
+            <DropGroupItem
+              key={name}
+              name={name}
+              typedDrops={typedDrops}
+              timezone={timezone}
+              expandedType={expandedType}
+              onToggle={handleToggle}
+            />
+          ))}
         </div>
       </div>
 
@@ -236,6 +351,28 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
           {allSorted.length === 0 && (
             <p className="text-[13px] text-[var(--text-muted)]">Sin registros de gotas.</p>
           )}
+          <div ref={setSentinelEl} className="h-px" />
+        </div>
+
+        {/* Scroll hint — DOM mutation instead of React state to avoid re-renders */}
+        <div
+          ref={showScrollHintRef}
+          className="sticky bottom-0 pointer-events-none flex justify-center pb-3 pt-2 transition-opacity duration-300"
+          style={{
+            opacity: 0,
+            background: "linear-gradient(to top, var(--surface), transparent 35%)",
+          }}
+        >
+          <div
+            className="flex h-7 w-7 items-center justify-center rounded-full shadow-sm"
+            style={{ background: "color-mix(in srgb, var(--surface-el) 80%, transparent)" }}
+          >
+            <CaretDoubleDownIcon
+              size={14}
+              className="animate-bounce"
+              color="var(--text-muted)"
+            />
+          </div>
         </div>
       </MobileSheet>
     </>

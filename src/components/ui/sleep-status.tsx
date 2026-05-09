@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoonIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { api } from "@/lib/api";
@@ -19,17 +20,15 @@ const QUALITY_LABELS: Record<string, string> = {
 type SleepData = Awaited<ReturnType<typeof api.getTodaySleep>>;
 
 export function SleepStatus() {
-  const [sleep, setSleep] = useState<SleepData | null | undefined>(undefined);
+  const queryClient = useQueryClient();
+  const { data: sleep, isLoading } = useQuery<SleepData>({
+    queryKey: ["sleep/today"],
+    queryFn: api.getTodaySleep,
+    staleTime: 60_000,
+  });
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    api.getTodaySleep()
-      .then((record) => setSleep(record))
-      .catch(() => setSleep(null));
-  }, []);
-
   const hasSleep = sleep && sleep !== null;
-  const isLoading = sleep === undefined;
 
   if (isLoading) {
     return (
@@ -81,7 +80,7 @@ export function SleepStatus() {
           <SleepSheet
             onSaved={() => {
               setOpen(false);
-              api.getTodaySleep().then((record) => setSleep(record)).catch(() => setSleep(null));
+              queryClient.invalidateQueries({ queryKey: ["sleep/today"] });
             }}
           />
         </Suspense>
