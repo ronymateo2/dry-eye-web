@@ -31,6 +31,7 @@ function formatVialCountdown(targetIso: string): string {
 
 function ActiveVialsSection() {
   const queryClient = useQueryClient();
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const { data: activeVials = [] } = useQuery({
     queryKey: ["vials/active"],
     queryFn: api.getActiveVials,
@@ -38,7 +39,10 @@ function ActiveVialsSection() {
 
   const discardMutation = useMutation({
     mutationFn: (id: string) => api.discardVial(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["vials/active"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+      setConfirmingId(null);
+    },
   });
 
   if (activeVials.length === 0) return null;
@@ -52,33 +56,59 @@ function ActiveVialsSection() {
         const remainingText = formatVialCountdown(expiresAt);
         const isExpired = remainingText === "Vencido";
         const isWarning = !isExpired && new Date(expiresAt).getTime() - Date.now() < 2 * 3_600_000;
+        const isConfirming = confirmingId === vial.id;
 
         return (
           <div
             key={vial.id}
-            className="flex items-center justify-between gap-3 rounded-[10px] border border-[var(--border)] bg-[var(--surface-card)] px-3 py-2.5"
+            className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-card)] px-3 py-2.5"
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <EyedropperSampleIcon size={16} className="shrink-0 text-[var(--accent)]" />
-              <div className="min-w-0">
-                <p className="truncate text-[13px] font-medium text-[var(--text-primary)]">{vial.drop_type_name}</p>
-                <div className="flex items-center gap-1.5">
-                  <TimerIcon size={12} className={isExpired ? "text-[var(--pain-high)]" : isWarning ? "text-[var(--warning)]" : "text-[var(--accent)]"} />
-                  <span className={`text-[12px] font-[family-name:var(--font-mono)] ${isExpired ? "text-[var(--pain-high)]" : isWarning ? "text-[var(--warning)]" : "text-[var(--accent)]"}`}>
-                    {isExpired ? "Vencido" : `Expira en ${remainingText}`}
-                  </span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <EyedropperSampleIcon size={16} className="shrink-0 text-[var(--accent)]" />
+                <div className="min-w-0">
+                  <p className="truncate text-[13px] font-medium text-[var(--text-primary)]">{vial.drop_type_name}</p>
+                  <div className="flex items-center gap-1.5">
+                    <TimerIcon size={12} className={isExpired ? "text-[var(--pain-high)]" : isWarning ? "text-[var(--warning)]" : "text-[var(--accent)]"} />
+                    <span className={`text-[12px] font-[family-name:var(--font-mono)] ${isExpired ? "text-[var(--pain-high)]" : isWarning ? "text-[var(--warning)]" : "text-[var(--accent)]"}`}>
+                      {isExpired ? "Vencido" : `Expira en ${remainingText}`}
+                    </span>
+                  </div>
                 </div>
               </div>
+              {!isConfirming && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingId(vial.id)}
+                  className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium text-[var(--error)] opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  <XCircleIcon size={12} />
+                  Descartar
+                </button>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => discardMutation.mutate(vial.id)}
-              disabled={discardMutation.isPending}
-              className="flex shrink-0 items-center gap-1 rounded-full bg-[var(--pain-high)]/10 px-2.5 py-1 text-[12px] font-medium text-[var(--pain-high)] transition-colors active:bg-[var(--pain-high)]/20 disabled:opacity-50"
-            >
-              <XCircleIcon size={12} />
-              Descartar
-            </button>
+            {isConfirming && (
+              <div className="mt-2 flex items-center justify-between gap-2 rounded-[8px] border border-[var(--error)]/20 bg-[var(--error)]/[0.04] px-2.5 py-2">
+                <span className="text-[12px] font-medium text-[var(--error)]">¿Descartar vial?</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingId(null)}
+                    className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface)]"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => discardMutation.mutate(vial.id)}
+                    disabled={discardMutation.isPending}
+                    className="rounded-full px-3 py-1 text-[12px] font-medium text-[var(--error)] opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
+                  >
+                    {discardMutation.isPending ? "..." : "Sí, descartar"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         );
       })}

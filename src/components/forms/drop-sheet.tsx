@@ -252,19 +252,19 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
                     </span>
                   </div>
                   {confirmingDiscardId !== vialStatus.id && (
-                    <button
-                      type="button"
-                      onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
-                      className="flex items-center gap-1 rounded-full bg-[var(--pain-high)]/10 px-3 py-1 text-[12px] font-medium text-[var(--pain-high)] transition-colors active:bg-[var(--pain-high)]/20"
-                    >
-                      <XCircleIcon size={12} />
-                      Descartar
-                    </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
+                    className="flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-medium text-[var(--error)] opacity-60 hover:opacity-100 transition-opacity"
+                  >
+                    <XCircleIcon size={12} />
+                    Descartar
+                  </button>
                   )}
                 </div>
                 {confirmingDiscardId === vialStatus.id && (
-                  <div className="flex items-center justify-between gap-2 rounded-[8px] border border-[var(--pain-high)]/20 bg-[var(--pain-high)]/5 px-2.5 py-2">
-                    <span className="text-[12px] font-medium text-[var(--text-primary)]">¿Descartar vial?</span>
+                  <div className="mt-2 flex items-center justify-between gap-2 rounded-[8px] border border-[var(--error)]/20 bg-[var(--error)]/[0.04] px-2.5 py-2">
+                    <span className="text-[12px] font-medium text-[var(--error)]">¿Descartar vial?</span>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -277,7 +277,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
                         type="button"
                         onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
                         disabled={discardVialMutation.isPending}
-                        className="rounded-full bg-[var(--pain-high)]/15 px-3 py-1 text-[12px] font-medium text-[var(--pain-high)] transition-colors active:bg-[var(--pain-high)]/25 disabled:opacity-50"
+                        className="rounded-full px-3 py-1 text-[12px] font-medium text-[var(--error)] opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
                       >
                         {discardVialMutation.isPending ? "..." : "Sí, descartar"}
                       </button>
