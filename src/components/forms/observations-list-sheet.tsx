@@ -255,7 +255,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                 >
                   <div className="flex flex-1 flex-col gap-1 min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="truncate text-[15px] font-medium text-[var(--text-primary)]">
+                      <span className="text-[15px] font-medium text-[var(--text-primary)] break-words min-w-0">
                         {obs.title}
                       </span>
                       <EyePill eye={obs.eye} />
