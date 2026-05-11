@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
+import { EyedropperIcon, StethoscopeIcon, MoonIcon, PillIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
 import { OBS_EYE_LABELS } from "@/lib/constants";
@@ -141,18 +142,18 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                       <p className="mt-0.5 text-[12px] leading-snug text-[var(--text-secondary)]">{item.notes}</p>
                     )}
                     {hasLinks && (
-                      <div className="mt-1 flex flex-wrap gap-1">
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
                         {(item.links!.drop_type_ids ?? []).length > 0 && (
-                          <span className="text-[11px] text-[var(--text-faint)]">💧</span>
+                          <EyedropperIcon size={12} color="var(--text-faint)" />
                         )}
                         {item.links!.check_in_id && (
-                          <span className="text-[11px] text-[var(--text-faint)]">🩺</span>
+                          <StethoscopeIcon size={12} color="var(--text-faint)" />
                         )}
                         {item.links!.sleep_day_key && (
-                          <span className="text-[11px] text-[var(--text-faint)]">😴</span>
+                          <MoonIcon size={12} color="var(--text-faint)" />
                         )}
                         {(item.links!.medication_ids ?? []).length > 0 && (
-                          <span className="text-[11px] text-[var(--text-faint)]">💊</span>
+                          <PillIcon size={12} color="var(--text-faint)" />
                         )}
                       </div>
                     )}
