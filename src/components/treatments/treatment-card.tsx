@@ -49,7 +49,7 @@ export function TreatmentCard({
             {...attributes}
             {...listeners}
             aria-label={`Reordenar ${name}`}
-            className="flex w-12 shrink-0 cursor-grab items-center justify-center text-[var(--text-faint)] active:cursor-grabbing"
+            className="flex w-12 shrink-0 cursor-grab items-center justify-center text-[var(--text-muted)] active:cursor-grabbing"
           >
             <DotsSixVerticalIcon size={18} />
           </button>

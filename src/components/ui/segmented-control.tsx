@@ -10,7 +10,7 @@ type Option<T extends string> = {
 };
 
 type SegmentedControlProps<T extends string> = {
-  label: string;
+  label?: string;
   options: readonly Option<T>[];
   value: T;
   onChange: (value: T) => void;
@@ -88,8 +88,8 @@ export function SegmentedControl<T extends string>({
   const isQuiet = tone === "quiet";
 
   return (
-    <div className="space-y-3">
-      <p className="section-label">{label}</p>
+    <div className={label ? "space-y-3" : undefined}>
+      {label && <p className="section-label">{label}</p>}
       <div
         ref={containerRef}
         className={cn(

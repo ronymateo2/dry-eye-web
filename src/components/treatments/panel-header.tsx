@@ -6,11 +6,13 @@ export function PanelHeader({
   count,
   onAdd,
   addLabel,
+  countLabel = "activas",
 }: {
   title: string;
   count: number;
   onAdd: () => void;
   addLabel: string;
+  countLabel?: string;
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -18,7 +20,7 @@ export function PanelHeader({
         <h2 className="text-[17px] font-semibold leading-tight text-[var(--text-primary)]">{title}</h2>
         {count > 0 && (
           <p className="mono mt-0.5 text-[12px] text-[var(--text-faint)]">
-            {count} {count === 1 ? "activa" : "activas"}
+            {count} {countLabel}
           </p>
         )}
       </div>

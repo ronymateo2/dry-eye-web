@@ -13,7 +13,6 @@ export default function TreatmentsPage() {
   return (
     <section className="space-y-6">
       <SegmentedControl
-        label="Tipo de tratamiento"
         options={[
           { label: "Gotas", value: "drops" },
           { label: "Pastillas", value: "pills" },

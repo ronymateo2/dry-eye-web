@@ -51,6 +51,7 @@ export function MedicationsPanel() {
         count={medications.length}
         onAdd={() => setEditingItem("new")}
         addLabel="Agregar"
+        countLabel="activos"
       />
 
       {isLoading ? (

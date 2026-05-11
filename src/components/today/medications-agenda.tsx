@@ -63,9 +63,14 @@ function buildSchedule(
     const slots = times.map((t) => makeTodayDateAtTime(t, nowDate).getTime()).sort((a, b) => a - b);
     const lastLogged = intakeMap.get(med.id) ?? null;
 
+    const minInterval = slots.length > 1
+      ? Math.min(...slots.slice(1).map((s, i) => s - slots[i]))
+      : 86_400_000;
+    const earlyWindowMs = minInterval / 2;
+
     let nextSlot: number | null = null;
     for (const slot of slots) {
-      if (lastLogged == null || slot > lastLogged) {
+      if (lastLogged == null || slot > lastLogged + earlyWindowMs) {
         nextSlot = slot;
         break;
       }
