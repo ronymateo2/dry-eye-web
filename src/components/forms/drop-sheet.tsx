@@ -6,7 +6,7 @@ import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EyedropperIcon, TimerIcon, WarningIcon, XCircleIcon } from "@phosphor-icons/react";
+import { EyedropperIcon, TimerIcon, WarningIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
@@ -95,6 +95,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
       queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
@@ -119,7 +120,13 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     const durationMs = (selectedDropTypeInfo.vial_duration ?? 24) * 3_600_000;
     const expiresAt = new Date(activeVialForType.started_at).getTime() + durationMs;
     const remainingMs = expiresAt - Date.now();
-    if (remainingMs <= 0) return { kind: "expired" as const };
+    if (remainingMs <= 0) {
+      const expiredMs = Math.abs(remainingMs);
+      const expHrs = Math.floor(expiredMs / 3_600_000);
+      const expMins = Math.floor((expiredMs % 3_600_000) / 60_000);
+      const expiredAgo = expHrs > 0 ? `${expHrs}h ${expMins}m` : `${expMins}m`;
+      return { kind: "expired" as const, id: activeVialForType.id, expiredAgo };
+    }
     const hrs = Math.floor(remainingMs / 3_600_000);
     const mins = Math.floor((remainingMs % 3_600_000) / 60_000);
     return { kind: "active" as const, id: activeVialForType.id, remaining: `${hrs}h ${mins}m` };
@@ -250,61 +257,83 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         {vialStatus && (
           <>
             {vialStatus.kind === "active" && (
-              <div className="rounded-[10px] border px-3 py-2.5 space-y-2" style={{ background: "var(--surface-el)", borderColor: "var(--border)" }}>
-                <div className="flex items-center gap-2">
-                  <TimerIcon size={14} style={{ color: "var(--accent)" }} />
-                  <span className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
-                    Vial activo · expira en {vialStatus.remaining}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <TimerIcon size={13} style={{ color: "var(--accent)" }} />
+                  <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
+                    Vial activo · {vialStatus.remaining}
                   </span>
                 </div>
-                {confirmingDiscardId !== vialStatus.id && (
+                {confirmingDiscardId !== vialStatus.id ? (
                   <button
                     type="button"
                     onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-[8px] border border-[var(--error)]/30 py-2 text-[13px] font-medium transition-colors hover:border-[var(--error)]/60 hover:bg-[var(--error)]/[0.04]"
+                    className="text-[12px] font-medium opacity-60 hover:opacity-100 transition-opacity"
                     style={{ color: "var(--error)" }}
                   >
-                    <XCircleIcon size={14} />
-                    Descartar vial
+                    Descartar
                   </button>
-                )}
-                {confirmingDiscardId === vialStatus.id && (
-                  <div className="flex items-center justify-between gap-2 rounded-[8px] border border-[var(--error)]/20 bg-[var(--error)]/[0.04] px-2.5 py-2">
-                    <span className="text-[12px] font-medium text-[var(--error)]">¿Descartar vial?</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setConfirmingDiscardId(null)}
-                        className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface)]"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
-                        disabled={discardVialMutation.isPending}
-                        className="rounded-full px-3 py-1 text-[12px] font-medium text-[var(--error)] opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
-                      >
-                        {discardVialMutation.isPending ? "..." : "Sí, descartar"}
-                      </button>
-                    </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDiscardId(null)}
+                      className="text-[12px] font-medium transition-colors"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
+                      disabled={discardVialMutation.isPending}
+                      className="text-[12px] font-medium opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
+                      style={{ color: "var(--error)" }}
+                    >
+                      {discardVialMutation.isPending ? "..." : "¿Sí, descartar?"}
+                    </button>
                   </div>
                 )}
               </div>
             )}
             {vialStatus.kind === "expired" && (
-              <div className="rounded-[10px] border px-3 py-2.5 bg-[var(--warning)]/[0.06] border-[var(--warning)]/25">
-                <div className="flex items-start gap-2">
-                  <WarningIcon size={15} weight="fill" className="mt-[1px] shrink-0" style={{ color: "var(--warning)" }} />
-                  <div className="space-y-0.5">
-                    <span className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
-                      Vial vencido — tirarlo
-                    </span>
-                    <p className="text-[12px] leading-snug" style={{ color: "var(--text-faint)" }}>
-                      Al guardar se abrirá uno nuevo
-                    </p>
-                  </div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                  <WarningIcon size={13} weight="fill" style={{ color: "var(--warning)" }} />
+                  <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
+                    Vencido hace {vialStatus.expiredAgo}
+                  </span>
                 </div>
+                {confirmingDiscardId !== vialStatus.id ? (
+                  <button
+                    type="button"
+                    onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
+                    className="text-[12px] font-medium opacity-60 hover:opacity-100 transition-opacity"
+                    style={{ color: "var(--error)" }}
+                  >
+                    Descartar
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDiscardId(null)}
+                      className="text-[12px] font-medium transition-colors"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
+                      disabled={discardVialMutation.isPending}
+                      className="text-[12px] font-medium opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
+                      style={{ color: "var(--error)" }}
+                    >
+                      {discardVialMutation.isPending ? "..." : "¿Sí, descartar?"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
             {vialStatus.kind === "new" && (

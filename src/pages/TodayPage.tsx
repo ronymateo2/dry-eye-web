@@ -60,85 +60,85 @@ function VialRow({
   }
 
   return (
-    <div>
-      <motion.div
-        initial={{ opacity: 0, y: 3 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-        className={cn(
-          "group grid min-h-[34px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[9px] px-1 py-1 text-left",
-          "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
-          "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
-        )}
-      >
-        <span className="flex min-w-0 items-center gap-2.5">
-          <span
-            className="h-4 w-[3px] shrink-0 rounded-full opacity-90 transition-[height,opacity] duration-[160ms] ease-out group-hover:h-5 group-hover:opacity-100"
-            style={{ background: barColor }}
-          />
-          <span className="flex min-w-0 items-baseline gap-1.5">
-            <span
-              className="truncate text-[13px] font-medium capitalize leading-none"
-              style={{ color: isExpired ? "var(--text-primary)" : "var(--text-muted)" }}
-            >
-              {vial.drop_type_name}
-            </span>
-          </span>
-        </span>
-
-        <span className="flex shrink-0 items-center gap-1.5">
-          <span
-            className="font-mono text-[11px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
-            style={{ color: barColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
-          >
-            {rightLabel}
-          </span>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="flex items-center justify-center w-12 h-12 -m-3 rounded-full text-[var(--text-faint)] opacity-50 active:opacity-100 active:bg-[var(--surface-el)] active:text-[var(--error)] transition-all duration-[160ms]"
-            aria-label={`Descartar ${vial.drop_type_name}`}
-          >
-            <TrashIcon size={16} weight="regular" />
-          </button>
-        </span>
-      </motion.div>
-
-      <AnimatePresence initial={false}>
-        {isConfirming && (
+    <motion.div
+      initial={{ opacity: 0, y: 3 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+      className="group min-h-[44px] w-full overflow-hidden rounded-[9px]"
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {!isConfirming ? (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
-            className="overflow-hidden"
+            key="normal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-1 py-1"
           >
-            <div className="px-1 pt-1 pb-1">
-              <div className="flex items-center justify-between gap-3 rounded-[9px] border border-[var(--error)]/20 bg-[var(--error)]/[0.04] px-3 py-2">
-                <span className="text-[12px] font-medium text-[var(--error)]">¿Descartar {vial.drop_type_name}?</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={onCancel}
-                    className="rounded-full px-2.5 py-1 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface)]"
-                  >
-                    No
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onDiscard}
-                    disabled={isPending}
-                    className="rounded-full px-3 py-1 text-[12px] font-medium text-[var(--error)] opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
-                  >
-                    {isPending ? "..." : "Descartar"}
-                  </button>
-                </div>
-              </div>
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span
+                className="h-4 w-[3px] shrink-0 rounded-full opacity-90 transition-[height,opacity] duration-[160ms] ease-out group-hover:h-5 group-hover:opacity-100"
+                style={{ background: barColor }}
+              />
+              <span
+                className="truncate text-[13px] font-medium capitalize leading-none"
+                style={{ color: isExpired ? "var(--text-primary)" : "var(--text-muted)" }}
+              >
+                {vial.drop_type_name}
+              </span>
+            </span>
+
+            <span className="flex shrink-0 items-center gap-1.5">
+              <span
+                className="font-mono text-[11px] font-semibold tabular-nums"
+                style={{ color: barColor }}
+              >
+                {rightLabel}
+              </span>
+              <button
+                type="button"
+                onClick={onConfirm}
+                className="flex items-center justify-center w-7 h-7 rounded-full text-[var(--text-faint)] opacity-60 hover:opacity-100 hover:bg-[var(--surface-el)] active:bg-[var(--surface-el)] active:text-[var(--error)] transition-all duration-[160ms]"
+                aria-label={`Descartar ${vial.drop_type_name}`}
+              >
+                <TrashIcon size={15} weight="regular" />
+              </button>
+            </span>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="confirm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+            className="flex items-center justify-between gap-3 px-3 py-1 min-h-[44px]"
+          >
+            <span className="min-w-0 truncate text-[12px] font-medium text-[var(--error)]">
+              ¿Descartar {vial.drop_type_name}?
+            </span>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="rounded-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-el)]"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={onDiscard}
+                disabled={isPending}
+                className="rounded-full bg-[var(--error)]/10 px-3 py-1.5 text-[12px] font-medium text-[var(--error)] transition-opacity hover:bg-[var(--error)]/20 disabled:opacity-50"
+              >
+                {isPending ? "…" : "Sí"}
+              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }
 

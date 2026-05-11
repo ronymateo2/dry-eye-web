@@ -39,7 +39,7 @@ function EmptyState({ label, description, icon, onClick, buttonLabel }: {
       <button
         type="button"
         onClick={onClick}
-        className="mt-3 inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 py-2 text-[13px] font-medium text-[#121008] transition-colors hover:bg-[var(--accent-bright)]"
+        className="mt-3 inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 py-2 text-[13px] font-medium text-[var(--btn-primary-text,#121008)] transition-colors hover:bg-[var(--accent-bright)]"
       >
         <PlusIcon size={14} weight="bold" />
         {buttonLabel}
@@ -160,22 +160,29 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
       </div>
 
       {selectedDropType && vialStatus && (
-        <div className="rounded-[10px] border px-3 py-2.5" style={{ background: "var(--surface-el)", borderColor: "var(--border)" }}>
-          {vialStatus.kind === "active" ? (
-            <div className="flex items-center gap-2">
-              <TimerIcon size={14} style={{ color: "var(--warning)" }} />
-              <span className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
-                Se descartará el vial actual (expira en {vialStatus.remaining})
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <TimerIcon size={14} style={{ color: "var(--warning)" }} />
-              <span className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
-                El vial actual está vencido
-              </span>
-            </div>
+        <div
+          className={cn(
+            "rounded-[10px] border-l-2 px-3 py-2.5 flex items-start gap-2.5",
+            vialStatus.kind === "active"
+              ? "bg-[rgba(224,147,42,0.07)] border-[var(--warning)]"
+              : "bg-[rgba(204,63,48,0.07)] border-[var(--error)]",
           )}
+        >
+          <TimerIcon
+            size={14}
+            className="mt-0.5 shrink-0"
+            style={{ color: vialStatus.kind === "active" ? "var(--warning)" : "var(--error)" }}
+          />
+          <span className="text-[13px] text-[var(--text-muted)] leading-snug">
+            {vialStatus.kind === "active" ? (
+              <>
+                Se descartará el vial actual — expira en{" "}
+                <span className="font-mono text-[var(--warning)]">{vialStatus.remaining}</span>
+              </>
+            ) : (
+              "El vial actual está vencido"
+            )}
+          </span>
         </div>
       )}
 
@@ -211,22 +218,22 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
                     type="button"
                     onClick={() => setSelectedDropId(drop.id)}
                     className={cn(
-                      "flex w-full min-h-[48px] items-center gap-3 rounded-[10px] border px-3 py-2.5 text-left transition-colors",
+                      "flex w-full min-h-[52px] items-center gap-3 rounded-[10px] border px-3 py-3 text-left transition-colors",
                       isSelected
-                        ? "border-[var(--accent)] bg-[var(--surface)]"
+                        ? "border-[var(--accent)] bg-[var(--accent-dim)]"
                         : "border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-el)]",
                     )}
                   >
-                    <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border", isSelected ? "border-[var(--accent)]" : "border-[var(--border)]")}>
+                    <div className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors", isSelected ? "border-[var(--accent)]" : "border-[var(--border)]")}>
                       {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={cn("text-[13px] font-medium", isSelected ? "text-[var(--accent)]" : "text-[var(--text-primary)]")}>
+                    <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+                      <span className={cn("font-mono text-[14px]", isSelected ? "text-[var(--accent)]" : "text-[var(--text-primary)]")}>
                         {timeAgo(drop.logged_at)}
-                      </p>
-                      <p className="text-[12px] text-[var(--text-faint)]">
-                        {eyeLabel} · {drop.quantity} {drop.quantity === 1 ? "gota" : "gotas"}
-                      </p>
+                      </span>
+                      <span className="text-[12px] text-[var(--text-faint)] shrink-0">
+                        {eyeLabel} · <span className="font-mono">{drop.quantity}</span> {drop.quantity === 1 ? "gota" : "gotas"}
+                      </span>
                     </div>
                   </button>
                 );
