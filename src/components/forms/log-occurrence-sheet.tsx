@@ -143,7 +143,7 @@ function DynamicPropertyField({
     const numVal = typeof value === "number" ? value : min;
     return (
       <div className="space-y-2">
-        <PainSlider label={def.label} value={numVal} onChange={(v) => onChange(v)} />
+        <PainSlider label={def.label} labelClassName="section-label" value={numVal} onChange={(v) => onChange(v)} />
       </div>
     );
   }
@@ -152,7 +152,7 @@ function DynamicPropertyField({
     const boolVal = typeof value === "boolean" ? value : null;
     return (
       <div className="space-y-2">
-        <p className="text-[13px] font-medium text-[var(--text-primary)]">{def.label}</p>
+        <p className="section-label">{def.label}</p>
         <div className="flex gap-2">
           {([{ label: "Sí", val: true }, { label: "No", val: false }] as const).map((opt) => (
             <button
@@ -178,7 +178,7 @@ function DynamicPropertyField({
   const strVal = typeof value === "string" ? value : null;
   return (
     <div className="space-y-2">
-      <p className="text-[13px] font-medium text-[var(--text-primary)]">{def.label}</p>
+      <p className="section-label">{def.label}</p>
       <div className="flex flex-wrap gap-2">
         {def.options.map((opt) => (
           <button
@@ -390,7 +390,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
 
         <ObsContextCard observation={observation} />
 
-        <PainSlider label="Intensidad" value={intensity} onChange={setIntensity} />
+        <PainSlider label="Intensidad" labelClassName="section-label" value={intensity} onChange={setIntensity} />
 
         {(observation.propertiesSchema ?? []).map((def) => (
           <DynamicPropertyField

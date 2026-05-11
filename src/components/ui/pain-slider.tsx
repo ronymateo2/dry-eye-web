@@ -3,6 +3,7 @@ import { painColor, qualityColor, painGradient, qualityGradient } from "@/lib/pa
 
 type PainSliderProps = {
   label: string;
+  labelClassName?: string;
   icon?: React.ReactNode;
   value: number;
   onChange: (value: number) => void;
@@ -19,7 +20,7 @@ function normalizeValue(value: number, scale: "integer" | "vas"): number {
   return Math.round(value);
 }
 
-export const PainSlider = memo(function PainSlider({ label, icon, value, onChange, scale = "integer", variant = "pain" }: PainSliderProps) {
+export const PainSlider = memo(function PainSlider({ label, labelClassName, icon, value, onChange, scale = "integer", variant = "pain" }: PainSliderProps) {
   const colorFn = variant === "quality" ? qualityColor : painColor;
   const gradientFn = variant === "quality" ? qualityGradient : painGradient;
   const displayValue = formatValue(value, scale);
@@ -27,7 +28,7 @@ export const PainSlider = memo(function PainSlider({ label, icon, value, onChang
   return (
     <div className="space-y-1">
       <div className="flex items-end justify-between gap-4">
-        <span className="flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]">
+        <span className={labelClassName ?? "flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]"}>
           {icon}{label}
         </span>
         <span className="mono text-[22px] font-normal" style={{ color: colorFn(value), transition: "color 200ms cubic-bezier(0.16, 1, 0.3, 1)" }}>

@@ -1,7 +1,7 @@
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, XIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon, CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { api } from "@/lib/api";
@@ -76,6 +76,74 @@ function PillGrid<T extends string>({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+function CollapseSelect<T extends string>({
+  options,
+  value,
+  onChange,
+  placeholder = "Seleccionar...",
+}: {
+  options: readonly { label: string; value: T }[];
+  value: T | null;
+  onChange: (v: T | null) => void;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value);
+
+  return (
+    <div className="rounded-[12px] border border-[var(--border)] overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3"
+        aria-expanded={open}
+      >
+        <span className={cn("text-[14px]", selected ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]")}>
+          {selected?.label ?? placeholder}
+        </span>
+        <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.18 }} className="shrink-0 text-[var(--text-muted)]">
+          <CaretDownIcon size={14} />
+        </motion.span>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="options"
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden border-t border-[var(--border)]"
+          >
+            {options.map((opt) => {
+              const active = value === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(active ? null : opt.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center justify-between px-4 py-2.5 border-b last:border-0 border-[var(--border)]",
+                    "text-[14px] transition-colors duration-[80ms]",
+                    active ? "text-[var(--accent)] bg-[var(--accent-dim)]" : "text-[var(--text-primary)]"
+                  )}
+                >
+                  <span>{opt.label}</span>
+                  {active && <CheckIcon size={14} weight="bold" className="shrink-0" />}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -333,11 +401,11 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
 
         <div className="space-y-2">
           <p className="section-label">Zona</p>
-          <PillGrid
+          <CollapseSelect
             options={OBS_BODY_ZONE_OPTIONS}
             value={bodyZone}
             onChange={(v) => { setBodyZone(v); if (v !== "other") setBodyZoneCustom(""); }}
-            scrollable
+            placeholder="Seleccionar zona..."
           />
           <AnimatePresence>
             {bodyZone === "other" && (
@@ -362,7 +430,12 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
 
         <div className="space-y-2">
           <p className="section-label">Categoría</p>
-          <PillGrid options={OBS_CATEGORY_OPTIONS} value={category} onChange={setCategory} scrollable />
+          <CollapseSelect
+            options={OBS_CATEGORY_OPTIONS}
+            value={category}
+            onChange={setCategory}
+            placeholder="Seleccionar categoría..."
+          />
         </div>
 
         <PropertyEditorSection properties={properties} onChange={setProperties} showErrors={showPropErrors} />
