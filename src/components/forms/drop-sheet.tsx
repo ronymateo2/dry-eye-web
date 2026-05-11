@@ -92,6 +92,9 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
 
     try {
       await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
+      if (vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
+        await api.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
+      }
       persistLastDrop();
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
