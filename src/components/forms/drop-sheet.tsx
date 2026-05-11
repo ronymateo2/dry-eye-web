@@ -6,7 +6,7 @@ import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EyedropperIcon, TimerIcon, WarningIcon } from "@phosphor-icons/react";
+import { ClockIcon, EyedropperIcon, TimerIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
@@ -22,14 +22,14 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
   const user = useUser();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
   const [selectedDropType, setSelectedDropType] = useState<string>("");
-  const [quantity, setQuantity] = useState("1");
+  const [quantity, setQuantity] = useState(1);
   const [eye, setEye] = useState<DropEye>("left");
   const [loggedAt, setLoggedAt] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [isPending, setIsPending] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const [confirmingDiscardId, setConfirmingDiscardId] = useState<string | null>(null);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const { data: lastDrop, isLoading: lastDropLoading } = useQuery({
     queryKey: ["drops/last"],
@@ -46,6 +46,10 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     mutationFn: (id: string) => api.discardVial(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+      setShowDiscardConfirm(false);
+    },
+    onError: () => {
+      setShowDiscardConfirm(false);
     },
   });
 
@@ -64,7 +68,6 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     }
   }, [dropTypes, selectedDropType, initialDropTypeId]);
 
-
   const handleSave = async () => {
     if (!selectedDropType) {
       setState({ status: "error", message: "Selecciona un tipo de gota." });
@@ -74,15 +77,13 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     setIsPending(true);
     const dropId = crypto.randomUUID();
     const ts = loggedAt ? new Date(loggedAt).toISOString() : new Date().toISOString();
-    const qty = Number(quantity) || 1;
     const dropTypeName = dropTypes.find((dt) => dt.id === selectedDropType)?.name ?? "";
 
     const persistLastDrop = () =>
-      setLastDrop({ id: dropId, logged_at: ts, quantity: qty, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
+      setLastDrop({ id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
 
-    // Offline path
     if (!isOnline) {
-      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
+      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
       persistLastDrop();
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
@@ -91,22 +92,28 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     }
 
     try {
-      await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
-      if (vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
-        await api.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
-      }
+      await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
       persistLastDrop();
+      toast.success("Gota registrada.");
+
+      if (vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
+        try {
+          await api.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
+          toast.success(`Vial abierto · ${dropTypeName}`);
+        } catch {
+          toast.warning("Gota guardada. No se pudo abrir el vial — ábrelo manualmente desde Tratamientos.");
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
       queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
       queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
-      toast.success("Gota registrada.");
       onSaved();
     } catch {
-      // Network failure while online — queue and sync later
-      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity: qty, eye });
+      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
       persistLastDrop();
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
@@ -134,6 +141,87 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     const mins = Math.floor((remainingMs % 3_600_000) / 60_000);
     return { kind: "active" as const, id: activeVialForType.id, remaining: `${hrs}h ${mins}m` };
   }, [selectedDropTypeInfo, activeVialForType]);
+
+  function renderVialStatus() {
+    if (!vialStatus) return null;
+
+    if (vialStatus.kind === "new") {
+      return (
+        <div className="flex items-center gap-2 rounded-[8px] px-3 py-2" style={{ background: "var(--surface-el)" }}>
+          <TimerIcon size={13} style={{ color: "var(--text-faint)" }} />
+          <span className="text-[12px]" style={{ color: "var(--text-faint)" }}>
+            Se abrirá un nuevo vial al guardar
+          </span>
+        </div>
+      );
+    }
+
+    const statusText = vialStatus.kind === "active"
+      ? `Vial activo · ${vialStatus.remaining}`
+      : `Vencido hace ${vialStatus.expiredAgo}`;
+    const iconColor = vialStatus.kind === "active" ? "var(--accent)" : "var(--warning)";
+
+    return (
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            {vialStatus.kind === "active"
+              ? <TimerIcon size={13} style={{ color: iconColor }} />
+              : <WarningIcon size={13} weight="fill" style={{ color: iconColor }} />
+            }
+            <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>{statusText}</span>
+          </div>
+          {!showDiscardConfirm && (
+            <button
+              type="button"
+              aria-label="Descartar vial"
+              className="flex items-center gap-1 rounded-[6px] border px-2.5 py-1.5 text-[12px] font-medium opacity-70 hover:opacity-100 transition-opacity"
+              style={{ color: "var(--error)", borderColor: "color-mix(in srgb, var(--error) 30%, transparent)" }}
+              onClick={() => setShowDiscardConfirm(true)}
+            >
+              <TrashIcon size={12} weight="fill" />
+              Descartar vial
+            </button>
+          )}
+        </div>
+
+        {showDiscardConfirm && (
+          <div className="rounded-[10px] border p-3 space-y-3" style={{ borderColor: "color-mix(in srgb, var(--error) 40%, transparent)", background: "var(--surface-el)" }}>
+            <div>
+              <p className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>
+                ¿Descartar vial de {selectedDropTypeInfo?.name}?
+              </p>
+              <p className="mt-0.5 text-[12px] leading-snug" style={{ color: "var(--text-muted)" }}>
+                Marca el vial como usado. Recuerda tirar el frasco físico. Esta acción no se puede deshacer.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="flex-1 rounded-[8px] border border-[var(--border)] py-2 text-[13px] font-medium"
+                style={{ color: "var(--text-muted)" }}
+                onClick={() => setShowDiscardConfirm(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-[8px] py-2 text-[13px] font-medium disabled:opacity-50"
+                style={{ background: "var(--error)", color: "white" }}
+                disabled={discardVialMutation.isPending}
+                onClick={() => {
+                  discardVialMutation.mutate(vialStatus.id);
+                  setShowDiscardConfirm(false);
+                }}
+              >
+                {discardVialMutation.isPending ? "..." : "Sí, descartar"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const canSave = !!selectedDropType;
 
@@ -180,6 +268,19 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     return { timeStr, name: lastDrop.drop_type_name, eye: eyeLabel, quantityLabel };
   })() : null;
 
+  const nowTimeStr = (() => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  })();
+
+  const loggedTimeStr = loggedAt ? (() => {
+    const d = new Date(loggedAt);
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    const dateStr = d.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+    return `${hh}:${mm} · ${dateStr}`;
+  })() : null;
+
   return (
     <div className="space-y-5 pb-[calc(20px+env(safe-area-inset-bottom))]">
       {lastDropLabel && (
@@ -206,16 +307,29 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       )}
 
       <div>
-        {!showDatePicker ? (
-          <button
-            type="button"
-            className="text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)]"
-            onClick={() => { setShowDatePicker(true); setLoggedAt((prev) => prev ?? new Date().toISOString()); }}
-          >
-            ¿Olvidaste registrarla? Cambiar fecha
-          </button>
-        ) : (
-          <div className="space-y-1.5">
+        <button
+          type="button"
+          aria-expanded={showDatePicker}
+          className="flex items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5 text-[13px] font-medium transition-colors"
+          style={loggedAt
+            ? { color: "var(--accent)", borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)" }
+            : { color: "var(--text-secondary)", borderColor: "var(--border)" }
+          }
+          onClick={() => {
+            if (showDatePicker) {
+              setShowDatePicker(false);
+            } else {
+              setShowDatePicker(true);
+              if (!loggedAt) setLoggedAt(new Date().toISOString());
+            }
+          }}
+        >
+          <ClockIcon size={13} />
+          {loggedAt ? loggedTimeStr : `Ahora · ${nowTimeStr}`}
+        </button>
+
+        {showDatePicker && (
+          <div className="mt-2 space-y-1.5">
             <div className="flex items-center justify-between">
               <p className="section-label mb-0">Fecha y hora</p>
               <button
@@ -223,7 +337,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
                 className="text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)]"
                 onClick={() => { setShowDatePicker(false); setLoggedAt(null); }}
               >
-                Usar hora actual
+                Volver a ahora
               </button>
             </div>
             <DateTimePicker value={loggedAt} onChange={setLoggedAt} max={new Date()} />
@@ -236,7 +350,12 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="section-label mb-0">Tipo de gota</p>
-          <button onClick={() => { onSaved(); navigate("/treatments"); }} className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]">Gestionar</button>
+          <button
+            onClick={() => { onSaved(); navigate("/treatments"); }}
+            className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]"
+          >
+            + Nuevo
+          </button>
         </div>
 
         {dropTypes.length === 0 ? (
@@ -249,7 +368,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
             aria-label="Seleccionar tipo de gota"
             className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors appearance-none"
             value={selectedDropType}
-            onChange={(e) => setSelectedDropType(e.target.value)}
+            onChange={(e) => { setSelectedDropType(e.target.value); setShowDiscardConfirm(false); }}
           >
             {dropTypes.map((dt) => (
               <option key={dt.id} value={dt.id}>{dt.name}</option>
@@ -257,95 +376,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
           </select>
         )}
 
-        {vialStatus && (
-          <>
-            {vialStatus.kind === "active" && (
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5">
-                  <TimerIcon size={13} style={{ color: "var(--accent)" }} />
-                  <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
-                    Vial activo · {vialStatus.remaining}
-                  </span>
-                </div>
-                {confirmingDiscardId !== vialStatus.id ? (
-                  <button
-                    type="button"
-                    onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
-                    className="text-[12px] font-medium opacity-60 hover:opacity-100 transition-opacity"
-                    style={{ color: "var(--error)" }}
-                  >
-                    Descartar
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setConfirmingDiscardId(null)}
-                      className="text-[12px] font-medium transition-colors"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
-                      disabled={discardVialMutation.isPending}
-                      className="text-[12px] font-medium opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
-                      style={{ color: "var(--error)" }}
-                    >
-                      {discardVialMutation.isPending ? "..." : "¿Sí, descartar?"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            {vialStatus.kind === "expired" && (
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5">
-                  <WarningIcon size={13} weight="fill" style={{ color: "var(--warning)" }} />
-                  <span className="text-[12px]" style={{ color: "var(--text-muted)" }}>
-                    Vencido hace {vialStatus.expiredAgo}
-                  </span>
-                </div>
-                {confirmingDiscardId !== vialStatus.id ? (
-                  <button
-                    type="button"
-                    onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
-                    className="text-[12px] font-medium opacity-60 hover:opacity-100 transition-opacity"
-                    style={{ color: "var(--error)" }}
-                  >
-                    Descartar
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setConfirmingDiscardId(null)}
-                      className="text-[12px] font-medium transition-colors"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { if (vialStatus.id) { discardVialMutation.mutate(vialStatus.id); setConfirmingDiscardId(null); } }}
-                      disabled={discardVialMutation.isPending}
-                      className="text-[12px] font-medium opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
-                      style={{ color: "var(--error)" }}
-                    >
-                      {discardVialMutation.isPending ? "..." : "¿Sí, descartar?"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-            {vialStatus.kind === "new" && (
-              <p className="text-[12px] leading-snug" style={{ color: "var(--text-faint)" }}>
-                Se abrirá nuevo vial al guardar
-              </p>
-            )}
-          </>
-        )}
+        {renderVialStatus()}
       </div>
 
       <div className="grid grid-cols-[1fr_120px] gap-3">
@@ -358,14 +389,28 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         />
         <div className="space-y-2">
           <p className="section-label">Cantidad</p>
-          <input
-            className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors"
-            inputMode="numeric"
-            min={1}
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-          />
+          <div className="flex h-12 items-center rounded-[10px] border border-[var(--border)] bg-[var(--surface)]">
+            <button
+              type="button"
+              aria-label="Reducir cantidad"
+              className="flex h-full w-10 items-center justify-center text-[18px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors disabled:opacity-30"
+              disabled={quantity <= 1}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            >
+              −
+            </button>
+            <span className="flex-1 text-center text-[15px] font-medium text-[var(--text-primary)]">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              aria-label="Aumentar cantidad"
+              className="flex h-full w-10 items-center justify-center text-[18px] font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+              onClick={() => setQuantity((q) => q + 1)}
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
 
