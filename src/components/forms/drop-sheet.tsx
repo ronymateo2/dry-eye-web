@@ -6,8 +6,7 @@ import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WheelPicker } from "@/components/ui/wheel-picker";
-import { EyedropperIcon, TimerIcon, XCircleIcon } from "@phosphor-icons/react";
+import { EyedropperIcon, TimerIcon, WarningIcon, XCircleIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
@@ -65,7 +64,6 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     }
   }, [dropTypes, selectedDropType, initialDropTypeId]);
 
-  const wheelOptions = useMemo(() => dropTypes.map((dt) => ({ value: dt.id, label: dt.name })), [dropTypes]);
 
   const handleSave = async () => {
     if (!selectedDropType) {
@@ -135,7 +133,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         <Skeleton className="h-9 w-full rounded-[10px]" />
         <div className="space-y-2">
           <Skeleton className="h-[14px] w-24 rounded-full" />
-          <Skeleton className="h-[148px] w-full rounded-[16px]" />
+          <Skeleton className="h-[48px] w-full rounded-[10px]" />
         </div>
         <Skeleton className="h-[16px] w-48 rounded-full" />
         <div className="grid grid-cols-[1fr_120px] gap-3">
@@ -237,33 +235,41 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
             <button onClick={() => { onSaved(); navigate("/treatments"); }} className="text-[var(--accent)]">Crear uno</button>
           </div>
         ) : (
-          <WheelPicker label="Seleccionar tipo de gota" options={wheelOptions} value={selectedDropType} onChange={setSelectedDropType} />
+          <select
+            aria-label="Seleccionar tipo de gota"
+            className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors appearance-none"
+            value={selectedDropType}
+            onChange={(e) => setSelectedDropType(e.target.value)}
+          >
+            {dropTypes.map((dt) => (
+              <option key={dt.id} value={dt.id}>{dt.name}</option>
+            ))}
+          </select>
         )}
 
         {vialStatus && (
-          <div className="rounded-[10px] border px-3 py-2.5" style={{ background: "var(--surface-el)", borderColor: "var(--border)" }}>
-            {vialStatus.kind === "active" ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <TimerIcon size={14} style={{ color: "var(--accent)" }} />
-                    <span className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
-                      Vial activo · expira en {vialStatus.remaining}
-                    </span>
-                  </div>
-                  {confirmingDiscardId !== vialStatus.id && (
+          <>
+            {vialStatus.kind === "active" && (
+              <div className="rounded-[10px] border px-3 py-2.5 space-y-2" style={{ background: "var(--surface-el)", borderColor: "var(--border)" }}>
+                <div className="flex items-center gap-2">
+                  <TimerIcon size={14} style={{ color: "var(--accent)" }} />
+                  <span className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
+                    Vial activo · expira en {vialStatus.remaining}
+                  </span>
+                </div>
+                {confirmingDiscardId !== vialStatus.id && (
                   <button
                     type="button"
                     onClick={() => { if (vialStatus.id) setConfirmingDiscardId(vialStatus.id); }}
-                    className="flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-medium text-[var(--error)] opacity-60 hover:opacity-100 transition-opacity"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-[8px] border border-[var(--error)]/30 py-2 text-[13px] font-medium transition-colors hover:border-[var(--error)]/60 hover:bg-[var(--error)]/[0.04]"
+                    style={{ color: "var(--error)" }}
                   >
-                    <XCircleIcon size={12} />
-                    Descartar
+                    <XCircleIcon size={14} />
+                    Descartar vial
                   </button>
-                  )}
-                </div>
+                )}
                 {confirmingDiscardId === vialStatus.id && (
-                  <div className="mt-2 flex items-center justify-between gap-2 rounded-[8px] border border-[var(--error)]/20 bg-[var(--error)]/[0.04] px-2.5 py-2">
+                  <div className="flex items-center justify-between gap-2 rounded-[8px] border border-[var(--error)]/20 bg-[var(--error)]/[0.04] px-2.5 py-2">
                     <span className="text-[12px] font-medium text-[var(--error)]">¿Descartar vial?</span>
                     <div className="flex items-center gap-2">
                       <button
@@ -285,15 +291,28 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <TimerIcon size={14} style={{ color: "var(--warning)" }} />
-                <span className="text-[13px] font-medium" style={{ color: "var(--text-muted)" }}>
-                  {vialStatus.kind === "expired" ? "Vial vencido · se abrirá nuevo al guardar" : "Se abrirá nuevo vial al guardar"}
-                </span>
+            )}
+            {vialStatus.kind === "expired" && (
+              <div className="rounded-[10px] border px-3 py-2.5 bg-[var(--warning)]/[0.06] border-[var(--warning)]/25">
+                <div className="flex items-start gap-2">
+                  <WarningIcon size={15} weight="fill" className="mt-[1px] shrink-0" style={{ color: "var(--warning)" }} />
+                  <div className="space-y-0.5">
+                    <span className="text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
+                      Vial vencido — tirarlo
+                    </span>
+                    <p className="text-[12px] leading-snug" style={{ color: "var(--text-faint)" }}>
+                      Al guardar se abrirá uno nuevo
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
+            {vialStatus.kind === "new" && (
+              <p className="text-[12px] leading-snug" style={{ color: "var(--text-faint)" }}>
+                Se abrirá nuevo vial al guardar
+              </p>
+            )}
+          </>
         )}
       </div>
 
