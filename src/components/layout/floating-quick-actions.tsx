@@ -107,13 +107,13 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95dvh]" onClose={closeAll}>
           <HygieneSheet onSaved={savedAndClose} onClose={closeAll} />
         </MobileSheet>
-        <MobileSheet open={sheet === "obs_list"} title="Observaciones" description="Selecciona una observacion para registrar." onClose={closeAll}>
+        <MobileSheet open={sheet === "obs_list"} title="Observaciones" description="Selecciona una observacion para registrar." panelClassName="!h-[95dvh]" onClose={closeAll}>
           <ObservationsListSheet
             onSelectObservation={(obs) => { setSelectedObservation(obs); setSheet("obs_log"); }}
             onCreateNew={() => setSheet("obs_new")}
           />
         </MobileSheet>
-        <MobileSheet open={sheet === "obs_log"} title="Registrar ocurrencia" description="Registra cuando ocurre esta observacion." onClose={closeAll} onBack={() => setSheet("obs_list")}>
+        <MobileSheet open={sheet === "obs_log"} title="Registrar ocurrencia" description="Registra cuando ocurre esta observacion." onClose={closeAll} panelClassName="!h-[95dvh]" onBack={() => setSheet("obs_list")}>
           {selectedObservation && <LogOccurrenceSheet observation={selectedObservation} onSaved={savedAndClose} />}
         </MobileSheet>
         <MobileSheet open={sheet === "obs_new"} title="Nueva observacion" description="Registra algo que notaste." onClose={closeAll}>
