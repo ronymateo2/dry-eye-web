@@ -132,7 +132,6 @@ function DynamicPropertyField({
 }) {
   if (def.type === "scale") {
     const min = def.min ?? 0;
-    const max = def.max ?? 10;
     const numVal = typeof value === "number" ? value : min;
     return (
       <div className="space-y-2">
