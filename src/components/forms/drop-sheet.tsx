@@ -6,7 +6,7 @@ import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClockIcon, EyedropperIcon, TimerIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
+import { ClockIcon, EyedropperIcon, TimerIcon, TrashIcon, WarningIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
@@ -364,16 +364,21 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
             <button onClick={() => { onSaved(); navigate("/treatments"); }} className="text-[var(--accent)]">Crear uno</button>
           </div>
         ) : (
-          <select
-            aria-label="Seleccionar tipo de gota"
-            className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors appearance-none"
-            value={selectedDropType}
-            onChange={(e) => { setSelectedDropType(e.target.value); setShowDiscardConfirm(false); }}
-          >
-            {dropTypes.map((dt) => (
-              <option key={dt.id} value={dt.id}>{dt.name}</option>
-            ))}
-          </select>
+          <div className="relative">
+
+            <select
+              aria-label="Seleccionar tipo de gota"
+              className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors appearance-none"
+              value={selectedDropType}
+              onChange={(e) => { setSelectedDropType(e.target.value); setShowDiscardConfirm(false); }}
+            >
+              {dropTypes.map((dt) => (
+                <option key={dt.id} value={dt.id}>{dt.name}</option>
+              ))}
+            </select>
+            <CaretDownIcon size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
+          </div>
+
         )}
 
         {renderVialStatus()}
