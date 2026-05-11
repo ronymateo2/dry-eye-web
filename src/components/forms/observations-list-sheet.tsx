@@ -12,7 +12,7 @@ import type { ObservationEye } from "@/types/domain";
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
-type Obs = { id: string; title: string; eye: string; last_logged_at: string | null; occurrence_count: number };
+type Obs = { id: string; title: string; eye: string; last_logged_at: string | null; occurrence_count: number; matched_note?: string | null };
 
 type Props = {
   onSelectObservation: (obs: Obs) => void;
@@ -26,6 +26,22 @@ function timeAgo(iso: string): string {
   const h = Math.floor(min / 60);
   if (h < 24) return `hace ${h} h`;
   return `hace ${Math.floor(h / 24)} d`;
+}
+
+function highlightMatch(text: string, query: string) {
+  const words = query
+    .replace(/["*^()]/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return text;
+  const pattern = new RegExp(`(${words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
+  const parts = text.split(pattern);
+  return parts.map((part, i) =>
+    pattern.test(part)
+      ? <mark key={i} className="bg-transparent font-semibold text-[var(--accent)]">{part}</mark>
+      : part,
+  );
 }
 
 function EyePill({ eye }: { eye: string }) {
@@ -263,6 +279,11 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                     <span className="text-[12px] text-[var(--text-muted)]">
                       {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
                     </span>
+                    {isSearching && obs.matched_note && (
+                      <span className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                        {highlightMatch(obs.matched_note, submittedQuery)}
+                      </span>
+                    )}
                   </div>
 
                   {obs.occurrence_count > 0 && (
