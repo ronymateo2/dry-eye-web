@@ -87,17 +87,17 @@ function ObsContextCard({ observation }: { observation: Props["observation"] }) 
   const zoneLabel = observation.body_zone ? OBS_BODY_ZONE_LABELS[observation.body_zone] : null;
   const catLabel = observation.category ? OBS_CATEGORY_LABELS[observation.category] : null;
   const hasChips = eyeLabel || zoneLabel || catLabel;
-  const hasDetails = observation.notes || (observation.propertiesSchema && observation.propertiesSchema.length > 0);
+  const hasNotes = !!observation.notes;
 
-  if (!hasChips && !hasDetails) return null;
+  if (!hasChips && !hasNotes) return null;
 
   return (
     <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
       <button
         type="button"
         aria-expanded={expanded}
-        onClick={() => setExpanded((p) => !p)}
-        className="flex w-full items-center justify-between px-4 py-3 active:opacity-70"
+        onClick={hasNotes ? () => setExpanded((p) => !p) : undefined}
+        className={cn("flex w-full items-center justify-between px-4 py-3", hasNotes && "active:opacity-70")}
       >
         <div className="flex flex-wrap items-center gap-1.5 min-w-0">
           {eyeLabel && (
@@ -109,11 +109,11 @@ function ObsContextCard({ observation }: { observation: Props["observation"] }) 
           {catLabel && (
             <span className="rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[11px] text-[var(--accent)]">{catLabel}</span>
           )}
-          {!hasChips && (
-            <span className="text-[13px] text-[var(--text-muted)]">Ver detalles</span>
+          {!hasChips && hasNotes && (
+            <span className="text-[13px] text-[var(--text-muted)]">Ver descripción</span>
           )}
         </div>
-        {hasDetails && (
+        {hasNotes && (
           <CaretDownIcon
             size={14}
             className={cn("shrink-0 ml-2 text-[var(--text-faint)] transition-transform duration-200 ease-out", expanded && "rotate-180")}
@@ -122,7 +122,7 @@ function ObsContextCard({ observation }: { observation: Props["observation"] }) 
       </button>
 
       <AnimatePresence>
-        {expanded && hasDetails && (
+        {expanded && hasNotes && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -130,22 +130,8 @@ function ObsContextCard({ observation }: { observation: Props["observation"] }) 
             transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             className="overflow-hidden"
           >
-            <div className="space-y-3 px-4 pb-4">
-              {observation.notes && (
-                <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">{observation.notes}</p>
-              )}
-              {observation.propertiesSchema && observation.propertiesSchema.length > 0 && (
-                <div>
-                  <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">Campos</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {observation.propertiesSchema.map((def) => (
-                      <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
-                        {def.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div className="px-4 pb-4">
+              <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">{observation.notes}</p>
             </div>
           </motion.div>
         )}
