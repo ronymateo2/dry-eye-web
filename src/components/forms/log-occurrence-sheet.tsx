@@ -234,7 +234,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
       await api.saveOccurrence(observation.id, {
         id: crypto.randomUUID(),
         loggedAt: new Date().toISOString(),
-        intensity: hasDynamicSchema ? 1 : intensity,
+        intensity: hasDynamicSchema ? null : intensity,
         durationMinutes: hasDynamicSchema ? null : durationMinutes,
         triggerType: hasDynamicSchema ? null : triggerType,
         painQuality: hasDynamicSchema ? null : painQuality,

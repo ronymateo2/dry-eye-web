@@ -12,6 +12,7 @@ import type { ObservationEye, PropertyDef } from "@/types/domain";
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
+type MatchedNote = { note: string; logged_at: string };
 type Obs = { id: string; title: string; eye: string; body_zone?: string | null; category?: string | null; properties_schema?: PropertyDef[] | null; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
 
 type Props = {
@@ -81,6 +82,87 @@ function SkeletonRow({ delay }: { delay: number }) {
         <Skeleton className="h-3 w-1/3" />
       </div>
     </motion.div>
+  );
+}
+
+function formatMatchedAt(iso: string): string {
+  const d = new Date(iso);
+  return d.toLocaleDateString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function ObsRow({ obs, index, isSearching, submittedQuery, onSelect, onEdit }: {
+  obs: Obs;
+  index: number;
+  isSearching: boolean;
+  submittedQuery: string;
+  onSelect: (obs: Obs) => void;
+  onEdit?: (obs: Obs) => void;
+}) {
+  return (
+    <motion.button
+      type="button"
+      layout
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -6, scale: 0.97 }}
+      transition={{ ...SPRING, delay: index * 0.035 }}
+      whileTap={{ scale: 0.975 }}
+      className={cn(
+        "flex w-full flex-col gap-1.5 rounded-[14px]",
+        "border border-[var(--border)] bg-[var(--surface)] px-4 py-3",
+        "text-left"
+      )}
+      onClick={() => onSelect(obs)}
+    >
+      <div className="flex items-start justify-between gap-2 min-w-0">
+        <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
+          {obs.title}
+        </span>
+        <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+          {obs.occurrence_count > 0 && (
+            <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
+              {obs.occurrence_count}
+            </span>
+          )}
+          {onEdit && (
+            <button
+              type="button"
+              aria-label={`Editar ${obs.title}`}
+              className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] active:opacity-60"
+              onClick={(e) => { e.stopPropagation(); onEdit(obs); }}
+            >
+              <PencilSimpleIcon size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+      {(obs.body_zone || obs.eye !== "none" || obs.category) && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <ZonePill bodyZone={obs.body_zone} eye={obs.eye} />
+          <CategoryPill category={obs.category} />
+        </div>
+      )}
+      <span className="text-[12px] text-[var(--text-muted)]">
+        {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
+      </span>
+      {isSearching && obs.matched_notes && (() => {
+        const entries: MatchedNote[] = JSON.parse(obs.matched_notes);
+        return entries.length > 0 ? (
+          <div className="mt-0.5 space-y-1.5">
+            {entries.map((entry, ni) => (
+              <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
+                <span className="mb-0.5 block text-[11px] text-[var(--accent)]/70">
+                  {formatMatchedAt(entry.logged_at)}
+                </span>
+                <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                  {highlightMatch(entry.note, submittedQuery)}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      })()}
+    </motion.button>
   );
 }
 
@@ -267,75 +349,28 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
             </motion.div>
           ) : (
             <motion.div key={`list-${submittedQuery}`} className="space-y-2">
+              {/* Recientes — top 3 with prior occurrences, shown when not searching */}
+              {!isSearching && (() => {
+                const recientes = displayed.filter((o) => o.last_logged_at !== null).slice(0, 3);
+                if (recientes.length === 0) return null;
+                return (
+                  <>
+                    <p className="px-0.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">
+                      Recientes
+                    </p>
+                    {recientes.map((obs, i) => (
+                      <ObsRow key={obs.id} obs={obs} index={i} isSearching={false} submittedQuery="" onSelect={onSelectObservation} onEdit={onEditObservation} />
+                    ))}
+                    {displayed.length > recientes.length && (
+                      <p className="px-0.5 pt-1 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">
+                        Todas
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
               {displayed.map((obs, i) => (
-                <motion.button
-                  key={obs.id}
-                  type="button"
-                  layout
-                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                  transition={{ ...SPRING, delay: i * 0.035 }}
-                  whileTap={{ scale: 0.975 }}
-                  className={cn(
-                    "flex w-full flex-col gap-1.5 rounded-[14px]",
-                    "border border-[var(--border)] bg-[var(--surface)] px-4 py-3",
-                    "text-left"
-                  )}
-                  onClick={() => onSelectObservation(obs)}
-                >
-                  {/* Header: title + count + edit */}
-                  <div className="flex items-start justify-between gap-2 min-w-0">
-                    <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
-                      {obs.title}
-                    </span>
-                    <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
-                      {obs.occurrence_count > 0 && (
-                        <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
-                          {obs.occurrence_count}
-                        </span>
-                      )}
-                      {onEditObservation && (
-                        <button
-                          type="button"
-                          aria-label={`Editar ${obs.title}`}
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] active:opacity-60"
-                          onClick={(e) => { e.stopPropagation(); onEditObservation(obs); }}
-                        >
-                          <PencilSimpleIcon size={14} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  {/* Chips: zone + category */}
-                  {(obs.body_zone || obs.eye !== "none" || obs.category) && (
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <ZonePill bodyZone={obs.body_zone} eye={obs.eye} />
-                      <CategoryPill category={obs.category} />
-                    </div>
-                  )}
-
-                  {/* Timestamp */}
-                  <span className="text-[12px] text-[var(--text-muted)]">
-                    {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
-                  </span>
-
-                  {/* Matched note snippets */}
-                  {isSearching && obs.matched_notes && (() => {
-                    const notes: string[] = JSON.parse(obs.matched_notes);
-                    return notes.length > 0 ? (
-                      <div className="mt-0.5 space-y-1.5">
-                        {notes.map((note, ni) => (
-                          <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
-                            <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
-                              {highlightMatch(note, submittedQuery)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null;
-                  })()}
-                </motion.button>
+                <ObsRow key={obs.id} obs={obs} index={i} isSearching={isSearching} submittedQuery={submittedQuery} onSelect={onSelectObservation} onEdit={onEditObservation} />
               ))}
             </motion.div>
           )}

@@ -148,7 +148,7 @@ export type SaveOccurrenceInput = {
   id: string;
   observationId: string;
   loggedAt: string;
-  intensity: number;
+  intensity: number | null;
   durationMinutes: number | null;
   triggerType?: string | null;
   painQuality?: string | null;

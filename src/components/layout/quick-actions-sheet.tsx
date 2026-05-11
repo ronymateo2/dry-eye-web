@@ -12,7 +12,7 @@ import {
   EyedropperSampleIcon,
 } from "@phosphor-icons/react";
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
+type Sheet = "drop" | "sleep" | "obs" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
 
 const PRIMARY_ACTIONS = [
   { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
@@ -24,7 +24,7 @@ const PRIMARY_ACTIONS = [
 const SECONDARY_ACTIONS = [
   { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
   { sheet: "therapy" as Sheet, Icon: HeartbeatIcon, label: "Terapia" },
-  { sheet: "obs_list" as Sheet, Icon: NotePencilIcon, label: "Observación" },
+  { sheet: "obs" as Sheet, Icon: NotePencilIcon, label: "Observación" },
   { sheet: "vial" as Sheet, Icon: EyedropperSampleIcon, label: "Vial" },
 ] as const;
 

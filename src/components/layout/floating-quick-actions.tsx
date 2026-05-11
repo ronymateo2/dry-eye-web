@@ -10,23 +10,18 @@ import { cn } from "@/lib/utils";
 const DropSheet = lazy(() => import("@/components/forms/drop-sheet").then((m) => ({ default: m.DropSheet })));
 const SleepSheet = lazy(() => import("@/components/forms/sleep-sheet").then((m) => ({ default: m.SleepSheet })));
 const HygieneSheet = lazy(() => import("@/components/forms/hygiene-sheet").then((m) => ({ default: m.HygieneSheet })));
-const ObservationsListSheet = lazy(() => import("@/components/forms/observations-list-sheet").then((m) => ({ default: m.ObservationsListSheet })));
-const LogOccurrenceSheet = lazy(() => import("@/components/forms/log-occurrence-sheet").then((m) => ({ default: m.LogOccurrenceSheet })));
-const ObservationSheet = lazy(() => import("@/components/forms/observation-sheet").then((m) => ({ default: m.ObservationSheet })));
+const ObservationFlowSheet = lazy(() => import("@/components/forms/observation-flow-sheet").then((m) => ({ default: m.ObservationFlowSheet })));
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
 const MedicationSessionSheet = lazy(() => import("@/components/forms/medication-session-sheet").then((m) => ({ default: m.MedicationSessionSheet })));
 const VialSheet = lazy(() => import("@/components/forms/vial-sheet").then((m) => ({ default: m.VialSheet })));
 
-type Sheet = "drop" | "sleep" | "obs_list" | "obs_log" | "obs_new" | "obs_edit" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
-
-type SelectedObs = { id: string; title: string; eye: string; body_zone?: string | null; category?: string | null; notes?: string | null; propertiesSchema?: import("@/types/domain").PropertyDef[] | null };
+type Sheet = "drop" | "sleep" | "obs" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
 
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
-  const [selectedObservation, setSelectedObservation] = useState<SelectedObs | null>(null);
   const [initialDropTypeId, setInitialDropTypeId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -46,7 +41,7 @@ export function FloatingQuickActions() {
     "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
 
   const queryClient = useQueryClient();
-  const closeAll = () => { setSheet(null); setMenuOpen(false); setSelectedObservation(null); setInitialDropTypeId(undefined); };
+  const closeAll = () => { setSheet(null); setMenuOpen(false); setInitialDropTypeId(undefined); };
   const savedAndClose = () => {
     window.dispatchEvent(new CustomEvent("history:refresh"));
     queryClient.invalidateQueries({ queryKey: ["history"] });
@@ -63,7 +58,7 @@ export function FloatingQuickActions() {
       navigate("/register");
       setMenuOpen(false);
     } else {
-      setSheet(s);
+      setSheet(s as Sheet);
     }
   };
 
@@ -109,54 +104,7 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95dvh]" onClose={closeAll}>
           <HygieneSheet onSaved={savedAndClose} onClose={closeAll} />
         </MobileSheet>
-        <MobileSheet open={sheet === "obs_list"} title="Observaciones" description="Selecciona una observacion para registrar." panelClassName="!h-[95dvh]" onClose={closeAll}>
-          <ObservationsListSheet
-            onSelectObservation={(obs) => {
-              setSelectedObservation({ ...obs, propertiesSchema: obs.properties_schema });
-              setSheet("obs_log");
-            }}
-            onEditObservation={(obs) => {
-              setSelectedObservation({ ...obs, propertiesSchema: obs.properties_schema });
-              setSheet("obs_edit");
-            }}
-            onCreateNew={() => setSheet("obs_new")}
-          />
-        </MobileSheet>
-        <MobileSheet open={sheet === "obs_log"} title="Registrar ocurrencia" description="Registra cuando ocurre esta observacion." onClose={closeAll} panelClassName="!h-[95dvh]" onBack={() => setSheet("obs_list")}>
-          {selectedObservation && (
-            <LogOccurrenceSheet
-              observation={{ ...selectedObservation, propertiesSchema: selectedObservation.propertiesSchema }}
-              onSaved={savedAndClose}
-            />
-          )}
-        </MobileSheet>
-        <MobileSheet open={sheet === "obs_new"} title="Nueva observacion" description="Registra algo que notaste." onClose={closeAll}>
-          <ObservationSheet
-            onSaved={(obs) => {
-              setSelectedObservation(obs);
-              setSheet("obs_log");
-            }}
-          />
-        </MobileSheet>
-        <MobileSheet open={sheet === "obs_edit"} title="Editar observacion" description="Modifica esta observacion y sus propiedades." panelClassName="!h-[95dvh]" onClose={closeAll} onBack={() => setSheet("obs_list")}>
-          {selectedObservation && (
-            <ObservationSheet
-              initialObservation={{
-                id: selectedObservation.id,
-                title: selectedObservation.title,
-                eye: selectedObservation.eye,
-                body_zone: selectedObservation.body_zone,
-                category: selectedObservation.category,
-                notes: selectedObservation.notes,
-                propertiesSchema: selectedObservation.propertiesSchema ?? undefined,
-              }}
-              onSaved={(obs) => {
-                setSelectedObservation((prev) => prev ? { ...prev, ...obs } : null);
-                setSheet("obs_list");
-              }}
-            />
-          )}
-        </MobileSheet>
+        <ObservationFlowSheet open={sheet === "obs"} onClose={closeAll} onSaved={savedAndClose} />
         <MobileSheet open={sheet === "therapy"} title="Registrar terapia" description="Registra una sesion de terapia miofascial." onClose={closeAll}>
           <TherapySheet onSaved={savedAndClose} />
         </MobileSheet>
