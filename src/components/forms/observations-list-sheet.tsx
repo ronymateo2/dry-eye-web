@@ -263,33 +263,39 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                   transition={{ ...SPRING, delay: i * 0.035 }}
                   whileTap={{ scale: 0.975 }}
                   className={cn(
-                    "flex min-h-[64px] w-full items-center gap-3 rounded-[14px]",
+                    "flex w-full flex-col gap-1.5 rounded-[14px]",
                     "border border-[var(--border)] bg-[var(--surface)] px-4 py-3",
                     "text-left"
                   )}
                   onClick={() => onSelectObservation(obs)}
                 >
-                  <div className="flex flex-1 flex-col gap-1 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[15px] font-medium text-[var(--text-primary)] break-words min-w-0">
-                        {obs.title}
-                      </span>
-                      <EyePill eye={obs.eye} />
-                    </div>
-                    <span className="text-[12px] text-[var(--text-muted)]">
-                      {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
+                  {/* Header: title + eye + count */}
+                  <div className="flex items-start justify-between gap-2 min-w-0">
+                    <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
+                      {obs.title}
                     </span>
-                    {isSearching && obs.matched_note && (
-                      <span className="mt-0.5 line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
-                        {highlightMatch(obs.matched_note, submittedQuery)}
-                      </span>
-                    )}
+                    <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
+                      <EyePill eye={obs.eye} />
+                      {obs.occurrence_count > 0 && (
+                        <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
+                          {obs.occurrence_count}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {obs.occurrence_count > 0 && (
-                    <span className="shrink-0 rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
-                      {obs.occurrence_count}
-                    </span>
+                  {/* Timestamp */}
+                  <span className="text-[12px] text-[var(--text-muted)]">
+                    {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
+                  </span>
+
+                  {/* Matched note snippet */}
+                  {isSearching && obs.matched_note && (
+                    <div className="mt-0.5 border-l-2 border-[var(--accent)]/35 pl-2.5">
+                      <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                        {highlightMatch(obs.matched_note, submittedQuery)}
+                      </span>
+                    </div>
                   )}
                 </motion.button>
               ))}
