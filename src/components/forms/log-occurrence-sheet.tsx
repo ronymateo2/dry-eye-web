@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CaretDownIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, DropIcon, StethoscopeIcon, MoonStarsIcon, PillIcon, type Icon as PhosphorIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -152,7 +152,7 @@ function DynamicPropertyField({
     const boolVal = typeof value === "boolean" ? value : null;
     return (
       <div className="space-y-2">
-        <p className="section-label">{def.label}</p>
+        <p className="text-[13px] font-medium text-[var(--text-primary)]">{def.label}</p>
         <div className="flex gap-2">
           {([{ label: "Sí", val: true }, { label: "No", val: false }] as const).map((opt) => (
             <button
@@ -178,7 +178,7 @@ function DynamicPropertyField({
   const strVal = typeof value === "string" ? value : null;
   return (
     <div className="space-y-2">
-      <p className="section-label">{def.label}</p>
+      <p className="text-[13px] font-medium text-[var(--text-primary)]">{def.label}</p>
       <div className="flex flex-wrap gap-2">
         {def.options.map((opt) => (
           <button
@@ -266,7 +266,7 @@ function LinksSection({
           return (
             <LinkRow
               key={d.drop_type_id}
-              emoji="💧"
+              icon={DropIcon}
               label={d.name}
               active={active}
               onToggle={() => toggleDropType(d.drop_type_id)}
@@ -275,8 +275,8 @@ function LinksSection({
         })}
         {checkInToday && (
           <LinkRow
-            emoji="🩺"
-            label={`Check-in · dolor registrado`}
+            icon={StethoscopeIcon}
+            label="Check-in · dolor registrado"
             active={!!links.check_in_id}
             onToggle={() =>
               onChange({ ...links, check_in_id: links.check_in_id ? undefined : checkInToday.id })
@@ -285,7 +285,7 @@ function LinksSection({
         )}
         {todaySleep && (
           <LinkRow
-            emoji="😴"
+            icon={MoonStarsIcon}
             label={`Sueño · ${todaySleep.sleep_hours}h`}
             active={!!links.sleep_day_key}
             onToggle={() =>
@@ -298,7 +298,7 @@ function LinksSection({
           return (
             <LinkRow
               key={m.id}
-              emoji="💊"
+              icon={PillIcon}
               label={m.name}
               active={active}
               onToggle={() => toggleMed(m.id)}
@@ -311,12 +311,12 @@ function LinksSection({
 }
 
 function LinkRow({
-  emoji,
+  icon: Icon,
   label,
   active,
   onToggle,
 }: {
-  emoji: string;
+  icon: PhosphorIcon;
   label: string;
   active: boolean;
   onToggle: () => void;
@@ -332,7 +332,10 @@ function LinkRow({
           : "border-[var(--border)] bg-[var(--surface)]"
       )}
     >
-      <span className="text-[16px]">{emoji}</span>
+      <Icon
+        size={16}
+        className={cn("shrink-0", active ? "text-[var(--accent)]" : "text-[var(--text-faint)]")}
+      />
       <span className={cn("flex-1 text-[13px]", active ? "text-[var(--accent)]" : "text-[var(--text-muted)]")}>
         {label}
       </span>
@@ -345,7 +348,7 @@ function LinkRow({
 }
 
 export function LogOccurrenceSheet({ observation, onSaved }: Props) {
-  const [intensity, setIntensity] = useState(5);
+  const [intensity, setIntensity] = useState(0);
   const [propertyValues, setPropertyValues] = useState<Record<string, PropertyValue>>({});
   const [notes, setNotes] = useState("");
   const [links, setLinks] = useState<ObservationLinks>({});
@@ -382,15 +385,10 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
 
   return (
     <>
-      <div className="space-y-6 pb-4">
+      <div className="space-y-4 pb-4">
         {state.status !== "idle" && <StatusBanner state={state} />}
 
         <ObsContextCard observation={observation} />
-
-        <PrevOccurrencesSection
-          observationId={observation.id}
-          schema={observation.propertiesSchema}
-        />
 
         <PainSlider label="Intensidad" value={intensity} onChange={setIntensity} />
 
@@ -415,6 +413,11 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
         </div>
 
         <LinksSection links={links} onChange={setLinks} timezone={timezone} />
+
+        <PrevOccurrencesSection
+          observationId={observation.id}
+          schema={observation.propertiesSchema}
+        />
       </div>
 
       <div

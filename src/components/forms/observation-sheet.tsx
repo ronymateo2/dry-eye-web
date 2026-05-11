@@ -44,13 +44,20 @@ function PillGrid<T extends string>({
   options,
   value,
   onChange,
+  scrollable,
 }: {
   options: readonly { label: string; value: T }[];
   value: T | null;
   onChange: (v: T) => void;
+  scrollable?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={cn(
+      "flex gap-2",
+      scrollable
+        ? "overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        : "flex-wrap"
+    )}>
       {options.map((opt) => {
         const active = value === opt.value;
         return (
@@ -59,7 +66,7 @@ function PillGrid<T extends string>({
             type="button"
             onClick={() => onChange(opt.value)}
             className={cn(
-              "rounded-full border px-3 py-1.5 text-[13px] font-medium transition duration-[120ms] ease-out active:scale-95",
+              "shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-medium transition duration-[120ms] ease-out active:scale-95",
               active
                 ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
                 : "border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)]"
@@ -155,8 +162,8 @@ function PropertyRow({
     )}>
       <div className="flex items-center gap-2">
         <input
-          className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
-          placeholder={showError && !prop.label.trim() ? "Nombre requerido" : "Nombre del campo"}
+          className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] placeholder:italic focus:outline-none"
+          placeholder={showError && !prop.label.trim() ? "Nombre requerido" : "Nombre del campo…"}
           value={prop.label}
           onChange={(e) => updateLabel(e.target.value)}
         />
@@ -330,6 +337,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
             options={OBS_BODY_ZONE_OPTIONS}
             value={bodyZone}
             onChange={(v) => { setBodyZone(v); if (v !== "other") setBodyZoneCustom(""); }}
+            scrollable
           />
           <AnimatePresence>
             {bodyZone === "other" && (
@@ -354,7 +362,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
 
         <div className="space-y-2">
           <p className="section-label">Categoría</p>
-          <PillGrid options={OBS_CATEGORY_OPTIONS} value={category} onChange={setCategory} />
+          <PillGrid options={OBS_CATEGORY_OPTIONS} value={category} onChange={setCategory} scrollable />
         </div>
 
         <PropertyEditorSection properties={properties} onChange={setProperties} showErrors={showPropErrors} />

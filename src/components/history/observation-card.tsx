@@ -50,7 +50,7 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
   const time = formatTime(item.loggedAt, timezone);
   const eyeLabel = OBS_EYE_LABELS[item.eye as keyof typeof OBS_EYE_LABELS];
   const hasPropertyValues = item.propertyValues && item.propertiesSchema && item.propertiesSchema.length > 0;
-  const intensityHue = painColor(item.intensity);
+  const intensityHue = item.intensity != null ? painColor(item.intensity) : undefined;
 
   return (
     <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
@@ -61,7 +61,7 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
             <p className="text-[14px] font-medium text-[var(--text-primary)]">{item.title}</p>
-            {!hasPropertyValues && item.intensity > 0 && (
+            {!hasPropertyValues && item.intensity != null && item.intensity > 0 && (
               <span
                 className="mono shrink-0 text-[13px] font-medium tabular-nums"
                 style={{ color: intensityHue }}
@@ -72,7 +72,6 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
           </div>
           <p className="mono mt-0.5 text-[10px] text-[var(--text-muted)]">
             {eyeLabel ? `${eyeLabel} · ` : ""}
-            {!hasPropertyValues && item.durationMinutes ? `${item.durationMinutes} min · ` : ""}
             {time}
           </p>
           {hasPropertyValues ? (
