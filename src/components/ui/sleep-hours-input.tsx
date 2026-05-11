@@ -100,33 +100,36 @@ export function SleepHoursInput({ id = "sleep-hours", label = "Horas de sueno", 
 
   return (
     <div className="space-y-3">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <p className="m-0 text-[13px] font-medium text-[var(--text-primary)]">{label}</p>
-        <span className="mono text-[22px] font-normal text-[var(--accent)]">
-          {`${formatHours(coreOptions[activeCoreIndex])} h`}
-        </span>
+        <div className="flex items-baseline gap-1">
+          <span className="mono text-[24px] font-normal leading-none text-[var(--accent)]">
+            {formatHours(coreOptions[activeCoreIndex])}
+          </span>
+          <span className="mono text-[11px] text-[var(--text-muted)]">h</span>
+        </div>
       </div>
 
-      <div className="relative rounded-[16px] border border-[var(--border)] bg-[var(--surface)] p-2">
+      <div className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface)]">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-2 top-2 z-10 rounded-[10px]"
+          className="pointer-events-none absolute inset-x-0 top-0 z-10"
           style={{
             height: `${WHEEL_FADE_HEIGHT}px`,
-            background: "linear-gradient(to bottom, var(--wheel-fade) 0%, transparent 100%)",
+            background: "linear-gradient(to bottom, var(--surface) 20%, transparent 100%)",
           }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-2 bottom-2 z-10 rounded-[10px]"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10"
           style={{
             height: `${WHEEL_FADE_HEIGHT}px`,
-            background: "linear-gradient(to top, var(--wheel-fade) 0%, transparent 100%)",
+            background: "linear-gradient(to top, var(--surface) 20%, transparent 100%)",
           }}
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-2 top-1/2 z-20 -translate-y-1/2 rounded-[10px] border border-[var(--accent)] bg-[var(--accent-dim)]"
+          className="pointer-events-none absolute inset-x-3 top-1/2 z-20 -translate-y-1/2 rounded-[10px] border border-[var(--accent)] bg-[var(--accent-dim)]"
           style={{ height: `${WHEEL_ROW_HEIGHT}px` }}
         />
         <div
@@ -160,13 +163,18 @@ export function SleepHoursInput({ id = "sleep-hours", label = "Horas de sueno", 
           <div aria-hidden style={{ height: `${WHEEL_PADDING_ROWS * WHEEL_ROW_HEIGHT}px` }} />
           {wheelOptions.map((item, index) => {
             const isSelected = index === activeIndex;
+            const distance = Math.min(Math.abs(index - activeIndex), 4);
             return (
               <button
                 key={item.key}
                 aria-selected={isSelected}
                 className={cn(
-                  "mono block h-14 w-full snap-center rounded-[10px] border border-transparent px-4 text-center text-[17px] transition-colors",
-                  isSelected ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]",
+                  "mono block h-14 w-full snap-center rounded-[10px] border border-transparent px-4 text-center transition-all duration-100",
+                  isSelected
+                    ? "text-[20px] font-medium text-[var(--text-primary)]"
+                    : distance === 1
+                      ? "text-[16px] font-normal text-[var(--text-muted)] opacity-55"
+                      : "text-[13px] font-normal text-[var(--text-muted)] opacity-15",
                 )}
                 role="option"
                 type="button"
@@ -186,7 +194,9 @@ export function SleepHoursInput({ id = "sleep-hours", label = "Horas de sueno", 
         </div>
       </div>
 
-      <p className="m-0 text-[12px] text-[var(--text-muted)]">Desliza para elegir entre 0 y 12 horas.</p>
+      <p className="m-0 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+        0 – 12 h · paso 0.5 h
+      </p>
     </div>
   );
 }
