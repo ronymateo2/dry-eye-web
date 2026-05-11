@@ -5,7 +5,7 @@ import { StatusBanner } from "@/components/ui/status-banner";
 import { PainSlider } from "@/components/ui/pain-slider";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { TRIGGER_OPTIONS, PAIN_QUALITY_OPTIONS } from "@/lib/constants";
+import { PAIN_QUALITY_OPTIONS } from "@/lib/constants";
 import type { ActionState, TriggerType, PainQuality } from "@/types/domain";
 
 type Props = {
