@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
@@ -18,6 +18,7 @@ import type { ActionState, DropEye } from "@/types/domain";
 
 export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void; initialDropTypeId?: string }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const user = useUser();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
@@ -351,7 +352,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         <div className="flex items-center justify-between">
           <p className="section-label mb-0">Tipo de gota</p>
           <button
-            onClick={() => { onSaved(); navigate("/treatments"); }}
+            onClick={() => { onSaved(); navigate("/treatments", { state: { returnTo: location.pathname } }); }}
             className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]"
           >
             + Nuevo
@@ -361,7 +362,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         {dropTypes.length === 0 ? (
           <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center text-[14px] text-[var(--text-muted)]">
             No tienes tipos de gota.{" "}
-            <button onClick={() => { onSaved(); navigate("/treatments"); }} className="text-[var(--accent)]">Crear uno</button>
+            <button onClick={() => { onSaved(); navigate("/treatments", { state: { returnTo: location.pathname } }); }} className="text-[var(--accent)]">Crear uno</button>
           </div>
         ) : (
           <div className="relative">

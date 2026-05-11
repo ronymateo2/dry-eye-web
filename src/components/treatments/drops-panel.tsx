@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -12,10 +12,12 @@ import { ArchivedItems } from "@/components/treatments/archived-items";
 import { DropSheet } from "@/components/treatments/drop-sheet";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
-import { EyeIcon, NotePencilIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { EyeIcon, EyedropperIcon } from "@phosphor-icons/react";
 
 export function DropsPanel() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = (location.state as { returnTo?: string } | null)?.returnTo ?? "/today";
   const qc = useQueryClient();
 
   const { data: dropTypes = [], isLoading } = useQuery({
@@ -122,19 +124,13 @@ export function DropsPanel() {
       <button
         type="button"
         onClick={() => {
-          navigate("/register");
-          setTimeout(
-            () => window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } })),
-            50,
-          );
+          navigate(returnTo);
+          window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } }));
         }}
-        className="flex min-h-[56px] w-full items-center gap-3 overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] px-4 transition-colors hover:border-[var(--accent)]"
+        className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--accent)_50%,transparent)] bg-[var(--accent-dim)] px-5 font-medium text-[var(--accent)] transition-opacity active:opacity-70"
       >
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[var(--accent-dim)]">
-          <NotePencilIcon size={18} color="var(--accent)" weight="fill" />
-        </div>
-        <span className="flex-1 text-left text-[15px] text-[var(--text-primary)]">Volver a Registrar</span>
-        <CaretRightIcon size={16} color="var(--text-faint)" />
+        <EyedropperIcon size={17} weight="fill" />
+        <span className="text-[15px]">Registrar gota</span>
       </button>
 
       <DropSheet
