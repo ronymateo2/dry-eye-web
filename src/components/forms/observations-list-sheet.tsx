@@ -1,4 +1,5 @@
-import { NotePencilIcon, PlusIcon } from "@phosphor-icons/react";
+import { useState } from "react";
+import { NotePencilIcon, PlusIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OBS_EYE_LABELS } from "@/lib/constants";
@@ -44,15 +45,74 @@ function SkeletonRow() {
 }
 
 export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Props) {
+  const [query, setQuery] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const isSearching = submittedQuery.length > 0;
+
   const { data: observations = [], isLoading, isError } = useQuery({
     queryKey: ["observations"],
     queryFn: api.getObservations,
   });
 
+  const { data: searchResults = [], isFetching: isSearchFetching } = useQuery({
+    queryKey: ["observations", "search", submittedQuery],
+    queryFn: () => api.searchObservations(submittedQuery),
+    enabled: isSearching,
+  });
+
+  const displayed = isSearching ? searchResults : observations;
+  const loading = isSearching ? isSearchFetching : isLoading;
+
+  const handleSearch = () => {
+    const q = query.trim();
+    setSubmittedQuery(q);
+  };
+
+  const handleClear = () => {
+    setQuery("");
+    setSubmittedQuery("");
+  };
+
   return (
     <>
       <div className="space-y-3 pb-4">
-        {isLoading ? (
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+        >
+          <div className="relative flex-1">
+            <MagnifyingGlassIcon
+              size={16}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none"
+            />
+            <input
+              className={cn(
+                "w-full rounded-[12px] border border-[var(--border)] bg-[var(--surface)] pl-9 pr-4 py-2.5",
+                "text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]",
+                "focus:outline-none focus:border-[var(--accent)]"
+              )}
+              placeholder="Buscar observaciones..."
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (e.target.value.trim() === "") handleClear();
+              }}
+            />
+          </div>
+          <button
+            type="submit"
+            className={cn(
+              "shrink-0 rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4",
+              "text-[14px] font-medium text-[var(--text-primary)]",
+              "transition duration-[120ms] ease-out active:scale-[0.97]",
+              "focus:outline-none focus:border-[var(--accent)]"
+            )}
+          >
+            Buscar
+          </button>
+        </form>
+
+        {loading ? (
           <>
             <SkeletonRow />
             <SkeletonRow />
@@ -60,15 +120,15 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
           </>
         ) : isError ? (
           <p className="text-center text-[13px] text-[var(--pain-high)]">Error al cargar observaciones.</p>
-        ) : observations.length === 0 ? (
+        ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <NotePencilIcon size={32} className="text-[var(--text-muted)]" />
             <p className="text-[14px] text-[var(--text-muted)]">
-              No tienes observaciones creadas.{"\n"}Crea una para comenzar a registrar ocurrencias.
+              {isSearching ? "Sin resultados." : "No tienes observaciones creadas.\nCrea una para comenzar a registrar ocurrencias."}
             </p>
           </div>
         ) : (
-          observations.map((obs) => (
+          displayed.map((obs) => (
             <button
               key={obs.id}
               type="button"

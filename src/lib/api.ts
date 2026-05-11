@@ -117,6 +117,7 @@ export const api = {
       hasMore: boolean;
     }>(`/observations/occurrences${q ? `?${q}` : ""}`);
   },
+  searchObservations: (q: string) => api.get<{ id: string; title: string; eye: string; notes: string | null; last_logged_at: string | null; occurrence_count: number }[]>(`/observations/search?q=${encodeURIComponent(q)}`),
   createObservation: (body: { title: string; eye?: string; notes?: string }) => api.post("/observations", body),
   deleteObservation: (id: string) => api.delete(`/observations/${id}`),
   saveOccurrence: (observationId: string, body: Omit<SaveOccurrenceInput, "observationId">) => api.post(`/observations/${observationId}/occurrences`, body),
