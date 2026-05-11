@@ -118,10 +118,61 @@ export type PropertyType = "scale" | "boolean" | "select" | "text";
 export type PropertyDef =
   | { key: string; label: string; type: "scale"; min?: number; max?: number }
   | { key: string; label: string; type: "boolean" }
-  | { key: string; label: string; type: "select"; options: { value: string; label: string }[] }
-  | { key: string; label: string; type: "text"; maxLength?: number };
+  | { key: string; label: string; type: "select"; options: { value: string; label: string }[] };
 
 export type PropertyValue = number | boolean | string;
+
+export type ObservationLinks = {
+  drop_type_ids?: string[];
+  check_in_id?: string;
+  sleep_day_key?: string;
+  medication_ids?: string[];
+};
+
+export type LastOccurrenceSnippet = {
+  intensity: number | null;
+  notes: string | null;
+  field_values: Record<string, PropertyValue> | null;
+  logged_at: string;
+};
+
+export type ObservationRecord = {
+  id: string;
+  title: string;
+  eye: string;
+  body_zone: string | null;
+  body_zone_custom: string | null;
+  category: string | null;
+  properties_schema: PropertyDef[] | null;
+  last_logged_at: string | null;
+  last_occurrences: LastOccurrenceSnippet[];
+  occurrence_count: number;
+};
+
+export type OccurrenceRecord = {
+  id: string;
+  observationId: string;
+  loggedAt: string;
+  intensity: number | null;
+  notes: string | null;
+  propertyValues: Record<string, PropertyValue> | null;
+  links: ObservationLinks | null;
+  updatedAt: string | null;
+  title: string;
+  eye: string;
+  bodyZone: string | null;
+  bodyZoneCustom: string | null;
+  propertiesSchema: PropertyDef[] | null;
+};
+
+export type PrevOccurrence = {
+  id: string;
+  loggedAt: string;
+  intensity: number | null;
+  notes: string | null;
+  propertyValues: Record<string, PropertyValue> | null;
+};
+
 export type TherapyType = "miofascial" | "other";
 
 export type SaveTherapySessionInput = {
@@ -148,12 +199,10 @@ export type SaveOccurrenceInput = {
   id: string;
   observationId: string;
   loggedAt: string;
-  intensity: number | null;
-  durationMinutes: number | null;
-  triggerType?: string | null;
-  painQuality?: string | null;
-  notes: string;
+  intensity: number;
+  notes?: string;
   propertyValues?: Record<string, PropertyValue>;
+  links?: ObservationLinks;
 };
 
 export type SaveHygieneInput = {

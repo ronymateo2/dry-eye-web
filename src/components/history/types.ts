@@ -45,10 +45,10 @@ export type DisplayObservation = {
   title: string;
   notes: string | null;
   eye: ObservationEye;
-  intensity: number;
-  durationMinutes: number | null;
+  intensity: number | null;
   propertyValues?: Record<string, import("@/types/domain").PropertyValue> | null;
   propertiesSchema?: import("@/types/domain").PropertyDef[] | null;
+  links?: import("@/types/domain").ObservationLinks | null;
 };
 
 export type DisplaySleep = {
@@ -113,13 +113,14 @@ export type OccurrenceRow = {
   id: string;
   observationId: string;
   loggedAt: string;
-  intensity: number;
-  durationMinutes: number | null;
+  intensity: number | null;
   notes: string | null;
   propertyValues: Record<string, import("@/types/domain").PropertyValue> | null;
+  links: import("@/types/domain").ObservationLinks | null;
   title: string;
   eye: string;
   bodyZone: string | null;
+  bodyZoneCustom: string | null;
   propertiesSchema: import("@/types/domain").PropertyDef[] | null;
 };
 

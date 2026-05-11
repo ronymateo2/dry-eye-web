@@ -58,13 +58,13 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
     );
   }
 
-  const groups = new Map<string, { title: string; eye: string; items: OccurrenceRow[] }>();
+  const groups = new Map<string, { title: string; eye: string; bodyZone: string | null; bodyZoneCustom: string | null; items: OccurrenceRow[] }>();
   for (const occ of occurrences) {
     const existing = groups.get(occ.observationId);
     if (existing) {
       existing.items.push(occ);
     } else {
-      groups.set(occ.observationId, { title: occ.title, eye: occ.eye, items: [occ] });
+      groups.set(occ.observationId, { title: occ.title, eye: occ.eye, bodyZone: occ.bodyZone, bodyZoneCustom: occ.bodyZoneCustom, items: [occ] });
     }
   }
 
@@ -99,23 +99,25 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
               const pillLabel = getDayPillLabel(dayKey, timezone);
               const shortDate = formatShortDate(dayKey);
               const dateLabel = pillLabel ?? shortDate;
-              const intensityHue = painColor(item.intensity);
+              const intensityHue = item.intensity != null ? painColor(item.intensity) : undefined;
               const hasProps = item.propertyValues && item.propertiesSchema && item.propertiesSchema.length > 0;
+              const hasLinks = item.links && Object.values(item.links).some((v) =>
+                Array.isArray(v) ? v.length > 0 : v !== undefined
+              );
               return (
                 <div key={item.id} className="flex items-start gap-3 px-4 py-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <p className="mono text-[11px] text-[var(--text-muted)]">
                         {dateLabel} · {time}
-                        {!hasProps && item.durationMinutes ? ` · ${item.durationMinutes} min` : ""}
                       </p>
-                      {!hasProps && item.intensity > 0 && (
+                      {item.intensity != null && (
                         <span className="mono shrink-0 text-[12px] font-semibold tabular-nums" style={{ color: intensityHue }}>
                           {item.intensity}/10
                         </span>
                       )}
                     </div>
-                    {hasProps ? (
+                    {hasProps && (
                       <div className="mt-1 flex flex-wrap gap-1.5">
                         {item.propertiesSchema!.map((def) => {
                           const v = item.propertyValues![def.key];
@@ -123,12 +125,9 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                           let display: string;
                           if (def.type === "scale") display = `${v}/10`;
                           else if (def.type === "boolean") display = v ? "Sí" : "No";
-                          else if (def.type === "select") {
+                          else {
                             const opt = def.options.find((o) => o.value === v);
                             display = opt?.label ?? String(v);
-                          } else {
-                            const s = String(v);
-                            display = s.length > 30 ? s.slice(0, 30) + "…" : s;
                           }
                           return (
                             <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
@@ -137,9 +136,26 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                           );
                         })}
                       </div>
-                    ) : item.notes ? (
+                    )}
+                    {item.notes && (
                       <p className="mt-0.5 text-[12px] leading-snug text-[var(--text-secondary)]">{item.notes}</p>
-                    ) : null}
+                    )}
+                    {hasLinks && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {(item.links!.drop_type_ids ?? []).length > 0 && (
+                          <span className="text-[11px] text-[var(--text-faint)]">💧</span>
+                        )}
+                        {item.links!.check_in_id && (
+                          <span className="text-[11px] text-[var(--text-faint)]">🩺</span>
+                        )}
+                        {item.links!.sleep_day_key && (
+                          <span className="text-[11px] text-[var(--text-faint)]">😴</span>
+                        )}
+                        {(item.links!.medication_ids ?? []).length > 0 && (
+                          <span className="text-[11px] text-[var(--text-faint)]">💊</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               );

@@ -1,25 +1,24 @@
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, XIcon, CaretDownIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
+  OBS_EYE_OPTIONS,
   OBS_BODY_ZONE_OPTIONS,
   OBS_CATEGORY_OPTIONS,
 } from "@/lib/constants";
-import type { ObservationBodyZone, ObservationCategory, ActionState, PropertyDef, PropertyType } from "@/types/domain";
+import type { ObservationBodyZone, ObservationCategory, ObservationEye, ActionState, PropertyDef, PropertyType } from "@/types/domain";
 
-const MAX_CHARS = 300;
 const MAX_TITLE = 80;
 
 const PROP_TYPE_OPTIONS: { label: string; value: PropertyType }[] = [
   { label: "Escala", value: "scale" },
   { label: "Sí/No", value: "boolean" },
   { label: "Opciones", value: "select" },
-  { label: "Texto", value: "text" },
 ];
 
 function slugify(s: string): string {
@@ -31,8 +30,8 @@ type InitialObs = {
   title: string;
   eye?: string;
   body_zone?: string | null;
+  body_zone_custom?: string | null;
   category?: string | null;
-  notes?: string | null;
   propertiesSchema?: PropertyDef[];
 };
 
@@ -48,7 +47,7 @@ function PillGrid<T extends string>({
 }: {
   options: readonly { label: string; value: T }[];
   value: T | null;
-  onChange: (v: T | null) => void;
+  onChange: (v: T) => void;
 }) {
   return (
     <div className="flex flex-wrap gap-2">
@@ -58,7 +57,7 @@ function PillGrid<T extends string>({
           <button
             key={opt.value}
             type="button"
-            onClick={() => onChange(active ? null : opt.value)}
+            onClick={() => onChange(opt.value)}
             className={cn(
               "rounded-full border px-3 py-1.5 text-[13px] font-medium transition duration-[120ms] ease-out active:scale-95",
               active
@@ -70,63 +69,6 @@ function PillGrid<T extends string>({
           </button>
         );
       })}
-    </div>
-  );
-}
-
-function CollapsiblePillGroup<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: readonly { label: string; value: T }[];
-  value: T | null;
-  onChange: (v: T | null) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const selectedLabel = options.find((o) => o.value === value)?.label;
-
-  return (
-    <div>
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((p) => !p)}
-        className="flex w-full items-center justify-between py-1 active:opacity-70"
-      >
-        <p className="section-label mb-0">{label}</p>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className={cn("text-[13px] font-medium", value ? "text-[var(--accent)]" : "text-[var(--text-muted)]")}>
-            {selectedLabel ?? "Ninguna"}
-          </span>
-          <CaretDownIcon
-            size={14}
-            className={cn("text-[var(--text-faint)] transition-transform duration-200 ease-out", open && "rotate-180")}
-          />
-        </div>
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="pt-2">
-              <PillGrid
-                options={options}
-                value={value}
-                onChange={(v) => { onChange(v); setOpen(false); }}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -203,8 +145,7 @@ function PropertyRow({
     const base = { key: prop.key, label: prop.label };
     if (type === "scale") onChange({ ...base, type: "scale" });
     else if (type === "boolean") onChange({ ...base, type: "boolean" });
-    else if (type === "select") onChange({ ...base, type: "select", options: [] });
-    else onChange({ ...base, type: "text" });
+    else onChange({ ...base, type: "select", options: [] });
   };
 
   return (
@@ -270,7 +211,7 @@ function PropertyEditorSection({
 
   return (
     <div className="space-y-3">
-      <p className="section-label">Propiedades a medir</p>
+      <p className="section-label">Campos extra (opcional)</p>
       {properties.map((prop, i) => (
         <PropertyRow
           key={i}
@@ -286,7 +227,7 @@ function PropertyEditorSection({
         onClick={add}
       >
         <PlusIcon size={14} />
-        Añadir propiedad
+        Añadir campo
       </button>
     </div>
   );
@@ -297,9 +238,14 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
   const isEdit = !!initialObservation;
 
   const [title, setTitle] = useState(initialObservation?.title ?? "");
-  const [notes, setNotes] = useState(initialObservation?.notes ?? "");
+  const [eye, setEye] = useState<ObservationEye>(
+    (initialObservation?.eye as ObservationEye | undefined) ?? "none"
+  );
   const [bodyZone, setBodyZone] = useState<ObservationBodyZone | null>(
     (initialObservation?.body_zone as ObservationBodyZone | null) ?? null
+  );
+  const [bodyZoneCustom, setBodyZoneCustom] = useState(
+    initialObservation?.body_zone_custom ?? ""
   );
   const [category, setCategory] = useState<ObservationCategory | null>(
     (initialObservation?.category as ObservationCategory | null) ?? null
@@ -312,12 +258,11 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const canSave = title.trim().length > 0 && !isPending;
-  const charsLeft = MAX_CHARS - (notes?.length ?? 0);
 
   const handleSave = () => {
     if (properties.some((p) => !p.label.trim())) {
       setShowPropErrors(true);
-      setState({ status: "error", message: "Todas las propiedades necesitan un nombre." });
+      setState({ status: "error", message: "Todos los campos necesitan un nombre." });
       return;
     }
     setShowPropErrors(false);
@@ -326,9 +271,10 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
       try {
         const payload = {
           title: title.trim(),
+          eye,
           body_zone: bodyZone,
+          body_zone_custom: bodyZone === "other" ? (bodyZoneCustom.trim() || null) : null,
           category,
-          notes: notes?.trim() || undefined,
           propertiesSchema: properties.length > 0 ? properties : undefined,
         };
 
@@ -358,7 +304,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
         {state.status !== "idle" && <StatusBanner state={state} />}
 
         <div className="space-y-2">
-          <p className="section-label">Titulo</p>
+          <p className="section-label">Nombre</p>
           <input
             className={cn(
               "w-full rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-3",
@@ -367,39 +313,48 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
               "h-[48px]"
             )}
             maxLength={MAX_TITLE}
-            placeholder="Ej: Sensibilidad a gotas frias"
+            placeholder="Ej: Ardor párpado superior OI"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
 
-        <CollapsiblePillGroup label="Zona afectada" options={OBS_BODY_ZONE_OPTIONS} value={bodyZone} onChange={setBodyZone} />
-        <CollapsiblePillGroup label="Categoria" options={OBS_CATEGORY_OPTIONS} value={category} onChange={setCategory} />
+        <div className="space-y-2">
+          <p className="section-label">Ojo</p>
+          <PillGrid options={OBS_EYE_OPTIONS} value={eye} onChange={setEye} />
+        </div>
 
         <div className="space-y-2">
-          <p className="section-label">Descripcion (opcional)</p>
-          <div className="relative">
-            <textarea
-              className={cn(
-                "w-full resize-none rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-3",
-                "text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]",
-                "focus:outline-none focus:border-[var(--accent)]",
-                "min-h-[80px]"
-              )}
-              maxLength={MAX_CHARS}
-              placeholder="Describe la observacion..."
-              value={notes ?? ""}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-            <span
-              className={cn(
-                "absolute bottom-3 right-4 text-[11px] tabular-nums",
-                charsLeft < 30 ? "text-[var(--pain-high)]" : "text-[var(--text-muted)]"
-              )}
-            >
-              {(notes?.length ?? 0)}/{MAX_CHARS}
-            </span>
-          </div>
+          <p className="section-label">Zona</p>
+          <PillGrid
+            options={OBS_BODY_ZONE_OPTIONS}
+            value={bodyZone}
+            onChange={(v) => { setBodyZone(v); if (v !== "other") setBodyZoneCustom(""); }}
+          />
+          <AnimatePresence>
+            {bodyZone === "other" && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                className="overflow-hidden"
+              >
+                <input
+                  className="mt-2 w-full rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-2.5 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+                  placeholder="Especificar zona..."
+                  maxLength={60}
+                  value={bodyZoneCustom}
+                  onChange={(e) => setBodyZoneCustom(e.target.value)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <div className="space-y-2">
+          <p className="section-label">Categoría</p>
+          <PillGrid options={OBS_CATEGORY_OPTIONS} value={category} onChange={setCategory} />
         </div>
 
         <PropertyEditorSection properties={properties} onChange={setProperties} showErrors={showPropErrors} />
@@ -410,7 +365,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
         style={{ background: "linear-gradient(to top, var(--bg) 60%, transparent)" }}
       >
         <Button className="w-full" disabled={!canSave} type="button" onClick={handleSave}>
-          {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Guardar observacion"}
+          {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Guardar observación"}
         </Button>
       </div>
     </>

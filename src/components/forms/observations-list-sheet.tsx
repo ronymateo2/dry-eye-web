@@ -7,13 +7,13 @@ import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import type { ObservationEye, PropertyDef } from "@/types/domain";
+import type { ObservationEye, PropertyDef, PropertyValue, ObservationRecord, LastOccurrenceSnippet } from "@/types/domain";
 
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
 type MatchedNote = { note: string; logged_at: string };
-type Obs = { id: string; title: string; eye: string; body_zone?: string | null; category?: string | null; properties_schema?: PropertyDef[] | null; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
+type Obs = ObservationRecord & { matched_notes?: MatchedNote[] | null };
 
 type Props = {
   onSelectObservation: (obs: Obs) => void;
@@ -46,9 +46,9 @@ function highlightMatch(text: string, query: string) {
   );
 }
 
-function ZonePill({ bodyZone, eye }: { bodyZone?: string | null; eye: string }) {
+function ZonePill({ bodyZone, bodyZoneCustom, eye }: { bodyZone?: string | null; bodyZoneCustom?: string | null; eye: string }) {
   const label = bodyZone
-    ? OBS_BODY_ZONE_LABELS[bodyZone]
+    ? (bodyZone === "other" && bodyZoneCustom ? bodyZoneCustom : OBS_BODY_ZONE_LABELS[bodyZone])
     : eye !== "none"
       ? OBS_EYE_LABELS[eye as ObservationEye]
       : null;
@@ -58,6 +58,50 @@ function ZonePill({ bodyZone, eye }: { bodyZone?: string | null; eye: string }) 
       {label}
     </span>
   );
+}
+
+function renderOccurrenceSnippet(
+  occ: LastOccurrenceSnippet,
+  schema: PropertyDef[] | null,
+  index: number,
+) {
+  const parts: string[] = [];
+  if (occ.intensity != null) parts.push(`${occ.intensity}/10`);
+  if (occ.notes) {
+    parts.push(`"${occ.notes.length > 50 ? occ.notes.slice(0, 50) + "…" : occ.notes}"`);
+  } else if (occ.field_values && schema && schema.length > 0) {
+    const chip = renderFieldValueSnippet(occ.field_values, schema);
+    if (chip) parts.push(chip);
+  }
+  if (parts.length === 0) return null;
+  return (
+    <span
+      key={index}
+      className="block truncate text-[12px] text-[var(--text-faint)]"
+      style={{ opacity: 1 - index * 0.25 }}
+    >
+      {parts.join(" · ")}
+    </span>
+  );
+}
+
+function renderFieldValueSnippet(
+  fieldValues: Record<string, PropertyValue>,
+  schema: PropertyDef[]
+): string {
+  const parts: string[] = [];
+  for (const def of schema) {
+    const v = fieldValues[def.key];
+    if (v === undefined || v === null || v === "") continue;
+    if (def.type === "boolean") parts.push(`${def.label}: ${v ? "Sí" : "No"}`);
+    else if (def.type === "scale") parts.push(`${def.label}: ${v}/10`);
+    else if (def.type === "select") {
+      const opt = def.options.find((o) => o.value === v);
+      parts.push(`${def.label}: ${opt?.label ?? String(v)}`);
+    }
+    if (parts.length >= 3) break;
+  }
+  return parts.join(" · ");
 }
 
 function CategoryPill({ category }: { category?: string | null }) {
@@ -138,30 +182,35 @@ function ObsRow({ obs, index, isSearching, submittedQuery, onSelect, onEdit }: {
       </div>
       {(obs.body_zone || obs.eye !== "none" || obs.category) && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <ZonePill bodyZone={obs.body_zone} eye={obs.eye} />
+          <ZonePill bodyZone={obs.body_zone} bodyZoneCustom={obs.body_zone_custom} eye={obs.eye} />
           <CategoryPill category={obs.category} />
+        </div>
+      )}
+      {/* Snippets: last N occurrences — note → field chips → nothing per occurrence */}
+      {!isSearching && obs.last_occurrences.length > 0 && (
+        <div className="space-y-0.5">
+          {obs.last_occurrences.map((occ, i) =>
+            renderOccurrenceSnippet(occ, obs.properties_schema, i)
+          )}
         </div>
       )}
       <span className="text-[12px] text-[var(--text-muted)]">
         {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
       </span>
-      {isSearching && obs.matched_notes && (() => {
-        const entries: MatchedNote[] = JSON.parse(obs.matched_notes);
-        return entries.length > 0 ? (
-          <div className="mt-0.5 space-y-1.5">
-            {entries.map((entry, ni) => (
-              <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
-                <span className="mb-0.5 block text-[11px] text-[var(--accent)]/70">
-                  {formatMatchedAt(entry.logged_at)}
-                </span>
-                <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
-                  {highlightMatch(entry.note, submittedQuery)}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : null;
-      })()}
+      {isSearching && obs.matched_notes && obs.matched_notes.length > 0 && (
+        <div className="mt-0.5 space-y-1.5">
+          {obs.matched_notes.map((entry, ni) => (
+            <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
+              <span className="mb-0.5 block text-[11px] text-[var(--accent)]/70">
+                {formatMatchedAt(entry.logged_at)}
+              </span>
+              <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                {highlightMatch(entry.note, submittedQuery)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </motion.button>
   );
 }

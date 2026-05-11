@@ -48,6 +48,13 @@ export const OBS_EYE_LABELS: Record<string, string> = {
   none: "",
 };
 
+export const OBS_EYE_OPTIONS = [
+  { label: "OD", value: "right" },
+  { label: "OI", value: "left" },
+  { label: "AO", value: "both" },
+  { label: "N/A", value: "none" },
+] as const;
+
 export const OBS_BODY_ZONE_OPTIONS = [
   { label: "Párpado", value: "eyelid" },
   { label: "Orbital", value: "orbital" },
@@ -86,7 +93,6 @@ export const PROPERTY_TYPE_OPTIONS = [
   { label: "Escala 0-10", value: "scale" },
   { label: "Sí/No", value: "boolean" },
   { label: "Opciones", value: "select" },
-  { label: "Texto", value: "text" },
 ] as const;
 
 export const PROPERTY_TYPE_LABELS: Record<string, string> = {

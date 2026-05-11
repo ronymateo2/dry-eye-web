@@ -12,8 +12,8 @@ type SelectedObs = {
   title: string;
   eye: string;
   body_zone?: string | null;
+  body_zone_custom?: string | null;
   category?: string | null;
-  notes?: string | null;
   propertiesSchema?: PropertyDef[] | null;
 };
 
@@ -86,8 +86,8 @@ export function ObservationFlowSheet({ open, onClose, onSaved }: Props) {
                   title: selectedObs.title,
                   eye: selectedObs.eye,
                   body_zone: selectedObs.body_zone,
+                  body_zone_custom: selectedObs.body_zone_custom,
                   category: selectedObs.category,
-                  notes: selectedObs.notes,
                   propertiesSchema: selectedObs.propertiesSchema ?? undefined,
                 }}
                 onSaved={(obs) => {
