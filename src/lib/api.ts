@@ -105,7 +105,7 @@ export const api = {
   saveTrigger: (body: unknown) => api.post("/triggers", body),
   saveSymptom: (body: unknown) => api.post("/symptoms", body),
 
-  getObservations: () => api.get<{ id: string; title: string; eye: string; body_zone: string | null; category: string | null; notes: string | null; last_logged_at: string | null; occurrence_count: number }[]>("/observations"),
+  getObservations: () => api.get<{ id: string; title: string; eye: string; body_zone: string | null; category: string | null; notes: string | null; properties_schema: import("@/types/domain").PropertyDef[] | null; last_logged_at: string | null; occurrence_count: number }[]>("/observations"),
   getObservationOccurrences: (params?: { limit?: number; before?: string }) => {
     const qs = new URLSearchParams();
     if (params?.limit) qs.set("limit", String(params.limit));
@@ -113,12 +113,13 @@ export const api = {
     const q = qs.toString();
     return api.get<{
       ok: boolean;
-      occurrences: { id: string; observationId: string; loggedAt: string; intensity: number; durationMinutes: number | null; notes: string | null; title: string; eye: string }[];
+      occurrences: { id: string; observationId: string; loggedAt: string; intensity: number; durationMinutes: number | null; notes: string | null; propertyValues: Record<string, import("@/types/domain").PropertyValue> | null; title: string; eye: string; bodyZone: string | null; propertiesSchema: import("@/types/domain").PropertyDef[] | null }[];
       hasMore: boolean;
     }>(`/observations/occurrences${q ? `?${q}` : ""}`);
   },
-  searchObservations: (q: string) => api.get<{ id: string; title: string; eye: string; body_zone: string | null; category: string | null; notes: string | null; last_logged_at: string | null; occurrence_count: number; matched_notes: string | null }[]>(`/observations/search?q=${encodeURIComponent(q)}`),
-  createObservation: (body: { title: string; eye?: string; body_zone?: string | null; category?: string | null; notes?: string }) => api.post("/observations", body),
+  searchObservations: (q: string) => api.get<{ id: string; title: string; eye: string; body_zone: string | null; category: string | null; notes: string | null; properties_schema: import("@/types/domain").PropertyDef[] | null; last_logged_at: string | null; occurrence_count: number; matched_notes: string | null }[]>(`/observations/search?q=${encodeURIComponent(q)}`),
+  createObservation: (body: { title: string; eye?: string; body_zone?: string | null; category?: string | null; notes?: string; propertiesSchema?: import("@/types/domain").PropertyDef[] }) => api.post<{ id: string; title: string; eye: string; properties_schema: import("@/types/domain").PropertyDef[] | null }>("/observations", body),
+  updateObservation: (id: string, body: { title?: string; eye?: string; body_zone?: string | null; category?: string | null; notes?: string | null; propertiesSchema?: import("@/types/domain").PropertyDef[] }) => api.put<{ id: string; title: string; eye: string; properties_schema: import("@/types/domain").PropertyDef[] | null }>(`/observations/${id}`, body),
   deleteObservation: (id: string) => api.delete(`/observations/${id}`),
   saveOccurrence: (observationId: string, body: Omit<SaveOccurrenceInput, "observationId">) =>
     api.post(`/observations/${observationId}/occurrences`, body),

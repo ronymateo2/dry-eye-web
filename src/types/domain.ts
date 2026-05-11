@@ -112,6 +112,16 @@ export type SaveMedicationInput = {
 };
 
 export type PainQuality = "ardor" | "hormigueo" | "electrico" | "presion" | "alodinia";
+
+export type PropertyType = "scale" | "boolean" | "select" | "text";
+
+export type PropertyDef =
+  | { key: string; label: string; type: "scale"; min?: number; max?: number }
+  | { key: string; label: string; type: "boolean" }
+  | { key: string; label: string; type: "select"; options: { value: string; label: string }[] }
+  | { key: string; label: string; type: "text"; maxLength?: number };
+
+export type PropertyValue = number | boolean | string;
 export type TherapyType = "miofascial" | "other";
 
 export type SaveTherapySessionInput = {
@@ -143,6 +153,7 @@ export type SaveOccurrenceInput = {
   triggerType?: string | null;
   painQuality?: string | null;
   notes: string;
+  propertyValues?: Record<string, PropertyValue>;
 };
 
 export type SaveHygieneInput = {

@@ -1,21 +1,22 @@
 import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { NotePencilIcon, PlusIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
+import { NotePencilIcon, PlusIcon, MagnifyingGlassIcon, XIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import type { ObservationEye } from "@/types/domain";
+import type { ObservationEye, PropertyDef } from "@/types/domain";
 
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
-type Obs = { id: string; title: string; eye: string; body_zone?: string | null; category?: string | null; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
+type Obs = { id: string; title: string; eye: string; body_zone?: string | null; category?: string | null; properties_schema?: PropertyDef[] | null; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
 
 type Props = {
   onSelectObservation: (obs: Obs) => void;
+  onEditObservation?: (obs: Obs) => void;
   onCreateNew: () => void;
 };
 
@@ -83,7 +84,7 @@ function SkeletonRow({ delay }: { delay: number }) {
   );
 }
 
-export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Props) {
+export function ObservationsListSheet({ onSelectObservation, onEditObservation, onCreateNew }: Props) {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -283,21 +284,36 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                   )}
                   onClick={() => onSelectObservation(obs)}
                 >
-                  {/* Header: title + zone + count */}
+                  {/* Header: title + count + edit */}
                   <div className="flex items-start justify-between gap-2 min-w-0">
                     <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
                       {obs.title}
                     </span>
                     <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
-                      <ZonePill bodyZone={obs.body_zone} eye={obs.eye} />
                       {obs.occurrence_count > 0 && (
                         <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
                           {obs.occurrence_count}
                         </span>
                       )}
+                      {onEditObservation && (
+                        <button
+                          type="button"
+                          aria-label={`Editar ${obs.title}`}
+                          className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] active:opacity-60"
+                          onClick={(e) => { e.stopPropagation(); onEditObservation(obs); }}
+                        >
+                          <PencilSimpleIcon size={14} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                  {obs.category && <CategoryPill category={obs.category} />}
+                  {/* Chips: zone + category */}
+                  {(obs.body_zone || obs.eye !== "none" || obs.category) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <ZonePill bodyZone={obs.body_zone} eye={obs.eye} />
+                      <CategoryPill category={obs.category} />
+                    </div>
+                  )}
 
                   {/* Timestamp */}
                   <span className="text-[12px] text-[var(--text-muted)]">

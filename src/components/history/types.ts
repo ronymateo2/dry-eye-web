@@ -47,6 +47,8 @@ export type DisplayObservation = {
   eye: ObservationEye;
   intensity: number;
   durationMinutes: number | null;
+  propertyValues?: Record<string, import("@/types/domain").PropertyValue> | null;
+  propertiesSchema?: import("@/types/domain").PropertyDef[] | null;
 };
 
 export type DisplaySleep = {
@@ -114,8 +116,11 @@ export type OccurrenceRow = {
   intensity: number;
   durationMinutes: number | null;
   notes: string | null;
+  propertyValues: Record<string, import("@/types/domain").PropertyValue> | null;
   title: string;
   eye: string;
+  bodyZone: string | null;
+  propertiesSchema: import("@/types/domain").PropertyDef[] | null;
 };
 
 export const TRIGGER_LABELS: Record<TriggerType, string> = {

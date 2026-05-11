@@ -100,19 +100,44 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
               const shortDate = formatShortDate(dayKey);
               const dateLabel = pillLabel ?? shortDate;
               const intensityHue = painColor(item.intensity);
+              const hasProps = item.propertyValues && item.propertiesSchema && item.propertiesSchema.length > 0;
               return (
                 <div key={item.id} className="flex items-start gap-3 px-4 py-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
                       <p className="mono text-[11px] text-[var(--text-muted)]">
                         {dateLabel} · {time}
-                        {item.durationMinutes ? ` · ${item.durationMinutes} min` : ""}
+                        {!hasProps && item.durationMinutes ? ` · ${item.durationMinutes} min` : ""}
                       </p>
-                      <span className="mono shrink-0 text-[12px] font-semibold tabular-nums" style={{ color: intensityHue }}>
-                        {item.intensity}/10
-                      </span>
+                      {!hasProps && item.intensity > 0 && (
+                        <span className="mono shrink-0 text-[12px] font-semibold tabular-nums" style={{ color: intensityHue }}>
+                          {item.intensity}/10
+                        </span>
+                      )}
                     </div>
-                    {item.notes ? (
+                    {hasProps ? (
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        {item.propertiesSchema!.map((def) => {
+                          const v = item.propertyValues![def.key];
+                          if (v === undefined || v === null || v === "") return null;
+                          let display: string;
+                          if (def.type === "scale") display = `${v}/10`;
+                          else if (def.type === "boolean") display = v ? "Sí" : "No";
+                          else if (def.type === "select") {
+                            const opt = def.options.find((o) => o.value === v);
+                            display = opt?.label ?? String(v);
+                          } else {
+                            const s = String(v);
+                            display = s.length > 30 ? s.slice(0, 30) + "…" : s;
+                          }
+                          return (
+                            <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
+                              {def.label}: <span className="font-medium text-[var(--text-primary)]">{display}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    ) : item.notes ? (
                       <p className="mt-0.5 text-[12px] leading-snug text-[var(--text-secondary)]">{item.notes}</p>
                     ) : null}
                   </div>
