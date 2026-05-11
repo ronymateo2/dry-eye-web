@@ -89,7 +89,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
     enabled: isSearching,
   });
 
-  const displayed = isSearching ? searchResults : observations;
+  const displayed: Obs[] = isSearching ? searchResults : observations;
   const loading = isSearching ? isSearchFetching : isLoading;
 
   const handleSubmit = (e: React.FormEvent) => {
