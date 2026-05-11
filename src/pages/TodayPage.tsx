@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PulseIcon, CaretRightIcon, GearIcon, TrashIcon } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
@@ -26,18 +27,18 @@ function VialRow({
   index,
   now,
   isConfirming,
-  onConfirm,
+  onRequestDiscard,
   onCancel,
-  onDiscard,
+  onConfirmDiscard,
   isPending,
 }: {
   vial: { id: string; drop_type_name: string; started_at: string; vial_duration?: number | null };
   index: number;
   now: number;
   isConfirming: boolean;
-  onConfirm: () => void;
+  onRequestDiscard: () => void;
   onCancel: () => void;
-  onDiscard: () => void;
+  onConfirmDiscard: () => void;
   isPending: boolean;
 }) {
   const durationMs = (vial.vial_duration ?? 24) * 3_600_000;
@@ -98,7 +99,7 @@ function VialRow({
               </span>
               <button
                 type="button"
-                onClick={onConfirm}
+                onClick={onRequestDiscard}
                 className="flex items-center justify-center w-7 h-7 rounded-full text-[var(--text-faint)] opacity-60 hover:opacity-100 hover:bg-[var(--surface-el)] active:bg-[var(--surface-el)] active:text-[var(--error)] transition-all duration-[160ms]"
                 aria-label={`Descartar ${vial.drop_type_name}`}
               >
@@ -128,7 +129,7 @@ function VialRow({
               </button>
               <button
                 type="button"
-                onClick={onDiscard}
+                onClick={onConfirmDiscard}
                 disabled={isPending}
                 className="rounded-full bg-[var(--error)]/10 px-3 py-1.5 text-[12px] font-medium text-[var(--error)] transition-opacity hover:bg-[var(--error)]/20 disabled:opacity-50"
               >
@@ -149,6 +150,7 @@ function ActiveVialsSection() {
   const { data: activeVials = [] } = useQuery({
     queryKey: ["vials/active"],
     queryFn: api.getActiveVials,
+    staleTime: 60_000,
   });
 
   useEffect(() => {
@@ -161,6 +163,9 @@ function ActiveVialsSection() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       setConfirmingId(null);
+    },
+    onError: () => {
+      toast.error("No se pudo descartar el vial. Intenta de nuevo.");
     },
   });
 
@@ -184,10 +189,10 @@ function ActiveVialsSection() {
                 index={i}
                 now={now}
                 isConfirming={confirmingId === vial.id}
-                onConfirm={() => handleConfirm(vial.id)}
+                onRequestDiscard={() => handleConfirm(vial.id)}
                 onCancel={handleCancel}
-                onDiscard={() => discardMutation.mutate(vial.id)}
-                isPending={discardMutation.isPending}
+                onConfirmDiscard={() => discardMutation.mutate(vial.id)}
+                isPending={discardMutation.isPending && confirmingId === vial.id}
               />
             ))}
           </AnimatePresence>
