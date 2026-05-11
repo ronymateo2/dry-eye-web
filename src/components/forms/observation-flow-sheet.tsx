@@ -27,7 +27,7 @@ const SHEET_META: Record<ObsView, { title: string; description: string; panel?: 
   list: { title: "Observaciones", description: "Selecciona una observacion para registrar.", panel: "!h-[95dvh]" },
   log:  { title: "Registrar ocurrencia", description: "Registra cuando ocurre esta observacion.", panel: "!h-[95dvh]", back: "list" },
   edit: { title: "Editar observacion",   description: "Modifica esta observacion y sus propiedades.", panel: "!h-[95dvh]", back: "list" },
-  new:  { title: "Nueva observacion",    description: "Registra algo que notaste." },
+  new:  { title: "Nueva observacion",    description: "Registra algo que notaste.", back: "list" },
 };
 
 export function ObservationFlowSheet({ open, onClose, onSaved }: Props) {

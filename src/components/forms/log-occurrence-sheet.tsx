@@ -7,8 +7,8 @@ import { StatusBanner } from "@/components/ui/status-banner";
 import { PainSlider } from "@/components/ui/pain-slider";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { PAIN_QUALITY_OPTIONS } from "@/lib/constants";
-import type { ActionState, TriggerType, PainQuality, PropertyDef, PropertyValue } from "@/types/domain";
+import { PAIN_QUALITY_OPTIONS, OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
+import type { ActionState, TriggerType, PainQuality, PropertyDef, PropertyValue, ObservationEye } from "@/types/domain";
 
 function CollapsiblePillGroup<T extends string>({
   label,
@@ -72,10 +72,87 @@ type Props = {
     id: string;
     title: string;
     eye: string;
+    body_zone?: string | null;
+    category?: string | null;
+    notes?: string | null;
     propertiesSchema?: PropertyDef[] | null;
   };
   onSaved: () => void;
-};
+}
+
+function ObsContextCard({ observation }: { observation: Props["observation"] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const eyeLabel = observation.eye !== "none" ? OBS_EYE_LABELS[observation.eye as ObservationEye] : null;
+  const zoneLabel = observation.body_zone ? OBS_BODY_ZONE_LABELS[observation.body_zone] : null;
+  const catLabel = observation.category ? OBS_CATEGORY_LABELS[observation.category] : null;
+  const hasChips = eyeLabel || zoneLabel || catLabel;
+  const hasDetails = observation.notes || (observation.propertiesSchema && observation.propertiesSchema.length > 0);
+
+  if (!hasChips && !hasDetails) return null;
+
+  return (
+    <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((p) => !p)}
+        className="flex w-full items-center justify-between px-4 py-3 active:opacity-70"
+      >
+        <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+          {eyeLabel && (
+            <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">{eyeLabel}</span>
+          )}
+          {zoneLabel && (
+            <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">{zoneLabel}</span>
+          )}
+          {catLabel && (
+            <span className="rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[11px] text-[var(--accent)]">{catLabel}</span>
+          )}
+          {!hasChips && (
+            <span className="text-[13px] text-[var(--text-muted)]">Ver detalles</span>
+          )}
+        </div>
+        {hasDetails && (
+          <CaretDownIcon
+            size={14}
+            className={cn("shrink-0 ml-2 text-[var(--text-faint)] transition-transform duration-200 ease-out", expanded && "rotate-180")}
+          />
+        )}
+      </button>
+
+      <AnimatePresence>
+        {expanded && hasDetails && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 px-4 pb-4">
+              {observation.notes && (
+                <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">{observation.notes}</p>
+              )}
+              {observation.propertiesSchema && observation.propertiesSchema.length > 0 && (
+                <div>
+                  <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">Campos</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {observation.propertiesSchema.map((def) => (
+                      <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
+                        {def.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 function PillGrid<T extends string>({
   options,
@@ -253,7 +330,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
     <>
       <div className="space-y-6 pb-4">
         {state.status !== "idle" && <StatusBanner state={state} />}
-        <p className="text-[13px] text-[var(--text-muted)]">{observation.title}</p>
+        <ObsContextCard observation={observation} />
 
         {hasDynamicSchema ? (
           observation.propertiesSchema!.map((def) => (
