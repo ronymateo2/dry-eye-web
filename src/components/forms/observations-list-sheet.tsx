@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { NotePencilIcon, PlusIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { OBS_EYE_LABELS } from "@/lib/constants";
+import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,7 @@ import type { ObservationEye } from "@/types/domain";
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
-type Obs = { id: string; title: string; eye: string; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
+type Obs = { id: string; title: string; eye: string; body_zone?: string | null; category?: string | null; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
 
 type Props = {
   onSelectObservation: (obs: Obs) => void;
@@ -44,11 +44,25 @@ function highlightMatch(text: string, query: string) {
   );
 }
 
-function EyePill({ eye }: { eye: string }) {
-  if (eye === "none") return null;
+function ZonePill({ bodyZone, eye }: { bodyZone?: string | null; eye: string }) {
+  const label = bodyZone
+    ? OBS_BODY_ZONE_LABELS[bodyZone]
+    : eye !== "none"
+      ? OBS_EYE_LABELS[eye as ObservationEye]
+      : null;
+  if (!label) return null;
   return (
     <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
-      {OBS_EYE_LABELS[eye as ObservationEye]}
+      {label}
+    </span>
+  );
+}
+
+function CategoryPill({ category }: { category?: string | null }) {
+  if (!category) return null;
+  return (
+    <span className="rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[11px] text-[var(--accent)]">
+      {OBS_CATEGORY_LABELS[category]}
     </span>
   );
 }
@@ -269,13 +283,13 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                   )}
                   onClick={() => onSelectObservation(obs)}
                 >
-                  {/* Header: title + eye + count */}
+                  {/* Header: title + zone + count */}
                   <div className="flex items-start justify-between gap-2 min-w-0">
                     <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
                       {obs.title}
                     </span>
                     <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
-                      <EyePill eye={obs.eye} />
+                      <ZonePill bodyZone={obs.body_zone} eye={obs.eye} />
                       {obs.occurrence_count > 0 && (
                         <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
                           {obs.occurrence_count}
@@ -283,6 +297,7 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                       )}
                     </div>
                   </div>
+                  {obs.category && <CategoryPill category={obs.category} />}
 
                   {/* Timestamp */}
                   <span className="text-[12px] text-[var(--text-muted)]">

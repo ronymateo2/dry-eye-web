@@ -48,6 +48,40 @@ export const OBS_EYE_LABELS: Record<string, string> = {
   none: "",
 };
 
+export const OBS_BODY_ZONE_OPTIONS = [
+  { label: "Párpado", value: "eyelid" },
+  { label: "Orbital", value: "orbital" },
+  { label: "Sien", value: "temple" },
+  { label: "Masetero", value: "masseter" },
+  { label: "Cervical", value: "cervical" },
+  { label: "Otro", value: "other" },
+] as const;
+
+export const OBS_BODY_ZONE_LABELS: Record<string, string> = {
+  eyelid: "Párpado",
+  orbital: "Orbital",
+  temple: "Sien",
+  masseter: "Masetero",
+  cervical: "Cervical",
+  other: "Otro",
+};
+
+export const OBS_CATEGORY_OPTIONS = [
+  { label: "Sensorial", value: "sensory" },
+  { label: "Dolor", value: "pain" },
+  { label: "Funcional", value: "functional" },
+  { label: "Ambiental", value: "environmental" },
+  { label: "Postural", value: "postural" },
+] as const;
+
+export const OBS_CATEGORY_LABELS: Record<string, string> = {
+  sensory: "Sensorial",
+  pain: "Dolor",
+  functional: "Funcional",
+  environmental: "Ambiental",
+  postural: "Postural",
+};
+
 export const TRIGGER_OPTIONS = [
   { id: "screens", label: "Pantallas", value: "screens" },
   { id: "tv", label: "TV", value: "tv" },

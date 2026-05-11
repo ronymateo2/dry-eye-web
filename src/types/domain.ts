@@ -5,6 +5,8 @@ export type TriggerType =
   | "climate" | "humidifier" | "stress" | "screens"
   | "tv" | "ergonomics" | "exercise" | "other";
 export type ObservationEye = "right" | "left" | "both" | "none";
+export type ObservationBodyZone = "eyelid" | "orbital" | "temple" | "masseter" | "cervical" | "other";
+export type ObservationCategory = "sensory" | "pain" | "functional" | "environmental" | "postural";
 export type HygieneStatus = "completed" | "skipped" | "partial";
 export type FrictionType = "mental" | "logistics" | "none";
 
@@ -138,6 +140,8 @@ export type SaveOccurrenceInput = {
   loggedAt: string;
   intensity: number;
   durationMinutes: number | null;
+  triggerType?: string | null;
+  painQuality?: string | null;
   notes: string;
 };
 

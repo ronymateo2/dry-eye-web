@@ -2,17 +2,13 @@ import { useState, useTransition } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
-import { SegmentedControl } from "@/components/ui/segmented-control";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { ObservationEye, ActionState } from "@/types/domain";
-
-const EYE_OPTIONS = [
-  { label: "OD", value: "right" },
-  { label: "OI", value: "left" },
-  { label: "AO", value: "both" },
-  { label: "Ninguno", value: "none" },
-] as const satisfies readonly { label: string; value: ObservationEye }[];
+import {
+  OBS_BODY_ZONE_OPTIONS,
+  OBS_CATEGORY_OPTIONS,
+} from "@/lib/constants";
+import type { ObservationBodyZone, ObservationCategory, ActionState } from "@/types/domain";
 
 const MAX_CHARS = 300;
 const MAX_TITLE = 80;
@@ -21,11 +17,45 @@ type Props = {
   onSaved: (obs: { id: string; title: string; eye: string }) => void;
 };
 
+function PillGrid<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: readonly { label: string; value: T }[];
+  value: T | null;
+  onChange: (v: T | null) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(active ? null : opt.value)}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-[13px] font-medium transition duration-[120ms] ease-out active:scale-95",
+              active
+                ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)]"
+            )}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ObservationSheet({ onSaved }: Props) {
   const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
-  const [eye, setEye] = useState<ObservationEye>("none");
+  const [bodyZone, setBodyZone] = useState<ObservationBodyZone | null>(null);
+  const [category, setCategory] = useState<ObservationCategory | null>(null);
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [isPending, startTransition] = useTransition();
 
@@ -35,7 +65,12 @@ export function ObservationSheet({ onSaved }: Props) {
   const handleSave = () => {
     startTransition(async () => {
       try {
-        const result = await api.createObservation({ title: title.trim(), eye, notes: notes.trim() || undefined });
+        const result = await api.createObservation({
+          title: title.trim(),
+          body_zone: bodyZone,
+          category,
+          notes: notes.trim() || undefined,
+        });
         queryClient.invalidateQueries({ queryKey: ["observations"] });
         onSaved(result as { id: string; title: string; eye: string });
       } catch {
@@ -66,17 +101,35 @@ export function ObservationSheet({ onSaved }: Props) {
         </div>
 
         <div className="space-y-2">
-          <p className="section-label">Detalles (opcional)</p>
+          <p className="section-label">Zona afectada</p>
+          <PillGrid
+            options={OBS_BODY_ZONE_OPTIONS}
+            value={bodyZone}
+            onChange={setBodyZone}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <p className="section-label">Categoria</p>
+          <PillGrid
+            options={OBS_CATEGORY_OPTIONS}
+            value={category}
+            onChange={setCategory}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <p className="section-label">Descripcion (opcional)</p>
           <div className="relative">
             <textarea
               className={cn(
                 "w-full resize-none rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-3",
                 "text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]",
                 "focus:outline-none focus:border-[var(--accent)]",
-                "min-h-[96px]"
+                "min-h-[80px]"
               )}
               maxLength={MAX_CHARS}
-              placeholder="Que observaste? Por ejemplo: mas sensibilidad a gotas frias..."
+              placeholder="Describe la observacion..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
             />
@@ -90,14 +143,6 @@ export function ObservationSheet({ onSaved }: Props) {
             </span>
           </div>
         </div>
-
-        <SegmentedControl
-          label="Ojo afectado"
-          options={EYE_OPTIONS}
-          value={eye}
-          tone="quiet"
-          onChange={setEye}
-        />
       </div>
 
       <div
