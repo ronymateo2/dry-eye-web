@@ -12,7 +12,7 @@ import type { ObservationEye } from "@/types/domain";
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
-type Obs = { id: string; title: string; eye: string; last_logged_at: string | null; occurrence_count: number; matched_note?: string | null };
+type Obs = { id: string; title: string; eye: string; last_logged_at: string | null; occurrence_count: number; matched_notes?: string | null };
 
 type Props = {
   onSelectObservation: (obs: Obs) => void;
@@ -289,14 +289,21 @@ export function ObservationsListSheet({ onSelectObservation, onCreateNew }: Prop
                     {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
                   </span>
 
-                  {/* Matched note snippet */}
-                  {isSearching && obs.matched_note && (
-                    <div className="mt-0.5 border-l-2 border-[var(--accent)]/35 pl-2.5">
-                      <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
-                        {highlightMatch(obs.matched_note, submittedQuery)}
-                      </span>
-                    </div>
-                  )}
+                  {/* Matched note snippets */}
+                  {isSearching && obs.matched_notes && (() => {
+                    const notes: string[] = JSON.parse(obs.matched_notes);
+                    return notes.length > 0 ? (
+                      <div className="mt-0.5 space-y-1.5">
+                        {notes.map((note, ni) => (
+                          <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
+                            <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                              {highlightMatch(note, submittedQuery)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null;
+                  })()}
                 </motion.button>
               ))}
             </motion.div>
