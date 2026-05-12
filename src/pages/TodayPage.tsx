@@ -635,7 +635,7 @@ function TimelineRow({
                   className="min-w-0 truncate font-mono text-[10px] font-semibold uppercase tracking-[0.04em] tabular-nums"
                   style={{ color: vialChipColor }}
                 >
-                  {vialStatus.isExpired ? "vial vencido" : `vial ${vialStatus.timeStr}`}
+                  {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
                 </span>
               </span>
             )}
