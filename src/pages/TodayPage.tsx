@@ -559,11 +559,13 @@ function TimelineRow({
   index,
   now,
   vial,
+  onDiscardVial,
 }: {
   entry: DropScheduleEntry;
   index: number;
   now: number;
   vial: ActiveVialEntry | null;
+  onDiscardVial?: (vial: ActiveVialEntry) => void;
 }) {
   if (!entry.interval_hours) return null;
 
@@ -572,15 +574,6 @@ function TimelineRow({
   const badgeLabel = noRecord ? "Sin registro" : computed!.label;
   const badgeColor = computed?.color ?? "var(--text-muted)";
   const vialStatus = vial ? getVialStatus(vial, now) : null;
-  const vialChipColor = vialStatus?.color === "var(--warning)"
-    ? "color-mix(in srgb, var(--warning) 68%, var(--text-primary))"
-    : vialStatus?.color;
-  const vialChipBackground = vialStatus?.color === "var(--warning)"
-    ? "color-mix(in srgb, var(--warning) 10%, var(--surface))"
-    : "var(--surface-el)";
-  const vialChipBorder = vialStatus?.color === "var(--warning)"
-    ? "color-mix(in srgb, var(--warning) 42%, var(--border))"
-    : "transparent";
 
   const openDropSheet = () => {
     window.dispatchEvent(
@@ -591,65 +584,74 @@ function TimelineRow({
   };
 
   return (
-    <motion.button
-      type="button"
+    <motion.div
       initial={{ opacity: 0, y: 3 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group grid min-h-[56px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[10px] px-3 py-2.5 text-left",
+        "group relative flex min-h-[56px] w-full items-center gap-3 rounded-[10px] px-3 py-2.5 cursor-pointer",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
-        "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40",
+        "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}
       onClick={openDropSheet}
       aria-label={`Registrar ${entry.name}. Próxima dosis ${badgeLabel}.`}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openDropSheet();
+        }
+      }}
     >
-      <span className="flex min-w-0 items-center gap-2.5">
-        {/* Barra vertical indicadora — inline, sin afectar altura de fila */}
-        <span
-          className="h-5 w-[3px] shrink-0 rounded-full"
-          style={{ background: badgeColor }}
-          aria-hidden
-        />
+      {/* Barra vertical indicadora */}
+      <span
+        className="self-stretch w-[3px] shrink-0 rounded-full"
+        style={{ background: badgeColor }}
+        aria-hidden
+      />
 
-        <span className="grid min-w-0 gap-1">
-          <span className="flex min-w-0 items-center gap-2">
-            <span
-              className="truncate text-[14px] font-bold capitalize leading-none"
-              style={{ color: "var(--text-primary)" }}
-            >
-              {entry.name}
-            </span>
-            {vialStatus && (
-              <span
-                className="inline-flex min-w-0 shrink items-center gap-1 rounded-full border px-2 py-0.5"
-                style={{ background: vialChipBackground, borderColor: vialChipBorder }}
-              >
-                <EyedropperSampleIcon
-                  size={11}
-                  weight="fill"
-                  className="shrink-0"
-                  style={{ color: vialChipColor }}
-                />
-                <span
-                  className="min-w-0 truncate font-mono text-[10px] font-semibold uppercase tracking-[0.04em] tabular-nums"
-                  style={{ color: vialChipColor }}
-                >
-                  {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
-                </span>
-              </span>
-            )}
-          </span>
+      {/* Contenido izquierdo: apilado vertical */}
+      <div className="grid min-w-0 flex-1 gap-1">
+        {/* Línea 1: hora + nombre */}
+        <span className="flex min-w-0 items-center gap-2">
           <span
             className="font-mono text-[12px] tabular-nums whitespace-nowrap"
             style={{ color: "var(--text-faint)" }}
           >
             {computed?.nextTime ?? `cada ${entry.interval_hours}h`}
           </span>
+          <span
+            className="truncate text-[14px] font-bold capitalize leading-none"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {entry.name}
+          </span>
         </span>
-      </span>
 
-      <span className="flex shrink-0 items-center gap-1.5">
+        {/* Línea 2: vial (botón grande para descartar, con stopPropagation) */}
+        {vialStatus && vial && onDiscardVial && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDiscardVial(vial);
+            }}
+            className="inline-flex w-fit items-center gap-1 rounded-[6px] px-1.5 py-0.5 text-left transition-opacity hover:opacity-80 active:opacity-60"
+            style={{ color: vialStatus.color }}
+            aria-label={`Descartar vial de ${entry.name}`}
+          >
+            <EyedropperSampleIcon size={11} weight="fill" className="shrink-0" />
+            <span className="min-w-0 truncate font-mono text-[10px] font-semibold uppercase tracking-[0.04em] tabular-nums">
+              {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
+            </span>
+            <TrashIcon size={11} weight="regular" className="shrink-0" />
+          </button>
+        )}
+      </div>
+
+      {/* Countdown + caret */}
+      <span className="flex shrink-0 items-center gap-1.5 pointer-events-none">
         <span
           className="font-mono text-[12px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
@@ -660,10 +662,10 @@ function TimelineRow({
           aria-hidden
           size={9}
           weight="bold"
-          className="translate-x-0 text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70 group-focus-visible:opacity-70"
+          className="text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70"
         />
       </span>
-    </motion.button>
+    </motion.div>
   );
 }
 
@@ -892,13 +894,14 @@ function HeroView({
               {timelineEntries.map((entry, i) => {
                 const vial = vialByDropType.get(entry.drop_type_id) ?? null;
                 return (
-                  <TimelineRow
-                    key={entry.drop_type_id}
-                    entry={entry}
-                    index={i}
-                    now={now}
-                    vial={vial}
-                  />
+                <TimelineRow
+                  key={entry.drop_type_id}
+                  entry={entry}
+                  index={i}
+                  now={now}
+                  vial={vial}
+                  onDiscardVial={(v) => setDiscardTarget(v)}
+                />
                 );
               })}
             </div>
