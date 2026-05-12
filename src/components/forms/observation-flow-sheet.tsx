@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { StackedSheet, type SheetLayer } from "@/components/layout/stacked-sheet";
 import { ObservationsListSheet } from "./observations-list-sheet";
 import { LogOccurrenceSheet } from "./log-occurrence-sheet";
 import { ObservationSheet } from "./observation-sheet";
-import type { PropertyDef } from "@/types/domain";
+import type { ObservationRecord, PropertyDef } from "@/types/domain";
 
 type SelectedObs = {
   id: string;
@@ -34,53 +34,72 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
     if (!open) setSecondary(null);
   }, [open]);
 
-  const handleOccurrenceSaved = () => {
+  const handleSelectObs = useCallback(
+    (obs: ObservationRecord) =>
+      setSecondary({ type: "log", obs: { ...obs, propertiesSchema: obs.properties_schema } }),
+    [],
+  );
+
+  const handleEditObs = useCallback(
+    (obs: ObservationRecord) =>
+      setSecondary({ type: "edit", obs: { ...obs, propertiesSchema: obs.properties_schema } }),
+    [],
+  );
+
+  const handleCreateNew = useCallback(() => setSecondary({ type: "new" }), []);
+
+  const handleOccurrenceSaved = useCallback(() => {
     window.dispatchEvent(new CustomEvent("history:refresh"));
     queryClient.invalidateQueries({ queryKey: ["history"] });
     queryClient.invalidateQueries({ queryKey: ["observations"] });
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
     setSecondary(null);
-  };
+  }, [queryClient]);
 
-  const layers: SheetLayer[] = [
-    {
+  const baseLayer = useMemo<SheetLayer>(
+    () => ({
       key: "list",
       title: "Observaciones",
       description: "Selecciona una observacion para registrar.",
       content: (
         <ObservationsListSheet
-          onSelectObservation={(obs) =>
-            setSecondary({ type: "log", obs: { ...obs, propertiesSchema: obs.properties_schema } })
-          }
-          onEditObservation={(obs) =>
-            setSecondary({ type: "edit", obs: { ...obs, propertiesSchema: obs.properties_schema } })
-          }
-          onCreateNew={() => setSecondary({ type: "new" })}
+          onSelectObservation={handleSelectObs}
+          onEditObservation={handleEditObs}
+          onCreateNew={handleCreateNew}
         />
       ),
-    },
-  ];
+    }),
+    [handleSelectObs, handleEditObs, handleCreateNew],
+  );
 
-  if (secondary?.type === "log") {
-    layers.push({
-      key: "log",
-      title: "Registrar ocurrencia",
-      description: "Registra cuando ocurre esta observacion.",
-      content: <LogOccurrenceSheet observation={secondary.obs} onSaved={handleOccurrenceSaved} />,
-    });
-  } else if (secondary?.type === "new") {
-    layers.push({
-      key: "new",
-      title: "Nueva observacion",
-      description: "Registra algo que notaste.",
-      content: (
-        <ObservationSheet
-          onSaved={(obs) => setSecondary({ type: "log", obs })}
-        />
-      ),
-    });
-  } else if (secondary?.type === "edit") {
-    layers.push({
+  const secondaryLayer = useMemo<SheetLayer | null>(() => {
+    if (!secondary) return null;
+
+    if (secondary.type === "log") {
+      return {
+        key: "log",
+        title: "Registrar ocurrencia",
+        description: "Registra cuando ocurre esta observacion.",
+        content: (
+          <LogOccurrenceSheet observation={secondary.obs} onSaved={handleOccurrenceSaved} />
+        ),
+      };
+    }
+
+    if (secondary.type === "new") {
+      return {
+        key: "new",
+        title: "Nueva observacion",
+        description: "Registra algo que notaste.",
+        content: (
+          <ObservationSheet
+            onSaved={(obs) => setSecondary({ type: "log", obs })}
+          />
+        ),
+      };
+    }
+
+    return {
       key: "edit",
       title: "Editar observacion",
       description: "Modifica esta observacion y sus propiedades.",
@@ -98,8 +117,13 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
           onSaved={() => setSecondary(null)}
         />
       ),
-    });
-  }
+    };
+  }, [secondary, handleOccurrenceSaved]);
+
+  const layers = useMemo<SheetLayer[]>(
+    () => (secondaryLayer ? [baseLayer, secondaryLayer] : [baseLayer]),
+    [baseLayer, secondaryLayer],
+  );
 
   return (
     <StackedSheet
