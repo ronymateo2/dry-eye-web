@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { ArrowRightIcon, CaretRightIcon, WarningIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CaretRightIcon, DropIcon, WarningIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { cn, daysUntilEnd } from "@/lib/utils";
@@ -11,7 +11,9 @@ function getCountdown(lastLoggedAt: string, intervalHours: number, now: number):
   const nextMs = new Date(lastLoggedAt).getTime() + intervalHours * 3_600_000;
   const diffMs = nextMs - now;
   const rawProgress = 1 - diffMs / (intervalHours * 3_600_000);
-  const nextTime = new Date(nextMs).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+  const nd = new Date(nextMs);
+  const nh = nd.getHours(), nm = nd.getMinutes();
+  const nextTime = `${String(nh % 12 || 12).padStart(2, "0")}:${String(nm).padStart(2, "0")} ${nh < 12 ? "am" : "pm"}`;
 
   let label: string;
   let color: string;
@@ -25,7 +27,7 @@ function getCountdown(lastLoggedAt: string, intervalHours: number, now: number):
   } else {
     const h = Math.floor(diffMs / 3_600_000);
     const m = Math.floor((diffMs % 3_600_000) / 60_000);
-    label = h > 0 ? `en ${h}h ${m}m` : `en ${m}m`;
+    label = h > 0 ? `${h}h ${m}m` : `${m}m`;
     color = rawProgress < 0.5 ? "var(--pain-low)" : rawProgress < 0.8 ? "var(--accent)" : "var(--pain-mid)";
   }
 
@@ -110,9 +112,16 @@ function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: n
           <WarningIcon size={14} className="shrink-0 text-[var(--warning)]" weight="fill" />
         ) : (
           <span
-            className="h-4 w-[3px] shrink-0 rounded-full opacity-90 transition-[height,opacity] duration-[160ms] ease-out group-hover:h-5 group-hover:opacity-100"
-            style={{ background: badgeColor }}
-          />
+            className="shrink-0 flex items-center justify-center rounded-[8px]"
+            style={{
+              width: 32,
+              height: 32,
+              background: `color-mix(in srgb, ${badgeColor} 12%, var(--surface-el))`,
+            }}
+            aria-hidden
+          >
+            <DropIcon size={15} style={{ color: badgeColor }} />
+          </span>
         )}
         <span className="flex min-w-0 items-baseline gap-1.5">
           <span
