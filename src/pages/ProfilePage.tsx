@@ -19,8 +19,7 @@ import {
 } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTheme } from "@/lib/theme";
-import { useFont } from "@/lib/font";
-import { SegmentedControl } from "@/components/ui/segmented-control";
+import { useFont, type FontOption } from "@/lib/font";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -184,22 +183,21 @@ export default function ProfilePage() {
                 <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
                   Fuente
                 </span>
-                <SegmentedControl
-                  options={[
-                    { label: "Atkinson Hyp.", value: "atkinson-hyperlegible" },
-                    { label: "Manrope", value: "manrope" },
-                    { label: "SF Pro Rnd.", value: "sf-pro-rounded" },
-                  ]}
+                <select
                   value={font}
-                  onChange={async (v) => {
+                  onChange={async (e) => {
                     try {
-                      await setFontServer(v);
+                      await setFontServer(e.target.value as FontOption);
                     } catch {
                       toast.error("No se pudo cambiar la fuente.");
                     }
                   }}
-                  tone="quiet"
-                />
+                  className="w-full bg-transparent text-[14px] text-[var(--text-primary)] outline-none"
+                >
+                  <option value="atkinson-hyperlegible">Atkinson Hyperlegible</option>
+                  <option value="manrope">Manrope</option>
+                  <option value="sf-pro-rounded">SF Pro Rounded</option>
+                </select>
               </div>
             </div>
             <div className="flex min-h-[72px] items-center gap-3 border-t border-[var(--border)] px-4">
