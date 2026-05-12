@@ -10,19 +10,21 @@ import {
   NotePencilIcon,
   PulseIcon,
   EyedropperSampleIcon,
+  EyeClosedIcon,
 } from "@phosphor-icons/react";
 
-type Sheet = "drop" | "sleep" | "obs" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
+type Sheet = "drop" | "sleep" | "obs" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | "symptoms" | null;
 
 const PRIMARY_ACTIONS = [
   { sheet: "drop" as Sheet, Icon: DropIcon, label: "Gota" },
   { sheet: "medication-intake" as Sheet, Icon: PillIcon, label: "Pastilla" },
   { sheet: "pain" as Sheet, Icon: PulseIcon, label: "Dolor" },
-  { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },
+  { sheet: "symptoms" as Sheet, Icon: EyeClosedIcon, label: "Síntomas" },
 ] as const;
 
 const SECONDARY_ACTIONS = [
   { sheet: "sleep" as Sheet, Icon: MoonIcon, label: "Sueño" },
+  { sheet: "hygiene" as Sheet, Icon: EyeIcon, label: "Higiene" },
   { sheet: "therapy" as Sheet, Icon: HeartbeatIcon, label: "Terapia" },
   { sheet: "obs" as Sheet, Icon: NotePencilIcon, label: "Observación" },
   { sheet: "vial" as Sheet, Icon: EyedropperSampleIcon, label: "Vial" },

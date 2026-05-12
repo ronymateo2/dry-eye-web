@@ -2,26 +2,40 @@ import { useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { getPendingDrops, removePendingDrop } from "@/lib/offline/drops-queue";
+import { getPendingSymptomEntries, removePendingSymptomEntry } from "@/lib/offline/symptoms-queue";
 
 export function useOfflineSync() {
   const queryClient = useQueryClient();
 
   const sync = useCallback(async () => {
     if (!navigator.onLine) return;
-    const pending = await getPendingDrops();
-    if (pending.length === 0) return;
 
-    for (const drop of pending) {
+    const pendingDrops = await getPendingDrops();
+    for (const drop of pendingDrops) {
       try {
         await api.saveDrop(drop);
         await removePendingDrop(drop.id);
       } catch {
-        // keep in queue, try next time
+        // keep in queue
       }
     }
+    if (pendingDrops.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+    }
 
-    queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-    queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+    const pendingSymptoms = await getPendingSymptomEntries();
+    for (const entry of pendingSymptoms) {
+      try {
+        await api.saveSymptomEntry(entry);
+        await removePendingSymptomEntry(entry.id);
+      } catch {
+        // keep in queue
+      }
+    }
+    if (pendingSymptoms.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
+    }
   }, [queryClient]);
 
   useEffect(() => {

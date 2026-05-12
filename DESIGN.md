@@ -18,17 +18,17 @@
 ---
 
 ## Typography
-- **UI / Body / Headings:** Manrope — loaded via `@fontsource/manrope` (weights 400, 500, 600, 700). Geometric humanist sans-serif with clean, open letterforms. Highly legible at small sizes; distinctive enough to feel designed, not generic. Falls back to system-ui stack.
-  - Stack: `"Manrope", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`
+- **UI / Body / Headings:** Atkinson Hyperlegible — loaded via `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics). Designed by the Braille Institute for maximum legibility and character distinctiveness — unambiguous letterforms reduce reading errors, which is critical for patients with visual impairment from dry eye. Falls back to system-ui stack.
+  - Stack: `"Atkinson Hyperlegible", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`
 - **Data / Numbers:** Geist Mono — all numeric values (pain scores 0-10, drop counts, sleep hours, timestamps, correlation coefficients). Tabular-nums. Makes readings feel like instrument output, not form inputs. Reinforces the clinical precision aesthetic.
-- **Loading:** `@fontsource/manrope` (weights 400/500/600/700) + `@fontsource/geist-mono` (weights 400/500)
+- **Loading:** `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics) + `@fontsource/geist-mono` (weights 400/500)
 - **Scale:**
-  - `11-12px / Manrope 600 / 0.10em tracking` — section labels (uppercase)
-  - `12px / Manrope 500` — metadata, timestamps, helper text
-  - `13px / Manrope 500` — input labels, chip text, alert text
-  - `15px / Manrope 400` — body copy
-  - `17px / Manrope 600` — screen titles
-  - `22px / Manrope 700 / -0.02em` — page headings
+  - `11-12px / Atkinson Hyperlegible 700 / 0.10em tracking` — section labels (uppercase)
+  - `12px / Atkinson Hyperlegible 400` — metadata, timestamps, helper text
+  - `13px / Atkinson Hyperlegible 400` — input labels, chip text, alert text
+  - `15px / Atkinson Hyperlegible 400` — body copy
+  - `17px / Atkinson Hyperlegible 700` — screen titles
+  - `22px / Atkinson Hyperlegible 700 / -0.02em` — page headings
   - `22px / Geist Mono 400` — primary data values (pain score display in sliders)
   - `32-36px / Geist Mono 400` — stat card values (dashboard)
   - `11-13px / Geist Mono 400` — secondary data (correlation coefficients, timestamps)

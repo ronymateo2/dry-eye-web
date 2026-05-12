@@ -275,3 +275,52 @@ export type SaveVialInput = {
   startedAt: string;
   dropId?: string;
 };
+
+export type SymptomState = "calmado" | "leve" | "sensible" | "reactivo" | "brote";
+
+export type SymptomIntensities = {
+  dryness: number;
+  burning: number;
+  photophobia: number;
+  blurry_vision: number;
+  tearing: number;
+  stinging?: number;
+  pressure?: number;
+};
+
+export type SaveSymptomEntryInput = {
+  id: string;
+  logged_at: string;
+  day_key: string;
+  intensities: SymptomIntensities;
+  triggers?: TriggerType[];
+  note?: string;
+};
+
+export type SymptomEntryRecord = {
+  id: string;
+  logged_at: string;
+  day_key: string;
+  intensities: SymptomIntensities;
+  triggers: TriggerType[];
+  note: string | null;
+  calculated_state: SymptomState;
+  created_at: string;
+};
+
+export type SymptomTrendDay = {
+  day_key: string;
+  avg_intensity: number;
+  state: SymptomState;
+};
+
+export type SymptomTopItem = {
+  key: keyof SymptomIntensities;
+  value: number;
+};
+
+export type SymptomStatusToday = {
+  latest: SymptomEntryRecord | null;
+  trend_7d: SymptomTrendDay[];
+  top_symptoms: SymptomTopItem[];
+};

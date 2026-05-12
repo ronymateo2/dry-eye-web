@@ -1,4 +1,4 @@
-import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, SaveMedicationIntakeInput, SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry } from "@/types/domain";
+import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, SaveMedicationIntakeInput, SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry, SaveSymptomEntryInput, SymptomStatusToday, SymptomEntryRecord } from "@/types/domain";
 
 const BASE = import.meta.env.VITE_API_URL ?? "/api";
 
@@ -104,6 +104,20 @@ export const api = {
 
   saveTrigger: (body: unknown) => api.post("/triggers", body),
   saveSymptom: (body: unknown) => api.post("/symptoms", body),
+
+  saveSymptomEntry: (body: SaveSymptomEntryInput) =>
+    api.post<{ ok: boolean; calculated_state: string }>("/symptoms/entries", body),
+  getSymptomStatusToday: () => api.get<SymptomStatusToday & { ok: boolean }>("/symptoms/today"),
+  getSymptomEntries: (params?: { from?: string; to?: string; limit?: number }) => {
+    const qs = new URLSearchParams();
+    if (params?.from) qs.set("from", params.from);
+    if (params?.to) qs.set("to", params.to);
+    if (params?.limit) qs.set("limit", String(params.limit));
+    const q = qs.toString();
+    return api.get<{ ok: boolean; entries: SymptomEntryRecord[]; hasMore: boolean }>(
+      `/symptoms/entries${q ? `?${q}` : ""}`,
+    );
+  },
 
   getObservations: () => api.get<import("@/types/domain").ObservationRecord[]>("/observations"),
   getObservationOccurrences: (params?: { limit?: number; before?: string }) => {

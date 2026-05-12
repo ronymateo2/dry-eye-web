@@ -14,8 +14,9 @@ const ObservationFlowSheet = lazy(() => import("@/components/forms/observation-f
 const TherapySheet = lazy(() => import("@/components/forms/therapy-sheet").then((m) => ({ default: m.TherapySheet })));
 const MedicationSessionSheet = lazy(() => import("@/components/forms/medication-session-sheet").then((m) => ({ default: m.MedicationSessionSheet })));
 const VialSheet = lazy(() => import("@/components/forms/vial-sheet").then((m) => ({ default: m.VialSheet })));
+const SymptomsSheet = lazy(() => import("@/components/forms/symptoms-sheet").then((m) => ({ default: m.SymptomsSheet })));
 
-type Sheet = "drop" | "sleep" | "obs" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | null;
+type Sheet = "drop" | "sleep" | "obs" | "hygiene" | "therapy" | "medication-intake" | "pain" | "vial" | "symptoms" | null;
 
 export function FloatingQuickActions() {
   const { pathname } = useLocation();
@@ -50,6 +51,7 @@ export function FloatingQuickActions() {
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
     queryClient.invalidateQueries({ queryKey: ["vials/active"] });
     queryClient.invalidateQueries({ queryKey: ["vials/history"] });
+    queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
     closeAll();
   };
 
@@ -113,6 +115,9 @@ export function FloatingQuickActions() {
         </MobileSheet>
         <MobileSheet open={sheet === "vial"} title="Abrir vial" description="Vincula un vial a una gota ya registrada." onClose={closeAll} panelClassName="!h-[85dvh]">
           <VialSheet onClose={closeAll} />
+        </MobileSheet>
+        <MobileSheet open={sheet === "symptoms"} title="Registrar síntomas" description="¿Cómo se siente tu ojo ahora?" onClose={closeAll} panelClassName="!h-[95dvh]">
+          <SymptomsSheet onSaved={savedAndClose} />
         </MobileSheet>
       </Suspense>
     </>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { DropsScheduleCard } from "@/components/register/drops-schedule-card";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
+import { SymptomStatusCard } from "@/components/today/symptom-status-card";
 import { SleepStatus } from "@/components/ui/sleep-status";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -234,6 +235,12 @@ function PainCheckInCompact() {
   );
 }
 
+function openSymptomsSheet() {
+  window.dispatchEvent(
+    new CustomEvent("quickactions:open", { detail: { sheet: "symptoms" } }),
+  );
+}
+
 export default function TodayPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -274,10 +281,16 @@ export default function TodayPage() {
       queryFn: api.getActiveVials,
       staleTime: 60_000,
     });
+    void queryClient.prefetchQuery({
+      queryKey: ["symptoms/today"],
+      queryFn: api.getSymptomStatusToday,
+      staleTime: 60_000,
+    });
   }, [queryClient]);
 
   return (
     <section className="space-y-5">
+      <SymptomStatusCard onRegister={openSymptomsSheet} />
       <ActiveVialsSection />
 
       <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
