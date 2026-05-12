@@ -58,7 +58,7 @@ function VialRow({
   } else {
     const h = Math.floor(diffMs / 3_600_000);
     const m = Math.floor((diffMs % 3_600_000) / 60_000);
-    rightLabel = h > 0 ? `expira en ${h}h ${m}m` : `expira en ${m}m`;
+    rightLabel = h > 0 ? `vence en ${h}h ${m}m` : `vence en ${m}m`;
   }
 
   return (
