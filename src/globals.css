@@ -28,6 +28,10 @@
   --pain-low: #5cb85a;
   --pain-mid: #e0932a;
   --pain-high: #cc3f30;
+  --dose-early: #5cb85a;
+  --dose-mid: #d4a24c;
+  --dose-late: #e0932a;
+  --dose-overdue: #cc3f30;
   --success: #5cb85a;
   --warning: #e0932a;
   --error: #cc3f30;
@@ -78,6 +82,10 @@
   --pain-low: #5CC8A0;
   --pain-mid: #F4A25A;
   --pain-high: #F47070;
+  --dose-early: #5CC8A0;
+  --dose-mid: #7C6DCD;
+  --dose-late: #F4A25A;
+  --dose-overdue: #F47070;
   --success: #5CC8A0;
   --warning: #F4A25A;
   --error: #F47070;

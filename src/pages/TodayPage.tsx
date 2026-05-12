@@ -62,13 +62,13 @@ function getCountdown(
     const h = Math.floor(abs / 3_600_000);
     const m = Math.floor((abs % 3_600_000) / 60_000);
     label = h > 0 ? `hace ${h}h ${m}m` : `hace ${m}m`;
-    color = "var(--pain-high)";
+    color = "var(--dose-overdue)";
   } else {
     const h = Math.floor(diffMs / 3_600_000);
     const m = Math.floor((diffMs % 3_600_000) / 60_000);
     label = h > 0 ? `${h}h ${m}m` : `${m}m`;
     color =
-      progress < 0.5 ? "var(--pain-low)" : progress < 0.8 ? "var(--accent)" : "var(--pain-mid)";
+      progress < 0.5 ? "var(--dose-early)" : progress < 0.8 ? "var(--dose-mid)" : "var(--dose-late)";
   }
 
   return { label, overdue: diffMs <= 0, nextTime, color, progress };
@@ -391,11 +391,7 @@ function HeroVialStatus({
     >
       <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
       <span>Vial vence en {status.timeStr}</span>
-      <CaretRightIcon
-        size={12}
-        weight="bold"
-        className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-      />
+      <TrashIcon size={14} weight="regular" className="shrink-0" />
     </button>
   );
 }
@@ -498,6 +494,20 @@ function CountdownValue({
         </div>
       </CircularProgress>
     </div>
+  );
+}
+
+function ViewDayButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Ver proyección del día"
+      className="flex min-h-8 items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+    >
+      <span style={{ color: "var(--accent)" }}>Hoy</span>
+      <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
+    </button>
   );
 }
 
@@ -693,19 +703,7 @@ function CardView({
         <div className="flex items-center justify-between gap-3">
           <p className="section-label mb-0">Próximas dosis</p>
           <div className="flex shrink-0 items-center gap-2">
-            <div className="w-[72px] shrink-0">
-              {scheduled.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setProjectionOpen(true)}
-                  aria-label="Ver proyección del día"
-                  className="flex min-h-8 w-full items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
-                >
-                  <span style={{ color: "var(--accent)" }}>Ver día</span>
-                  <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
-                </button>
-              )}
-            </div>
+            {scheduled.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
@@ -817,23 +815,13 @@ function HeroView({
         <div className="flex items-center justify-between gap-3 px-4 pt-4">
           <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
           <div className="flex shrink-0 items-center gap-2">
-            <div className="w-[72px]">
-              <button
-                type="button"
-                onClick={() => setProjectionOpen(true)}
-                aria-label="Ver proyección del día"
-                className="flex min-h-8 w-full items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
-              >
-                <span style={{ color: "var(--accent)" }}>Ver día</span>
-                <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
-              </button>
-            </div>
+            <ViewDayButton onClick={() => setProjectionOpen(true)} />
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
 
         <div className="grid gap-5 px-4 pb-5 pt-5">
-          <div className="grid grid-cols-[110px_minmax(0,1fr)] items-start gap-5">
+          <div className="grid grid-cols-[minmax(80px,110px)_minmax(0,1fr)] items-start gap-5">
             <div className="pt-1">
               {computed ? (
                 <CountdownValue
@@ -853,7 +841,7 @@ function HeroView({
             </div>
 
             <div className="grid min-w-0 gap-2 pt-1">
-              <h2 className="min-w-0 max-w-full truncate text-[26px] font-bold capitalize leading-none tracking-[-0.01em] text-[var(--text-primary)]">
+              <h2 className="min-w-0 max-w-full truncate text-[24px] font-bold capitalize leading-none tracking-[-0.01em] text-[var(--text-primary)]">
                 {heroEntry.name}
               </h2>
 
@@ -879,6 +867,7 @@ function HeroView({
               <button
                 type="button"
                 onClick={openHeroDrop}
+                aria-label={`Registrar dosis de ${heroEntry.name}`}
                 className="group inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors hover:text-[var(--accent-bright)] active:opacity-70"
                 style={{ color: "var(--accent)" }}
               >
@@ -896,9 +885,8 @@ function HeroView({
 
         {timelineEntries.length > 0 && (
           <div className="border-t border-[var(--border)]">
-            <div className="flex items-baseline justify-between gap-3 px-4 py-3">
+            <div className="flex items-baseline gap-3 px-4 py-3">
               <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
-              <span className="text-[11px] text-[var(--text-faint)]">resto del día</span>
             </div>
             <div className="space-y-0 px-1 pb-2">
               {timelineEntries.map((entry, i) => {

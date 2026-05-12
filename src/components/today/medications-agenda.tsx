@@ -24,13 +24,13 @@ function getCountdown(nextMs: number, now: number): { label: string; overdue: bo
     const h = Math.floor(abs / 3_600_000);
     const m = Math.floor((abs % 3_600_000) / 60_000);
     const label = h > 0 ? `hace ${h}h ${m}m` : `hace ${m}m`;
-    return { label, overdue: true, color: "var(--pain-high)" };
+    return { label, overdue: true, color: "var(--dose-overdue)" };
   }
   const h = Math.floor(diffMs / 3_600_000);
   const m = Math.floor((diffMs % 3_600_000) / 60_000);
   const label = h > 0 ? `en ${h}h ${m}m` : `en ${m}m`;
   const rawProgress = 1 - diffMs / 86_400_000;
-  const color = rawProgress < 0.5 ? "var(--pain-low)" : rawProgress < 0.8 ? "var(--accent)" : "var(--pain-mid)";
+  const color = rawProgress < 0.5 ? "var(--dose-early)" : rawProgress < 0.8 ? "var(--dose-mid)" : "var(--dose-late)";
   return { label, overdue: false, color };
 }
 
