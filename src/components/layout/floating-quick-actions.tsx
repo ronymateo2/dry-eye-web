@@ -104,7 +104,7 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95dvh]" onClose={closeAll}>
           <HygieneSheet onSaved={savedAndClose} onClose={closeAll} />
         </MobileSheet>
-        <ObservationFlowSheet open={sheet === "obs"} onClose={closeAll} onSaved={savedAndClose} />
+        <ObservationFlowSheet open={sheet === "obs"} onClose={closeAll} />
         <MobileSheet open={sheet === "therapy"} title="Registrar terapia" description="Registra una sesion de terapia miofascial." onClose={closeAll}>
           <TherapySheet onSaved={savedAndClose} />
         </MobileSheet>

@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
-import { MobileSheet } from "@/components/layout/mobile-sheet";
+import { useQueryClient } from "@tanstack/react-query";
+import { StackedSheet, type SheetLayer } from "@/components/layout/stacked-sheet";
 import { ObservationsListSheet } from "./observations-list-sheet";
 import { LogOccurrenceSheet } from "./log-occurrence-sheet";
 import { ObservationSheet } from "./observation-sheet";
 import type { PropertyDef } from "@/types/domain";
-
-type ObsView = "list" | "log" | "edit" | "new";
 
 type SelectedObs = {
   id: string;
@@ -17,88 +16,98 @@ type SelectedObs = {
   propertiesSchema?: PropertyDef[] | null;
 };
 
+type Secondary =
+  | { type: "log"; obs: SelectedObs }
+  | { type: "new" }
+  | { type: "edit"; obs: SelectedObs };
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  onSaved: () => void;
 };
 
-const SHEET_META: Record<ObsView, { title: string; description: string; panel?: string; back?: ObsView }> = {
-  list: { title: "Observaciones", description: "Selecciona una observacion para registrar.", panel: "!h-[95dvh]" },
-  log:  { title: "Registrar ocurrencia", description: "Registra cuando ocurre esta observacion.", panel: "!h-[95dvh]", back: "list" },
-  edit: { title: "Editar observacion",   description: "Modifica esta observacion y sus propiedades.", panel: "!h-[95dvh]", back: "list" },
-  new:  { title: "Nueva observacion",    description: "Registra algo que notaste.", panel: "!h-[95dvh]", back: "list" },
-};
-
-export function ObservationFlowSheet({ open, onClose, onSaved }: Props) {
-  const [view, setView] = useState<ObsView>("list");
-  const [selectedObs, setSelectedObs] = useState<SelectedObs | null>(null);
+export function ObservationFlowSheet({ open, onClose }: Props) {
+  const queryClient = useQueryClient();
+  const [secondary, setSecondary] = useState<Secondary | null>(null);
 
   useEffect(() => {
-    if (!open) {
-      setView("list");
-      setSelectedObs(null);
-    }
+    if (!open) setSecondary(null);
   }, [open]);
 
+  const handleOccurrenceSaved = () => {
+    window.dispatchEvent(new CustomEvent("history:refresh"));
+    queryClient.invalidateQueries({ queryKey: ["history"] });
+    queryClient.invalidateQueries({ queryKey: ["observations"] });
+    queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
+    setSecondary(null);
+  };
+
+  const layers: SheetLayer[] = [
+    {
+      key: "list",
+      title: "Observaciones",
+      description: "Selecciona una observacion para registrar.",
+      content: (
+        <ObservationsListSheet
+          onSelectObservation={(obs) =>
+            setSecondary({ type: "log", obs: { ...obs, propertiesSchema: obs.properties_schema } })
+          }
+          onEditObservation={(obs) =>
+            setSecondary({ type: "edit", obs: { ...obs, propertiesSchema: obs.properties_schema } })
+          }
+          onCreateNew={() => setSecondary({ type: "new" })}
+        />
+      ),
+    },
+  ];
+
+  if (secondary?.type === "log") {
+    layers.push({
+      key: "log",
+      title: "Registrar ocurrencia",
+      description: "Registra cuando ocurre esta observacion.",
+      content: <LogOccurrenceSheet observation={secondary.obs} onSaved={handleOccurrenceSaved} />,
+    });
+  } else if (secondary?.type === "new") {
+    layers.push({
+      key: "new",
+      title: "Nueva observacion",
+      description: "Registra algo que notaste.",
+      content: (
+        <ObservationSheet
+          onSaved={(obs) => setSecondary({ type: "log", obs })}
+        />
+      ),
+    });
+  } else if (secondary?.type === "edit") {
+    layers.push({
+      key: "edit",
+      title: "Editar observacion",
+      description: "Modifica esta observacion y sus propiedades.",
+      content: (
+        <ObservationSheet
+          initialObservation={{
+            id: secondary.obs.id,
+            title: secondary.obs.title,
+            eye: secondary.obs.eye,
+            body_zone: secondary.obs.body_zone,
+            body_zone_custom: secondary.obs.body_zone_custom,
+            category: secondary.obs.category,
+            propertiesSchema: secondary.obs.propertiesSchema ?? undefined,
+          }}
+          onSaved={() => setSecondary(null)}
+        />
+      ),
+    });
+  }
+
   return (
-    <>
-      {(["list", "log", "edit", "new"] as ObsView[]).map((v) => {
-        const meta = SHEET_META[v];
-        return (
-          <MobileSheet
-            key={v}
-            open={open && view === v}
-            title={meta.title}
-            description={meta.description}
-            panelClassName={meta.panel}
-            onClose={onClose}
-            onBack={meta.back ? () => setView(meta.back!) : undefined}
-          >
-            {v === "list" && (
-              <ObservationsListSheet
-                onSelectObservation={(obs) => {
-                  setSelectedObs({ ...obs, propertiesSchema: obs.properties_schema });
-                  setView("log");
-                }}
-                onEditObservation={(obs) => {
-                  setSelectedObs({ ...obs, propertiesSchema: obs.properties_schema });
-                  setView("edit");
-                }}
-                onCreateNew={() => setView("new")}
-              />
-            )}
-            {v === "log" && selectedObs && (
-              <LogOccurrenceSheet observation={selectedObs} onSaved={onSaved} />
-            )}
-            {v === "new" && (
-              <ObservationSheet
-                onSaved={(obs) => {
-                  setSelectedObs(obs);
-                  setView("log");
-                }}
-              />
-            )}
-            {v === "edit" && selectedObs && (
-              <ObservationSheet
-                initialObservation={{
-                  id: selectedObs.id,
-                  title: selectedObs.title,
-                  eye: selectedObs.eye,
-                  body_zone: selectedObs.body_zone,
-                  body_zone_custom: selectedObs.body_zone_custom,
-                  category: selectedObs.category,
-                  propertiesSchema: selectedObs.propertiesSchema ?? undefined,
-                }}
-                onSaved={(obs) => {
-                  setSelectedObs((prev) => (prev ? { ...prev, ...obs } : null));
-                  setView("list");
-                }}
-              />
-            )}
-          </MobileSheet>
-        );
-      })}
-    </>
+    <StackedSheet
+      open={open}
+      onClose={onClose}
+      layers={layers}
+      onPop={() => setSecondary(null)}
+      panelClassName="!h-[95dvh]"
+    />
   );
 }
