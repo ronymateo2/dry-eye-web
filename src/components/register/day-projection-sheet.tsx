@@ -43,7 +43,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
     return match ?? next;
   }, [selectedKey, sorted, next]);
 
-  const timeLabel = (t: number) => new Date(t).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
+  const timeLabel = (t: number) => new Date(t).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false });
 
   const countdown = (t: number) => {
     const diff = t - now;
