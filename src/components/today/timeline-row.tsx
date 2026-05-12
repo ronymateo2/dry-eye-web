@@ -49,7 +49,7 @@ export function TimelineRow({
       }}
     >
       <span
-        className="self-stretch w-[3px] shrink-0 rounded-full"
+        className="self-stretch w-[3px] shrink-0 rounded-full opacity-60 scale-y-[0.82] origin-center transition-[opacity,transform] duration-[160ms] ease-out group-hover:opacity-100 group-hover:scale-y-100"
         style={{ background: badgeColor }}
         aria-hidden
       />
