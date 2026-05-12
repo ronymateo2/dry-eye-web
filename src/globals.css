@@ -517,7 +517,7 @@ img, svg { display: block; max-width: 100%; }
   margin: 0 auto;
   padding: 14px 20px 0;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(37,32,20,0.99), rgba(18,16,8,1));
+  background: var(--surface);
   border: 1px solid rgba(212, 162, 76, 0.12);
   border-bottom: none;
   border-top-left-radius: var(--radius-lg);
@@ -571,7 +571,7 @@ img, svg { display: block; max-width: 100%; }
   width: min(100%, 480px);
   margin: 0 auto;
   padding: 14px 20px 0;
-  background: linear-gradient(180deg, rgba(37,32,20,0.99), rgba(18,16,8,1));
+  background: var(--surface);
   border: 1px solid rgba(212, 162, 76, 0.12);
   border-bottom: none;
   border-top-left-radius: var(--radius-lg);
@@ -582,7 +582,7 @@ img, svg { display: block; max-width: 100%; }
     0 -8px 32px rgba(212, 162, 76, 0.04);
 }
 [data-theme="light"] .action-sheet-panel {
-  background: linear-gradient(180deg, #FFFFFF, #F5F4FC);
+  background: var(--surface);
   border-color: rgba(124, 109, 205, 0.15);
   box-shadow:
     0 -2px 0 0 rgba(124, 109, 205, 0.22),

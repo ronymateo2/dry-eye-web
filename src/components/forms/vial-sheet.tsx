@@ -245,7 +245,7 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
 
       {selectedDropType && recentDrops.length > 0 && (
         <Button
-          className="w-full shadow-[0_10px_24px_var(--fab-shadow)]"
+          className="w-full"
           disabled={!selectedDropId || createVialMutation.isPending}
           type="button"
           onClick={handleOpenVial}

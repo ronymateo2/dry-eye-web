@@ -322,7 +322,7 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
       {/* Sticky footer */}
       <div className="sticky bottom-0 z-10 -mx-[var(--screen-padding)] border-t border-[var(--border)] bg-[var(--bg)] px-[var(--screen-padding)] pb-[calc(12px+env(safe-area-inset-bottom))] pt-3">
         <Button
-          className="w-full shadow-[0_10px_24px_var(--fab-shadow)]"
+          className="w-full"
           disabled={isPending || checkedCount === 0}
           type="button"
           onClick={handleSave}
