@@ -364,17 +364,26 @@ function HeroVialChip({
   onClick: () => void;
 }) {
   const status = getVialStatus(vial, now);
+  const chipColor = status.color === "var(--warning)"
+    ? "color-mix(in srgb, var(--warning) 68%, var(--text-primary))"
+    : status.color;
+  const chipBackground = status.color === "var(--warning)"
+    ? "color-mix(in srgb, var(--warning) 10%, var(--surface))"
+    : "var(--surface-el)";
+  const chipBorder = status.color === "var(--warning)"
+    ? "color-mix(in srgb, var(--warning) 42%, var(--border))"
+    : "transparent";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 transition-opacity hover:opacity-80 active:opacity-60"
-      style={{ background: "var(--surface-el)" }}
+      className="inline-flex min-h-7 max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 transition-opacity hover:opacity-80 active:opacity-60"
+      style={{ background: chipBackground, borderColor: chipBorder }}
       aria-label={`Vial de ${vial.drop_type_name}. ${status.fullLabel}. Toca para descartar.`}
     >
-      <EyedropperSampleIcon size={12} weight="fill" style={{ color: status.color, flexShrink: 0 }} />
-      <span className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.08em] tabular-nums" style={{ color: status.color }}>
+      <EyedropperSampleIcon size={11} weight="fill" style={{ color: chipColor, flexShrink: 0 }} />
+      <span className="truncate font-mono text-[9px] font-semibold uppercase tracking-[0.08em] tabular-nums" style={{ color: chipColor }}>
         {status.fullLabel}
       </span>
     </button>
@@ -395,7 +404,7 @@ function CountdownValue({
 
   return (
     <div className="grid gap-2">
-      <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
+      <p className="mb-0 text-[10px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
         {overdue ? "Vencida" : "En"}
       </p>
       <div className="flex flex-nowrap items-end gap-x-1.5 whitespace-nowrap leading-none" style={{ color }}>
@@ -404,17 +413,17 @@ function CountdownValue({
           const unit = part.slice(-1);
           return (
             <span key={part} className="inline-flex items-end gap-1">
-              <span className="font-mono text-[42px] font-semibold leading-[0.88] tabular-nums">
+              <span className="font-mono text-[38px] font-semibold leading-[0.88] tabular-nums">
                 {value}
               </span>
-              <span className="pb-1 text-[18px] font-semibold leading-none">
+              <span className="pb-1 text-[16px] font-semibold leading-none">
                 {unit}
               </span>
             </span>
           );
         })}
       </div>
-      <p className="text-[12px] leading-tight text-[var(--text-muted)]">
+      <p className="text-[11px] leading-tight text-[var(--text-muted)]">
         para tu próxima dosis
       </p>
     </div>
@@ -431,13 +440,13 @@ function ViewToggle({
   setView: (v: "card" | "hero") => void;
 }) {
   return (
-    <div className="flex h-11 items-center gap-0.5 rounded-full bg-[var(--surface-el)] p-1">
+    <div className="flex h-9 items-center gap-0.5 rounded-full bg-[var(--surface-el)] p-1">
       <button
         type="button"
         onClick={() => setView("card")}
         aria-label="Vista tarjeta"
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-full transition-all duration-[160ms]",
+          "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-[160ms]",
           view === "card"
             ? "bg-[var(--accent)] text-[var(--btn-primary-text)]"
             : "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
@@ -450,7 +459,7 @@ function ViewToggle({
         onClick={() => setView("hero")}
         aria-label="Vista hero"
         className={cn(
-          "flex h-9 w-9 items-center justify-center rounded-full transition-all duration-[160ms]",
+          "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-[160ms]",
           view === "hero"
             ? "bg-[var(--accent)] text-[var(--btn-primary-text)]"
             : "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
@@ -482,6 +491,15 @@ function TimelineRow({
   const badgeLabel = noRecord ? "Sin registro" : computed!.label;
   const badgeColor = computed?.color ?? "var(--text-muted)";
   const vialStatus = vial ? getVialStatus(vial, now) : null;
+  const vialChipColor = vialStatus?.color === "var(--warning)"
+    ? "color-mix(in srgb, var(--warning) 68%, var(--text-primary))"
+    : vialStatus?.color;
+  const vialChipBackground = vialStatus?.color === "var(--warning)"
+    ? "color-mix(in srgb, var(--warning) 10%, var(--surface))"
+    : "var(--surface-el)";
+  const vialChipBorder = vialStatus?.color === "var(--warning)"
+    ? "color-mix(in srgb, var(--warning) 42%, var(--border))"
+    : "transparent";
 
   const openDropSheet = () => {
     window.dispatchEvent(
@@ -520,25 +538,25 @@ function TimelineRow({
         <span className="grid min-w-0 gap-1">
           <span className="flex min-w-0 items-center gap-1.5">
             <span
-              className="truncate text-[15px] font-bold capitalize leading-none"
+              className="truncate text-[14px] font-bold capitalize leading-none"
               style={{ color: "var(--text-primary)" }}
             >
               {entry.name}
             </span>
             {vialStatus && (
               <span
-                className="inline-flex min-w-0 shrink items-center gap-1 rounded-full px-2 py-0.5"
-                style={{ background: "var(--surface-el)" }}
+                className="inline-flex min-w-0 shrink items-center gap-1 rounded-full border px-2 py-0.5"
+                style={{ background: vialChipBackground, borderColor: vialChipBorder }}
               >
                 <EyedropperSampleIcon
-                  size={10}
+                  size={9}
                   weight="fill"
                   className="shrink-0"
-                  style={{ color: vialStatus.color }}
+                  style={{ color: vialChipColor }}
                 />
                 <span
-                  className="truncate font-mono text-[10px] font-semibold uppercase tracking-[0.08em] tabular-nums"
-                  style={{ color: vialStatus.color }}
+                  className="truncate font-mono text-[9px] font-semibold uppercase tracking-[0.08em] tabular-nums"
+                  style={{ color: vialChipColor }}
                 >
                   {vialStatus.isExpired ? "vial vencido" : vialStatus.label}
                 </span>
@@ -546,7 +564,7 @@ function TimelineRow({
             )}
           </span>
           <span
-            className="font-mono text-[12px] tabular-nums whitespace-nowrap"
+            className="font-mono text-[11px] tabular-nums whitespace-nowrap"
             style={{ color: "var(--text-faint)" }}
           >
             {computed?.nextTime ?? `cada ${entry.interval_hours}h`}
@@ -556,7 +574,7 @@ function TimelineRow({
 
       <span className="flex shrink-0 items-center gap-1.5">
         <span
-          className="font-mono text-[13px] font-semibold tabular-nums"
+          className="font-mono text-[12px] font-semibold tabular-nums"
           style={{ color: badgeColor }}
         >
           {noRecord ? badgeLabel : `en ${badgeLabel}`}
@@ -728,13 +746,13 @@ function HeroView({
     <>
       <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
         <div className="flex items-center justify-between gap-3 px-4 pt-4">
-          <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
+          <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
           <div className="flex shrink-0 items-center gap-2">
             <button
               type="button"
               onClick={() => setProjectionOpen(true)}
               aria-label="Ver proyección del día"
-              className="flex min-h-11 items-center gap-1 rounded-full px-1 text-[13px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+              className="flex min-h-11 items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
             >
               <span style={{ color: "var(--accent)" }}>Ver día</span>
               <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
@@ -755,7 +773,7 @@ function HeroView({
               ) : (
                 <div className="grid gap-2">
                   <p className="section-label mb-0">Cada</p>
-                  <p className="font-mono text-[30px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
+                  <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
                     {heroEntry.interval_hours}h
                   </p>
                   <p className="text-[12px] leading-tight text-[var(--text-muted)]">
@@ -766,34 +784,34 @@ function HeroView({
             </div>
 
             <div className="grid min-w-0 gap-3">
-            <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-              <h2 className="min-w-0 max-w-full truncate text-[25px] font-bold capitalize leading-none text-[var(--text-primary)]">
-                {heroEntry.name}
-              </h2>
-              {heroVial && (
-                <HeroVialChip vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
-              )}
-            </div>
-
-            {computed ? (
-              <div className="grid gap-1">
-                <p className="font-mono text-[18px] font-semibold leading-none tabular-nums text-[var(--accent)]">
-                  {computed.nextTime}
-                </p>
-                <p className="text-[12px] text-[var(--text-muted)]">próxima dosis programada</p>
+              <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+                <h2 className="min-w-0 max-w-full truncate text-[23px] font-bold capitalize leading-none text-[var(--text-primary)]">
+                  {heroEntry.name}
+                </h2>
+                {heroVial && (
+                  <HeroVialChip vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
+                )}
               </div>
-            ) : (
-              <p className="font-mono text-[15px] tabular-nums text-[var(--text-muted)]">
-                Cada {heroEntry.interval_hours}h
-              </p>
-            )}
+
+              {computed ? (
+                <div className="grid gap-1">
+                  <p className="font-mono text-[17px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                    {computed.nextTime}
+                  </p>
+                  <p className="text-[11px] text-[var(--text-muted)]">próxima dosis programada</p>
+                </div>
+              ) : (
+                <p className="font-mono text-[15px] tabular-nums text-[var(--text-muted)]">
+                  Cada {heroEntry.interval_hours}h
+                </p>
+              )}
             </div>
           </div>
 
           <button
             type="button"
             onClick={openHeroDrop}
-            className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-[14px] font-semibold text-[var(--btn-primary-text)] transition-opacity hover:opacity-90 active:opacity-70"
+            className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-[13px] font-semibold text-[var(--btn-primary-text)] transition-opacity hover:opacity-90 active:opacity-70"
           >
             <CheckCircleIcon size={19} weight="bold" />
             Registrar dosis
@@ -803,8 +821,8 @@ function HeroView({
         {timelineEntries.length > 0 && (
           <div className="border-t border-[var(--border)]">
             <div className="flex items-baseline justify-between gap-3 px-4 py-3">
-              <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
-              <span className="text-[12px] text-[var(--text-faint)]">resto del día</span>
+              <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
+              <span className="text-[11px] text-[var(--text-faint)]">resto del día</span>
             </div>
             <div className="space-y-1 px-1 pb-2">
               {timelineEntries.map((entry, i) => {
