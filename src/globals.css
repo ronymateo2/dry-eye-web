@@ -3,6 +3,10 @@
 @import "@fontsource/atkinson-hyperlegible/400-italic.css";
 @import "@fontsource/atkinson-hyperlegible/700.css";
 @import "@fontsource/atkinson-hyperlegible/700-italic.css";
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
 @import "@fontsource/geist-mono/400.css";
 @import "@fontsource/geist-mono/500.css";
 
@@ -44,6 +48,18 @@
   --btn-primary-text: #121008;
   --wheel-fade: rgba(28, 24, 16, 0.96);
   --fab-shadow: rgba(212, 162, 76, 0.40);
+}
+
+[data-font="atkinson-hyperlegible"] {
+  --font-ui: "Atkinson Hyperlegible", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+[data-font="manrope"] {
+  --font-ui: "Manrope", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+[data-font="sf-pro-rounded"] {
+  --font-ui: "SF Pro Rounded", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 :root[data-theme="light"] {

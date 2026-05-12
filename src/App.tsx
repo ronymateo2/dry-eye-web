@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth, storeTokenFromUrl } from "@/lib/auth";
 import { ThemeProvider } from "@/lib/theme";
+import { FontProvider } from "@/lib/font";
 import { AppShell } from "@/components/layout/app-shell";
 import { SplashScreen } from "@/components/layout/splash-screen";
 
@@ -87,10 +88,12 @@ export function App() {
       <ScrollToTop />
       <TokenInit />
       <AuthProvider>
+        <FontProvider>
         <ThemeProvider>
           <AppRoutes />
           <Toaster />
         </ThemeProvider>
+        </FontProvider>
       </AuthProvider>
     </BrowserRouter>
   );

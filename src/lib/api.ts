@@ -48,8 +48,8 @@ export const api = {
   delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
 
   // Named endpoints
-  getMe: () => api.get<{ id: string; name: string | null; email: string | null; image: string | null; timezone: string; theme: "dark" | "light" }>("/user/me"),
-  updateMe: (body: { timezone?: string; name?: string; theme?: "dark" | "light" }) => api.put<{ token?: string } & Record<string, unknown>>("/user/me", body),
+  getMe: () => api.get<{ id: string; name: string | null; email: string | null; image: string | null; timezone: string; theme: "dark" | "light"; font: "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded" | null }>("/user/me"),
+  updateMe: (body: { timezone?: string; name?: string; theme?: "dark" | "light"; font?: "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded" }) => api.put<{ token?: string } & Record<string, unknown>>("/user/me", body),
 
   saveCheckIn: (body: unknown) => api.post("/check-ins", body),
   getLastCheckIn: () =>

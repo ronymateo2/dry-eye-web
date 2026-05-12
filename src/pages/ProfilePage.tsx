@@ -15,9 +15,12 @@ import {
   PillIcon,
   SignOutIcon,
   SunIcon,
+  TextTIcon,
 } from "@phosphor-icons/react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTheme } from "@/lib/theme";
+import { useFont } from "@/lib/font";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -70,6 +73,7 @@ export default function ProfilePage() {
 
   const { theme, setTheme } = useTheme();
   const [themePending, setThemePending] = useState(false);
+  const { font, setFont: setFontServer } = useFont();
   const reducedMotion = useReducedMotion();
   const spring = reducedMotion ? { duration: 0 } : { type: "spring" as const, stiffness: 400, damping: 28, mass: 0.8 };
   const fade = reducedMotion ? { duration: 0 } : { duration: 0.2 };
@@ -171,6 +175,32 @@ export default function ProfilePage() {
               >
                 <PencilSimpleIcon size={15} />
               </button>
+            </div>
+            <div className="flex min-h-[72px] items-center gap-3 border-t border-[var(--border)] px-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                <TextTIcon size={16} color="var(--accent)" weight="fill" />
+              </div>
+              <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
+                  Fuente
+                </span>
+                <SegmentedControl
+                  options={[
+                    { label: "Atkinson Hyp.", value: "atkinson-hyperlegible" },
+                    { label: "Manrope", value: "manrope" },
+                    { label: "SF Pro Rnd.", value: "sf-pro-rounded" },
+                  ]}
+                  value={font}
+                  onChange={async (v) => {
+                    try {
+                      await setFontServer(v);
+                    } catch {
+                      toast.error("No se pudo cambiar la fuente.");
+                    }
+                  }}
+                  tone="quiet"
+                />
+              </div>
             </div>
             <div className="flex min-h-[72px] items-center gap-3 border-t border-[var(--border)] px-4">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">

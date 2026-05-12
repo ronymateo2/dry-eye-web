@@ -252,7 +252,7 @@ Used for Gotas and Triggers screens (launched from FAB).
 
 - **Never default to light mode.** Dark mode must be the initial state — photophobia patients open the app in pain. Light mode is opt-in only.
 - **No blue or cyan accents.** `#06b6d4`, `#0ea5e9`, `#3b82f6` — all activate photosensitive receptors. Even the original manifest `#0f172a` navy is too blue for this product.
-- **No custom UI web fonts.** Use the system font stack (`-apple-system`) — zero download, native rendering.
+- **No custom UI web fonts unless user opts in.** Default is system font stack (`-apple-system`). Users can switch via Profile → Fuente. Atkinson Hyperlegible (Braille Institute) and Manrope are available as optional downloads.
 - **No purple/violet gradients.** Generic wellness app slop.
 - **No gamification.** No streaks, no badges, no progress bars with encouragement messages. Medical tool.
 - **No bright illustrations or mascots.**
@@ -279,3 +279,4 @@ Used for Gotas and Triggers screens (launched from FAB).
 | 2026-04-27 | Toast: dark surface + colored border + colored icon (no solid color bg) | Solid color backgrounds (bright green/red) flash high luminance against the dark UI — a direct photophobia trigger. Severity still readable via border and icon color. Consistent with how info toasts already worked. |
 | 2026-04-27 | Added opt-in light theme (`[data-theme="light"]`) | Some users operate in bright environments or have accessibility needs not related to photophobia. Dark remains default; light is user-selectable. Violet accent (#7C6DCD) chosen to stay out of the blue/cyan photosensitive zone while providing sufficient contrast on light backgrounds. |
 | 2026-05-07 | Spring animations permitted for sheet presentations and FAB | After user testing, subtle springs (duration-based with bounce 0.1–0.2) feel more natural and responsive than fixed-duration curves. Bounce is kept intentionally low to avoid playful motion. `prefers-reduced-motion` still honored. |
+| 2026-05-12 | Font selector in Profile: Atkinson Hyperlegible / Manrope / SF Pro Rounded | iOS-only PWA. SF Pro Rounded is native (0 download). Atkinson Hyperlegible (Braille Institute) offers maximum character distinctiveness for patients with visual impairment. Manrope retained for users who prefer the original aesthetic. Preference persisted to server via `api.updateMe({ font })`. |

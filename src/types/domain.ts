@@ -257,6 +257,7 @@ export type User = {
   image: string | null;
   timezone: string;
   theme: "dark" | "light";
+  font: "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded" | null;
 };
 
 export type VialRecord = {
