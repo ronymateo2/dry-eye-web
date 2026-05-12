@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeftIcon, XIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import type { SheetStackState } from "@/lib/hooks/use-sheet-stack";
 
 export type SheetLayer = {
   key: string;
@@ -15,20 +16,40 @@ export type SheetLayer = {
   onBack?: () => void;
 };
 
+type DeclarativeProps = {
+  layers: SheetLayer[];
+  onPop?: () => void;
+  stack?: never;
+  baseLayer?: never;
+};
+
+type ImperativeProps = {
+  stack: SheetStackState;
+  /** Prepended to stack.layers as the base (non-poppable) layer */
+  baseLayer?: SheetLayer;
+  layers?: never;
+  onPop?: never;
+};
+
 type Props = {
   open: boolean;
   onClose: () => void;
-  layers: SheetLayer[];
-  /** Default back action when active layer has no onBack */
-  onPop?: () => void;
   /** Global panel class applied to all layers */
   panelClassName?: string;
-};
+} & (DeclarativeProps | ImperativeProps);
 
 const PANEL_SPRING = { type: "spring" as const, stiffness: 260, damping: 30, mass: 0.85 };
 const BACKDROP_FADE = { duration: 0.25, ease: [0.32, 0.72, 0, 1] as const };
 
-export function StackedSheet({ open, onClose, layers, onPop, panelClassName }: Props) {
+export function StackedSheet(props: Props) {
+  const { open, onClose, panelClassName } = props;
+
+  const resolvedLayers: SheetLayer[] = props.stack
+    ? [...(props.baseLayer ? [props.baseLayer] : []), ...props.stack.layers]
+    : (props.layers ?? []);
+
+  const resolvedOnPop = props.stack ? props.stack.pop : props.onPop;
+
   const id = useId();
   const [mounted, setMounted] = useState(open);
   const openRef = useRef(open);
@@ -63,13 +84,13 @@ export function StackedSheet({ open, onClose, layers, onPop, panelClassName }: P
               if (!openRef.current) setMounted(false);
             }}
           >
-            {(open ? layers : []).map((layer, index) => {
-              const depth = layers.length - 1 - index;
+            {(open ? resolvedLayers : []).map((layer, index) => {
+              const depth = resolvedLayers.length - 1 - index;
               const isActive = depth === 0;
               const titleId = `${id}-${layer.key}-title`;
               const descId = `${id}-${layer.key}-desc`;
-              const backAction = layer.onBack ?? onPop;
-              const hasBack = isActive && layers.length > 1 && !!backAction;
+              const backAction = layer.onBack ?? resolvedOnPop;
+              const hasBack = isActive && resolvedLayers.length > 1 && !!backAction;
               const xAction = hasBack ? backAction : onClose;
 
               return (
