@@ -9,7 +9,6 @@ import {
   LightningIcon,
   CircleHalfIcon,
   EyeClosedIcon,
-  InfoIcon,
 } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { SYMPTOM_STATE_COLOR, SYMPTOM_STATE_COPY, SYMPTOM_STATE_LABEL } from "@/lib/symptom-state";
@@ -213,7 +212,6 @@ export function SymptomStatusCard({ onRegister }: Props) {
           aria-label="Información sobre el cálculo de estado"
           title={`Estado calculado a partir de la intensidad promedio de los síntomas. Última actualización: ${timeAgo}`}
         >
-          <InfoIcon size={14} />
         </button>
       </div>
 
