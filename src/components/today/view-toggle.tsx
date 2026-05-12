@@ -1,4 +1,4 @@
-import { ArrowRightIcon, ClockCountdownIcon, ListDashesIcon } from "@phosphor-icons/react";
+import { CalendarDotsIcon, ClockCountdownIcon, ListDashesIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export function ViewDayButton({ onClick }: { onClick: () => void }) {
@@ -9,8 +9,8 @@ export function ViewDayButton({ onClick }: { onClick: () => void }) {
       aria-label="Ver proyección del día"
       className="flex min-h-8 items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
     >
-      <span style={{ color: "var(--accent)" }}>Hoy</span>
-      <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
+      <CalendarDotsIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
+      <span style={{ color: "var(--accent)" }}>Horario</span>
     </button>
   );
 }

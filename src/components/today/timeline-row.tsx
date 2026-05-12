@@ -32,7 +32,8 @@ export function TimelineRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group relative flex min-h-[56px] w-full items-center gap-3 rounded-[10px] px-3 py-2.5 cursor-pointer",
+        "group relative flex w-full items-start gap-3 rounded-[10px] px-3 cursor-pointer",
+        vialStatus ? "py-2.5 min-h-[56px]" : "py-2 min-h-[44px]",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}
@@ -89,7 +90,7 @@ export function TimelineRow({
         )}
       </div>
 
-      <span className="flex shrink-0 items-center gap-1.5 pointer-events-none">
+      <span className="flex shrink-0 items-center gap-1.5 pointer-events-none pt-0.5">
         <span
           className="font-mono text-[12px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}

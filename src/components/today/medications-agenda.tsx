@@ -14,7 +14,7 @@ function makeTodayDateAtTime(timeStr: string, now: Date): Date {
 }
 
 function formatTime(date: Date): string {
-  return date.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: true });
+  return date.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
 function getCountdown(nextMs: number, now: number): { label: string; overdue: boolean; color: string } {
