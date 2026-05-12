@@ -70,11 +70,11 @@ export function CountdownValue({
 
   return (
     <div className="grid gap-1 justify-items-center">
-      <CircularProgress progress={progress ?? 0} color={color}>
-        <p className="mb-0.5 text-[9px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
+      <CircularProgress size={80} progress={progress ?? 0} color={color}>
+        <p className="mb-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
           {overdue ? "Vencida" : "En"}
         </p>
-        <div className="flex flex-nowrap items-end gap-x-1 whitespace-nowrap leading-none" style={{ color }}>
+        <div className="flex flex-nowrap items-end gap-x-0.5 whitespace-nowrap leading-none" style={{ color }}>
           {parts.map((part) => {
             const value = part.slice(0, -1);
             const unit = part.slice(-1);
@@ -86,11 +86,11 @@ export function CountdownValue({
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
                   className="font-mono tabular-nums"
-                  style={{ fontSize: parts.length > 1 ? 28 : 30, fontWeight: 600, lineHeight: 0.9 }}
+                  style={{ fontSize: parts.length > 1 ? 20 : 22, fontWeight: 600, lineHeight: 0.9 }}
                 >
                   {value}
                 </motion.span>
-                <span className="pb-0.5 text-[12px] font-semibold leading-none">
+                <span className="pb-0.5 text-[10px] font-semibold leading-none">
                   {unit}
                 </span>
               </span>

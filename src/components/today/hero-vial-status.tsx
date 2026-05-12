@@ -20,10 +20,10 @@ export function HeroVialStatus({
         onClick={onClick}
         className="group inline-flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-80 active:opacity-60"
         style={{ color: "var(--pain-high)" }}
-        aria-label={`Vial vencido hace ${status.timeStr}. Toca para descartar.`}
+        aria-label={`Vial vencido (+${status.timeStr}). Toca para descartar.`}
       >
         <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
-        <span>Vial vencido hace {status.timeStr}</span>
+        <span>Vial vencido (+{status.timeStr})</span>
         <TrashIcon size={14} weight="regular" className="shrink-0" />
       </button>
     );

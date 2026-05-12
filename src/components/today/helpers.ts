@@ -27,7 +27,7 @@ export function getCountdown(
   const progress = Math.min(1, Math.max(0, 1 - diffMs / intervalMs));
   const nd = new Date(nextMs);
   const nh = nd.getHours(), nm = nd.getMinutes();
-  const nextTime = `${String(nh % 12 || 12).padStart(2, "0")}:${String(nm).padStart(2, "0")} ${nh < 12 ? "am" : "pm"}`;
+  const nextTime = `${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`;
 
   let label: string;
   let color: string;
