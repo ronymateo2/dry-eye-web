@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -6,12 +6,12 @@ import {
   CaretRightIcon,
   GearIcon,
   TrashIcon,
-  DropIcon,
   EyedropperSampleIcon,
   ClockCountdownIcon,
   ArrowRightIcon,
   ListDashesIcon,
   CheckCircleIcon,
+  AlarmIcon,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
@@ -349,12 +349,12 @@ function getVialStatus(vial: ActiveVialEntry, now: number) {
   const label = isExpired ? `vencido hace ${timeStr}` : `${timeStr}`;
   const fullLabel = isExpired ? `vial vencido hace ${timeStr}` : `vial activo · ${timeStr}`;
 
-  return { color, label, fullLabel, isExpired };
+  return { color, label, fullLabel, timeStr, isExpired };
 }
 
-// ---- HeroVialChip (hero view — clickable vial pill badge) ----
+// ---- HeroVialStatus (hero view — inline vial text with action) ----
 
-function HeroVialChip({
+function HeroVialStatus({
   vial,
   now,
   onClick,
@@ -364,29 +364,92 @@ function HeroVialChip({
   onClick: () => void;
 }) {
   const status = getVialStatus(vial, now);
-  const chipColor = status.color === "var(--warning)"
-    ? "color-mix(in srgb, var(--warning) 68%, var(--text-primary))"
-    : status.color;
-  const chipBackground = status.color === "var(--warning)"
-    ? "color-mix(in srgb, var(--warning) 10%, var(--surface))"
-    : "var(--surface-el)";
-  const chipBorder = status.color === "var(--warning)"
-    ? "color-mix(in srgb, var(--warning) 42%, var(--border))"
-    : "transparent";
+
+  if (status.isExpired) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="group inline-flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-80 active:opacity-60"
+        style={{ color: "var(--pain-high)" }}
+        aria-label={`Vial vencido hace ${status.timeStr}. Toca para descartar.`}
+      >
+        <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
+        <span>Vial vencido hace {status.timeStr}</span>
+        <TrashIcon size={14} weight="regular" className="shrink-0" />
+      </button>
+    );
+  }
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex min-h-7 max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 transition-opacity hover:opacity-80 active:opacity-60"
-      style={{ background: chipBackground, borderColor: chipBorder }}
-      aria-label={`Vial de ${vial.drop_type_name}. ${status.fullLabel}. Toca para descartar.`}
+      className="group inline-flex items-center gap-1 text-[12px] transition-colors hover:opacity-80 active:opacity-60"
+      style={{ color: status.color }}
+      aria-label={`Vial vence en ${status.timeStr}. Toca para descartar.`}
     >
-      <EyedropperSampleIcon size={11} weight="fill" style={{ color: chipColor, flexShrink: 0 }} />
-      <span className="truncate font-mono text-[9px] font-semibold uppercase tracking-[0.08em] tabular-nums" style={{ color: chipColor }}>
-        {status.fullLabel}
-      </span>
+      <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
+      <span>Vial vence en {status.timeStr}</span>
+      <CaretRightIcon
+        size={12}
+        weight="bold"
+        className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+      />
     </button>
+  );
+}
+
+function CircularProgress({
+  size = 100,
+  strokeWidth = 4,
+  progress,
+  color,
+  children,
+}: {
+  size?: number;
+  strokeWidth?: number;
+  progress: number;
+  color: string;
+  children: ReactNode;
+}) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - progress * circumference;
+
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg
+        width={size}
+        height={size}
+        className="absolute inset-0 -rotate-90"
+        aria-hidden="true"
+      >
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--surface-el)"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.6s cubic-bezier(0.23, 1, 0.32, 1)" }}
+        />
+      </svg>
+      <div className="relative z-10 flex flex-col items-center justify-center text-center">
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -394,38 +457,46 @@ function CountdownValue({
   label,
   overdue,
   color,
+  progress,
 }: {
   label: string;
   overdue: boolean;
   color: string;
+  progress?: number;
 }) {
   const cleanLabel = label.replace(/^hace\s+/, "");
   const parts = cleanLabel.split(" ");
 
   return (
-    <div className="grid gap-2">
-      <p className="mb-0 text-[10px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
-        {overdue ? "Vencida" : "En"}
-      </p>
-      <div className="flex flex-nowrap items-end gap-x-1.5 whitespace-nowrap leading-none" style={{ color }}>
-        {parts.map((part) => {
-          const value = part.slice(0, -1);
-          const unit = part.slice(-1);
-          return (
-            <span key={part} className="inline-flex items-end gap-1">
-              <span className="font-mono text-[38px] font-semibold leading-[0.88] tabular-nums">
-                {value}
+    <div className="grid gap-1 justify-items-center">
+      <CircularProgress progress={progress ?? 0} color={color}>
+        <p className="mb-0.5 text-[9px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
+          {overdue ? "Vencida" : "En"}
+        </p>
+        <div className="flex flex-nowrap items-end gap-x-1 whitespace-nowrap leading-none" style={{ color }}>
+          {parts.map((part) => {
+            const value = part.slice(0, -1);
+            const unit = part.slice(-1);
+            return (
+              <span key={part} className="inline-flex items-end gap-0.5">
+                <motion.span
+                  key={`val-${part}`}
+                  initial={{ scale: 1.04, opacity: 0.85 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                  className="font-mono tabular-nums"
+                  style={{ fontSize: parts.length > 1 ? 28 : 30, fontWeight: 600, lineHeight: 0.9 }}
+                >
+                  {value}
+                </motion.span>
+                <span className="pb-0.5 text-[12px] font-semibold leading-none">
+                  {unit}
+                </span>
               </span>
-              <span className="pb-1 text-[16px] font-semibold leading-none">
-                {unit}
-              </span>
-            </span>
-          );
-        })}
-      </div>
-      <p className="text-[11px] leading-tight text-[var(--text-muted)]">
-        para tu próxima dosis
-      </p>
+            );
+          })}
+        </div>
+      </CircularProgress>
     </div>
   );
 }
@@ -440,13 +511,13 @@ function ViewToggle({
   setView: (v: "card" | "hero") => void;
 }) {
   return (
-    <div className="flex h-9 items-center gap-0.5 rounded-full bg-[var(--surface-el)] p-1">
+    <div className="flex h-9 w-[66px] shrink-0 items-center justify-between rounded-full bg-[var(--surface-el)] p-1">
       <button
         type="button"
         onClick={() => setView("card")}
         aria-label="Vista tarjeta"
         className={cn(
-          "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-[160ms]",
+          "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-[160ms]",
           view === "card"
             ? "bg-[var(--accent)] text-[var(--btn-primary-text)]"
             : "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
@@ -459,7 +530,7 @@ function ViewToggle({
         onClick={() => setView("hero")}
         aria-label="Vista hero"
         className={cn(
-          "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-[160ms]",
+          "flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-[160ms]",
           view === "hero"
             ? "bg-[var(--accent)] text-[var(--btn-primary-text)]"
             : "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
@@ -516,7 +587,7 @@ function TimelineRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group grid min-h-[64px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[10px] px-3 py-2 text-left",
+        "group grid min-h-[56px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[10px] px-3 py-2.5 text-left",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40",
       )}
@@ -524,19 +595,15 @@ function TimelineRow({
       aria-label={`Registrar ${entry.name}. Próxima dosis ${badgeLabel}.`}
     >
       <span className="flex min-w-0 items-center gap-2.5">
+        {/* Barra vertical indicadora — inline, sin afectar altura de fila */}
         <span
-          className="shrink-0 flex items-center justify-center rounded-[12px]"
-          style={{
-            width: 44,
-            height: 44,
-            background: "var(--surface-el)",
-          }}
+          className="h-5 w-[3px] shrink-0 rounded-full"
+          style={{ background: badgeColor }}
           aria-hidden
-        >
-          <DropIcon size={18} style={{ color: badgeColor }} />
-        </span>
+        />
+
         <span className="grid min-w-0 gap-1">
-          <span className="flex min-w-0 items-center gap-1.5">
+          <span className="flex min-w-0 items-center gap-2">
             <span
               className="truncate text-[14px] font-bold capitalize leading-none"
               style={{ color: "var(--text-primary)" }}
@@ -549,22 +616,22 @@ function TimelineRow({
                 style={{ background: vialChipBackground, borderColor: vialChipBorder }}
               >
                 <EyedropperSampleIcon
-                  size={9}
+                  size={11}
                   weight="fill"
                   className="shrink-0"
                   style={{ color: vialChipColor }}
                 />
                 <span
-                  className="truncate font-mono text-[9px] font-semibold uppercase tracking-[0.08em] tabular-nums"
+                  className="min-w-0 truncate font-mono text-[10px] font-semibold uppercase tracking-[0.04em] tabular-nums"
                   style={{ color: vialChipColor }}
                 >
-                  {vialStatus.isExpired ? "vial vencido" : vialStatus.label}
+                  {vialStatus.isExpired ? "vial vencido" : `vial ${vialStatus.timeStr}`}
                 </span>
               </span>
             )}
           </span>
           <span
-            className="font-mono text-[11px] tabular-nums whitespace-nowrap"
+            className="font-mono text-[12px] tabular-nums whitespace-nowrap"
             style={{ color: "var(--text-faint)" }}
           >
             {computed?.nextTime ?? `cada ${entry.interval_hours}h`}
@@ -574,16 +641,16 @@ function TimelineRow({
 
       <span className="flex shrink-0 items-center gap-1.5">
         <span
-          className="font-mono text-[12px] font-semibold tabular-nums"
-          style={{ color: badgeColor }}
+          className="font-mono text-[12px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+          style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
           {noRecord ? badgeLabel : `en ${badgeLabel}`}
         </span>
         <CaretRightIcon
           aria-hidden
-          size={12}
+          size={9}
           weight="bold"
-          className="text-[var(--text-faint)] opacity-60 group-hover:opacity-100"
+          className="translate-x-0 text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70 group-focus-visible:opacity-70"
         />
       </span>
     </motion.button>
@@ -623,20 +690,22 @@ function CardView({
   return (
     <>
       <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           <p className="section-label mb-0">Próximas dosis</p>
-          <div className="flex items-center gap-2">
-            {scheduled.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setProjectionOpen(true)}
-                aria-label="Ver proyección del día"
-                className="flex items-center gap-1 rounded-sm text-[11px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
-              >
-                <span style={{ color: "var(--accent)" }}>Ver día</span>
-                <ArrowRightIcon size={10} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
-              </button>
-            )}
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="w-[72px] shrink-0">
+              {scheduled.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setProjectionOpen(true)}
+                  aria-label="Ver proyección del día"
+                  className="flex min-h-8 w-full items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+                >
+                  <span style={{ color: "var(--accent)" }}>Ver día</span>
+                  <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
+                </button>
+              )}
+            </div>
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
@@ -748,74 +817,81 @@ function HeroView({
         <div className="flex items-center justify-between gap-3 px-4 pt-4">
           <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
           <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setProjectionOpen(true)}
-              aria-label="Ver proyección del día"
-              className="flex min-h-11 items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
-            >
-              <span style={{ color: "var(--accent)" }}>Ver día</span>
-              <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
-            </button>
+            <div className="w-[72px]">
+              <button
+                type="button"
+                onClick={() => setProjectionOpen(true)}
+                aria-label="Ver proyección del día"
+                className="flex min-h-8 w-full items-center gap-1 rounded-full px-1 text-[12px] font-medium transition-opacity duration-[160ms] hover:opacity-75 active:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40"
+              >
+                <span style={{ color: "var(--accent)" }}>Ver día</span>
+                <ArrowRightIcon size={13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
+              </button>
+            </div>
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
 
-        <div className="grid gap-4 px-4 pb-5 pt-5">
-          <div className="grid grid-cols-[126px_minmax(0,1fr)] items-center gap-5">
-            <div className="min-w-0">
+        <div className="grid gap-5 px-4 pb-5 pt-5">
+          <div className="grid grid-cols-[110px_minmax(0,1fr)] items-start gap-5">
+            <div className="pt-1">
               {computed ? (
                 <CountdownValue
                   label={computed.label}
                   overdue={computed.overdue}
                   color={computed.color}
+                  progress={computed.progress}
                 />
               ) : (
-                <div className="grid gap-2">
+                <div className="grid gap-2 justify-items-center text-center">
                   <p className="section-label mb-0">Cada</p>
                   <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
                     {heroEntry.interval_hours}h
-                  </p>
-                  <p className="text-[12px] leading-tight text-[var(--text-muted)]">
-                    intervalo configurado
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="grid min-w-0 gap-3">
-              <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-                <h2 className="min-w-0 max-w-full truncate text-[23px] font-bold capitalize leading-none text-[var(--text-primary)]">
-                  {heroEntry.name}
-                </h2>
-                {heroVial && (
-                  <HeroVialChip vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
-                )}
-              </div>
+            <div className="grid min-w-0 gap-2 pt-1">
+              <h2 className="min-w-0 max-w-full truncate text-[26px] font-bold capitalize leading-none tracking-[-0.01em] text-[var(--text-primary)]">
+                {heroEntry.name}
+              </h2>
 
               {computed ? (
-                <div className="grid gap-1">
+                <div className="flex items-center gap-1.5">
+                  <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
                   <p className="font-mono text-[17px] font-semibold leading-none tabular-nums text-[var(--accent)]">
                     {computed.nextTime}
                   </p>
-                  <p className="text-[11px] text-[var(--text-muted)]">próxima dosis programada</p>
                 </div>
               ) : (
                 <p className="font-mono text-[15px] tabular-nums text-[var(--text-muted)]">
                   Cada {heroEntry.interval_hours}h
                 </p>
               )}
+
+              <div className="h-px w-[80%] bg-[var(--border)] my-1" />
+
+              {heroVial && (
+                <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
+              )}
+
+              <button
+                type="button"
+                onClick={openHeroDrop}
+                className="group inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors hover:text-[var(--accent-bright)] active:opacity-70"
+                style={{ color: "var(--accent)" }}
+              >
+                <CheckCircleIcon size={16} weight="bold" className="shrink-0" />
+                Registrar dosis
+                <CaretRightIcon
+                  size={14}
+                  weight="bold"
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                />
+              </button>
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={openHeroDrop}
-            className="inline-flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3 text-[13px] font-semibold text-[var(--btn-primary-text)] transition-opacity hover:opacity-90 active:opacity-70"
-          >
-            <CheckCircleIcon size={19} weight="bold" />
-            Registrar dosis
-          </button>
         </div>
 
         {timelineEntries.length > 0 && (
@@ -824,7 +900,7 @@ function HeroView({
               <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
               <span className="text-[11px] text-[var(--text-faint)]">resto del día</span>
             </div>
-            <div className="space-y-1 px-1 pb-2">
+            <div className="space-y-0 px-1 pb-2">
               {timelineEntries.map((entry, i) => {
                 const vial = vialByDropType.get(entry.drop_type_id) ?? null;
                 return (
