@@ -1,3 +1,59 @@
+/**
+ * StackedSheet — iOS Health-style stacked bottom sheets.
+ *
+ * Each layer slides up on top of the previous one. Background layers scale back
+ * (scale 0.93, y -10px from top-center) and receive a dim overlay, matching the
+ * iOS navigation sheet pattern. Only the active (top) layer is interactive.
+ *
+ * ## Two usage modes
+ *
+ * ### Declarative — caller owns the layers array
+ * Use when the set of possible layers is known upfront and driven by local state.
+ *
+ * ```tsx
+ * const [view, setView] = useState<"list" | "detail">("list");
+ *
+ * <StackedSheet
+ *   open={open}
+ *   onClose={onClose}
+ *   layers={[
+ *     { key: "list",   title: "Items",  content: <List onSelect={() => setView("detail")} /> },
+ *     ...(view === "detail" ? [{ key: "detail", title: "Detail", content: <Detail /> }] : []),
+ *   ]}
+ *   onPop={() => setView("list")}
+ * />
+ * ```
+ *
+ * ### Imperative — useSheetStack manages the stack
+ * Use when layers are pushed/popped in response to user actions.
+ * Keys are auto-suffixed with a counter, so re-pushing the same key always animates.
+ *
+ * ```tsx
+ * const stack = useSheetStack();
+ *
+ * const handleSelect = (item: Item) => {
+ *   stack.push({
+ *     key: "detail",
+ *     title: item.name,
+ *     content: <Detail item={item} onSaved={() => stack.pop()} />,
+ *   });
+ * };
+ *
+ * <StackedSheet
+ *   open={open}
+ *   onClose={onClose}
+ *   stack={stack}
+ *   baseLayer={{ key: "list", title: "Items", content: <List onSelect={handleSelect} /> }}
+ * />
+ * ```
+ *
+ * ## Back / close behaviour
+ * - X button on active layer with layers below → calls back action (pop)
+ * - X button on base layer (only layer) → calls onClose
+ * - Backdrop tap → always calls onClose (closes entire stack)
+ * - Per-layer `onBack` overrides the global pop for that specific layer
+ */
+
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
@@ -6,26 +62,30 @@ import { cn } from "@/lib/utils";
 import type { SheetStackState } from "@/lib/hooks/use-sheet-stack";
 
 export type SheetLayer = {
+  /** Unique identifier. In imperative mode, useSheetStack auto-suffixes to guarantee AnimatePresence animates re-pushes of the same key. */
   key: string;
   title: string;
   description?: string;
   content: ReactNode;
-  /** Per-layer panel class — merged with global panelClassName */
+  /** Merged with the global panelClassName. Use to override height per layer, e.g. "!h-[80dvh]". */
   panelClassName?: string;
-  /** Custom back action for this layer — overrides global onPop */
+  /** Replaces the default pop action for this layer's back button and X button. */
   onBack?: () => void;
 };
 
+/** Declarative mode: caller owns and computes the full layers array. */
 type DeclarativeProps = {
   layers: SheetLayer[];
+  /** Called when the active layer's back button or X is pressed and layers.length > 1. */
   onPop?: () => void;
   stack?: never;
   baseLayer?: never;
 };
 
+/** Imperative mode: useSheetStack manages pushed layers; baseLayer is the permanent bottom layer. */
 type ImperativeProps = {
   stack: SheetStackState;
-  /** Prepended to stack.layers as the base (non-poppable) layer */
+  /** Permanent bottom layer prepended to stack.layers. Not poppable — only closeable via onClose. */
   baseLayer?: SheetLayer;
   layers?: never;
   onPop?: never;
@@ -34,7 +94,7 @@ type ImperativeProps = {
 type Props = {
   open: boolean;
   onClose: () => void;
-  /** Global panel class applied to all layers */
+  /** Applied to all layer panels. Per-layer panelClassName takes precedence. */
   panelClassName?: string;
 } & (DeclarativeProps | ImperativeProps);
 
