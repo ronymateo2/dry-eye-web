@@ -248,7 +248,7 @@ img, svg { display: block; max-width: 100%; }
 .section-label {
   margin: 0 0 12px;
   color: var(--text-faint);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.10em;

@@ -62,7 +62,7 @@ export function SleepStatus() {
       >
         <MoonIcon size={16} className="shrink-0 text-[var(--text-muted)]" />
         <span className={cn(
-          "text-[13px]",
+          "text-[14px]",
           hasSleep ? "text-[var(--text-muted)]" : "text-[var(--text-faint)]",
         )}>
           {label}

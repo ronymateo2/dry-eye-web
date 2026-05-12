@@ -84,7 +84,7 @@ function VialRow({
                 style={{ background: barColor }}
               />
               <span
-                className="truncate text-[13px] font-medium capitalize leading-none"
+                className="truncate text-[14px] font-medium capitalize leading-none"
                 style={{ color: isExpired ? "var(--text-primary)" : "var(--text-muted)" }}
               >
                 {vial.drop_type_name}
@@ -93,7 +93,7 @@ function VialRow({
 
             <span className="flex shrink-0 items-center gap-1.5">
               <span
-                className="font-mono text-[11px] font-semibold tabular-nums"
+                className="font-mono text-[12px] font-semibold tabular-nums"
                 style={{ color: barColor }}
               >
                 {rightLabel}
@@ -117,14 +117,14 @@ function VialRow({
             transition={{ duration: 0.12 }}
             className="flex items-center justify-between gap-3 px-3 py-1 min-h-[44px]"
           >
-            <span className="min-w-0 truncate text-[12px] font-medium text-[var(--error)]">
+            <span className="min-w-0 truncate text-[13px] font-medium text-[var(--error)]">
               ¿Descartar {vial.drop_type_name}?
             </span>
             <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
                 onClick={onCancel}
-                className="rounded-full px-3 py-1.5 text-[12px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-el)]"
+                className="rounded-full px-3 py-1.5 text-[13px] font-medium text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-el)]"
               >
                 No
               </button>
@@ -132,7 +132,7 @@ function VialRow({
                 type="button"
                 onClick={onConfirmDiscard}
                 disabled={isPending}
-                className="rounded-full bg-[var(--error)]/10 px-3 py-1.5 text-[12px] font-medium text-[var(--error)] transition-opacity hover:bg-[var(--error)]/20 disabled:opacity-50"
+                className="rounded-full bg-[var(--error)]/10 px-3 py-1.5 text-[13px] font-medium text-[var(--error)] transition-opacity hover:bg-[var(--error)]/20 disabled:opacity-50"
               >
                 {isPending ? "…" : "Sí"}
               </button>
@@ -227,7 +227,7 @@ function PainCheckInCompact() {
       aria-label="Registrar dolor"
     >
       <PulseIcon size={16} className="shrink-0 text-[var(--text-muted)]" />
-      <span className={cn("text-[13px]", lastAgo ? "text-[var(--text-muted)]" : "text-[var(--text-faint)]")}>
+      <span className={cn("text-[14px]", lastAgo ? "text-[var(--text-muted)]" : "text-[var(--text-faint)]")}>
         {label}
       </span>
       <CaretRightIcon size={10} className="ml-auto shrink-0 text-[var(--text-faint)]" />
@@ -308,7 +308,7 @@ export default function TodayPage() {
           onClick={() => navigate("/treatments")}
           className={cn(
             "flex min-h-[48px] w-full items-center gap-3 rounded-[9px] px-2 py-1.5 text-left",
-            "text-[13px] text-[var(--text-muted)]",
+            "text-[14px] text-[var(--text-muted)]",
             "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
             "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
           )}

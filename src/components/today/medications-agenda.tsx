@@ -121,14 +121,14 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
         <span className="flex min-w-0 items-baseline gap-1.5">
           <span
             className={cn(
-              "truncate text-[13px] font-medium capitalize leading-none",
+              "truncate text-[14px] font-medium capitalize leading-none",
               item.overdue ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]",
             )}
           >
             {item.name}
           </span>
-          <span className="shrink-0 text-[11px] leading-none text-[var(--text-faint)]">·</span>
-          <span className="truncate font-mono text-[11px] leading-none tabular-nums text-[var(--text-faint)]">
+          <span className="shrink-0 text-[12px] leading-none text-[var(--text-faint)]">·</span>
+          <span className="truncate font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
             {item.detail}
           </span>
         </span>
@@ -136,7 +136,7 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
 
       <span className="flex shrink-0 items-center gap-1.5">
         <span
-          className="font-mono text-[11px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+          className="font-mono text-[12px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: item.badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
           {item.badgeLabel}
@@ -214,7 +214,7 @@ export function MedicationsAgenda() {
           )}
         >
           <PillIcon size={16} className="shrink-0 text-[var(--text-faint)]" weight="fill" />
-          <span className="text-[13px] text-[var(--text-faint)]">
+          <span className="text-[14px] text-[var(--text-faint)]">
             No tienes pastillas configuradas. Toca para agregar.
           </span>
         </button>
