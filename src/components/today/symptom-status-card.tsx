@@ -46,9 +46,9 @@ const ADVICE: Record<SymptomState, string> = {
 function IntensityGauge({ value, state }: { value: number; state: SymptomState }) {
   const color = SYMPTOM_STATE_COLOR[state];
   const pct = value / 10;
-  const r = 28;
-  const cx = 36;
-  const cy = 36;
+  const r = 38;
+  const cx = 48;
+  const cy = 48;
   const startAngle = -210;
   const sweepAngle = 240;
   const endAngle = startAngle + sweepAngle * pct;
@@ -71,9 +71,9 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
   return (
     <div className="relative flex flex-col items-center">
       <svg
-        width="72"
-        height="56"
-        viewBox="0 0 72 72"
+        width="96"
+        height="74"
+        viewBox="0 0 96 96"
         aria-label={`Intensidad promedio ${value} de 10, estado ${SYMPTOM_STATE_LABEL[state]}`}
         role="img"
       >
@@ -81,7 +81,7 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
           d={arcPath(startAngle, startAngle + sweepAngle, r)}
           fill="none"
           stroke="var(--surface-el)"
-          strokeWidth="5"
+          strokeWidth="6"
           strokeLinecap="round"
         />
         {pct > 0 && (
@@ -89,13 +89,13 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
             d={arcPath(startAngle, endAngle, r)}
             fill="none"
             stroke={color}
-            strokeWidth="5"
+            strokeWidth="6"
             strokeLinecap="round"
           />
         )}
       </svg>
-      <div className="absolute top-[18px] flex flex-col items-center leading-none">
-        <span className="mono text-[15px] font-bold" style={{ color }}>
+      <div className="absolute top-[24px] flex flex-col items-center leading-none">
+        <span className="mono text-[19px] font-bold" style={{ color }}>
           {value}/10
         </span>
       </div>
@@ -114,10 +114,10 @@ function TopSymptomCell({ item }: { item: SymptomTopItem }) {
         : "var(--pain-low)";
 
   return (
-    <div className="flex flex-col items-center gap-0.5">
-      <Icon size={14} style={{ color }} className="shrink-0" />
-      <span className="text-[11px] text-[var(--text-muted)] leading-none text-center">{label}</span>
-      <span className="mono text-[12px] font-semibold" style={{ color }}>
+    <div className="flex flex-col items-center gap-1">
+      <Icon size={18} style={{ color }} className="shrink-0" />
+      <span className="text-[12px] text-[var(--text-muted)] leading-none text-center">{label}</span>
+      <span className="mono text-[14px] font-semibold" style={{ color }}>
         {item.value}/10
       </span>
     </div>
@@ -224,11 +224,11 @@ export function SymptomStatusCard({ onRegister }: Props) {
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-[18px] font-semibold leading-tight" style={{ color }}>
+            <p className="text-[22px] font-semibold leading-tight" style={{ color }}>
               {label}
             </p>
-            <p className="text-[13px] text-[var(--text-muted)] mt-0.5">{copy}</p>
-            <p className="text-[12px] text-[var(--text-faint)] mt-1">{timeAgo}</p>
+            <p className="text-[15px] text-[var(--text-muted)] mt-1">{copy}</p>
+            <p className="text-[13px] text-[var(--text-faint)] mt-1">{timeAgo}</p>
           </div>
           <IntensityGauge value={avgVal} state={state} />
         </div>
@@ -250,7 +250,7 @@ export function SymptomStatusCard({ onRegister }: Props) {
       <div className="mt-3 h-px bg-[var(--border)]" />
       <div className="mt-2.5 flex items-start gap-2">
         <SunIcon size={12} className="mt-[2px] shrink-0 text-[var(--accent)]" />
-        <p className="text-[12px] leading-relaxed text-[var(--text-muted)]">
+        <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">
           <span className="font-medium text-[var(--text-primary)]">Consejo del día: </span>
           {ADVICE[state]}
         </p>
