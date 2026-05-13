@@ -174,26 +174,15 @@ export function SymptomsSheet({ onSaved }: Props) {
           <div className="flex items-center justify-between mb-2">
             <p className="section-label mb-0">1. Intensidad de síntomas</p>
             <div className="flex items-center gap-2">
-              {latest && (
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={loadLastValues}
-                    disabled={loadedLast}
-                    className={cn(
-                      "flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--text-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--accent-dim)] active:scale-95",
-                      loadedLast && "invisible"
-                    )}
-                  >
-                    <ClockCounterClockwiseIcon size={11} />
-                    Cargar últimos
-                  </button>
-                  {loadedLast && (
-                    <span className="absolute inset-0 flex items-center text-[11px] text-[var(--text-faint)] whitespace-nowrap">
-                      Valores anteriores cargados
-                    </span>
-                  )}
-                </div>
+              {latest && !loadedLast && (
+                <button
+                  type="button"
+                  onClick={loadLastValues}
+                  className="flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--text-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--accent-dim)] active:scale-95"
+                >
+                  <ClockCounterClockwiseIcon size={11} />
+                  Cargar últimos
+                </button>
               )}
               {previewState && (
                 <span
