@@ -53,7 +53,7 @@ export function HeroView({
         </div>
 
         <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
-          <div className="grid grid-cols-[80px_minmax(0,1fr)] items-start gap-4">
+          <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4">
             <div className="pt-1">
               {computed ? (
                 <CountdownValue

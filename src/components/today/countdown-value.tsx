@@ -79,7 +79,7 @@ export function CountdownValue({
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
       style={onClick ? { cursor: "pointer" } : undefined}
     >
-      <CircularProgress size={80} progress={progress ?? 0} color={color}>
+      <CircularProgress size={88} progress={progress ?? 0} color={color}>
         <p className="mb-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
           {overdue ? "Vencida" : "En"}
         </p>
