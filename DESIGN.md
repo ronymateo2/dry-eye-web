@@ -18,11 +18,11 @@
 ---
 
 ## Typography
-- **UI / Body / Headings:** Atkinson Hyperlegible (default) — loaded via `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics). Designed by the Braille Institute for maximum legibility and character distinctiveness — unambiguous letterforms reduce reading errors, which is critical for patients with visual impairment from dry eye.
-  - Stack: `"Atkinson Hyperlegible", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`
+- **UI / Body / Headings:** Atkinson Hyperlegible Next (default) — loaded via `@fontsource/atkinson-hyperlegible-next` (weights 400, 500, 600, 700 + 400/700 italics). Designed by the Braille Institute for maximum legibility and character distinctiveness — unambiguous letterforms reduce reading errors, which is critical for patients with visual impairment from dry eye.
+  - Stack: `"Atkinson Hyperlegible Next", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`
 - **SF Pro (iOS native, opt-in):** When user selects "SF Pro Rounded" in Profile, the stack uses the real iOS system font via `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display"`. Zero download, subpixel precision, works offline. This is the Apple Health look.
 - **Data / Numbers:** Geist Mono — all numeric values (pain scores 0-10, drop counts, sleep hours, timestamps, correlation coefficients). Tabular-nums. Makes readings feel like clinical instrument readings, not form inputs. Reinforces the clinical precision aesthetic.
-- **Loading:** `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics) + `@fontsource/geist-mono` (weights 400/500)
+- **Loading:** `@fontsource/atkinson-hyperlegible-next` (weights 400, 500, 600, 700 + 400/700 italics) + `@fontsource/geist-mono` (weights 400/500)
 - **Scale:**
   - `11-12px / 700 / 0.10em tracking` — section labels (uppercase)
   - `12-13px / 400` — metadata, timestamps, helper text
@@ -297,7 +297,7 @@ Used for Gotas and Triggers screens (launched from FAB).
 
 - **Never default to light mode.** Dark mode must be the initial state — photophobia patients open the app in pain. Light mode is opt-in only.
 - **No blue or cyan accents.** `#06b6d4`, `#0ea5e9`, `#3b82f6` — all activate photosensitive receptors. Even the original manifest `#0f172a` navy is too blue for this product.
-- **No custom UI web fonts unless user opts in.** Default is system font stack (`-apple-system`). Users can switch via Profile → Fuente. Atkinson Hyperlegible (Braille Institute) and Manrope are available as optional downloads.
+- **No custom UI web fonts unless user opts in.** Default is system font stack (`-apple-system`). Users can switch via Profile → Fuente. Atkinson Hyperlegible Next (Braille Institute) and Manrope are available as optional downloads.
 - **No purple/violet gradients.** Generic wellness app slop.
 - **No gamification.** No streaks, no badges, no progress bars with encouragement messages. Medical tool.
 - **No bright illustrations or mascots.**
@@ -324,7 +324,7 @@ Used for Gotas and Triggers screens (launched from FAB).
 | 2026-04-27 | Toast: dark surface + colored border + colored icon (no solid color bg) | Solid color backgrounds (bright green/red) flash high luminance against the dark UI — a direct photophobia trigger. Severity still readable via border and icon color. Consistent with how info toasts already worked. |
 | 2026-04-27 | Added opt-in light theme (`[data-theme="light"]`) | Some users operate in bright environments or have accessibility needs not related to photophobia. Dark remains default; light is user-selectable. Violet accent (#7C6DCD) chosen to stay out of the blue/cyan photosensitive zone while providing sufficient contrast on light backgrounds. |
 | 2026-05-07 | Spring animations permitted for sheet presentations and FAB | After user testing, subtle springs (duration-based with bounce 0.1–0.2) feel more natural and responsive than fixed-duration curves. Bounce is kept intentionally low to avoid playful motion. `prefers-reduced-motion` still honored. |
-| 2026-05-12 | Font selector in Profile: Atkinson Hyperlegible / Manrope / SF Pro Rounded | iOS-only PWA. SF Pro Rounded is native (0 download). Atkinson Hyperlegible (Braille Institute) offers maximum character distinctiveness for patients with visual impairment. Manrope retained for users who prefer the original aesthetic. Preference persisted to server via `api.updateMe({ font })`. |
+| 2026-05-12 | Font selector in Profile: Atkinson Hyperlegible Next / Manrope / SF Pro Rounded | iOS-only PWA. SF Pro Rounded is native (0 download). Atkinson Hyperlegible Next (Braille Institute) offers maximum character distinctiveness for patients with visual impairment. Manrope retained for users who prefer the original aesthetic. Preference persisted to server via `api.updateMe({ font })`. |
 | 2026-05-13 | Green changed `#5cb85a` → `#7BC67A` (dark), `#5CC8A0` → `#6CD9A0` (light) | The old green was Bootstrap's cold `#5cb85a` which clashed with the warm amber accent and was hard to read on warm charcoal. `#7BC67A` has a yellow component that harmonizes with the FL-41 palette. Better legibility at 50% brightness. |
 | 2026-05-13 | Typography scale expanded with Apple Health-style display sizes | Added `28px display` for state labels and medication names, `20px headline` for dose times, `17px emphasized` for descriptions. Creates dramatic hierarchy like Apple Health: big numbers, small labels. |
 | 2026-05-13 | SF Pro stack fixed to use real iOS system fonts | The old `data-font="sf-pro-rounded"` used a string `"SF Pro Rounded"` that resolved to nothing. Replaced with `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display"` which actually renders native SF Pro on iOS. |

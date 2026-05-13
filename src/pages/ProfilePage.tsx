@@ -195,7 +195,7 @@ export default function ProfilePage() {
                   }}
                   className="w-full bg-transparent text-[14px] text-[var(--text-primary)] outline-none"
                 >
-                  <option value="atkinson-hyperlegible">Atkinson Hyperlegible</option>
+                  <option value="atkinson-hyperlegible">Atkinson Hyperlegible Next</option>
                   <option value="manrope">Manrope</option>
                   <option value="sf-pro-rounded">SF Pro Rounded</option>
                 </select>

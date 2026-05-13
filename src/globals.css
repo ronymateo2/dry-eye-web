@@ -1,8 +1,10 @@
 @import "tailwindcss";
-@import "@fontsource/atkinson-hyperlegible/400.css";
-@import "@fontsource/atkinson-hyperlegible/400-italic.css";
-@import "@fontsource/atkinson-hyperlegible/700.css";
-@import "@fontsource/atkinson-hyperlegible/700-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/400.css";
+@import "@fontsource/atkinson-hyperlegible-next/400-italic.css";
+@import "@fontsource/atkinson-hyperlegible-next/500.css";
+@import "@fontsource/atkinson-hyperlegible-next/600.css";
+@import "@fontsource/atkinson-hyperlegible-next/700.css";
+@import "@fontsource/atkinson-hyperlegible-next/700-italic.css";
 @import "@fontsource/manrope/400.css";
 @import "@fontsource/manrope/500.css";
 @import "@fontsource/manrope/600.css";
@@ -11,7 +13,7 @@
 @import "@fontsource/geist-mono/500.css";
 
 :root {
-  --font-ui: "Atkinson Hyperlegible", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --font-ui: "Atkinson Hyperlegible Next", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --bg: #121008;
   --splash-glow-near: rgba(212, 162, 76, 0.55);
@@ -56,7 +58,7 @@
 }
 
 [data-font="atkinson-hyperlegible"] {
-  --font-ui: "Atkinson Hyperlegible", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --font-ui: "Atkinson Hyperlegible Next", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 }
 
 [data-font="manrope"] {
