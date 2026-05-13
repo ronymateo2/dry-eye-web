@@ -58,6 +58,7 @@ export function HeroView({
                   overdue={computed.overdue}
                   color={computed.color}
                   progress={computed.progress}
+                  onClick={() => dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
                 />
               ) : (
                 <div className="grid gap-2 justify-items-center text-center">

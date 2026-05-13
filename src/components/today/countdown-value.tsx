@@ -59,17 +59,26 @@ export function CountdownValue({
   overdue,
   color,
   progress,
+  onClick,
 }: {
   label: string;
   overdue: boolean;
   color: string;
   progress?: number;
+  onClick?: () => void;
 }) {
   const cleanLabel = label.replace(/^hace\s+/, "");
   const parts = cleanLabel.split(" ");
 
   return (
-    <div className="grid gap-1 justify-items-center">
+    <div
+      className="grid gap-1 justify-items-center"
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
+      style={onClick ? { cursor: "pointer" } : undefined}
+    >
       <CircularProgress size={80} progress={progress ?? 0} color={color}>
         <p className="mb-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
           {overdue ? "Vencida" : "En"}
