@@ -284,7 +284,6 @@ export type SymptomIntensities = {
   burning: number;
   photophobia: number;
   blurry_vision: number;
-  tearing: number;
   stinging?: number;
   pressure?: number;
 };

@@ -6,7 +6,6 @@ export function calcSymptomState(s: SymptomIntensities): SymptomState {
     s.burning,
     s.photophobia,
     s.blurry_vision,
-    s.tearing,
     s.stinging ?? 0,
     s.pressure ?? 0,
   ];

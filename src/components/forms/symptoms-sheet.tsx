@@ -2,11 +2,10 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  DropIcon,
+  DropHalfIcon,
   FireIcon,
   SunIcon,
   WaveSineIcon,
-  DropHalfIcon,
   LightningIcon,
   CircleHalfIcon,
   CheckCircleIcon,
@@ -30,14 +29,13 @@ const SYMPTOM_FIELDS: {
   label: string;
   Icon: React.ElementType;
 }[] = [
-  { key: "dryness", label: "Sequedad", Icon: DropIcon },
-  { key: "burning", label: "Ardor", Icon: FireIcon },
-  { key: "photophobia", label: "Fotofobia", Icon: SunIcon },
-  { key: "blurry_vision", label: "V. borrosa", Icon: WaveSineIcon },
-  { key: "tearing", label: "Lagrimeo", Icon: DropHalfIcon },
-  { key: "stinging", label: "Pinchazos", Icon: LightningIcon },
-  { key: "pressure", label: "Presión", Icon: CircleHalfIcon },
-];
+    { key: "dryness", label: "Sequedad", Icon: DropHalfIcon },
+    { key: "burning", label: "Ardor", Icon: FireIcon },
+    { key: "photophobia", label: "Fotofobia", Icon: SunIcon },
+    { key: "blurry_vision", label: "V. borrosa", Icon: WaveSineIcon },
+    { key: "stinging", label: "Pinchazos", Icon: LightningIcon },
+    { key: "pressure", label: "Presión", Icon: CircleHalfIcon },
+  ];
 
 const INTENSITY_COLOR: Record<number, string> = {
   0: "var(--text-faint)",
@@ -53,12 +51,12 @@ const INTENSITY_COLOR: Record<number, string> = {
   10: "var(--pain-high)",
 };
 
+
 const DEFAULT_INTENSITIES: SymptomIntensities = {
   dryness: 0,
   burning: 0,
   photophobia: 0,
   blurry_vision: 0,
-  tearing: 0,
   stinging: 0,
   pressure: 0,
 };

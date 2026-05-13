@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import {
-  DropIcon,
+  DropHalfIcon,
   FireIcon,
   SunIcon,
   WaveSineIcon,
-  DropHalfIcon,
   LightningIcon,
   CircleHalfIcon,
   EyeClosedIcon,
@@ -16,11 +15,10 @@ import { cn } from "@/lib/utils";
 import type { SymptomIntensities, SymptomState, SymptomTopItem } from "@/types/domain";
 
 const SYMPTOM_ICONS: Record<keyof SymptomIntensities, React.ElementType> = {
-  dryness: DropIcon,
+  dryness: DropHalfIcon,
   burning: FireIcon,
   photophobia: SunIcon,
   blurry_vision: WaveSineIcon,
-  tearing: DropHalfIcon,
   stinging: LightningIcon,
   pressure: CircleHalfIcon,
 };
@@ -30,7 +28,6 @@ const SYMPTOM_LABELS: Record<keyof SymptomIntensities, string> = {
   burning: "Ardor",
   photophobia: "Fotofobia",
   blurry_vision: "V. Borrosa",
-  tearing: "Lagrimeo",
   stinging: "Pinchazos",
   pressure: "Presión",
 };
@@ -185,7 +182,6 @@ export function SymptomStatusCard({ onRegister }: Props) {
     latest.intensities.burning,
     latest.intensities.photophobia,
     latest.intensities.blurry_vision,
-    latest.intensities.tearing,
     latest.intensities.stinging ?? 0,
     latest.intensities.pressure ?? 0,
   ].filter((v) => v > 0);
