@@ -159,34 +159,17 @@ export function SymptomsSheet({ onSaved }: Props) {
               max={new Date()}
               className="flex-1"
             />
-            <button
-              type="button"
-              onClick={() => setLoggedAt(new Date().toISOString())}
-              className="rounded-full border border-[var(--border)] px-3 py-2 text-[12px] font-medium text-[var(--accent)] transition-colors hover:bg-[var(--accent-dim)] active:scale-95"
-            >
-              Ahora
-            </button>
           </div>
         </div>
 
         {/* Symptom sliders — compact single-row per symptom */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between mb-2">
+        <div className="space-y-2">
+          <div className="flex items-start justify-between mb-2">
             <p className="section-label mb-0">1. Intensidad de síntomas</p>
-            <div className="flex items-center gap-2">
-              {latest && !loadedLast && (
-                <button
-                  type="button"
-                  onClick={loadLastValues}
-                  className="flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--text-muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--accent-dim)] active:scale-95"
-                >
-                  <ClockCounterClockwiseIcon size={11} />
-                  Cargar últimos
-                </button>
-              )}
+            <div className="flex flex-col items-end gap-1.5">
               {previewState && (
                 <span
-                  className="rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize"
+                  className="rounded-full px-2.5 py-0.5 text-[12px] font-semibold capitalize shrink-0"
                   style={{
                     background: `color-mix(in srgb, ${previewStateColor(previewState)} 15%, transparent)`,
                     color: previewStateColor(previewState),
@@ -195,6 +178,22 @@ export function SymptomsSheet({ onSaved }: Props) {
                   {previewState}
                 </span>
               )}
+              {latest && (
+                loadedLast ? (
+                  <span className="text-[11px] font-medium text-[var(--text-faint)]">
+                    Últimos cargados
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={loadLastValues}
+                    className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
+                  >
+                    <ClockCounterClockwiseIcon size={11} />
+                    Cargar últimos
+                  </button>
+                )
+              )}
             </div>
           </div>
 
@@ -202,10 +201,10 @@ export function SymptomsSheet({ onSaved }: Props) {
             const val = (intensities[key] ?? 0) as number;
             const color = INTENSITY_COLOR[val];
             return (
-              <div key={key} className="grid items-center gap-2" style={{ gridTemplateColumns: "88px 1fr 32px" }}>
-                <span className="flex items-center gap-1.5 min-w-0">
-                  <Icon size={12} className="shrink-0 text-[var(--text-faint)]" />
-                  <span className="truncate text-[12px] text-[var(--text-muted)]">{label}</span>
+              <div key={key} className="grid items-center gap-3" style={{ gridTemplateColumns: "96px 1fr 36px" }}>
+                <span className="flex items-center gap-2 min-w-0">
+                  <Icon size={14} className="shrink-0 text-[var(--text-faint)]" />
+                  <span className="truncate text-[13px] font-medium text-[var(--text-muted)]">{label}</span>
                 </span>
                 <input
                   type="range"
@@ -222,7 +221,7 @@ export function SymptomsSheet({ onSaved }: Props) {
                   onChange={(e) => setField(key, Number(e.target.value))}
                 />
                 <span
-                  className="mono text-right text-[12px] font-semibold tabular-nums"
+                  className="mono text-right text-[15px] font-bold tabular-nums"
                   style={{ color }}
                 >
                   {val}
@@ -236,7 +235,7 @@ export function SymptomsSheet({ onSaved }: Props) {
         {/* Triggers */}
         <div className="space-y-2">
           <p className="section-label">2. Posibles desencadenantes <span className="font-normal text-[var(--text-faint)]">(opcional)</span></p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2.5">
             {TRIGGER_OPTIONS.map((opt) => {
               const val = opt.value as TriggerType;
               const active = selectedTriggers.includes(val);
@@ -246,7 +245,7 @@ export function SymptomsSheet({ onSaved }: Props) {
                   type="button"
                   onClick={() => toggleTrigger(val)}
                   className={cn(
-                    "rounded-full border px-3 py-1.5 text-[12px] font-medium transition duration-[120ms] ease-out active:scale-95",
+                    "rounded-full border px-3.5 py-2 text-[13px] font-medium transition duration-[120ms] ease-out active:scale-95",
                     active
                       ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
                       : "border-[var(--border)] bg-[var(--surface)] text-[var(--text-muted)]",
@@ -263,13 +262,13 @@ export function SymptomsSheet({ onSaved }: Props) {
         <div className="space-y-2">
           <p className="section-label">3. Nota adicional <span className="font-normal text-[var(--text-faint)]">(opcional)</span></p>
           <textarea
-            className="w-full resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--accent)] min-h-[80px]"
+            className="w-full resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] focus:outline-none focus:border-[var(--accent)] min-h-[80px]"
             maxLength={200}
             placeholder="¿Quieres agregar algún detalle sobre cómo te sientes?"
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
-          <p className="text-right text-[11px] text-[var(--text-faint)]">{note.length}/200</p>
+          <p className="text-right text-[12px] text-[var(--text-faint)]">{note.length}/200</p>
         </div>
       </div>
 
