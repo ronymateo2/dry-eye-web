@@ -120,10 +120,7 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
         />
         <span className="flex min-w-0 items-baseline gap-1.5">
           <span
-            className={cn(
-              "truncate text-[17px] font-medium capitalize leading-none",
-              item.overdue ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]",
-            )}
+            className="truncate text-[17px] font-medium capitalize leading-none text-[var(--text-primary)]"
           >
             {item.name}
           </span>

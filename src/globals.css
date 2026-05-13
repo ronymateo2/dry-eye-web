@@ -52,6 +52,7 @@
   --btn-primary-text: #121008;
   --wheel-fade: rgba(28, 24, 16, 0.96);
   --fab-shadow: rgba(212, 162, 76, 0.40);
+  --topo-accent: #B25FEA;
 }
 
 [data-font="atkinson-hyperlegible"] {
@@ -79,16 +80,16 @@
   --accent: #7C6DCD;
   --accent-dim: rgba(124, 109, 205, 0.12);
   --accent-bright: #9D91D9;
-  --pain-low: #6CD9A0;
-  --pain-mid: #F4A25A;
-  --pain-high: #F47070;
-  --dose-early: #6CD9A0;
+  --pain-low: #67CE67;
+  --pain-mid: #EC6330;
+  --pain-high: #EB4B62;
+  --dose-early: #67CE67;
   --dose-mid: #7C6DCD;
-  --dose-late: #F4A25A;
-  --dose-overdue: #F47070;
-  --success: #6CD9A0;
-  --warning: #F4A25A;
-  --error: #F47070;
+  --dose-late: #EC6330;
+  --dose-overdue: #EB4B62;
+  --success: #67CE67;
+  --warning: #EC6330;
+  --error: #EB4B62;
   --info-bg: rgba(124, 109, 205, 0.10);
   --info-border: rgba(124, 109, 205, 0.25);
   --surface-card: rgba(255, 255, 255, 0.7);
