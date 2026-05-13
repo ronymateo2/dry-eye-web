@@ -81,6 +81,7 @@ export const api = {
   unarchiveDropType: (id: string) => api.post<{ ok: boolean }>(`/drop-types/${id}/unarchive`, {}),
 
   saveDrop: (body: SaveDropInput) => api.post("/drops", body),
+  deleteDrop: (id: string) => api.delete(`/drops/${id}`),
   getLastDrop: () => api.get<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_name: string; drop_type_id: string } | null>("/drops/last"),
   getLastDropPerType: () => api.get<DropScheduleEntry[]>("/drops/last-per-type"),
   getDropStatsPerType: () => api.get<DropTypeStats[]>("/drops/stats-per-type"),
