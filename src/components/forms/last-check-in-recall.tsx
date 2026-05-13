@@ -72,7 +72,7 @@ export function LastCheckInRecall({ data, triggerLabel, onApply }: Props) {
 
       <div className="flex items-start justify-between gap-3 px-3.5 pt-3.5 pb-3">
         <div className="min-w-0">
-          <p className="m-0 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+          <p className="m-0 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
             <ClockIcon size={11} weight="bold" />
             Ultimo registro
           </p>

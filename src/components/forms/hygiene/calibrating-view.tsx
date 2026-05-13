@@ -25,7 +25,7 @@ export function CalibratingView({
       {/* Chip */}
       <div className="w-full">
         <span
-          className="rounded-full px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.12em]"
+          className="rounded-full px-3 py-[5px] text-[11px] font-semibold uppercase tracking-[0.12em]"
           style={{
             border: "1px solid var(--border)",
             color: "var(--text-muted)",

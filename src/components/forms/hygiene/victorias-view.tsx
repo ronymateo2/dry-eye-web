@@ -61,7 +61,7 @@ export function VictoriasView({
   return (
     <div className="flex flex-col gap-4 px-5 pb-8">
       <p
-        className="text-[10px] font-semibold uppercase tracking-[0.12em]"
+        className="text-[11px] font-semibold uppercase tracking-[0.12em]"
         style={{ color: "var(--text-faint)" }}
       >
         Ciclo actual — 21 días calendario desde el inicio

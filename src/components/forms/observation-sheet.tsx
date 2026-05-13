@@ -116,7 +116,7 @@ function SelectOptionsEditor({
       ))}
       <div className="flex items-center gap-2">
         <input
-          className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-1 text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
+          className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-1 text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
           placeholder="Nueva opción"
           value={newOpt}
           onChange={(e) => setNewOpt(e.target.value)}
@@ -164,7 +164,7 @@ function PropertyRow({
     )}>
       <div className="flex items-center gap-2">
         <input
-          className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] placeholder:italic focus:outline-none"
+          className="flex-1 bg-transparent text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] placeholder:italic focus:outline-none"
           placeholder={showError && !prop.label.trim() ? "Nombre requerido" : "Nombre del campo…"}
           value={prop.label}
           onChange={(e) => updateLabel(e.target.value)}
@@ -317,7 +317,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
           <input
             className={cn(
               "w-full rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-3",
-              "text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]",
+              "text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)]",
               "focus:outline-none focus:border-[var(--accent)]",
               "h-[48px]"
             )}
@@ -360,7 +360,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
                 className="overflow-hidden"
               >
                 <input
-                  className="mt-2 w-full rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-2.5 text-[14px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+                  className="mt-2 w-full rounded-[12px] border border-[var(--border)] bg-transparent px-4 py-2.5 text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
                   placeholder="Especificar zona..."
                   maxLength={60}
                   value={bodyZoneCustom}

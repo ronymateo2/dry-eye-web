@@ -369,7 +369,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
 
             <select
               aria-label="Seleccionar tipo de gota"
-              className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors appearance-none"
+              className="min-h-12 w-full rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[16px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors appearance-none"
               value={selectedDropType}
               onChange={(e) => { setSelectedDropType(e.target.value); setShowDiscardConfirm(false); }}
             >

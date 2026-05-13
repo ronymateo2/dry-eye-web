@@ -76,7 +76,7 @@ export function VialDiscardSheet({
             <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5">
               <div className="mb-0.5 flex items-center gap-1.5">
                 <ClockIcon size={11} className="text-[var(--text-faint)]" />
-                <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--text-faint)]">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-faint)]">
                   Abierto
                 </span>
               </div>
@@ -87,7 +87,7 @@ export function VialDiscardSheet({
             <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5">
               <div className="mb-0.5 flex items-center gap-1.5">
                 <TimerIcon size={11} className="text-[var(--text-faint)]" />
-                <span className="text-[10px] font-medium uppercase tracking-wide text-[var(--text-faint)]">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-faint)]">
                   Duración
                 </span>
               </div>

@@ -20,7 +20,7 @@ const DROP_TYPE_COLORS = [
 function StatCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[10px] font-semibold tracking-wide uppercase text-[var(--text-muted)]">{label}</span>
+      <span className="text-[11px] font-semibold tracking-wide uppercase text-[var(--text-muted)]">{label}</span>
       <span className="mono text-[15px] tabular-nums text-[var(--text-primary)]">{children}</span>
     </div>
   );
@@ -45,7 +45,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
 
   if (!stats || stats.length === 0) {
     return (
-      <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
+      <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
         Aún no tienes tipos de gota. Crea uno en la sección de tipos de gota.
       </div>
     );
@@ -120,7 +120,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
                       : `${daysSinceFirst}d`}
                   </div>
                   {firstLabel && lastLabel && (
-                    <div className="flex items-center justify-end gap-1 text-[10px] text-[var(--text-faint)] mt-1.5">
+                    <div className="flex items-center justify-end gap-1 text-[11px] text-[var(--text-faint)] mt-1.5">
                       <CalendarIcon size={10} weight="regular" />
                       <span>{firstLabel} — {lastLabel}</span>
                     </div>

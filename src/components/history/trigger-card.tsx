@@ -24,7 +24,7 @@ export function TriggerCard({ item, timezone }: { item: DisplayTriggerGroup; tim
               <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
                 {TRIGGER_LABELS[single.triggerType]}
               </p>
-              <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)]">
+              <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)]">
                 Intensidad {single.intensity} · {time}
               </p>
             </div>
@@ -43,7 +43,7 @@ export function TriggerCard({ item, timezone }: { item: DisplayTriggerGroup; tim
               </div>
               <div>
                 <p className="text-[13px] font-semibold text-[var(--text-primary)]">Triggers</p>
-                <p className="mono text-[10px] text-[var(--text-muted)]">{time}</p>
+                <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
               </div>
             </div>
           </div>
@@ -52,7 +52,7 @@ export function TriggerCard({ item, timezone }: { item: DisplayTriggerGroup; tim
               <div key={i} className="flex items-center justify-between">
                 <span className="text-[13px] text-[var(--text-primary)]">{TRIGGER_LABELS[t.triggerType]}</span>
                 <span
-                  className="text-[10px] font-medium uppercase tracking-[0.1em]"
+                  className="text-[11px] font-medium uppercase tracking-[0.1em]"
                   style={{ color: intensityColor(t.intensity) }}
                 >
                   Int. {t.intensity}

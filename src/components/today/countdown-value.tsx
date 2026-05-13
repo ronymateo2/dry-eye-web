@@ -99,7 +99,7 @@ export function CountdownValue({
                 >
                   {value}
                 </motion.span>
-                <span className="pb-0.5 text-[10px] font-semibold leading-none">
+                <span className="pb-0.5 text-[11px] font-semibold leading-none">
                   {unit}
                 </span>
               </span>

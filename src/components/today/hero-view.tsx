@@ -45,7 +45,7 @@ export function HeroView({
         <TopographicBg position="calc(100% + 20px) -10px" size="600px" />
 
         <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-4">
-          <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
+          <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
           <div className="flex shrink-0 items-center gap-2">
             <ViewDayButton onClick={() => setProjectionOpen(true)} />
             <ViewToggle view={view} setView={setView} />
@@ -101,7 +101,7 @@ export function HeroView({
                 type="button"
                 onClick={() => dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
                 aria-label={`Registrar dosis de ${heroEntry.name}`}
-                className="group inline-flex items-center gap-1.5 text-[13px] font-semibold transition-colors hover:text-[var(--accent-bright)] active:opacity-70"
+                className="group inline-flex items-center gap-1.5 text-[14px] font-semibold transition-colors hover:text-[var(--accent-bright)] active:opacity-70"
                 style={{ color: "var(--accent)" }}
               >
                 <CheckCircleIcon size={16} weight="bold" className="shrink-0" />
@@ -119,7 +119,7 @@ export function HeroView({
         {timelineEntries.length > 0 && (
           <div className="relative z-10 border-t border-[var(--border)]">
             <div className="flex items-baseline gap-3 px-4 py-3">
-              <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
+              <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
             </div>
             <div className="space-y-0 px-1 pb-2">
               {timelineEntries.map((entry, i) => {

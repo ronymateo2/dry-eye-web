@@ -57,13 +57,13 @@ export function TimelineRow({
       <div className="grid min-w-0 flex-1 gap-1">
         <span className="flex min-w-0 items-center gap-2">
           <span
-            className="font-mono text-[12px] tabular-nums whitespace-nowrap"
+            className="font-mono text-[13px] tabular-nums whitespace-nowrap"
             style={{ color: "var(--text-faint)" }}
           >
             {computed?.nextTime ?? `cada ${entry.interval_hours}h`}
           </span>
           <span
-            className="truncate text-[14px] font-bold capitalize leading-none"
+            className="truncate text-[15px] font-bold capitalize leading-none"
             style={{ color: "var(--text-primary)" }}
           >
             {entry.name}
@@ -82,7 +82,7 @@ export function TimelineRow({
             aria-label={`Descartar vial de ${entry.name}`}
           >
             <EyedropperSampleIcon size={11} weight="fill" className="shrink-0" />
-            <span className="min-w-0 truncate font-mono text-[10px] font-semibold uppercase tracking-[0.04em] tabular-nums">
+            <span className="min-w-0 truncate font-mono text-[11px] font-semibold uppercase tracking-[0.04em] tabular-nums">
               {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
             </span>
             <TrashIcon size={11} weight="regular" className="shrink-0" />
@@ -92,7 +92,7 @@ export function TimelineRow({
 
       <span className="flex shrink-0 items-center gap-1.5 pointer-events-none pt-0.5">
         <span
-          className="font-mono text-[12px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+          className="font-mono text-[13px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
           {noRecord ? badgeLabel : `en ${badgeLabel}`}

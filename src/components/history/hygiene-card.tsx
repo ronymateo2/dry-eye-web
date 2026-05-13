@@ -36,7 +36,7 @@ function HygieneTimeline({
 
             {!isLast && (
               <TimelineGap lineColor={statusColor}>
-                <span className="mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                <span className="mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
                   {gap}
                 </span>
               </TimelineGap>
@@ -144,7 +144,7 @@ export function HygieneCard({
         >
           <div className="overflow-hidden">
             <div className="mt-2.5 rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3">
-              <p className="mono mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+              <p className="mono mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
                 Sesiones
               </p>
               <HygieneTimeline sessions={sessions} timezone={timezone} statusColor={statusColor} />
@@ -157,7 +157,7 @@ export function HygieneCard({
         <div className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-2.5">
           {friction && (
             <span
-              className="self-start rounded-[var(--radius-sm)] border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em]"
+              className="self-start rounded-[var(--radius-sm)] border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
               style={{
                 color: "var(--accent)",
                 borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",

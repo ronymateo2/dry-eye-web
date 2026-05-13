@@ -33,7 +33,7 @@ function PrimaryRow({ field, value, barsReady }: { field: ScoreField; value: num
         style={{ color: value === 0 ? "var(--text-faint)" : painColor(value) }}
       >
         {value}
-        <span className="text-[10px] font-normal opacity-60">/10</span>
+        <span className="text-[11px] font-normal opacity-60">/10</span>
       </span>
     </div>
   );
@@ -95,7 +95,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
             {item.triggerTypes && item.triggerTypes.length > 1 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.triggerTypes.map((t) => (
-                  <span key={t} className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--text-faint)]">
+                  <span key={t} className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[11px] text-[var(--text-faint)]">
                     {TRIGGER_LABELS[t as keyof typeof TRIGGER_LABELS] ?? t}
                   </span>
                 ))}
@@ -120,7 +120,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
 
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
             Zona ocular
           </span>
           <span className="h-px flex-1 bg-[var(--border)]" />
@@ -139,7 +139,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
 
       <div className="mt-3 space-y-2">
         <div className="flex items-center gap-2">
-          <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
             Asociado
           </span>
           <span className="h-px flex-1 bg-[var(--border)]" />
@@ -161,7 +161,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
             {item.painQuality.map((q) => (
               <span
                 key={q}
-                className="rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-0.5 text-[10px] font-medium text-[var(--text-muted)]"
+                className="rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--text-muted)]"
               >
                 {q}
               </span>

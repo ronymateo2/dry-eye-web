@@ -31,7 +31,7 @@ export function ScreenHeader({ title, description, action, user }: Props) {
               </div>
             )}
             <div className="min-w-0">
-              <p className="m-0 text-[10px] font-semibold tracking-[0.12em] text-[var(--text-faint)] uppercase">Sesion</p>
+              <p className="m-0 text-[11px] font-semibold tracking-[0.12em] text-[var(--text-faint)] uppercase">Sesion</p>
               <p className="m-0 truncate text-[13px] font-medium text-[var(--accent)]">{user?.name ?? "Usuario"}</p>
             </div>
           </Link>

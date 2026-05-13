@@ -23,7 +23,7 @@ export function VialsTab() {
             ))}
           </div>
         ) : loadError ? (
-          <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
+          <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
             {loadError}
           </div>
         ) : !historyData || historyData.vials.length === 0 ? (

@@ -534,7 +534,7 @@ export function ReportScreen({ data }: Props) {
           <span className="mono text-[30px] font-medium leading-none text-[var(--text-primary)]">
             {data.checkInsCount}
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-faint)]">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--text-faint)]">
             registros
           </span>
         </div>

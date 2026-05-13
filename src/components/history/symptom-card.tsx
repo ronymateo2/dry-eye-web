@@ -14,7 +14,7 @@ export function SymptomCard({ item, timezone }: { item: DisplaySymptomGroup; tim
         </div>
         <div>
           <p className="text-[13px] font-semibold text-[var(--text-primary)]">Síntomas</p>
-          <p className="mono text-[10px] text-[var(--text-muted)]">{time}</p>
+          <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-x-3 gap-y-1 pl-[42px]">

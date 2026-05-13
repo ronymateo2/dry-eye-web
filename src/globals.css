@@ -272,7 +272,7 @@ img, svg { display: block; max-width: 100%; }
 .section-label {
   margin: 0 0 12px;
   color: var(--text-faint);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.10em;
@@ -308,7 +308,7 @@ img, svg { display: block; max-width: 100%; }
   border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.35;
   outline: none;
   transition: border-color 160ms ease-out;
@@ -520,7 +520,7 @@ img, svg { display: block; max-width: 100%; }
   border-radius: 12px;
 }
 .bottom-nav__label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.04em;
   line-height: 1;
@@ -622,7 +622,7 @@ img, svg { display: block; max-width: 100%; }
 }
 .action-sheet-section-label {
   margin: 0 0 12px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.10em;
   text-transform: uppercase;
@@ -662,7 +662,7 @@ img, svg { display: block; max-width: 100%; }
   border-color: rgba(124, 109, 205, 0.25);
 }
 .action-tile-label {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.2;
   color: var(--text-primary);
@@ -687,7 +687,7 @@ img, svg { display: block; max-width: 100%; }
   border-top: 1px solid var(--border);
 }
 .action-row-label {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   line-height: 1.3;
 }
@@ -744,7 +744,7 @@ img, svg { display: block; max-width: 100%; }
 
 
 @media screen and (max-width: 480px) {
-  .section-label  { font-size: 13px; }
+  .section-label  { font-size: 14px; }
   .screen-subtitle { font-size: 17px; }
   .screen-title   { font-size: 24px; }
 }

@@ -81,7 +81,7 @@ export function IntervalPills({
             onKeyDown={(e) => e.key === "Enter" && handleCustomCommit()}
             placeholder="ej. 3"
             autoFocus
-            className="w-20 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="w-20 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[16px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
           />
           <span className="text-[13px] text-[var(--text-muted)]">horas</span>
         </div>

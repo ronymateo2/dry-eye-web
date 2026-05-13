@@ -33,7 +33,7 @@ export function TimesPicker({
             type="time"
             value={t}
             onChange={(e) => handleUpdateSlot(i, e.target.value)}
-            className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[16px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
           />
           <button
             type="button"

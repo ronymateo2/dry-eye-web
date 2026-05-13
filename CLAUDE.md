@@ -1,6 +1,6 @@
 # AGENTS.md — dry-eye-web
 
-PWA de salud para pacientes hispanohablantes con ojo seco neuropático. Registra dolor (5 zonas), gotas, sueño, higiene palpebral, síntomas, triggers, medicamentos y observaciones clínicas. Dashboard con correlaciones Spearman. UI en español, dark-first con light opt-in.
+PWA de salud para pacientes hispanohablantes con ojo seco neuropático. Registra dolor (5 zonas), gotas, viales desechables, sueño, higiene palpebral, síntomas, triggers, medicamentos y observaciones clínicas. Dashboard con correlaciones Spearman. UI en español, dark-first con light opt-in.
 
 Backend: https://github.com/ronymateo2/dry_eye_api (Hono + Cloudflare Workers + D1)
 
@@ -62,7 +62,6 @@ src/
     register/             # day-projection, drops-schedule cards
     report/               # report-screen (jsPDF + html2canvas)
     ui/                   # button, wheel-picker, pain-slider, segmented-control, date-time-picker, etc.
-    treatments/           # drops-panel, drop-sheet (tipo de gota), medications-panel
 ```
 
 **Path alias:** `@/` → `src/` (configured in tsconfig + vite.config.ts)
@@ -72,15 +71,18 @@ src/
 | Route | Page | Auth |
 |---|---|---|
 | `/login` | LoginPage | ✗ |
-| `/register` | RegisterPage | ✓ |
+| `/today` | TodayPage | ✓ |
+| `/check-in` | RegisterPage (pain form) | ✓ |
+| `/register` | RegisterPage (pain form) | ✓ |
 | `/history` | HistoryPage | ✓ |
 | `/dashboard` | DashboardPage | ✓ |
 | `/report` | ReportPage | ✓ |
 | `/profile` | ProfilePage | ✓ |
 | `/treatments` | TreatmentsPage | ✓ |
+| `/vials` | VialsPage | ✓ |
 | `/auth/callback` | AuthCallbackPage | — |
 
-- Unauthenticated → `/login`. Authenticated default → `/register`.
+- Unauthenticated → `/login`. Authenticated default → `/today`.
 - 401 → `clearToken()` + redirect to `/`.
 
 ## Auth
@@ -110,6 +112,7 @@ SaveMedicationInput, SaveMedicationIntakeInput, MedicationRecord, MedicationInta
 SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation,
 HygieneRecord, HistoryEntry, HistoryDayGroup, HistoryFeed,
 CalendarStatus, CalendarEventEntry, DropScheduleEntry, DropTypeStats,
+VialRecord, VialInstanceRecord, SaveVialInput,
 ActionState, SleepQuality, DropEye, TriggerType, ObservationEye,
 HygieneStatus, FrictionType, PainQuality, TherapyType, MedicationPhase
 ```

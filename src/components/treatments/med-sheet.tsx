@@ -103,7 +103,7 @@ function MedFormContent({
   return (
     <div className="space-y-3">
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Nombre</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Nombre</p>
         <TextInput
           placeholder="ej. Ciclosporina 0.1%"
           value={form.name}
@@ -113,7 +113,7 @@ function MedFormContent({
         />
       </div>
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Dosis</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Dosis</p>
         <TextInput
           placeholder="ej. 1 gota, 600mg"
           value={form.dosage}
@@ -122,7 +122,7 @@ function MedFormContent({
         />
       </div>
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Frecuencia</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Frecuencia</p>
         <TextInput
           placeholder="ej. 2 veces al día"
           value={form.frequency}
@@ -131,14 +131,14 @@ function MedFormContent({
         />
       </div>
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Horarios (Google Calendar)</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Horarios (Google Calendar)</p>
         <TimesPicker
           value={form.times}
           onChange={(times) => setForm((f) => ({ ...f, times }))}
         />
       </div>
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Notas</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Notas</p>
         <TextInput
           placeholder="opcional"
           value={form.notes}
@@ -147,7 +147,7 @@ function MedFormContent({
         />
       </div>
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Ciclo (opcional)</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Ciclo (opcional)</p>
         <DateRangePicker
           from={form.startDate || null}
           to={form.endDate || null}
@@ -155,7 +155,7 @@ function MedFormContent({
         />
       </div>
       <div className="space-y-1.5">
-        <p className="text-[12px] text-[var(--text-faint)]">Fases (opcional)</p>
+        <p className="text-[13px] text-[var(--text-faint)]">Fases (opcional)</p>
         <div className="space-y-2">
           {form.phases.map((phase, i) => (
             <div key={i} className="rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] p-3 space-y-2">
@@ -169,7 +169,7 @@ function MedFormContent({
                     phases[i] = { ...phases[i], label: e.target.value };
                     return { ...f, phases };
                   })}
-                  className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-faint)]"
+                  className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[16px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-faint)]"
                 />
                 <button
                   type="button"
@@ -189,7 +189,7 @@ function MedFormContent({
                   phases[i] = { ...phases[i], dosage: e.target.value };
                   return { ...f, phases };
                 })}
-                className="w-full rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[14px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-faint)]"
+                className="w-full rounded-[8px] border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[16px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)] placeholder:text-[var(--text-faint)]"
               />
               <DateRangePicker
                 from={phase.start_date || null}

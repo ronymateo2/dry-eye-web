@@ -150,7 +150,7 @@ function DropFormContent({
                 value={form.vialDuration ?? ""}
                 onChange={(e) => setForm((f) => ({ ...f, vialDuration: Number(e.target.value) || 1 }))}
                 placeholder="Otro"
-                className="h-10 w-20 rounded-full border border-[var(--border)] bg-[var(--bg)] px-3 text-center text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                className="h-10 w-20 rounded-full border border-[var(--border)] bg-[var(--bg)] px-3 text-center text-[16px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
               />
             </div>
           </div>

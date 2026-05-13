@@ -58,7 +58,7 @@ export default function TodayPage() {
           onClick={() => navigate("/treatments")}
           className={cn(
             "flex min-h-[48px] w-full items-center gap-3 rounded-[9px] px-2 py-1.5 text-left",
-            "text-[14px] text-[var(--text-muted)]",
+            "text-[15px] text-[var(--text-muted)]",
             "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
             "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
           )}

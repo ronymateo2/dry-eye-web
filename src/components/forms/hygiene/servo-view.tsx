@@ -109,7 +109,7 @@ export function ServoView({
         }}
       >
         <p
-          className="mb-3 text-[10px] font-semibold uppercase tracking-[0.12em]"
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
           style={{ color: "var(--text-muted)" }}
         >
           Dificultad en el Tiempo
@@ -179,7 +179,7 @@ export function ServoView({
               className="h-[6px] w-[6px] rounded-full"
               style={{ background: "var(--accent)" }}
             />
-            <span className="text-[10px]" style={{ color: "var(--text-faint)" }}>
+            <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
               Dificultad diaria
             </span>
           </div>
@@ -188,7 +188,7 @@ export function ServoView({
               className="h-[2px] w-[14px]"
               style={{ background: "var(--accent)", opacity: 0.45 }}
             />
-            <span className="text-[10px]" style={{ color: "var(--text-faint)" }}>
+            <span className="text-[11px]" style={{ color: "var(--text-faint)" }}>
               Tendencia
             </span>
           </div>
@@ -212,7 +212,7 @@ export function ServoView({
         }}
       >
         <p
-          className="mb-3 text-[10px] font-semibold uppercase tracking-[0.12em]"
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.12em]"
           style={{ color: "var(--text-muted)" }}
         >
           Distribución de Dificultad

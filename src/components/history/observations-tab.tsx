@@ -53,7 +53,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
 
   if (occurrences.length === 0) {
     return (
-      <div className="rounded-[var(--radius-md)] px-4 py-3 text-[13px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
+      <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
         No hay observaciones clínicas aún. Toca + para registrar tu primera observación.
       </div>
     );
@@ -83,7 +83,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
             <div className="min-w-0">
               <p className="text-[14px] font-semibold text-[var(--text-primary)]">{group.title}</p>
               {group.eye && group.eye !== "none" ? (
-                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)] mt-0.5">
+                <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)] mt-0.5">
                   {OBS_EYE_LABELS[group.eye as keyof typeof OBS_EYE_LABELS]}
                 </p>
               ) : null}
@@ -177,7 +177,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
         </div>
       )}
       {!hasMore && occurrences.length > 0 && (
-        <p className="mono text-center text-[10px] tracking-[0.12em] text-[var(--text-faint)] pb-4">
+        <p className="mono text-center text-[11px] tracking-[0.12em] text-[var(--text-faint)] pb-4">
           INICIO DEL HISTORIAL
         </p>
       )}

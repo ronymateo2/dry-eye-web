@@ -206,7 +206,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
             {/* Labels row: ahora + selected dot time */}
             <div className="relative h-5 mt-1.5">
               <span
-                className="absolute -translate-x-1/2 font-mono text-[10px] font-semibold"
+                className="absolute -translate-x-1/2 font-mono text-[11px] font-semibold"
                 style={{ left: `clamp(16px, ${nowPct}%, calc(100% - 24px))`, color: "var(--accent)" }}
               >
                 ahora
@@ -219,7 +219,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                     animate={{ opacity: 1, transform: "translateY(0px)" }}
                     exit={{ opacity: 0, transform: "translateY(3px)" }}
                     transition={{ type: "spring", duration: 0.32, bounce: 0 }}
-                    className="absolute -translate-x-1/2 font-mono text-[10px] font-semibold tabular-nums"
+                    className="absolute -translate-x-1/2 font-mono text-[11px] font-semibold tabular-nums"
                     style={{
                       left: `clamp(20px, ${pct(selected.time)}%, calc(100% - 28px))`,
                       color: heroAccent,
@@ -250,7 +250,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-2">
                       <ClockCountdownIcon size={12} weight="bold" style={{ color: heroAccent }} aria-hidden />
-                      <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-faint)" }}>
+                      <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--text-faint)" }}>
                         {heroLabel}
                       </p>
                     </div>
@@ -306,7 +306,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
           {/* Later doses — tappable rows */}
           {later.length > 0 && (
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-faint)" }}>
+              <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: "var(--text-faint)" }}>
                 Resto del día
               </p>
               <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface-el)" }}>

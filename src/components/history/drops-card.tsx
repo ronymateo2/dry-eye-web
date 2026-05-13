@@ -65,7 +65,7 @@ const DropGroupItemInner = ({
         <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
           {formatTime(last.loggedAt, timezone)}
         </span>
-        <span className="mono w-[26px] shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+        <span className="mono w-[26px] shrink-0 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
           {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
         </span>
         <div
@@ -90,11 +90,11 @@ const DropGroupItemInner = ({
       >
         <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
           <div className="mb-2 flex items-baseline justify-between">
-            <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+            <p className="mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
               {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
             </p>
             {typedDrops.length > 1 && (
-              <p className="mono text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+              <p className="mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
                 Intervalos
               </p>
             )}
@@ -163,7 +163,7 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
 
             {!isLast && (
               <TimelineGap>
-                <span className="mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                <span className="mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
                   {gap}
                 </span>
               </TimelineGap>
@@ -343,7 +343,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                     </span>
                     <div className="flex shrink-0 items-center gap-1.5">
                       <span
-                        className="mono inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[10px] font-bold tracking-wider text-[var(--text-faint)]"
+                        className="mono inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[11px] font-bold tracking-wider text-[var(--text-faint)]"
                         style={{
                           background:
                             "color-mix(in srgb, var(--surface-el) 60%, transparent)",
@@ -360,7 +360,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                 </TimelineRow>
                 {!isLast && (
                   <TimelineGap>
-                    <span className="mono text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                    <span className="mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
                       {gap}
                     </span>
                   </TimelineGap>

@@ -114,8 +114,8 @@ function TopSymptomCell({ item }: { item: SymptomTopItem }) {
   return (
     <div className="flex flex-col items-center gap-1">
       <Icon size={18} style={{ color }} className="shrink-0" />
-      <span className="text-[12px] text-[var(--text-muted)] leading-none text-center">{label}</span>
-      <span className="mono text-[14px] font-semibold" style={{ color }}>
+      <span className="text-[13px] text-[var(--text-muted)] leading-none text-center">{label}</span>
+      <span className="mono text-[15px] font-semibold" style={{ color }}>
         {item.value}/10
       </span>
     </div>
@@ -165,8 +165,8 @@ export function SymptomStatusCard({ onRegister }: Props) {
             <EyeClosedIcon size={18} className="text-[var(--text-faint)]" />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-[var(--text-primary)]">Registrar síntomas</p>
-            <p className="text-[13px] text-[var(--text-faint)]">Aún no hay registro hoy</p>
+            <p className="text-[15px] font-medium text-[var(--text-primary)]">Registrar síntomas</p>
+            <p className="text-[14px] text-[var(--text-faint)]">Aún no hay registro hoy</p>
           </div>
         </div>
       </motion.button>
@@ -227,8 +227,8 @@ export function SymptomStatusCard({ onRegister }: Props) {
             <p className="text-[22px] font-semibold leading-tight" style={{ color }}>
               {label}
             </p>
-            <p className="text-[15px] text-[var(--text-muted)] mt-1">{copy}</p>
-            <p className="text-[13px] text-[var(--text-faint)] mt-1">{timeAgo}</p>
+            <p className="text-[16px] text-[var(--text-muted)] mt-1">{copy}</p>
+            <p className="text-[14px] text-[var(--text-faint)] mt-1">{timeAgo}</p>
           </div>
           <IntensityGauge value={avgVal} state={state} />
         </div>
@@ -250,7 +250,7 @@ export function SymptomStatusCard({ onRegister }: Props) {
       <div className="mt-3 h-px bg-[var(--border)]" />
       <div className="mt-2.5 flex items-start gap-2">
         <SunIcon size={12} className="mt-[2px] shrink-0 text-[var(--accent)]" />
-        <p className="text-[13px] leading-relaxed text-[var(--text-muted)]">
+        <p className="text-[14px] leading-relaxed text-[var(--text-muted)]">
           <span className="font-medium text-[var(--text-primary)]">Consejo del día: </span>
           {ADVICE[state]}
         </p>

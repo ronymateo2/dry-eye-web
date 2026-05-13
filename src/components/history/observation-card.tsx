@@ -70,7 +70,7 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
               </span>
             )}
           </div>
-          <p className="mono mt-0.5 text-[10px] text-[var(--text-muted)]">
+          <p className="mono mt-0.5 text-[11px] text-[var(--text-muted)]">
             {eyeLabel ? `${eyeLabel} · ` : ""}
             {time}
           </p>
