@@ -16,16 +16,24 @@ import { setLastDrop } from "@/lib/last-drop-store";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, DropEye } from "@/types/domain";
 
-export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void; initialDropTypeId?: string }) {
+export function DropSheet({
+  onSaved,
+  initialDropTypeId,
+  editDrop,
+}: {
+  onSaved: () => void;
+  initialDropTypeId?: string;
+  editDrop?: { id: string; loggedAt: string; eye: DropEye; quantity: number; dropTypeId: string };
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const user = useUser();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
-  const [selectedDropType, setSelectedDropType] = useState<string>("");
-  const [quantity, setQuantity] = useState(1);
-  const [eye, setEye] = useState<DropEye>("left");
-  const [loggedAt, setLoggedAt] = useState<string | null>(null);
+  const [selectedDropType, setSelectedDropType] = useState<string>(editDrop?.dropTypeId ?? "");
+  const [quantity, setQuantity] = useState(editDrop?.quantity ?? 1);
+  const [eye, setEye] = useState<DropEye>(editDrop?.eye ?? "left");
+  const [loggedAt, setLoggedAt] = useState<string | null>(editDrop?.loggedAt ?? null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [isPending, setIsPending] = useState(false);
@@ -76,7 +84,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     }
 
     setIsPending(true);
-    const dropId = crypto.randomUUID();
+    const dropId = editDrop?.id ?? crypto.randomUUID();
     const ts = loggedAt ? new Date(loggedAt).toISOString() : new Date().toISOString();
     const dropTypeName = dropTypes.find((dt) => dt.id === selectedDropType)?.name ?? "";
 
@@ -95,9 +103,9 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
     try {
       await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
       persistLastDrop();
-      toast.success("Gota registrada.");
+      toast.success(editDrop ? "Gota actualizada." : "Gota registrada.");
 
-      if (vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
+      if (!editDrop && vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
         try {
           await api.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
           toast.success(`Vial abierto · ${dropTypeName}`);
@@ -108,7 +116,10 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
 
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
+      queryClient.invalidateQueries({ queryKey: ["drops/recent", selectedDropType] });
+      if (editDrop && editDrop.dropTypeId !== selectedDropType) {
+        queryClient.invalidateQueries({ queryKey: ["drops/recent", editDrop.dropTypeId] });
+      }
       queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
@@ -284,7 +295,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
 
   return (
     <div className="space-y-5 pb-[calc(20px+env(safe-area-inset-bottom))]">
-      {lastDropLabel && (
+      {lastDropLabel && !editDrop && (
         <div className="rounded-[10px] border px-3 py-2.5" style={{ background: "var(--surface-el)", borderColor: "var(--border)" }}>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -427,7 +438,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         type="button"
         onClick={handleSave}
       >
-        {isPending ? "Guardando..." : state.status === "success" ? "Guardada" : "Guardar gota"}
+        {isPending ? "Guardando..." : editDrop ? "Guardar cambios" : "Guardar gota"}
       </Button>
     </div>
   );
