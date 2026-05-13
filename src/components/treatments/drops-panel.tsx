@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -12,12 +11,9 @@ import { ArchivedItems } from "@/components/treatments/archived-items";
 import { DropSheet } from "@/components/treatments/drop-sheet";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
-import { EyeIcon, EyedropperIcon } from "@phosphor-icons/react";
+import { EyeIcon, } from "@phosphor-icons/react";
 
 export function DropsPanel() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const returnTo = (location.state as { returnTo?: string } | null)?.returnTo ?? "/today";
   const qc = useQueryClient();
 
   const { data: dropTypes = [], isLoading } = useQuery({
@@ -120,18 +116,6 @@ export function DropsPanel() {
           <span className="text-[14px] text-[var(--text-muted)]">{item.name}</span>
         )}
       />
-
-      <button
-        type="button"
-        onClick={() => {
-          navigate(returnTo);
-          window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } }));
-        }}
-        className="flex min-h-[52px] w-full items-center justify-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--accent)_50%,transparent)] bg-[var(--accent-dim)] px-5 font-medium text-[var(--accent)] transition-opacity active:opacity-70"
-      >
-        <EyedropperIcon size={17} weight="fill" />
-        <span className="text-[15px]">Registrar gota</span>
-      </button>
 
       <DropSheet
         item={editingItem === "new" ? null : editingItem}

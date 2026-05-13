@@ -349,15 +349,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
       {state.status !== "idle" && <StatusBanner state={state} />}
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="section-label mb-0">Tipo de gota</p>
-          <button
-            onClick={() => { onSaved(); navigate("/treatments", { state: { returnTo: location.pathname } }); }}
-            className="text-[12px] font-medium text-[var(--accent)] hover:text-[var(--accent-bright)]"
-          >
-            + Nuevo
-          </button>
-        </div>
+        <p className="section-label mb-0">Tipo de gota</p>
 
         {dropTypes.length === 0 ? (
           <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-4 text-center text-[14px] text-[var(--text-muted)]">
