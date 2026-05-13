@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlarmIcon, CheckCircleIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
+import { TopographicBg } from "@/components/ui/topographic-bg";
 import { CountdownValue } from "./countdown-value";
 import { ViewDayButton, ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
@@ -40,8 +41,10 @@ export function HeroView({
 
   return (
     <>
-      <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
-        <div className="flex items-center justify-between gap-3 px-4 pt-4">
+      <div className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
+        <TopographicBg position="right -20px top -10px" size="600px" />
+
+        <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-4">
           <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>
           <div className="flex shrink-0 items-center gap-2">
             <ViewDayButton onClick={() => setProjectionOpen(true)} />
@@ -49,7 +52,7 @@ export function HeroView({
           </div>
         </div>
 
-        <div className="grid gap-5 px-4 pb-5 pt-5">
+        <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
           <div className="grid grid-cols-[80px_minmax(0,1fr)] items-start gap-4">
             <div className="pt-1">
               {computed ? (
@@ -114,7 +117,7 @@ export function HeroView({
         </div>
 
         {timelineEntries.length > 0 && (
-          <div className="border-t border-[var(--border)]">
+          <div className="relative z-10 border-t border-[var(--border)]">
             <div className="flex items-baseline gap-3 px-4 py-3">
               <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
             </div>

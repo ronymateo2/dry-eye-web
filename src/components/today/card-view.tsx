@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence } from "motion/react";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
+import { TopographicBg } from "@/components/ui/topographic-bg";
 import { ViewDayButton, ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
 import { VialRow } from "./vial-row";
@@ -27,8 +28,11 @@ export function CardView({
 
   return (
     <>
-      <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
+      <div className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
+        <TopographicBg position="right -20px top -10px" size="600px" />
+
+        <div className="relative z-10 space-y-3">
+          <div className="flex items-center justify-between gap-3">
           <p className="section-label mb-0">Próximas dosis</p>
           <div className="flex shrink-0 items-center gap-2">
             {scheduled.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
@@ -78,6 +82,7 @@ export function CardView({
             </div>
           </div>
         )}
+        </div>
       </div>
 
       <DayProjectionSheet

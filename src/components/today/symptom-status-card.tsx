@@ -12,6 +12,7 @@ import {
 import { api } from "@/lib/api";
 import { SYMPTOM_STATE_COLOR, SYMPTOM_STATE_COPY, SYMPTOM_STATE_LABEL } from "@/lib/symptom-state";
 import { cn } from "@/lib/utils";
+import { TopographicBg } from "@/components/ui/topographic-bg";
 import type { SymptomIntensities, SymptomState, SymptomTopItem } from "@/types/domain";
 
 const SYMPTOM_ICONS: Record<keyof SymptomIntensities, React.ElementType> = {
@@ -197,10 +198,13 @@ export function SymptomStatusCard({ onRegister }: Props) {
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-      className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4"
+      className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4"
     >
-      {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
+      <TopographicBg position="right -20px bottom -10px" size="600px" />
+      
+      <div className="relative z-10">
+        {/* Header */}
+        <div className="mb-3 flex items-center justify-between">
         <p className="section-label mb-0">Estado actual</p>
         <button
           type="button"
@@ -250,6 +254,7 @@ export function SymptomStatusCard({ onRegister }: Props) {
           <span className="font-medium text-[var(--text-primary)]">Consejo del día: </span>
           {ADVICE[state]}
         </p>
+      </div>
       </div>
     </motion.div>
   );
