@@ -74,19 +74,19 @@ export function HeroView({
             </div>
 
             <div className="grid min-w-0 gap-2 pt-1">
-              <h2 className="min-w-0 max-w-full truncate text-[24px] font-bold capitalize leading-none tracking-[-0.01em] text-[var(--text-primary)]">
+              <h2 className="min-w-0 max-w-full truncate text-[28px] font-bold capitalize leading-none tracking-[-0.02em] text-[var(--text-primary)]">
                 {heroEntry.name}
               </h2>
 
               {computed ? (
                 <div className="flex items-center gap-1.5">
                   <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
-                  <p className="font-mono text-[17px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                  <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
                     {computed.nextTime}
                   </p>
                 </div>
               ) : (
-                <p className="font-mono text-[15px] tabular-nums text-[var(--text-muted)]">
+                <p className="font-mono text-[17px] tabular-nums text-[var(--text-muted)]">
                   Cada {heroEntry.interval_hours}h
                 </p>
               )}
@@ -101,7 +101,7 @@ export function HeroView({
                 type="button"
                 onClick={() => dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
                 aria-label={`Registrar dosis de ${heroEntry.name}`}
-                className="group inline-flex items-center gap-1.5 text-[14px] font-semibold transition-colors hover:text-[var(--accent-bright)] active:opacity-70"
+                className="group inline-flex items-center gap-1.5 text-[15px] font-semibold transition-colors hover:text-[var(--accent-bright)] active:opacity-70"
                 style={{ color: "var(--accent)" }}
               >
                 <CheckCircleIcon size={16} weight="bold" className="shrink-0" />

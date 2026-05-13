@@ -40,12 +40,12 @@ export function VialDiscardSheet({
       onClose={onClose}
     >
       {vial && status && (
-        <div className="space-y-4 pt-1">
+        <div className="space-y-5 pt-2">
           {/* Vial icon + status badge */}
-          <div className="flex flex-col items-center gap-3 py-3">
+          <div className="flex flex-col items-center gap-4 py-4">
             <div
               className={cn(
-                "flex h-16 w-16 items-center justify-center rounded-full border-2",
+                "flex h-20 w-20 items-center justify-center rounded-full border-2",
                 status.isExpired
                   ? "border-[var(--error)]/30 bg-[var(--error)]/10"
                   : status.isWarning
@@ -53,12 +53,12 @@ export function VialDiscardSheet({
                     : "border-[var(--success)]/30 bg-[var(--success)]/10",
               )}
             >
-              <EyedropperSampleIcon size={28} style={{ color: status.color }} />
+              <EyedropperSampleIcon size={32} style={{ color: status.color }} />
             </div>
 
             <div
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium",
+                "inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-semibold",
                 status.isExpired
                   ? "bg-[var(--error)]/12 text-[var(--error)]"
                   : status.isWarning
@@ -66,32 +66,32 @@ export function VialDiscardSheet({
                     : "bg-[var(--success)]/12 text-[var(--success)]",
               )}
             >
-              <TimerIcon size={11} weight="fill" />
+              <TimerIcon size={12} weight="fill" />
               {status.rightLabel}
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5">
-              <div className="mb-0.5 flex items-center gap-1.5">
-                <ClockIcon size={11} className="text-[var(--text-faint)]" />
-                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-faint)]">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+              <div className="mb-1 flex items-center gap-1.5">
+                <ClockIcon size={12} className="text-[var(--text-faint)]" />
+                <span className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--text-faint)]">
                   Abierto
                 </span>
               </div>
-              <span className="text-[14px] font-semibold text-[var(--text-primary)]">
+              <span className="text-[20px] font-bold text-[var(--text-primary)]">
                 {openedAgo}
               </span>
             </div>
-            <div className="rounded-[10px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5">
-              <div className="mb-0.5 flex items-center gap-1.5">
-                <TimerIcon size={11} className="text-[var(--text-faint)]" />
-                <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--text-faint)]">
+            <div className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
+              <div className="mb-1 flex items-center gap-1.5">
+                <TimerIcon size={12} className="text-[var(--text-faint)]" />
+                <span className="text-[12px] font-semibold uppercase tracking-[0.06em] text-[var(--text-faint)]">
                   Duración
                 </span>
               </div>
-              <span className="text-[14px] font-semibold text-[var(--text-primary)]">
+              <span className="text-[20px] font-bold text-[var(--text-primary)]">
                 {vial.vial_duration ?? 24}h
               </span>
             </div>
@@ -99,13 +99,13 @@ export function VialDiscardSheet({
 
           {/* Progress bar */}
           <div>
-            <div className="mb-1.5 flex items-center justify-between">
-              <span className="text-[11px] text-[var(--text-faint)]">Vida del vial</span>
-              <span className="font-mono text-[11px] text-[var(--text-faint)]">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-[13px] font-medium text-[var(--text-muted)]">Vida del vial</span>
+              <span className="font-mono text-[13px] font-semibold text-[var(--text-muted)]">
                 {Math.min(100, Math.round(progress * 100))}% usado
               </span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--surface-el)]">
+            <div className="h-2.5 overflow-hidden rounded-full bg-[var(--surface-el)]">
               <div
                 className="h-full rounded-full transition-all duration-300"
                 style={{ width: `${Math.min(100, progress * 100)}%`, backgroundColor: status.color }}
@@ -114,19 +114,19 @@ export function VialDiscardSheet({
           </div>
 
           {/* Actions */}
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2.5 pt-3">
             <button
               type="button"
               onClick={onConfirm}
               disabled={isPending}
-              className="w-full rounded-[14px] bg-[var(--error)]/10 py-4 text-[15px] font-semibold text-[var(--error)] transition-opacity disabled:opacity-50 hover:bg-[var(--error)]/20"
+              className="flex min-h-[52px] w-full items-center justify-center rounded-[16px] bg-[var(--error)]/10 text-[17px] font-semibold text-[var(--error)] transition-opacity disabled:opacity-50 hover:bg-[var(--error)]/20"
             >
               {isPending ? "…" : "Sí, descartar"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full rounded-[14px] py-4 text-[15px] font-medium text-[var(--text-muted)] transition-opacity hover:opacity-70"
+              className="flex min-h-[52px] w-full items-center justify-center rounded-[16px] text-[17px] font-medium text-[var(--text-muted)] transition-opacity hover:opacity-70"
             >
               Cancelar
             </button>

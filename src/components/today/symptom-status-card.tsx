@@ -44,9 +44,10 @@ const ADVICE: Record<SymptomState, string> = {
 function IntensityGauge({ value, state }: { value: number; state: SymptomState }) {
   const color = SYMPTOM_STATE_COLOR[state];
   const pct = value / 10;
-  const r = 38;
-  const cx = 48;
-  const cy = 48;
+  const size = 120;
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = 46;
   const startAngle = -210;
   const sweepAngle = 240;
   const endAngle = startAngle + sweepAngle * pct;
@@ -67,11 +68,11 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
   }
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center justify-center shrink-0" style={{ width: size, height: size }}>
       <svg
-        width="96"
-        height="74"
-        viewBox="0 0 96 96"
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
         aria-label={`Intensidad promedio ${value} de 10, estado ${SYMPTOM_STATE_LABEL[state]}`}
         role="img"
       >
@@ -79,7 +80,7 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
           d={arcPath(startAngle, startAngle + sweepAngle, r)}
           fill="none"
           stroke="var(--surface-el)"
-          strokeWidth="6"
+          strokeWidth="8"
           strokeLinecap="round"
         />
         {pct > 0 && (
@@ -87,13 +88,13 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
             d={arcPath(startAngle, endAngle, r)}
             fill="none"
             stroke={color}
-            strokeWidth="6"
+            strokeWidth="8"
             strokeLinecap="round"
           />
         )}
       </svg>
-      <div className="absolute top-[24px] flex flex-col items-center leading-none">
-        <span className="mono text-[19px] font-bold" style={{ color }}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="mono text-[24px] font-bold leading-none" style={{ color }}>
           {value}/10
         </span>
       </div>
@@ -112,10 +113,10 @@ function TopSymptomCell({ item }: { item: SymptomTopItem }) {
         : "var(--pain-low)";
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <Icon size={18} style={{ color }} className="shrink-0" />
-      <span className="text-[13px] text-[var(--text-muted)] leading-none text-center">{label}</span>
-      <span className="mono text-[15px] font-semibold" style={{ color }}>
+    <div className="flex flex-col items-center gap-1.5">
+      <Icon size={20} style={{ color }} className="shrink-0" />
+      <span className="text-[12px] text-[var(--text-muted)] leading-none text-center">{label}</span>
+      <span className="mono text-[17px] font-semibold" style={{ color }}>
         {item.value}/10
       </span>
     </div>
@@ -222,13 +223,13 @@ export function SymptomStatusCard({ onRegister }: Props) {
         className="w-full text-left mb-3"
         aria-label="Actualizar registro de síntomas"
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <p className="text-[22px] font-semibold leading-tight" style={{ color }}>
+            <p className="text-[28px] font-bold leading-tight tracking-[-0.02em]" style={{ color }}>
               {label}
             </p>
-            <p className="text-[16px] text-[var(--text-muted)] mt-1">{copy}</p>
-            <p className="text-[14px] text-[var(--text-faint)] mt-1">{timeAgo}</p>
+            <p className="text-[17px] font-medium text-[var(--text-muted)] mt-2">{copy}</p>
+            <p className="text-[13px] text-[var(--text-faint)] mt-1.5">{timeAgo}</p>
           </div>
           <IntensityGauge value={avgVal} state={state} />
         </div>
@@ -237,8 +238,8 @@ export function SymptomStatusCard({ onRegister }: Props) {
       {/* Top symptoms grid */}
       {topSymptoms.length > 0 && (
         <>
-          <div className="h-px bg-[var(--border)] mb-3" />
-          <div className="grid grid-cols-5 gap-1">
+          <div className="h-px bg-[var(--border)] my-4" />
+          <div className="grid grid-cols-5 gap-x-1 gap-y-3">
             {topSymptoms.slice(0, 5).map((item) => (
               <TopSymptomCell key={item.key} item={item} />
             ))}
@@ -247,7 +248,7 @@ export function SymptomStatusCard({ onRegister }: Props) {
       )}
 
       {/* Advice footer */}
-      <div className="mt-3 h-px bg-[var(--border)]" />
+      <div className="mt-4 h-px bg-[var(--border)]" />
       <div className="mt-2.5 flex items-start gap-2">
         <SunIcon size={12} className="mt-[2px] shrink-0 text-[var(--accent)]" />
         <p className="text-[14px] leading-relaxed text-[var(--text-muted)]">

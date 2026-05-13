@@ -121,7 +121,7 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
         <span className="flex min-w-0 items-baseline gap-1.5">
           <span
             className={cn(
-              "truncate text-[15px] font-medium capitalize leading-none",
+              "truncate text-[17px] font-medium capitalize leading-none",
               item.overdue ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]",
             )}
           >
@@ -136,7 +136,7 @@ function MedRow({ item, index, onClick }: { item: MedScheduleItem; index: number
 
       <span className="flex shrink-0 items-center gap-1.5">
         <span
-          className="font-mono text-[13px] font-semibold tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+          className="font-mono text-[15px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: item.badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
           {item.badgeLabel}

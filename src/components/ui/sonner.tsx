@@ -28,7 +28,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           toast:
             "group toast !rounded-[10px] !shadow-[0_4px_20px_rgba(0,0,0,0.5)] !text-[14px] !font-medium !leading-snug !bg-[var(--surface-el)] !text-[var(--text-primary)]",
           success:
-            "!border !border-[rgba(92,184,90,0.5)] [&>[data-icon]]:!text-[#5cb85a]",
+            "!border !border-[rgba(123,198,122,0.5)] [&>[data-icon]]:!text-[#7BC67A]",
           error:
             "!border !border-[rgba(204,63,48,0.5)] [&>[data-icon]]:!text-[#cc3f30]",
           warning:

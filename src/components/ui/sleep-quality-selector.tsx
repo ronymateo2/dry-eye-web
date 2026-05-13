@@ -8,7 +8,7 @@ const QUALITY_META: Record<SleepQuality, QualityMeta> = {
   muy_malo:  { color: "#cc3f30", activeBg: "rgba(204,63,48,0.13)",  bars: 1 },
   malo:      { color: "#e0932a", activeBg: "rgba(224,147,42,0.13)", bars: 2 },
   regular:   { color: "#8a7860", activeBg: "rgba(138,120,96,0.13)", bars: 3 },
-  bueno:     { color: "#5cb85a", activeBg: "rgba(92,184,90,0.13)",  bars: 4 },
+  bueno:     { color: "#7BC67A", activeBg: "rgba(123,198,122,0.13)",  bars: 4 },
   excelente: { color: "#d4a24c", activeBg: "rgba(212,162,76,0.13)", bars: 5 },
 };
 

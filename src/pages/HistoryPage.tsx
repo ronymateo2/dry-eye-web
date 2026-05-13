@@ -39,7 +39,7 @@ function TabBar({ activeTab, onTabChange }: { activeTab: HistoryTab; onTabChange
 
 function EmptyFeed() {
   return (
-    <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(92,184,90,0.12)] border border-[rgba(92,184,90,0.3)] text-[var(--pain-low)]">
+    <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
       Aún no tienes registros. Ve a Registrar para empezar.
     </div>
   );

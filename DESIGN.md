@@ -18,20 +18,26 @@
 ---
 
 ## Typography
-- **UI / Body / Headings:** Atkinson Hyperlegible — loaded via `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics). Designed by the Braille Institute for maximum legibility and character distinctiveness — unambiguous letterforms reduce reading errors, which is critical for patients with visual impairment from dry eye. Falls back to system-ui stack.
+- **UI / Body / Headings:** Atkinson Hyperlegible (default) — loaded via `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics). Designed by the Braille Institute for maximum legibility and character distinctiveness — unambiguous letterforms reduce reading errors, which is critical for patients with visual impairment from dry eye.
   - Stack: `"Atkinson Hyperlegible", -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif`
-- **Data / Numbers:** Geist Mono — all numeric values (pain scores 0-10, drop counts, sleep hours, timestamps, correlation coefficients). Tabular-nums. Makes readings feel like instrument output, not form inputs. Reinforces the clinical precision aesthetic.
+- **SF Pro (iOS native, opt-in):** When user selects "SF Pro Rounded" in Profile, the stack uses the real iOS system font via `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display"`. Zero download, subpixel precision, works offline. This is the Apple Health look.
+- **Data / Numbers:** Geist Mono — all numeric values (pain scores 0-10, drop counts, sleep hours, timestamps, correlation coefficients). Tabular-nums. Makes readings feel like clinical instrument readings, not form inputs. Reinforces the clinical precision aesthetic.
 - **Loading:** `@fontsource/atkinson-hyperlegible` (weights 400, 700 + italics) + `@fontsource/geist-mono` (weights 400/500)
 - **Scale:**
-  - `11-12px / Atkinson Hyperlegible 700 / 0.10em tracking` — section labels (uppercase)
-  - `12px / Atkinson Hyperlegible 400` — metadata, timestamps, helper text
-  - `13px / Atkinson Hyperlegible 400` — input labels, chip text, alert text
-  - `15px / Atkinson Hyperlegible 400` — body copy
-  - `17px / Atkinson Hyperlegible 700` — screen titles
-  - `22px / Atkinson Hyperlegible 700 / -0.02em` — page headings
-  - `22px / Geist Mono 400` — primary data values (pain score display in sliders)
+  - `11-12px / 700 / 0.10em tracking` — section labels (uppercase)
+  - `12-13px / 400` — metadata, timestamps, helper text
+  - `15px / 400` — body copy
+  - `17px / 500-600` — emphasized body, card values, medication names
+  - `20px / 600` — headline data (next dose time)
+  - `22px / 700` — screen titles
+  - `28px / 700 / -0.02em` — display headings (state labels, medication names) — Apple Health style
+  - `24px / Geist Mono 400` — primary data values (pain score display in sliders)
   - `32-36px / Geist Mono 400` — stat card values (dashboard)
   - `11-13px / Geist Mono 400` — secondary data (correlation coefficients, timestamps)
+- **Apple Health-style CSS utilities** (defined in `globals.css`):
+  - `.text-display` — `28px / 700 / -0.02em / 1.1` — state labels, hero medication names
+  - `.text-headline` — `20px / 600 / -0.01em / 1.15` — next dose time, emphasized data
+  - `.text-body-emphasized` — `17px / 500 / 1.3` — descriptions, secondary actions
 
 ---
 
@@ -61,12 +67,12 @@
   --accent-bright:  #e8b85e;  /* hover/active states */
 
   /* Pain severity gradient — all warm tones */
-  --pain-low:       #5cb85a;  /* warm green (0-3) */
+  --pain-low:       #7BC67A;  /* warm green (0-3) — harmonized with amber accent */
   --pain-mid:       #e0932a;  /* amber-orange (4-6) */
   --pain-high:      #cc3f30;  /* warm red (7-10) */
 
   /* Semantic */
-  --success:        #5cb85a;
+  --success:        #7BC67A;
   --warning:        #e0932a;
   --error:          #cc3f30;
   --info-bg:        rgba(212, 162, 76, 0.12);
@@ -86,9 +92,9 @@ export function painGradient(score: number): string {
   const pct = score * 10;
   const bg = '#252014';
   if (score === 0) return bg;
-  if (score <= 3) return `linear-gradient(to right, #5cb85a ${pct}%, ${bg} ${pct}%)`;
-  if (score <= 6) return `linear-gradient(to right, #5cb85a 0%, #e0932a ${pct}%, ${bg} ${pct}%)`;
-  return `linear-gradient(to right, #5cb85a 0%, #e0932a 40%, #cc3f30 ${pct}%, ${bg} ${pct}%)`;
+  if (score <= 3) return `linear-gradient(to right, #7BC67A ${pct}%, ${bg} ${pct}%)`;
+  if (score <= 6) return `linear-gradient(to right, #7BC67A 0%, #e0932a ${pct}%, ${bg} ${pct}%)`;
+  return `linear-gradient(to right, #7BC67A 0%, #e0932a 40%, #cc3f30 ${pct}%, ${bg} ${pct}%)`;
 }
 ```
 
@@ -110,7 +116,7 @@ Light mode is available for users who prefer or require it (e.g., bright environ
   --accent:       #7C6DCD;
   --accent-dim:   rgba(124, 109, 205, 0.12);
   --accent-bright:#9D91D9;
-  --pain-low:     #5CC8A0;
+  --pain-low:     #6CD9A0;
   --pain-mid:     #F4A25A;
   --pain-high:    #F47070;
   --btn-primary-text: #ffffff;
@@ -150,7 +156,7 @@ Light mode is available for users who prefer or require it (e.g., bright environ
 
 ## Layout
 - **Approach:** Single-column, mobile-first. No sidebar. No persistent header consuming vertical space.
-- **Navigation:** Bottom tab bar (4 tabs: Registrar / Historial / Dashboard / Reporte). Tabs are 48px minimum height. Active tab uses `--accent` color.
+- **Navigation:** Bottom tab bar (5 tabs: Today / Historial / Dashboard / Reporte/Profile). Tabs are 48px minimum height. Active tab uses `--accent` color.
 - **Grid:** Single column on mobile (375-430px base). Max content width: 480px on larger screens, centered.
 - **FAB:** Floating action button (56px) for quick "+" access to drops/triggers log. Positioned bottom-right, 24px from edges. `background: var(--accent)`, `box-shadow: 0 4px 20px rgba(212,162,76,0.35)`.
 - **Border radius:**
@@ -227,8 +233,8 @@ Tap cycles 0→1→2→3→0. Default on first select is State 1 (leve).
 ### Toast
 - Position: top of screen, below safe area inset, full width
 - Background: always `var(--surface-el)` (#252014) — never solid color backgrounds (high luminance = harmful for photophobia)
-- Border: colored at 50% opacity — success `rgba(92,184,90,0.5)`, error `rgba(204,63,48,0.5)`, warning `rgba(224,147,42,0.5)`, info `var(--border)`
-- Icon: full color — success `#5cb85a`, error `#cc3f30`, warning `#e0932a`, info `var(--accent)`
+- Border: colored at 50% opacity — success `rgba(123,198,122,0.5)`, error `rgba(204,63,48,0.5)`, warning `rgba(224,147,42,0.5)`, info `var(--border)`
+- Icon: full color — success `#7BC67A`, error `#cc3f30`, warning `#e0932a`, info `var(--accent)`
 - Text: `color: var(--text-primary)`, 13px 500
 - Duration: 4 seconds, then fade out
 - Do not auto-dismiss error toasts that require user action (e.g., retry)
@@ -280,3 +286,6 @@ Used for Gotas and Triggers screens (launched from FAB).
 | 2026-04-27 | Added opt-in light theme (`[data-theme="light"]`) | Some users operate in bright environments or have accessibility needs not related to photophobia. Dark remains default; light is user-selectable. Violet accent (#7C6DCD) chosen to stay out of the blue/cyan photosensitive zone while providing sufficient contrast on light backgrounds. |
 | 2026-05-07 | Spring animations permitted for sheet presentations and FAB | After user testing, subtle springs (duration-based with bounce 0.1–0.2) feel more natural and responsive than fixed-duration curves. Bounce is kept intentionally low to avoid playful motion. `prefers-reduced-motion` still honored. |
 | 2026-05-12 | Font selector in Profile: Atkinson Hyperlegible / Manrope / SF Pro Rounded | iOS-only PWA. SF Pro Rounded is native (0 download). Atkinson Hyperlegible (Braille Institute) offers maximum character distinctiveness for patients with visual impairment. Manrope retained for users who prefer the original aesthetic. Preference persisted to server via `api.updateMe({ font })`. |
+| 2026-05-13 | Green changed `#5cb85a` → `#7BC67A` (dark), `#5CC8A0` → `#6CD9A0` (light) | The old green was Bootstrap's cold `#5cb85a` which clashed with the warm amber accent and was hard to read on warm charcoal. `#7BC67A` has a yellow component that harmonizes with the FL-41 palette. Better legibility at 50% brightness. |
+| 2026-05-13 | Typography scale expanded with Apple Health-style display sizes | Added `28px display` for state labels and medication names, `20px headline` for dose times, `17px emphasized` for descriptions. Creates dramatic hierarchy like Apple Health: big numbers, small labels. |
+| 2026-05-13 | SF Pro stack fixed to use real iOS system fonts | The old `data-font="sf-pro-rounded"` used a string `"SF Pro Rounded"` that resolved to nothing. Replaced with `-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display"` which actually renders native SF Pro on iOS. |
