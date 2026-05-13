@@ -219,50 +219,55 @@ Tap cycles 0→1→2→3→0. Default on first select is State 1 (leve).
 
 ### Buttons (Apple HIG taxonomy)
 
-Four styles × three sizes. Classes defined in `globals.css`. Always compose `btn` + style + size (+ `btn-full` for full-width).
+**Always use `<Button>` component** (`src/components/ui/button.tsx`). CSS classes in `globals.css` are internal foundation — never use them directly in JSX.
 
 ```
-btn-filled       → var(--accent) bg, dark text          — primary CTA (Save, Confirm)
-btn-tinted       → accent-dim bg, accent text            — secondary accent action
-btn-tinted-error → error/10 bg, error text               — destructive confirm (Discard, Delete)
-btn-tinted-warn  → warning/10 bg, warning text           — warning confirm
-btn-gray         → surface-el bg, primary text           — neutral secondary
-btn-plain        → no bg, accent text                    — navigation, back, inline links
-btn-plain-muted  → no bg, muted text                     — cancel, dismiss
+Variant            Background          Text             When
+─────────────────────────────────────────────────────────────────
+filled             var(--accent)       btn-primary-text  Primary CTA (Guardar, Confirmar)
+tinted             accent-dim          accent            Secondary accent action
+tinted-error       error/10            error             Destructive confirm (Descartar, Eliminar)
+tinted-warn        warning/10          warning           Warning confirm
+gray               surface-el          text-primary      Neutral secondary
+plain              transparent         accent            Nav, back, inline links
+plain-muted        transparent         text-muted        Cancel, dismiss
+plain-error        transparent         error             Soft destructive (Archivar)
 
-btn-lg   → 50px / 17px / 600   — prominent sheet CTAs (use with btn-full)
-btn-md   → 48px / 15px / 500   — standard interactive buttons
-btn-sm   → 34px / 13px / 500   — small inline, non-critical actions
-btn-full → width: 100%
+Size     Height   Font          When
+──────────────────────────────────────────────────────────────────
+lg       50px     17px / 600    Sheet footer CTAs — always w-full
+default  48px     15px / 500    Standard standalone buttons
+sm       34px     13px / 500    Inline confirm dialogs, tight contexts
+icon     32px     —             Square icon-only (use raw <button> instead)
 ```
-
-**Use `<Button>` component** (`src/components/ui/button.tsx`) — never raw CSS classes in JSX. CSS classes in `globals.css` are the internal foundation only.
 
 ```tsx
 import { Button } from "@/components/ui/button";
 
-// Primary CTA (sheet footer)
+// Sheet footer — primary CTA
 <Button size="lg" className="w-full">Guardar</Button>
 
-// Destructive confirm (sheet footer)
+// Sheet footer — destructive + cancel pair
 <Button variant="tinted-error" size="lg" className="w-full">Sí, descartar</Button>
-
-// Cancel / dismiss (sheet footer)
 <Button variant="plain-muted" size="lg" className="w-full">Cancelar</Button>
 
-// Inline secondary
-<Button variant="tinted" size="sm">Añadir</Button>
-
-// Inline destructive (small confirm dialogs)
-<Button variant="tinted-error" size="sm" className="flex-1">Sí, descartar</Button>
+// Inline confirm dialog pair
+<Button variant="tinted-error" size="sm" className="flex-1">Archivar</Button>
 <Button variant="plain-muted" size="sm" className="flex-1">Cancelar</Button>
+
+// Soft destructive (below primary CTA, edit forms)
+<Button variant="plain-error" className="w-full">Archivar medicamento</Button>
+
+// Destructive standalone (profile, settings)
+<Button variant="tinted-error">Cerrar sesión</Button>
 ```
 
 **Rules:**
-- Sheet footer actions: `size="lg"` + `className="w-full"`, always paired (confirm + cancel)
-- `size="sm"` for inline confirm dialogs within cards/forms
-- `variant="plain-muted"` for cancel/dismiss — never `plain` (accent on cancel draws too much attention)
-- Icon-only buttons: raw `<button>` with `size="icon"` class or manual sizing — do not use `<Button>`
+- Sheet footer: `size="lg"` + `className="w-full"`. Always pair confirm + cancel.
+- `plain-muted` for cancel/dismiss — not `plain` (accent on cancel draws too much attention).
+- `plain-error` for soft destructive actions shown below a primary CTA (archive, delete-with-confirm).
+- Icon-only buttons: raw `<button>` with manual sizing — do not use `<Button>`.
+- `motion.button` with animations: keep as raw — `<Button>` does not support motion props.
 
 ### Toast
 - Position: top of screen, below safe area inset, full width
