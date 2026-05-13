@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
+import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/ui/text-input";
 import { api, setToken } from "@/lib/api";
 import { useAuth, useUser } from "@/lib/auth";
@@ -383,15 +384,15 @@ export default function ProfilePage() {
               Sesión activa como <span className="text-[var(--text-muted)]">{user.name}</span>
             </p>
           ) : null}
-          <button
-            type="button"
-            onClick={signOut}
+          <Button
+            variant="tinted-error"
             aria-label="Cerrar sesión"
-            className="group flex items-center gap-2 rounded-[999px] border border-[rgba(204,63,48,0.22)] bg-[rgba(204,63,48,0.07)] px-6 py-3 text-[14px] font-medium text-[var(--error)] transition-all duration-[180ms] active:scale-[0.96] hover:border-[rgba(204,63,48,0.45)] hover:bg-[rgba(204,63,48,0.13)]"
+            className="group"
+            onClick={signOut}
           >
             <SignOutIcon size={14} weight="bold" className="transition-transform duration-200 group-hover:-translate-x-0.5" />
             Cerrar sesión
-          </button>
+          </Button>
         </div>
       </section>
 

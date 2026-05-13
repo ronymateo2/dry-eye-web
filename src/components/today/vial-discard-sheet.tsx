@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { ActiveVialEntry } from "./helpers";
 import { getVialStatus, timeAgo } from "./helpers";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
+import { Button } from "@/components/ui/button";
 import { EyedropperSampleIcon, ClockIcon, TimerIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
@@ -115,21 +116,23 @@ export function VialDiscardSheet({
 
           {/* Actions */}
           <div className="space-y-2.5 pt-3">
-            <button
-              type="button"
+            <Button
+              variant="tinted-error"
+              size="lg"
+              className="w-full"
               onClick={onConfirm}
               disabled={isPending}
-              className="flex min-h-[52px] w-full items-center justify-center rounded-[16px] bg-[var(--error)]/10 text-[17px] font-semibold text-[var(--error)] transition-opacity disabled:opacity-50 hover:bg-[var(--error)]/20"
             >
               {isPending ? "…" : "Sí, descartar"}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="plain-muted"
+              size="lg"
+              className="w-full"
               onClick={onClose}
-              className="flex min-h-[52px] w-full items-center justify-center rounded-[16px] text-[17px] font-medium text-[var(--text-muted)] transition-opacity hover:opacity-70"
             >
               Cancelar
-            </button>
+            </Button>
           </div>
         </div>
       )}

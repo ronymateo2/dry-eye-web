@@ -598,14 +598,13 @@ export function HygieneSheet({
                 )}
 
                 {onClose && (
-                  <button
-                    className="min-h-[48px] py-2 text-[13px] transition-opacity active:opacity-60"
-                    style={{ color: "var(--text-faint)" }}
-                    type="button"
+                  <Button
+                    variant="plain-muted"
+                    className="text-[var(--text-faint)]"
                     onClick={onClose}
                   >
                     Cerrar
-                  </button>
+                  </Button>
                 )}
               </div>
             </motion.div>

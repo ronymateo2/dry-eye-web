@@ -167,13 +167,13 @@ function DropFormContent({
       </Button>
 
       {isEdit && !confirmDelete && (
-        <button
-          type="button"
+        <Button
+          variant="plain-error"
+          className="w-full"
           onClick={() => setConfirmDelete(true)}
-          className="w-full py-2 text-[13px] text-[var(--error)] opacity-60 hover:opacity-100 transition-opacity"
         >
           Archivar gota
-        </button>
+        </Button>
       )}
 
       {isEdit && confirmDelete && (

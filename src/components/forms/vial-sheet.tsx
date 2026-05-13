@@ -36,14 +36,10 @@ function EmptyState({ label, description, icon, onClick, buttonLabel }: {
       </div>
       <p className="text-[14px] font-medium text-[var(--text-primary)]">{label}</p>
       <p className="mt-1 text-[12px] text-[var(--text-muted)]">{description}</p>
-      <button
-        type="button"
-        onClick={onClick}
-        className="mt-3 inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-[var(--accent)] px-4 py-2 text-[13px] font-medium text-[var(--btn-primary-text,#121008)] transition-colors hover:bg-[var(--accent-bright)]"
-      >
+      <Button variant="filled" size="sm" className="mt-3" onClick={onClick}>
         <PlusIcon size={14} weight="bold" />
         {buttonLabel}
-      </button>
+      </Button>
     </div>
   );
 }

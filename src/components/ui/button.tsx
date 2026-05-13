@@ -1,40 +1,54 @@
 import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
+type Variant =
+  | "filled" | "tinted" | "tinted-error" | "tinted-warn"
+  | "gray" | "plain" | "plain-muted" | "plain-error"
+  | "primary"   // alias → filled (backward compat)
+  | "subtle"    // alias → gray   (backward compat)
+  | "ghost";    // alias → plain  (buttonVariants / calendar)
+
+type Size = "lg" | "default" | "sm" | "icon";
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "ghost" | "subtle";
-  /** Used internally by shadcn calendar nav buttons */
-  size?: "default" | "icon" | "sm" | "lg";
+  variant?: Variant;
+  size?: Size;
 };
 
-// Minimal variant helper used by shadcn calendar component
-export function buttonVariants({
-  variant,
-}: {
-  variant?: string;
-  size?: string;
-} = {}) {
-  if (variant === "ghost") {
-    return "hover:bg-[var(--surface-el)] hover:text-[var(--text-primary)] rounded-[var(--radius-sm)] p-0 inline-flex items-center justify-center";
-  }
-  return "inline-flex items-center justify-center";
+const VARIANT: Record<string, string> = {
+  filled:          "btn-filled",
+  primary:         "btn-filled",
+  tinted:          "btn-tinted",
+  "tinted-error":  "btn-tinted-error",
+  "tinted-warn":   "btn-tinted-warn",
+  gray:            "btn-gray",
+  subtle:          "btn-gray",
+  plain:           "btn-plain",
+  ghost:           "btn-plain",
+  "plain-muted":   "btn-plain-muted",
+  "plain-error":   "btn-plain-error",
+};
+
+const SIZE: Record<string, string> = {
+  lg:      "btn-lg",
+  default: "btn-md",
+  sm:      "btn-sm",
+  icon:    "h-8 w-8 p-0 min-h-0 rounded-[var(--radius-sm)]",
+};
+
+export function buttonVariants({ variant }: { variant?: string; size?: string } = {}) {
+  return cn("btn btn-sm", VARIANT[variant ?? "gray"] ?? "btn-gray");
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size, ...props }, ref) => {
+  ({ className, variant = "filled", size = "default", ...props }, ref) => {
     return (
       <button
         ref={ref}
         className={cn(
-          "inline-flex min-h-12 items-center justify-center rounded-[999px] border px-5 py-3 text-[15px] font-medium transition-[color,background-color,border-color,transform] duration-[160ms] ease-out active:scale-[0.97]",
-          variant === "primary" &&
-            "border-transparent bg-[var(--accent)] text-[var(--btn-primary-text)] hover:bg-[var(--accent-bright)] disabled:opacity-50",
-          variant === "ghost" &&
-            "border-[var(--border)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--surface-el)] disabled:opacity-50",
-          variant === "subtle" &&
-            "border-[var(--border)] bg-[var(--surface)] text-[var(--text-primary)] hover:bg-[var(--surface-el)] disabled:opacity-50",
-          size === "icon" &&
-            "min-h-0 h-8 w-8 rounded-[var(--radius-sm)] border-0 p-0 px-0",
+          "btn",
+          VARIANT[variant],
+          SIZE[size],
           "disabled:cursor-not-allowed",
           className,
         )}

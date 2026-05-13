@@ -197,18 +197,18 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
               </p>
             </div>
             <div className="flex gap-2">
-              <button
-                type="button"
-                className="flex-1 rounded-[8px] border border-[var(--border)] py-2 text-[13px] font-medium"
-                style={{ color: "var(--text-muted)" }}
+              <Button
+                variant="plain-muted"
+                size="sm"
+                className="flex-1"
                 onClick={() => setShowDiscardConfirm(false)}
               >
                 Cancelar
-              </button>
-              <button
-                type="button"
-                className="flex-1 rounded-[8px] py-2 text-[13px] font-medium disabled:opacity-50"
-                style={{ background: "var(--error)", color: "white" }}
+              </Button>
+              <Button
+                variant="tinted-error"
+                size="sm"
+                className="flex-1"
                 disabled={discardVialMutation.isPending}
                 onClick={() => {
                   discardVialMutation.mutate(vialStatus.id);
@@ -216,7 +216,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
                 }}
               >
                 {discardVialMutation.isPending ? "..." : "Sí, descartar"}
-              </button>
+              </Button>
             </div>
           </div>
         )}
