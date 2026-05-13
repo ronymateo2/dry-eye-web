@@ -67,12 +67,12 @@
   --accent-bright:  #e8b85e;  /* hover/active states */
 
   /* Pain severity gradient — all warm tones */
-  --pain-low:       #7BC67A;  /* warm green (0-3) — harmonized with amber accent */
+  --pain-low:       #5cb85a;  /* warm green (0-3) — harmonized with amber accent */
   --pain-mid:       #e0932a;  /* amber-orange (4-6) */
   --pain-high:      #cc3f30;  /* warm red (7-10) */
 
   /* Semantic */
-  --success:        #7BC67A;
+  --success:        #5cb85a;
   --warning:        #e0932a;
   --error:          #cc3f30;
   --info-bg:        rgba(212, 162, 76, 0.12);
