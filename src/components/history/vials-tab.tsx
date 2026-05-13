@@ -15,7 +15,7 @@ export function VialsTab() {
   return (
     <div className="space-y-5">
       <div className="space-y-2">
-        <p className="text-[12px] uppercase tracking-[0.10em] text-[var(--text-faint)] font-semibold">Historial de viales</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-faint)]">Historial de viales</p>
         {isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -23,11 +23,11 @@ export function VialsTab() {
             ))}
           </div>
         ) : loadError ? (
-          <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
+          <div className="rounded-[var(--radius-md)] px-4 py-3 text-body-emphasized bg-[rgba(204,63,48,0.12)] border border-[rgba(204,63,48,0.3)] text-[var(--pain-high)]">
             {loadError}
           </div>
         ) : !historyData || historyData.vials.length === 0 ? (
-          <p className="text-[13px] text-[var(--text-muted)] py-4 text-center">No hay viales descartados aún.</p>
+          <p className="text-[15px] text-[var(--text-muted)] py-4 text-center">No hay viales descartados aún.</p>
         ) : (
           <div className="space-y-2">
             {historyData.vials.map((vial) => (
@@ -39,16 +39,16 @@ export function VialsTab() {
                   <CheckCircleIcon size={16} className="text-[var(--text-faint)]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px] text-[var(--text-primary)] truncate">
+                  <p className="text-[15px] font-medium text-[var(--text-primary)] truncate">
                     {vial.drop_type_name}
                   </p>
-                  <p className="text-[12px] text-[var(--text-faint)]">
+                  <p className="text-[13px] font-normal text-[var(--text-muted)]">
                     {new Date(vial.started_at).toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" })} —{" "}
                     {vial.ended_at ? new Date(vial.ended_at).toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" }) : "?"}
                   </p>
                 </div>
                 {vial.ended_at && (
-                  <span className="text-[11px] font-[family-name:var(--font-mono)] text-[var(--text-faint)]">
+                  <span className="mono text-[13px] font-normal text-[var(--text-faint)]">
                     {Math.round((new Date(vial.ended_at).getTime() - new Date(vial.started_at).getTime()) / 36e5 * 10) / 10}h
                   </span>
                 )}

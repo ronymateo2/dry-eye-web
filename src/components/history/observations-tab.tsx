@@ -53,7 +53,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
 
   if (occurrences.length === 0) {
     return (
-      <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
+      <div className="rounded-[var(--radius-md)] px-4 py-3 text-body-emphasized bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
         No hay observaciones clínicas aún. Toca + para registrar tu primera observación.
       </div>
     );
@@ -81,14 +81,14 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
         >
           <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-[var(--border)]">
             <div className="min-w-0">
-              <p className="text-[14px] font-semibold text-[var(--text-primary)]">{group.title}</p>
+              <p className="text-[15px] font-medium text-[var(--text-primary)]">{group.title}</p>
               {group.eye && group.eye !== "none" ? (
-                <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-muted)] mt-0.5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-muted)] mt-0.5">
                   {OBS_EYE_LABELS[group.eye as keyof typeof OBS_EYE_LABELS]}
                 </p>
               ) : null}
             </div>
-            <span className="mono shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[var(--surface-el)] text-[11px] font-semibold text-[var(--text-muted)]">
+            <span className="mono shrink-0 inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-full bg-[var(--surface-el)] text-[13px] font-medium text-[var(--text-muted)]">
               {group.items.length}
             </span>
           </div>
@@ -109,11 +109,11 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                 <div key={item.id} className="flex items-start gap-3 px-4 py-2.5">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-2">
-                      <p className="mono text-[11px] text-[var(--text-muted)]">
+                      <p className="mono text-[12px] font-normal text-[var(--text-muted)]">
                         {dateLabel} · {time}
                       </p>
                       {item.intensity != null && (
-                        <span className="mono shrink-0 text-[12px] font-semibold tabular-nums" style={{ color: intensityHue }}>
+                        <span className="mono shrink-0 text-[13px] font-medium tabular-nums" style={{ color: intensityHue }}>
                           {item.intensity}/10
                         </span>
                       )}
@@ -131,7 +131,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                             display = opt?.label ?? String(v);
                           }
                           return (
-                            <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] text-[var(--text-muted)]">
+                            <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[12px] text-[var(--text-muted)]">
                               {def.label}: <span className="font-medium text-[var(--text-primary)]">{display}</span>
                             </span>
                           );
@@ -139,7 +139,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                       </div>
                     )}
                     {item.notes && (
-                      <p className="mt-0.5 text-[12px] leading-snug text-[var(--text-secondary)]">{item.notes}</p>
+                      <p className="mt-0.5 text-[13px] leading-snug text-[var(--text-muted)]">{item.notes}</p>
                     )}
                     {hasLinks && (
                       <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -170,14 +170,14 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
           <button
             onClick={loadMore}
             disabled={isLoadingMore}
-            className="mono text-[11px] tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
+            className="mono text-[11px] font-normal tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
           >
             {isLoadingMore ? "CARGANDO..." : "CARGAR MÁS"}
           </button>
         </div>
       )}
       {!hasMore && occurrences.length > 0 && (
-        <p className="mono text-center text-[11px] tracking-[0.12em] text-[var(--text-faint)] pb-4">
+        <p className="mono text-center text-[11px] font-normal tracking-[0.12em] text-[var(--text-faint)] pb-4">
           INICIO DEL HISTORIAL
         </p>
       )}

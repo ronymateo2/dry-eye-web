@@ -54,7 +54,7 @@ export function VialRow({
                 <EyedropperSampleIcon size={15} style={{ color: status.color }} />
               </span>
               <span
-                className="truncate text-[14px] font-medium capitalize leading-none"
+                className="truncate text-[17px] font-medium capitalize leading-none"
                 style={{ color: status.isExpired ? "var(--text-primary)" : "var(--text-muted)" }}
               >
                 {vial.drop_type_name}
@@ -63,7 +63,7 @@ export function VialRow({
 
             <span className="flex shrink-0 items-center gap-1.5">
               <span
-                className="font-mono text-[12px] font-semibold tabular-nums"
+                className="font-mono text-[15px] font-medium tabular-nums"
                 style={{ color: status.color }}
               >
                 {status.rightLabel}

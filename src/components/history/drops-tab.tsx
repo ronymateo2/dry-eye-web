@@ -20,8 +20,8 @@ const DROP_TYPE_COLORS = [
 function StatCell({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold tracking-wide uppercase text-[var(--text-muted)]">{label}</span>
-      <span className="mono text-[15px] tabular-nums text-[var(--text-primary)]">{children}</span>
+      <span className="text-[11px] font-bold tracking-[0.10em] uppercase text-[var(--text-muted)]">{label}</span>
+      <span className="mono text-[20px] font-normal tabular-nums text-[var(--text-primary)]">{children}</span>
     </div>
   );
 }
@@ -45,7 +45,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
 
   if (!stats || stats.length === 0) {
     return (
-      <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
+      <div className="rounded-[var(--radius-md)] px-4 py-3 text-body-emphasized bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
         Aún no tienes tipos de gota. Crea uno en la sección de tipos de gota.
       </div>
     );
@@ -108,19 +108,19 @@ export function DropsTab({ timezone }: { timezone: string }) {
                 <EyedropperIcon size={16} weight="duotone" color={color} />
               </div>
               <div className="min-w-0 flex-1 pt-1">
-                <p className="text-[14px] font-semibold text-[var(--text-primary)] truncate leading-snug">
+                <p className="text-[15px] font-medium text-[var(--text-primary)] truncate leading-snug">
                   {s.name}
                 </p>
               </div>
               {daysSinceFirst > 0 && (
                 <div className="mono shrink-0 text-right leading-none">
-                  <div className="text-[18px] font-bold text-[var(--text-primary)] leading-none">
+                  <div className="text-headline text-[var(--text-primary)] leading-none">
                     {durationMonths
                       ? `${durationMonths}m${durationRem ? ` ${durationRem}d` : ""}`
                       : `${daysSinceFirst}d`}
                   </div>
                   {firstLabel && lastLabel && (
-                    <div className="flex items-center justify-end gap-1 text-[11px] text-[var(--text-faint)] mt-1.5">
+                    <div className="flex items-center justify-end gap-1 text-[12px] font-normal text-[var(--text-faint)] mt-1.5">
                       <CalendarIcon size={10} weight="regular" />
                       <span>{firstLabel} — {lastLabel}</span>
                     </div>
@@ -131,7 +131,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
 
             {/* Body */}
             {s.total_uses === 0 ? (
-              <p className="px-4 py-3 text-[12px] text-[var(--text-faint)]">Sin registros aún.</p>
+              <p className="px-4 py-3 text-[13px] text-[var(--text-faint)]">Sin registros aún.</p>
             ) : (
               <div className="px-4 py-3 space-y-3">
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -143,7 +143,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
                     {eyeEntries.map((e) => (
                       <span
                         key={e.key}
-                        className="mono inline-flex items-center gap-1 px-2.5 h-6 rounded-full text-[11px] font-semibold"
+                        className="mono inline-flex items-center gap-1 px-2.5 h-6 rounded-full text-[13px] font-medium"
                         style={{
                           background: `color-mix(in srgb, ${color} 12%, var(--surface-el))`,
                           color: `color-mix(in srgb, ${color} 70%, var(--text-muted))`,
