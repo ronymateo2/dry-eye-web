@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   DropHalfIcon,
@@ -9,10 +9,12 @@ import {
   LightningIcon,
   CircleHalfIcon,
   CheckCircleIcon,
+  ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
+import type { SymptomStatusToday } from "@/types/domain";
 import { getDayKey } from "@/lib/utils";
 import { TRIGGER_OPTIONS } from "@/lib/constants";
 import { queueSymptomEntry } from "@/lib/offline/symptoms-queue";
@@ -68,6 +70,30 @@ export function SymptomsSheet({ onSaved }: Props) {
   const [selectedTriggers, setSelectedTriggers] = useState<TriggerType[]>([]);
   const [note, setNote] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [loadedLast, setLoadedLast] = useState(false);
+
+  const { data: todayStatus } = useQuery<SymptomStatusToday>({
+    queryKey: ["symptoms/today"],
+    queryFn: api.getSymptomStatusToday,
+    staleTime: 60_000,
+  });
+
+  const latest = todayStatus?.latest ?? null;
+
+  const loadLastValues = useCallback(() => {
+    if (!latest) return;
+    setIntensities({
+      dryness: latest.intensities.dryness,
+      burning: latest.intensities.burning,
+      photophobia: latest.intensities.photophobia,
+      blurry_vision: latest.intensities.blurry_vision,
+      stinging: latest.intensities.stinging ?? 0,
+      pressure: latest.intensities.pressure ?? 0,
+    });
+    setSelectedTriggers(latest.triggers ?? []);
+    if (latest.note) setNote(latest.note);
+    setLoadedLast(true);
+  }, [latest]);
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -147,17 +173,35 @@ export function SymptomsSheet({ onSaved }: Props) {
         <div className="space-y-1">
           <div className="flex items-center justify-between mb-2">
             <p className="section-label mb-0">1. Intensidad de síntomas</p>
-            {previewState && (
-              <span
-                className="rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize"
-                style={{
-                  background: `color-mix(in srgb, ${previewStateColor(previewState)} 15%, transparent)`,
-                  color: previewStateColor(previewState),
-                }}
-              >
-                {previewState}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {latest && (
+                <button
+                  type="button"
+                  onClick={loadLastValues}
+                  disabled={loadedLast}
+                  className={cn(
+                    "flex items-center gap-1 rounded-full border border-[var(--border)] px-2.5 py-0.5 text-[11px] font-medium transition-colors",
+                    loadedLast
+                      ? "invisible"
+                      : "text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] hover:bg-[var(--accent-dim)] active:scale-95"
+                  )}
+                >
+                  <ClockCounterClockwiseIcon size={11} />
+                  Cargar últimos
+                </button>
+              )}
+              {previewState && (
+                <span
+                  className="rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize"
+                  style={{
+                    background: `color-mix(in srgb, ${previewStateColor(previewState)} 15%, transparent)`,
+                    color: previewStateColor(previewState),
+                  }}
+                >
+                  {previewState}
+                </span>
+              )}
+            </div>
           </div>
 
           {SYMPTOM_FIELDS.map(({ key, label, Icon }) => {

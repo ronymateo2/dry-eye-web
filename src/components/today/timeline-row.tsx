@@ -32,8 +32,8 @@ export function TimelineRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group relative flex w-full items-start gap-3 rounded-[10px] px-3 cursor-pointer",
-        vialStatus ? "py-2.5 min-h-[56px]" : "py-2 min-h-[44px]",
+        "group relative flex w-full gap-3 rounded-[10px] px-3 cursor-pointer",
+        vialStatus ? "items-start py-2.5 min-h-[56px]" : "items-center py-2 min-h-[44px]",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}
