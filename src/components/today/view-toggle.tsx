@@ -1,4 +1,4 @@
-import { CalendarDotsIcon, ClockCountdownIcon, ListDashesIcon } from "@phosphor-icons/react";
+import { CalendarDotsIcon, PresentationIcon, ListDashesIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export function ViewDayButton({ onClick }: { onClick: () => void }) {
@@ -48,7 +48,7 @@ export function ViewToggle({
             : "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
         )}
       >
-        <ClockCountdownIcon size={13} />
+        <PresentationIcon size={13} />
       </button>
     </div>
   );
