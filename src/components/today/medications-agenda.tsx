@@ -88,7 +88,7 @@ function buildSchedule(
       medicationId: med.id,
       name: med.name,
       nextSlot: nextDate,
-      detail: isTomorrow ? `mañana ${formatTime(nextDate)}` : formatTime(nextDate),
+      detail: isTomorrow ? `${formatTime(nextDate)} (+1)` : formatTime(nextDate),
       badgeLabel: countdown.label,
       badgeColor: countdown.color,
       overdue: countdown.overdue,
