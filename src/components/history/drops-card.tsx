@@ -50,11 +50,11 @@ const DropGroupItemInner = ({
         onClick={handleClick}
         aria-expanded={isExpanded}
       >
-        <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
+          <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
           {name}
         </span>
         <span
-          className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums"
+          className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[13px] font-medium tabular-nums"
           style={{
             color: "var(--pain-low)",
             background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
@@ -62,10 +62,10 @@ const DropGroupItemInner = ({
         >
           {typedDrops.length}×
         </span>
-        <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
+        <span className="mono w-[42px] shrink-0 text-right text-[12px] font-normal tabular-nums text-[var(--text-muted)]">
           {formatTime(last.loggedAt, timezone)}
         </span>
-        <span className="mono w-[26px] shrink-0 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-faint)]">
+        <span className="mono w-[26px] shrink-0 text-right text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--text-faint)]">
           {EYE_SHORT[last.eye as keyof typeof EYE_SHORT]}
         </span>
         <div
@@ -90,11 +90,11 @@ const DropGroupItemInner = ({
       >
         <div className="rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3 mb-1">
           <div className="mb-2 flex items-baseline justify-between">
-            <p className="mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+            <p className="mono text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-faint)]">
               {typeQuantity} {typeQuantity === 1 ? "gota" : "gotas"}
             </p>
             {typedDrops.length > 1 && (
-              <p className="mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+              <p className="mono text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-faint)]">
                 Intervalos
               </p>
             )}
@@ -119,11 +119,11 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
     const d = sorted[0];
     return (
       <div className="flex items-center justify-between gap-2">
-        <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">
+        <span className="mono text-[12px] font-normal tabular-nums text-[var(--text-primary)]">
           {formatTime(d.loggedAt, timezone)}
         </span>
         <div className="flex items-center gap-2">
-          <span className="text-[12px] text-[var(--text-muted)]">
+          <span className="text-[13px] text-[var(--text-muted)]">
             {d.quantity} {d.quantity === 1 ? "gota" : "gotas"} ·{" "}
             {EYE_LABELS[d.eye as keyof typeof EYE_LABELS]}
           </span>
@@ -148,11 +148,11 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
               <TimelineDot />
               <div className="flex min-w-0 items-center justify-end gap-2">
                 {d.quantity > 1 && (
-                  <span className="mono text-[12px] tabular-nums text-[var(--text-muted)]">
+                  <span className="mono text-[12px] font-normal tabular-nums text-[var(--text-muted)]">
                     {d.quantity}×
                   </span>
                 )}
-                <span className="mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+                <span className="mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--text-muted)]">
                   {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
                 </span>
                 <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
@@ -163,7 +163,7 @@ function DropsTimeline({ drops, timezone }: { drops: DisplayDrop[]; timezone: st
 
             {!isLast && (
               <TimelineGap>
-                <span className="mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                <span className="mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--text-faint)]">
                   {gap}
                 </span>
               </TimelineGap>
@@ -276,10 +276,10 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
               <DropIcon size={15} color="var(--accent)" />
             </div>
             <div>
-              <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
+              <p className="text-[17px] font-medium leading-tight text-[var(--text-primary)]">
                 Gotas
               </p>
-              <p className="mono text-[11px] text-[var(--text-muted)]">{lastTime}</p>
+              <p className="mono text-[12px] font-normal text-[var(--text-muted)]">{lastTime}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
             >
               <EyedropperIcon size={15} color="var(--pain-low)" />
               <span
-                className="mono text-[15px] font-semibold tabular-nums"
+                className="mono text-[20px] font-normal tabular-nums"
                 style={{ color: "var(--pain-low)" }}
               >
                 {drops.length}
@@ -338,12 +338,12 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                 <TimelineRow time={formatTime(d.loggedAt, timezone)}>
                   <TimelineDot color="var(--accent)" />
                   <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                    <span className="truncate text-[13px] font-medium text-[var(--text-primary)]">
+                    <span className="truncate text-[15px] font-medium text-[var(--text-primary)]">
                       {d.name}
                     </span>
                     <div className="flex shrink-0 items-center gap-1.5">
                       <span
-                        className="mono inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[11px] font-bold tracking-wider text-[var(--text-faint)]"
+                        className="mono inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[11px] font-normal tracking-wider text-[var(--text-faint)]"
                         style={{
                           background:
                             "color-mix(in srgb, var(--surface-el) 60%, transparent)",
@@ -351,7 +351,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
                       >
                         {occurrenceById.get(d.id)}×
                       </span>
-                      <span className="mono text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--accent)]">
+                      <span className="mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--accent)]">
                         {EYE_SHORT[d.eye as keyof typeof EYE_SHORT]}
                       </span>
                       <CheckBadge />
@@ -369,7 +369,7 @@ export function DropsBlock({ drops, timezone }: { drops: DisplayDrop[]; timezone
             );
           })}
           {allSorted.length === 0 && (
-            <p className="text-[13px] text-[var(--text-muted)]">Sin registros de gotas.</p>
+            <p className="text-[15px] text-[var(--text-muted)]">Sin registros de gotas.</p>
           )}
           <div ref={setSentinelEl} className="h-px" />
         </div>

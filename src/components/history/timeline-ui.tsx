@@ -8,7 +8,7 @@ type TimeRowProps = {
 export function TimelineRow({ time, children }: TimeRowProps) {
   return (
     <div className="grid grid-cols-[44px_16px_1fr] items-center gap-2">
-      <span className="mono text-[12px] tabular-nums text-[var(--text-primary)]">{time}</span>
+      <span className="mono text-[12px] font-normal tabular-nums text-[var(--text-primary)]">{time}</span>
       {children}
     </div>
   );

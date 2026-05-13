@@ -19,7 +19,7 @@ function TabBar({ activeTab, onTabChange }: { activeTab: HistoryTab; onTabChange
         <button
           key={tab.value}
           onClick={() => onTabChange(tab.value)}
-          className="relative pb-2.5 text-[14px] font-semibold transition-colors duration-150"
+          className="relative pb-2.5 text-[13px] font-semibold transition-colors duration-150"
           style={{
             color: activeTab === tab.value ? "var(--text-primary)" : "var(--text-faint)",
           }}
@@ -39,7 +39,7 @@ function TabBar({ activeTab, onTabChange }: { activeTab: HistoryTab; onTabChange
 
 function EmptyFeed() {
   return (
-    <div className="rounded-[var(--radius-md)] px-4 py-3 text-[15px] bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
+    <div className="rounded-[var(--radius-md)] px-4 py-3 text-body-emphasized bg-[rgba(123,198,122,0.12)] border border-[rgba(123,198,122,0.3)] text-[var(--pain-low)]">
       Aún no tienes registros. Ve a Registrar para empezar.
     </div>
   );
@@ -67,13 +67,13 @@ function LoadMoreFooter({
         <button
           onClick={onLoadMore}
           disabled={isLoadingMore}
-          className="mono text-[11px] tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
+          className="mono text-[11px] font-normal tracking-[0.12em] text-[var(--text-muted)] disabled:opacity-50"
         >
           {isLoadingMore ? "CARGANDO..." : "CARGAR MÁS"}
         </button>
       )}
       {!hasMore && (
-        <p className="mono text-[11px] tracking-[0.12em] text-[var(--text-faint)]">
+        <p className="mono text-[11px] font-normal tracking-[0.12em] text-[var(--text-faint)]">
           INICIO DEL HISTORIAL
         </p>
       )}

@@ -8,13 +8,13 @@ import { formatTime, getTimeOfDay, painColor } from "./utils";
 function PrimaryRow({ field, value, barsReady }: { field: ScoreField; value: number; barsReady: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex w-[68px] shrink-0 items-center gap-2">
+      <div className="flex w-[82px] shrink-0 items-center gap-2">
         <img
           src={field.img}
           alt={field.label}
           className="w-[22px] h-[22px] shrink-0 object-contain theme-invert"
         />
-        <span className="text-[12px] font-medium leading-none text-[var(--text-muted)]">
+        <span className="text-[13px] font-medium leading-none whitespace-nowrap text-[var(--text-muted)]">
           {field.label}
         </span>
       </div>
@@ -29,7 +29,7 @@ function PrimaryRow({ field, value, barsReady }: { field: ScoreField; value: num
         />
       </div>
       <span
-        className="mono w-[34px] text-right text-[12px] font-semibold tabular-nums"
+        className="mono w-[34px] text-right text-[13px] font-medium tabular-nums"
         style={{ color: value === 0 ? "var(--text-faint)" : painColor(value) }}
       >
         {value}
@@ -48,10 +48,10 @@ function PeripheralChip({ field, value }: { field: ScoreField; value: number }) 
         alt={field.label}
         className="w-[18px] h-[18px] shrink-0 object-contain theme-invert"
       />
-      <span className="min-w-0 flex-1 truncate text-[11px] text-[var(--text-muted)]">
+      <span className="min-w-0 flex-1 truncate text-[12px] text-[var(--text-muted)]">
         {field.label}
       </span>
-      <span className="mono shrink-0 text-[12px] font-semibold tabular-nums" style={{ color }}>
+      <span className="mono shrink-0 text-[13px] font-medium tabular-nums" style={{ color }}>
         {value}
       </span>
     </div>
@@ -82,7 +82,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
             {isMoon ? <MoonIcon size={15} color="var(--accent)" /> : <SunIcon size={15} color="var(--accent)" />}
           </div>
           <div className="min-w-0">
-            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
+            <p className="text-[17px] font-medium leading-tight text-[var(--text-primary)]">
               {item.triggerTypes && item.triggerTypes.length > 0
                 ? item.triggerTypes.length === 1
                   ? `Trigger: ${item.triggerTypes[0] === "other" && item.notes ? item.notes : TRIGGER_LABELS[item.triggerTypes[0] as keyof typeof TRIGGER_LABELS] ?? item.triggerTypes[0]}`
@@ -91,7 +91,7 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
                   ? `Trigger: ${item.triggerType === "other" && item.notes ? item.notes : TRIGGER_LABELS[item.triggerType]}`
                   : label}
             </p>
-            <p className="mono text-[11px] text-[var(--text-muted)]">{formatTime(item.loggedAt, timezone)}</p>
+            <p className="mono text-[12px] font-normal text-[var(--text-muted)]">{formatTime(item.loggedAt, timezone)}</p>
             {item.triggerTypes && item.triggerTypes.length > 1 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.triggerTypes.map((t) => (
@@ -112,20 +112,20 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
             alt={worstField.label}
             className="w-[20px] h-[20px] object-contain theme-invert"
           />
-          <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: worstColor }}>
+          <span className="mono text-[20px] font-normal tabular-nums" style={{ color: worstColor }}>
             {worstScore}
           </span>
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-faint)]">
             Zona ocular
           </span>
           <span className="h-px flex-1 bg-[var(--border)]" />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           {PRIMARY_FIELDS.map((field) => (
             <PrimaryRow
               key={field.key}
@@ -137,14 +137,14 @@ export function CheckInCard({ item, timezone }: { item: DisplayCheckIn; timezone
         </div>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-4 space-y-3">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-faint)]">
             Asociado
           </span>
           <span className="h-px flex-1 bg-[var(--border)]" />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {PERIPHERAL_FIELDS.map((field) => (
             <PeripheralChip
               key={field.key}

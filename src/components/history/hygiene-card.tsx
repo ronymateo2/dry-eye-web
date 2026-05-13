@@ -36,7 +36,7 @@ function HygieneTimeline({
 
             {!isLast && (
               <TimelineGap lineColor={statusColor}>
-                <span className="mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                <span className="mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--text-faint)]">
                   {gap}
                 </span>
               </TimelineGap>
@@ -77,16 +77,16 @@ export function HygieneCard({
             <EyeIcon size={15} style={{ color: statusColor }} />
           </div>
           <div className="min-w-0">
-            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
+            <p className="text-[17px] font-medium leading-tight text-[var(--text-primary)]">
               Higiene palpebral
             </p>
             {lastTime ? (
-              <p className="mono text-[11px] text-[var(--text-muted)]">
+              <p className="mono text-[12px] font-normal text-[var(--text-muted)]">
                 {item.completedCount > 1 ? `Última ${lastTime}` : lastTime}
               </p>
             ) : (
               <p
-                className="text-[11px] font-semibold uppercase tracking-[0.08em]"
+                className="text-[11px] font-bold uppercase tracking-[0.10em]"
                 style={{ color: statusColor }}
               >
                 {statusLabel}
@@ -103,7 +103,7 @@ export function HygieneCard({
             >
               <CheckIcon size={13} color={statusColor} weight="bold" />
               <span
-                className="mono text-[15px] font-semibold tabular-nums"
+                className="mono text-[20px] font-normal tabular-nums"
                 style={{ color: statusColor }}
               >
                 {item.completedCount}
@@ -125,12 +125,12 @@ export function HygieneCard({
             )}
           </div>
         ) : (
-          <span
-            className="text-[11px] font-semibold uppercase tracking-[0.08em]"
-            style={{ color: statusColor }}
-          >
-            {statusLabel}
-          </span>
+            <span
+              className="text-[11px] font-bold uppercase tracking-[0.10em]"
+              style={{ color: statusColor }}
+            >
+              {statusLabel}
+            </span>
         )}
       </div>
 
@@ -144,7 +144,7 @@ export function HygieneCard({
         >
           <div className="overflow-hidden">
             <div className="mt-2.5 rounded-[10px] bg-[var(--surface-el)] px-3 pt-2.5 pb-3">
-              <p className="mono mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-faint)]">
+              <p className="mono mb-2 text-[11px] font-bold uppercase tracking-[0.10em] text-[var(--text-faint)]">
                 Sesiones
               </p>
               <HygieneTimeline sessions={sessions} timezone={timezone} statusColor={statusColor} />
@@ -157,7 +157,7 @@ export function HygieneCard({
         <div className="mt-3 flex flex-col gap-1.5 border-t border-[var(--border)] pt-2.5">
           {friction && (
             <span
-              className="self-start rounded-[var(--radius-sm)] border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em]"
+              className="self-start rounded-[var(--radius-sm)] border px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.10em]"
               style={{
                 color: "var(--accent)",
                 borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)",
@@ -168,7 +168,7 @@ export function HygieneCard({
             </span>
           )}
           {item.userNote && (
-            <p className="text-[12px] italic leading-snug text-[var(--text-muted)]">
+            <p className="text-[13px] italic leading-snug text-[var(--text-muted)]">
               "{item.userNote}"
             </p>
           )}

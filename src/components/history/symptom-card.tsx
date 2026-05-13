@@ -13,15 +13,15 @@ export function SymptomCard({ item, timezone }: { item: DisplaySymptomGroup; tim
           <PulseIcon size={15} color="var(--text-muted)" />
         </div>
         <div>
-          <p className="text-[13px] font-semibold text-[var(--text-primary)]">Síntomas</p>
-          <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
+          <p className="text-[15px] font-medium text-[var(--text-primary)]">Síntomas</p>
+          <p className="mono text-[12px] font-normal text-[var(--text-muted)]">{time}</p>
         </div>
       </div>
       <div className="flex flex-wrap gap-x-3 gap-y-1 pl-[42px]">
         {item.symptomTypes.map((type, i) => {
           const label = SYMPTOM_OPTIONS.find((o) => o.value === type)?.label ?? type;
           return (
-            <span key={i} className="text-[12px] text-[var(--text-muted)]">{label}</span>
+            <span key={i} className="text-[13px] text-[var(--text-muted)]">{label}</span>
           );
         })}
       </div>

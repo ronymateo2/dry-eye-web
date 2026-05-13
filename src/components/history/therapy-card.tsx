@@ -10,12 +10,12 @@ export function TherapyCard({ item, timezone }: { item: DisplayTherapy; timezone
         <HeartbeatIcon size={16} color="var(--accent)" weight="fill" />
       </div>
       <div className="flex flex-1 flex-col gap-0.5">
-        <span className="text-[13px] font-medium text-[var(--text-primary)]">
+        <span className="text-[15px] font-medium text-[var(--text-primary)]">
           {item.therapyType === "miofascial" ? "Terapia miofascial" : "Terapia"}
         </span>
-        <span className="mono text-[11px] text-[var(--text-faint)]">{time}</span>
+        <span className="mono text-[12px] font-normal text-[var(--text-faint)]">{time}</span>
         {item.notes && (
-          <span className="mt-1 text-[12px] italic text-[var(--text-muted)]">"{item.notes}"</span>
+          <span className="mt-1 text-[13px] italic text-[var(--text-muted)]">"{item.notes}"</span>
         )}
       </div>
     </article>

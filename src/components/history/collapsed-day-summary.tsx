@@ -37,20 +37,20 @@ export function CollapsedDaySummary({ group, timezone, onExpand }: CollapsedDayS
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-baseline gap-2">
-            <span className="text-[13px] font-semibold text-[var(--text-primary)]">{shortDate}</span>
+            <span className="text-[15px] font-medium text-[var(--text-primary)]">{shortDate}</span>
             {pillLabel && (
-              <span className="text-[11px] font-semibold tracking-[0.1em]" style={{ color: "var(--accent)" }}>
+              <span className="text-[11px] font-bold tracking-[0.10em]" style={{ color: "var(--accent)" }}>
                 {pillLabel}
               </span>
             )}
           </div>
           {parts.length > 0 && (
-            <p className="mt-0.5 text-[11px] text-[var(--text-muted)]">{parts.join(" · ")}</p>
+            <p className="mt-0.5 text-[12px] text-[var(--text-muted)]">{parts.join(" · ")}</p>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {lastAt && (
-            <span className="mono text-[11px] text-[var(--text-faint)]">
+            <span className="mono text-[12px] font-normal text-[var(--text-faint)]">
               ult {formatTime(lastAt, timezone)}
             </span>
           )}

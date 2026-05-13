@@ -13,11 +13,11 @@ function MedicationRow({ intake }: { intake: DisplayMedicationIntake }) {
         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(92,184,90,0.15)]">
           <CheckIcon size={11} color="var(--pain-low)" weight="bold" />
         </div>
-        <span className="flex-1 truncate text-[14px] font-normal text-[var(--text-primary)]">
+        <span className="flex-1 truncate text-[15px] font-normal text-[var(--text-primary)]">
           {intake.medicationName || "Medicamento"}
         </span>
         {intake.dosageTaken ? (
-          <span className="shrink-0 text-[13px] font-semibold text-[var(--accent)]">
+          <span className="shrink-0 text-[13px] font-medium text-[var(--accent)]">
             {intake.dosageTaken}
           </span>
         ) : null}
@@ -27,7 +27,7 @@ function MedicationRow({ intake }: { intake: DisplayMedicationIntake }) {
         <div className="mt-0.5 pl-8">
           <button
             onClick={() => setNotesOpen((v) => !v)}
-            className="text-[11px] font-medium text-[var(--text-faint)] transition-colors hover:text-[var(--text-muted)]"
+            className="text-[12px] font-medium text-[var(--text-faint)] transition-colors hover:text-[var(--text-muted)]"
           >
             {notesOpen ? "Ocultar nota" : "Ver nota"}
           </button>
@@ -39,7 +39,7 @@ function MedicationRow({ intake }: { intake: DisplayMedicationIntake }) {
             }}
           >
             <div className="overflow-hidden">
-              <p className="pt-1 text-[12px] leading-snug text-[var(--text-muted)]">
+              <p className="pt-1 text-[13px] leading-snug text-[var(--text-muted)]">
                 {intake.notes}
               </p>
             </div>
@@ -63,8 +63,8 @@ export function MedicationGroupCard({ item, timezone }: { item: DisplayMedicatio
             <PillIcon size={15} color="var(--accent)" />
           </div>
           <div>
-            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">Pastillas</p>
-            <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
+            <p className="text-[17px] font-medium leading-tight text-[var(--text-primary)]">Pastillas</p>
+            <p className="mono text-[12px] font-normal text-[var(--text-muted)]">{time}</p>
           </div>
         </div>
         <div
@@ -72,7 +72,7 @@ export function MedicationGroupCard({ item, timezone }: { item: DisplayMedicatio
           style={{ background: "color-mix(in srgb, var(--pain-low) 12%, transparent)" }}
         >
           <CheckIcon style={{ color: "var(--pain-low)" }} size={13} weight="bold" />
-          <span className="mono text-[15px] font-semibold tabular-nums" style={{ color: "var(--pain-low)" }}>
+          <span className="mono text-[20px] font-normal tabular-nums" style={{ color: "var(--pain-low)" }}>
             {item.intakes.length}
           </span>
         </div>
@@ -95,14 +95,14 @@ export function MedicationIntakeCard({ item, timezone }: { item: DisplayMedicati
         <PillIcon size={16} color="var(--accent)" weight="fill" />
       </div>
       <div className="flex flex-1 flex-col gap-0.5">
-        <span className="text-[13px] font-medium text-[var(--text-primary)]">
+        <span className="text-[15px] font-medium text-[var(--text-primary)]">
           {item.medicationName ?? "Medicamento"}
         </span>
-        <span className="mono text-[11px] text-[var(--text-faint)]">
+        <span className="mono text-[12px] font-normal text-[var(--text-faint)]">
           {item.dosageTaken ? `${item.dosageTaken} · ` : ""}{time}
         </span>
         {item.notes && (
-          <span className="mt-1 text-[12px] italic text-[var(--text-muted)]">"{item.notes}"</span>
+          <span className="mt-1 text-[13px] italic text-[var(--text-muted)]">"{item.notes}"</span>
         )}
       </div>
     </article>

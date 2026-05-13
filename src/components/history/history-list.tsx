@@ -81,7 +81,7 @@ export function HistoryList({ feed, timezone, expandedDays, toggleDay }: History
                     <div className="flex items-center gap-2 py-1">
                       <button
                         onClick={() => toggleDay(group.dayKey)}
-                        className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-3 text-[11px] font-semibold tracking-[0.12em] text-[var(--text-primary)] transition duration-150 ease-out hover:bg-[var(--border)] active:scale-[0.95]"
+                        className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface-el)] px-3 text-[11px] font-bold tracking-[0.10em] text-[var(--text-primary)] transition duration-150 ease-out hover:bg-[var(--border)] active:scale-[0.95]"
                       >
                         <span>{pillLabel ?? shortDate}</span>
                         <div style={{ transform: "rotate(90deg)" }}>
@@ -89,7 +89,7 @@ export function HistoryList({ feed, timezone, expandedDays, toggleDay }: History
                         </div>
                       </button>
                       {pillLabel && (
-                        <span className="text-[11px] font-medium tracking-[0.1em] text-[var(--text-muted)]">
+                        <span className="text-[12px] font-medium tracking-[0.10em] text-[var(--text-muted)]">
                           {shortDate}
                         </span>
                       )}

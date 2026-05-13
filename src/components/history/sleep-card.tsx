@@ -15,13 +15,13 @@ export function SleepCard({ item, timezone }: { item: DisplaySleep; timezone: st
             <BedIcon size={15} color="var(--text-muted)" />
           </div>
           <div>
-            <p className="text-[15px] font-semibold leading-tight text-[var(--text-primary)]">
+            <p className="text-[17px] font-medium leading-tight text-[var(--text-primary)]">
               Sueño · {item.sleepHours}h
             </p>
-            <p className="mono text-[11px] text-[var(--text-muted)]">{time}</p>
+            <p className="mono text-[12px] font-normal text-[var(--text-muted)]">{time}</p>
           </div>
         </div>
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: qualityColor }}>
+        <span className="text-[11px] font-bold uppercase tracking-[0.10em]" style={{ color: qualityColor }}>
           {SLEEP_QUALITY_LABELS[item.sleepQuality]}
         </span>
       </div>

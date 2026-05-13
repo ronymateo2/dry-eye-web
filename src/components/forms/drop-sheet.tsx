@@ -189,10 +189,10 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
         {showDiscardConfirm && (
           <div className="rounded-[10px] border p-3 space-y-3" style={{ borderColor: "color-mix(in srgb, var(--error) 40%, transparent)", background: "var(--surface-el)" }}>
             <div>
-              <p className="text-[13px] font-semibold" style={{ color: "var(--text-primary)" }}>
+              <p className="text-[15px] font-semibold" style={{ color: "var(--text-primary)" }}>
                 ¿Descartar vial de {selectedDropTypeInfo?.name}?
               </p>
-              <p className="mt-0.5 text-[12px] leading-snug" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-1 text-[13px] leading-snug" style={{ color: "var(--text-muted)" }}>
                 Marca el vial como usado. Recuerda tirar el frasco físico. Esta acción no se puede deshacer.
               </p>
             </div>
@@ -291,16 +291,16 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
               <span className="flex h-4 w-4 items-center justify-center">
                 <EyedropperIcon aria-hidden weight="duotone" size={24} className="shrink-0 -translate-y-[1.5px]" style={{ color: "var(--accent)" }} />
               </span>
-              <p className="m-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color: "var(--text-faint)" }}>
+              <p className="m-0 text-[11px] font-bold uppercase leading-none tracking-[0.10em]" style={{ color: "var(--text-faint)" }}>
                 Ultima gota
               </p>
             </div>
-            <p className="mono text-[13px] font-medium" style={{ color: "var(--text-primary)" }}>
+            <p className="mono text-[13px] font-normal" style={{ color: "var(--text-primary)" }}>
               {lastDropLabel.timeStr}
             </p>
           </div>
           <p className="mt-1.5 flex items-center gap-1.5 text-[13px] leading-snug" style={{ color: "var(--text-muted)" }}>
-            <span className="min-w-0 truncate" style={{ color: "var(--text-primary)" }}>{lastDropLabel.name}</span>
+            <span className="min-w-0 truncate font-medium" style={{ color: "var(--text-primary)" }}>{lastDropLabel.name}</span>
             <span className="shrink-0">· {lastDropLabel.eye}</span>
             <span className="shrink-0">· {lastDropLabel.quantityLabel}</span>
           </p>
@@ -314,7 +314,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
           className="flex items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5 text-[13px] font-medium transition-colors"
           style={loggedAt
             ? { color: "var(--accent)", borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)" }
-            : { color: "var(--text-secondary)", borderColor: "var(--border)" }
+            : { color: "var(--text-muted)", borderColor: "var(--border)" }
           }
           onClick={() => {
             if (showDatePicker) {
@@ -335,7 +335,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
               <p className="section-label mb-0">Fecha y hora</p>
               <button
                 type="button"
-                className="text-[12px] font-medium text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                className="text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)]"
                 onClick={() => { setShowDatePicker(false); setLoggedAt(null); }}
               >
                 Volver a ahora
@@ -405,7 +405,7 @@ export function DropSheet({ onSaved, initialDropTypeId }: { onSaved: () => void;
             >
               −
             </button>
-            <span className="flex-1 text-center text-[15px] font-medium text-[var(--text-primary)]">
+            <span className="flex-1 text-center text-[17px] font-medium text-[var(--text-primary)]">
               {quantity}
             </span>
             <button

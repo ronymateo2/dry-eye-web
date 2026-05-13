@@ -60,17 +60,17 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
-            <p className="text-[14px] font-medium text-[var(--text-primary)]">{item.title}</p>
+            <p className="text-[15px] font-medium text-[var(--text-primary)]">{item.title}</p>
             {!hasPropertyValues && item.intensity != null && item.intensity > 0 && (
               <span
-                className="mono shrink-0 text-[13px] font-medium tabular-nums"
+                className="mono shrink-0 text-[15px] font-normal tabular-nums"
                 style={{ color: intensityHue }}
               >
                 {item.intensity}/10
               </span>
             )}
           </div>
-          <p className="mono mt-0.5 text-[11px] text-[var(--text-muted)]">
+          <p className="mono mt-0.5 text-[12px] font-normal text-[var(--text-muted)]">
             {eyeLabel ? `${eyeLabel} · ` : ""}
             {time}
           </p>
@@ -80,7 +80,7 @@ export function ObservationCard({ item, timezone }: { item: DisplayObservation; 
               propertiesSchema={item.propertiesSchema!}
             />
           ) : item.notes ? (
-            <p className="mt-1.5 text-[13px] leading-snug text-[var(--text-muted)]">{item.notes}</p>
+            <p className="mt-1.5 text-[15px] leading-snug text-[var(--text-muted)]">{item.notes}</p>
           ) : null}
         </div>
       </div>
