@@ -42,7 +42,7 @@ export function HeroView({
   return (
     <>
       <div className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
-        <TopographicBg position="right -20px top -10px" size="600px" />
+        <TopographicBg position="calc(100% + 20px) -10px" size="600px" />
 
         <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-4">
           <p className="mb-0 text-[11px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Próxima dosis</p>

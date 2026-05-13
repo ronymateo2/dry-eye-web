@@ -200,7 +200,7 @@ export function SymptomStatusCard({ onRegister }: Props) {
       transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
       className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4"
     >
-      <TopographicBg position="right -20px bottom -10px" size="600px" />
+      <TopographicBg position="calc(100% + 20px) calc(100% + 10px)" size="600px" />
       
       <div className="relative z-10">
         {/* Header */}

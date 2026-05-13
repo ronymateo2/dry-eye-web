@@ -29,7 +29,7 @@ export function CardView({
   return (
     <>
       <div className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
-        <TopographicBg position="right -20px top -10px" size="600px" />
+        <TopographicBg position="calc(100% + 20px) -10px" size="600px" />
 
         <div className="relative z-10 space-y-3">
           <div className="flex items-center justify-between gap-3">
