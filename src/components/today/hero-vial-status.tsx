@@ -13,33 +13,31 @@ export function HeroVialStatus({
 }) {
   const status = getVialStatus(vial, now);
 
-  if (status.isExpired) {
-    return (
+  const label = status.isExpired
+    ? `Vial vencido (+${status.timeStr})`
+    : `Vial vence en ${status.timeStr}`;
+
+  return (
+    <div className="inline-flex items-center gap-2">
       <button
         type="button"
         onClick={onClick}
-        className="group inline-flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-80 active:opacity-60"
-        style={{ color: "var(--pain-high)" }}
-        aria-label={`Vial vencido (+${status.timeStr}). Toca para descartar.`}
+        className="inline-flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-80 active:opacity-60"
+        style={{ color: status.isExpired ? "var(--pain-high)" : status.color }}
+        aria-label={`${label}. Toca para descartar.`}
       >
         <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
-        <span>Vial vencido (+{status.timeStr})</span>
-        <TrashIcon size={14} weight="regular" className="shrink-0" />
+        <span>{label}</span>
       </button>
-    );
-  }
 
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group inline-flex items-center gap-1 text-[12px] transition-colors hover:opacity-80 active:opacity-60"
-      style={{ color: status.color }}
-      aria-label={`Vial vence en ${status.timeStr}. Toca para descartar.`}
-    >
-      <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
-      <span>Vial vence en {status.timeStr}</span>
-      <TrashIcon size={14} weight="regular" className="shrink-0" />
-    </button>
+      <button
+        type="button"
+        onClick={onClick}
+        className="shrink-0 text-[var(--text-muted)] transition-opacity hover:opacity-80 active:opacity-60"
+        aria-label="Descartar vial"
+      >
+        <TrashIcon size={14} weight="regular" />
+      </button>
+    </div>
   );
 }

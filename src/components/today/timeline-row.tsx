@@ -71,22 +71,35 @@ export function TimelineRow({
         </span>
 
         {vialStatus && vial && onDiscardVial && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDiscardVial(vial);
-            }}
-            className="inline-flex w-fit items-center gap-1 rounded-[6px] px-1.5 py-0.5 text-left transition-opacity hover:opacity-80 active:opacity-60"
-            style={{ color: vialStatus.color }}
-            aria-label={`Descartar vial de ${entry.name}`}
-          >
-            <EyedropperSampleIcon size={11} weight="fill" className="shrink-0" />
-            <span className="min-w-0 truncate font-mono text-[11px] font-semibold uppercase tracking-[0.04em] tabular-nums">
-              {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
-            </span>
-            <TrashIcon size={11} weight="regular" className="shrink-0" />
-          </button>
+          <div className="inline-flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDiscardVial(vial);
+              }}
+              className="inline-flex w-fit items-center gap-1 rounded-[6px] px-1.5 py-0.5 text-left transition-opacity hover:opacity-80 active:opacity-60"
+              style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
+              aria-label={`Descartar vial de ${entry.name}`}
+            >
+              <EyedropperSampleIcon size={11} weight="fill" className="shrink-0" />
+              <span className="min-w-0 truncate font-mono text-[11px] font-semibold uppercase tracking-[0.04em] tabular-nums">
+                {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDiscardVial(vial);
+              }}
+              className="shrink-0 text-[var(--text-muted)] transition-opacity hover:opacity-80 active:opacity-60"
+              aria-label={`Descartar vial de ${entry.name}`}
+            >
+              <TrashIcon size={11} weight="regular" />
+            </button>
+          </div>
         )}
       </div>
 
