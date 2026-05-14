@@ -91,8 +91,11 @@ export function HeroView({
 
   function handleQuickLog() {
     if (!heroEntry || quickLogPending || justRegistered) return;
-    const d = new Date();
-    const takenAt = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    const takenAt = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
     setJustRegistered({ dropTypeId: heroEntry.drop_type_id, takenAt });
     quickLog(heroEntry.drop_type_id);
   }
@@ -165,7 +168,7 @@ export function HeroView({
                   style={{ cursor: isRegistered ? "default" : "pointer" }}
                 >
                   <span
-                    className="truncate text-[28px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                    className="truncate text-[26px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
                     style={{
                       color: isRegistered ? "var(--text-muted)" : "var(--text-primary)",
                       textDecoration: isRegistered ? "line-through" : "none",
