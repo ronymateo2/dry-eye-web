@@ -84,7 +84,9 @@ export function HeroView({
   const heroEntry = upcoming[0] ?? null;
   const timelineEntries = upcoming.slice(1);
   const heroVial = heroEntry ? (vialByDropType.get(heroEntry.drop_type_id) ?? null) : null;
-  const todayCount = allRecentDrops.length;
+  const todayCount = allRecentDrops.filter(
+    (d) => new Date(d.logged_at).toDateString() === new Date().toDateString(),
+  ).length;
   const isRegistered = heroEntry ? justRegistered?.dropTypeId === heroEntry.drop_type_id : false;
 
   function handleQuickLog() {

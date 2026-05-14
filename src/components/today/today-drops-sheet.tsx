@@ -24,18 +24,24 @@ function formatTime(isoStr: string): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+function isToday(isoStr: string): boolean {
+  return new Date(isoStr).toDateString() === new Date().toDateString();
+}
+
 /* ─── Drop type accordion group ────────────────────────────────────────── */
 
 function DropTypeGroup({
   typeId,
   typeName,
   initialExpanded,
+  show24h,
   onEdit,
   onDelete,
 }: {
   typeId: string;
   typeName: string;
   initialExpanded: boolean;
+  show24h: boolean;
   onEdit: (drop: RecentDrop, typeId: string) => void;
   onDelete: (drop: RecentDrop, typeId: string) => void;
 }) {
@@ -55,9 +61,11 @@ function DropTypeGroup({
     [drops],
   );
 
-  if (sorted.length === 0) return null;
+  const visible = show24h ? sorted : sorted.filter((d) => isToday(d.logged_at));
 
-  const lastDrop = sorted[0];
+  if (visible.length === 0) return null;
+
+  const lastDrop = visible[0];
 
   return (
     <div>
@@ -77,7 +85,7 @@ function DropTypeGroup({
             background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
           }}
         >
-          {sorted.length}×
+          {visible.length}×
         </span>
         <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
           {formatTime(lastDrop.logged_at)}
@@ -106,7 +114,7 @@ function DropTypeGroup({
       >
         <div className="rounded-[10px] bg-[var(--surface-el)] mb-1 overflow-hidden divide-y divide-[var(--border)]">
           <AnimatePresence mode="popLayout" initial={false}>
-            {sorted.map((drop) => (
+            {visible.map((drop) => (
               <motion.div
                 key={drop.id}
                 layout
@@ -164,6 +172,7 @@ export function TodayDropsSheet({
 }) {
   const queryClient = useQueryClient();
   const stack = useSheetStack();
+  const [show24h, setShow24h] = useState(false);
 
   useEffect(() => {
     if (!open) stack.clear();
@@ -266,12 +275,28 @@ export function TodayDropsSheet({
 
   const baseContent = (
     <div>
+      <div className="mb-3 flex justify-end">
+        <button
+          type="button"
+          onClick={() => setShow24h((v) => !v)}
+          className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition-colors"
+          style={{
+            color: show24h ? "var(--accent)" : "var(--text-faint)",
+            background: show24h
+              ? "color-mix(in srgb, var(--accent) 12%, transparent)"
+              : "var(--surface-el)",
+          }}
+        >
+          {show24h ? "Últimas 24h" : "Solo hoy"}
+        </button>
+      </div>
       {dropTypes.map((t) => (
         <DropTypeGroup
           key={t.id}
           typeId={t.id}
           typeName={t.name}
           initialExpanded={t.id === initialDropTypeId}
+          show24h={show24h}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
@@ -301,7 +326,7 @@ export function TodayDropsSheet({
       onClose={onClose}
       stack={stack}
       panelClassName="!h-[95dvh]"
-      baseLayer={{ key: "drops-today", title: "Dosis de hoy", description: "Últimas 24 horas", content: baseContent }}
+      baseLayer={{ key: "drops-today", title: "Dosis de hoy", description: show24h ? "Últimas 24 horas" : "Solo hoy", content: baseContent }}
     />
   );
 }

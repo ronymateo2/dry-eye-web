@@ -37,7 +37,7 @@ export function TimelineRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group relative flex flex-col w-full rounded-[10px] px-3 cursor-pointer",
+        "group relative flex items-center gap-2 w-full rounded-[10px] px-3 min-h-[40px] cursor-pointer",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}
@@ -52,70 +52,69 @@ export function TimelineRow({
         }
       }}
     >
-      <div className="flex items-center gap-2 min-h-[44px]">
-        <span
-          className="w-[3px] shrink-0 self-stretch rounded-full opacity-60 scale-y-[0.82] origin-center transition-[opacity,transform] duration-[160ms] ease-out group-hover:opacity-100 group-hover:scale-y-100"
-          style={{ background: badgeColor }}
-          aria-hidden
-        />
+      <span
+        className="w-[3px] shrink-0 self-stretch rounded-full opacity-60 scale-y-[0.82] origin-center transition-[opacity,transform] duration-[160ms] ease-out group-hover:opacity-100 group-hover:scale-y-100"
+        style={{ background: badgeColor }}
+        aria-hidden
+      />
 
-        <span
-          className="font-mono text-[13px] tabular-nums whitespace-nowrap w-[46px] shrink-0 text-right"
-          style={{ color: "var(--text-faint)" }}
-        >
-          {timeLabel}
-        </span>
+      <span
+        className="font-mono text-[13px] tabular-nums whitespace-nowrap w-[46px] shrink-0 text-right"
+        style={{ color: "var(--text-faint)" }}
+      >
+        {timeLabel}
+      </span>
 
+      <span className="min-w-0 flex-1 flex items-center gap-1.5 ml-1 overflow-hidden">
         <span
-          className="truncate text-[17px] font-medium capitalize leading-none flex-1 ml-1"
+          className="truncate text-[15px] font-medium capitalize leading-none"
           style={{ color: "var(--text-primary)" }}
         >
           {entry.name}
         </span>
-
-        <span className="flex shrink-0 items-center gap-1.5 pointer-events-none">
-          <span
-            className="font-mono text-[15px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
-            style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
-          >
-            {badgeText}
+        {vialStatus && vial && onDiscardVial && (
+          <span className="flex shrink-0 items-center gap-1">
+            <EyedropperSampleIcon
+              size={10}
+              weight="fill"
+              className="shrink-0"
+              style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
+            />
+            <span
+              className="font-mono text-[10px] font-medium uppercase tracking-[0.04em] tabular-nums whitespace-nowrap"
+              style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
+            >
+              {vialStatus.isExpired ? `+${vialStatus.timeStr}` : vialStatus.timeStr}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDiscardVial(vial);
+              }}
+              className="shrink-0 text-[var(--text-faint)] transition-opacity hover:opacity-80 active:opacity-60"
+              aria-label={`Descartar vial de ${entry.name}`}
+            >
+              <TrashIcon size={12} weight="regular" />
+            </button>
           </span>
-          <CaretRightIcon
-            aria-hidden
-            size={9}
-            weight="bold"
-            className="text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70"
-          />
+        )}
+      </span>
+
+      <span className="flex shrink-0 items-center gap-1.5 pointer-events-none">
+        <span
+          className="font-mono text-[13px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+          style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
+        >
+          {badgeText}
         </span>
-      </div>
-
-      {vialStatus && vial && onDiscardVial && (
-        <div className="flex items-center gap-2 pb-2 -mt-0.5 w-full ml-[60px]">
-          <EyedropperSampleIcon
-            size={11}
-            weight="fill"
-            className="shrink-0"
-            style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
-          />
-          <span
-            className="min-w-0 truncate font-mono text-[11px] font-medium uppercase tracking-[0.04em] tabular-nums flex-1"
-            style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
-          >
-            {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
-          </span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDiscardVial(vial);
-            }}
-            className="shrink-0 text-[var(--text-muted)] transition-opacity hover:opacity-80 active:opacity-60"
-            aria-label={`Descartar vial de ${entry.name}`}
-          >
-            <TrashIcon size={14} weight="regular" />
-          </button>
-        </div>
-      )}
+        <CaretRightIcon
+          aria-hidden
+          size={9}
+          weight="bold"
+          className="text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70"
+        />
+      </span>
     </motion.div>
   );
 }
