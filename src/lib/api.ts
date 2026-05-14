@@ -85,8 +85,8 @@ export const api = {
   getLastDrop: () => api.get<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_name: string; drop_type_id: string } | null>("/drops/last"),
   getLastDropPerType: () => api.get<DropScheduleEntry[]>("/drops/last-per-type"),
   getDropStatsPerType: () => api.get<DropTypeStats[]>("/drops/stats-per-type"),
-  getRecentDrops: (dropTypeId: string, hours: number) =>
-    api.get<{ id: string; logged_at: string; quantity: number; eye: string }[]>(`/drops/recent?dropTypeId=${dropTypeId}&hours=${hours}`),
+  getRecentDrops: (dropTypeId: string, hours: number, opts?: { hasVial?: boolean }) =>
+    api.get<{ id: string; logged_at: string; quantity: number; eye: string }[]>(`/drops/recent?dropTypeId=${dropTypeId}&hours=${hours}${opts?.hasVial ? "&hasVial=true" : ""}`),
   getRecentDropsAll: (hours: number) =>
     api.get<{ id: string; logged_at: string; quantity: number; eye: string }[]>(`/drops/recent?hours=${hours}`),
 

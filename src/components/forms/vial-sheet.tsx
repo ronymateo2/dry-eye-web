@@ -61,8 +61,8 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
   const hours = selectedTypeInfo?.vial_duration ?? 24;
 
   const { data: recentDrops = [], isLoading: dropsLoading } = useQuery({
-    queryKey: ["drops/recent", selectedDropType, hours],
-    queryFn: () => api.getRecentDrops(selectedDropType, hours),
+    queryKey: ["drops/recent-has-vial", selectedDropType, hours],
+    queryFn: () => api.getRecentDrops(selectedDropType, hours, { hasVial: true }),
     enabled: !!selectedDropType,
   });
 
