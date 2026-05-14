@@ -90,23 +90,19 @@ export function TimelineRow({
       </div>
 
       {vialStatus && vial && onDiscardVial && (
-        <div className="flex items-center gap-1.5 pb-2 -mt-0.5 w-full">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDiscardVial(vial);
-            }}
-            className="flex flex-1 items-center gap-1 rounded-[6px] px-1.5 py-0.5 text-left transition-opacity hover:opacity-80 active:opacity-60"
+        <div className="flex items-center gap-2 pb-2 -mt-0.5 w-full ml-[60px]">
+          <EyedropperSampleIcon
+            size={11}
+            weight="fill"
+            className="shrink-0"
             style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
-            aria-label={`Descartar vial de ${entry.name}`}
+          />
+          <span
+            className="min-w-0 truncate font-mono text-[11px] font-medium uppercase tracking-[0.04em] tabular-nums flex-1"
+            style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
           >
-            <EyedropperSampleIcon size={11} weight="fill" className="shrink-0" />
-            <span className="min-w-0 truncate font-mono text-[11px] font-medium uppercase tracking-[0.04em] tabular-nums">
-              {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
-            </span>
-          </button>
-
+            {vialStatus.isExpired ? `vial vencido (+${vialStatus.timeStr})` : `vial ${vialStatus.timeStr}`}
+          </span>
           <button
             type="button"
             onClick={(e) => {
@@ -116,7 +112,7 @@ export function TimelineRow({
             className="shrink-0 text-[var(--text-muted)] transition-opacity hover:opacity-80 active:opacity-60"
             aria-label={`Descartar vial de ${entry.name}`}
           >
-            <TrashIcon size={11} weight="regular" />
+            <TrashIcon size={14} weight="regular" />
           </button>
         </div>
       )}
