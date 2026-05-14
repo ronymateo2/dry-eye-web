@@ -156,7 +156,7 @@ export function HeroView({
                 )}
               </div>
 
-              <div className="grid min-w-0 gap-2 pt-1">
+              <div className="grid min-w-0 gap-3 pt-1">
                 <button
                   type="button"
                   onClick={() => !isRegistered && dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
@@ -215,7 +215,7 @@ export function HeroView({
                   )}
                 </div>
 
-                <div className="h-px w-[80%] bg-[var(--border)] my-1" />
+                <div className="h-px w-[80%] bg-[var(--border)]" />
 
                 {/* vial + badge — stay in DOM (preserve height), hidden when registered */}
                 <div
@@ -233,7 +233,7 @@ export function HeroView({
                       type="button"
                       onClick={() => setTodayDropsOpen(true)}
                       aria-label={`Ver ${todayCount} dosis registradas hoy`}
-                      className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-[12px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)]/20 active:opacity-70"
+                      className="mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/20 active:scale-[0.97] active:bg-[var(--accent)]/25"
                     >
                       <EyedropperIcon size={12} weight="bold" />
                       {todayCount} {todayCount === 1 ? "dosis hoy" : "dosis hoy"}

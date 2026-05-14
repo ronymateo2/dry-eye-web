@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useAnimation } from "motion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { TrashIcon, PencilSimpleIcon, EyedropperIcon, PlusIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { TrashIcon, PencilSimpleIcon, EyedropperIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { StackedSheet } from "@/components/layout/stacked-sheet";
 import { useSheetStack } from "@/lib/hooks/use-sheet-stack";
 import { DropSheet } from "@/components/forms/drop-sheet";
@@ -12,10 +12,10 @@ import { cn } from "@/lib/utils";
 import type { DropEye } from "@/types/domain";
 import { dispatchQuickAction } from "./helpers";
 
-const EXPAND_EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
+const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 const EYE_SHORT: Record<string, string> = { left: "IZQ", right: "DER", both: "AMB" };
-const EYE_LABEL: Record<string, string> = { left: "Izq", right: "Der", both: "Ambos" };
+const EYE_LABEL: Record<string, string> = { left: "Ojo izq.", right: "Ojo der.", both: "Ambos ojos" };
 
 type RecentDrop = { id: string; logged_at: string; quantity: number; eye: string };
 
@@ -26,6 +26,12 @@ function formatTime(isoStr: string): string {
 
 function isToday(isoStr: string): boolean {
   return new Date(isoStr).toDateString() === new Date().toDateString();
+}
+
+function isYesterday(isoStr: string): boolean {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return new Date(isoStr).toDateString() === yesterday.toDateString();
 }
 
 /* ─── Drop type accordion group ────────────────────────────────────────── */
@@ -46,6 +52,7 @@ function DropTypeGroup({
   onDelete: (drop: RecentDrop, typeId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(initialExpanded);
+  const badgeAnim = useAnimation();
 
   const { data: drops = [] } = useQuery({
     queryKey: ["drops/recent", typeId],
@@ -63,6 +70,12 @@ function DropTypeGroup({
 
   const visible = show24h ? sorted : sorted.filter((d) => isToday(d.logged_at));
 
+  useEffect(() => {
+    if (visible.length > 0) {
+      void badgeAnim.start({ scale: [1, 1.28, 1], transition: { duration: 0.32, ease: [0.23, 1, 0.32, 1] } });
+    }
+  }, [visible.length, badgeAnim]);
+
   if (visible.length === 0) return null;
 
   const lastDrop = visible[0];
@@ -70,89 +83,118 @@ function DropTypeGroup({
   return (
     <div>
       <button
-        className="w-full flex items-center gap-3 py-2 text-left transition-transform duration-[120ms] ease-out active:scale-[0.98]"
+        className="w-full flex items-center gap-3 py-3.5 text-left rounded-lg transition-[background-color,transform] duration-150 ease-out active:bg-[var(--surface-el)] active:scale-[0.99]"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        aria-label={`${typeName}, ${sorted.length} dosis`}
+        aria-label={`${typeName}, ${visible.length} dosis`}
       >
-        <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--text-primary)]">
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ background: "var(--pain-low)" }}
+        />
+        <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-[var(--text-primary)]">
           {typeName}
         </span>
-        <span
-          className="mono inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[13px] font-medium tabular-nums"
+        <motion.span
+          animate={badgeAnim}
+          className="overflow-hidden inline-flex items-center justify-center rounded-full min-w-[32px] px-2 py-0.5 text-[12px] font-semibold tabular-nums mono"
           style={{
             color: "var(--pain-low)",
             background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
           }}
         >
-          {visible.length}×
-        </span>
-        <span className="mono w-[42px] shrink-0 text-right text-[12px] tabular-nums text-[var(--text-muted)]">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={visible.length}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+              className="block"
+            >
+              {visible.length}×
+            </motion.span>
+          </AnimatePresence>
+        </motion.span>
+        <span className="mono text-[13px] font-medium tabular-nums text-[var(--text-muted)]">
           {formatTime(lastDrop.logged_at)}
         </span>
-        <span className="mono w-[26px] shrink-0 text-right text-[11px] uppercase tracking-[0.08em] text-[var(--text-faint)]">
+        <span className="mono w-[30px] shrink-0 text-right text-[11px] uppercase tracking-[0.08em] text-[var(--text-faint)]">
           {EYE_SHORT[lastDrop.eye] ?? "—"}
         </span>
         <div
-          className="shrink-0 will-change-transform"
+          className="shrink-0 text-[var(--text-faint)] will-change-transform"
           style={{
             transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 200ms cubic-bezier(0.4, 0, 0.2, 1)",
+            transition: `transform 220ms ${EASE_OUT}`,
           }}
         >
-          <CaretRightIcon size={12} color="var(--text-faint)" />
+          <CaretRightIcon size={14} />
         </div>
       </button>
 
       <div
-        className="overflow-hidden will-change-[max-height,opacity]"
+        className="grid"
         style={{
-          maxHeight: expanded ? 1200 : 0,
+          gridTemplateRows: expanded ? "1fr" : "0fr",
           opacity: expanded ? 1 : 0,
-          transition: `max-height 250ms ${EXPAND_EASE}, opacity 200ms ${EXPAND_EASE}`,
+          transition: `grid-template-rows 260ms ${EASE_OUT}, opacity 180ms ${EASE_OUT}`,
         }}
       >
-        <div className="rounded-[10px] bg-[var(--surface-el)] mb-1 overflow-hidden divide-y divide-[var(--border)]">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {visible.map((drop) => (
-              <motion.div
-                key={drop.id}
-                layout
-                initial={false}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
-                className="overflow-hidden"
-              >
-                <div className="flex items-center gap-2.5 px-3 py-2.5">
-                  <span className="mono text-[13px] tabular-nums text-[var(--text-primary)]">
-                    {formatTime(drop.logged_at)}
-                  </span>
-                  <span className="flex-1 text-[13px] text-[var(--text-muted)]">
-                    {EYE_LABEL[drop.eye] ?? drop.eye} · ×{drop.quantity}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="Editar dosis"
-                    onClick={() => onEdit(drop, typeId)}
-                    className={cn(
-                      "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
-                      "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
-                    )}
-                  >
-                    <PencilSimpleIcon size={12} weight="bold" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Eliminar dosis"
-                    onClick={() => onDelete(drop, typeId)}
-                    className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] transition-colors hover:text-[var(--error)]"
-                  >
-                    <TrashIcon size={12} weight="bold" />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+        <div className="overflow-hidden">
+          <div className="rounded-[12px] bg-[var(--surface-el)] mb-3 overflow-hidden divide-y divide-[var(--border)]">
+            <AnimatePresence mode="popLayout" initial={false}>
+              {visible.map((drop) => (
+                <motion.div
+                  key={drop.id}
+                  layout
+                  initial={false}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex items-center gap-2 px-3 py-2">
+                    <span className="mono text-[14px] font-semibold tabular-nums text-[var(--text-primary)] w-[46px] shrink-0">
+                      {formatTime(drop.logged_at)}
+                    </span>
+                    <span className="flex-1 text-[13px] text-[var(--text-muted)]">
+                      {EYE_LABEL[drop.eye] ?? drop.eye}
+                      <span className="text-[var(--text-faint)]"> · ×{drop.quantity}</span>
+                      {isYesterday(drop.logged_at) && (
+                        <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--text-faint)]">Ayer</span>
+                      )}
+                    </span>
+                    <button
+                      type="button"
+                      aria-label="Editar dosis"
+                      onClick={() => onEdit(drop, typeId)}
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-full",
+                        "transition-[background-color,color,transform] duration-[120ms] ease-out",
+                        "text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface)]",
+                        "active:scale-[0.88]",
+                      )}
+                    >
+                      <PencilSimpleIcon size={14} weight="bold" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Eliminar dosis"
+                      onClick={() => onDelete(drop, typeId)}
+                      className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-full",
+                        "transition-[background-color,color,transform] duration-[120ms] ease-out",
+                        "text-[var(--text-faint)] hover:text-[var(--error)]",
+                        "active:scale-[0.88]",
+                      )}
+                    >
+                      <TrashIcon size={14} weight="bold" />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
@@ -275,32 +317,48 @@ export function TodayDropsSheet({
 
   const baseContent = (
     <div>
-      <div className="mb-3 flex justify-end">
-        <button
-          type="button"
-          onClick={() => setShow24h((v) => !v)}
-          className="rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] transition-colors"
-          style={{
-            color: show24h ? "var(--accent)" : "var(--text-faint)",
-            background: show24h
-              ? "color-mix(in srgb, var(--accent) 12%, transparent)"
-              : "var(--surface-el)",
-          }}
+      <div className="mb-4 flex justify-center">
+        <div
+          className="inline-flex rounded-full p-0.5"
+          style={{ background: "var(--surface-el)" }}
         >
-          {show24h ? "Últimas 24h" : "Solo hoy"}
-        </button>
+          {([false, true] as const).map((is24h) => {
+            const isActive = show24h === is24h;
+            return (
+              <button
+                key={String(is24h)}
+                type="button"
+                onClick={() => setShow24h(is24h)}
+                className="relative px-5 py-1.5 rounded-full text-[12px] font-semibold tracking-[0.02em] transition-colors duration-150 ease-out z-[1]"
+                style={{ color: isActive ? "var(--text-primary)" : "var(--text-faint)" }}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="seg-thumb"
+                    className="absolute inset-0 rounded-full"
+                    style={{ background: "var(--surface)" }}
+                    transition={{ type: "spring", duration: 0.3, bounce: 0.08 }}
+                  />
+                )}
+                <span className="relative z-[1]">{is24h ? "Últimas 24h" : "Hoy"}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-      {dropTypes.map((t) => (
-        <DropTypeGroup
-          key={t.id}
-          typeId={t.id}
-          typeName={t.name}
-          initialExpanded={t.id === initialDropTypeId}
-          show24h={show24h}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      ))}
+      <div className="divide-y divide-[var(--border)]">
+        {dropTypes.map((t) => (
+          <DropTypeGroup
+            key={t.id}
+            typeId={t.id}
+            typeName={t.name}
+            initialExpanded={t.id === initialDropTypeId}
+            show24h={show24h}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ))}
+      </div>
 
       <div className="pt-3">
         <Button
@@ -312,8 +370,7 @@ export function TodayDropsSheet({
             setTimeout(() => dispatchQuickAction("drop", { dropTypeId: initialDropTypeId }), 300);
           }}
         >
-          <EyedropperIcon size={16} weight="bold" className="mr-1.5" />
-          <PlusIcon size={14} weight="bold" className="mr-1" />
+          <EyedropperIcon size={16} weight="bold" className="mr-2" />
           Nueva dosis
         </Button>
       </div>
