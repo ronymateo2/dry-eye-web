@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { DoseSlot } from "@/components/register/day-projection-sheet";
 import { api } from "@/lib/api";
 import { daysUntilEnd } from "@/lib/utils";
-import { getNextMs, buildDayProjection } from "./helpers";
+import { getNextMs, isPrevDayOverdue, isCompletedToday, buildDayProjection } from "./helpers";
 
 export function useScheduleData() {
   const [now, setNow] = useState(() => Date.now());
@@ -31,13 +31,30 @@ export function useScheduleData() {
     return () => clearInterval(id);
   }, []);
 
-  const scheduled = useMemo(
+  const validEntries = useMemo(
     () =>
       entries
         .filter((e) => e.interval_hours != null)
-        .filter((e) => !(e.end_date && daysUntilEnd(e.end_date) < 0))
-        .sort((a, b) => getNextMs(a) - getNextMs(b)),
+        .filter((e) => !(e.end_date && daysUntilEnd(e.end_date) < 0)),
     [entries],
+  );
+
+  const upcoming = useMemo(
+    () =>
+      validEntries
+        .filter((e) => !isPrevDayOverdue(e, now) && !isCompletedToday(e, now))
+        .sort((a, b) => getNextMs(a) - getNextMs(b)),
+    [validEntries, now],
+  );
+
+  const completado = useMemo(
+    () => validEntries.filter((e) => isCompletedToday(e, now)),
+    [validEntries, now],
+  );
+
+  const sinRegistro = useMemo(
+    () => validEntries.filter((e) => isPrevDayOverdue(e, now) || !e.last_logged_at),
+    [validEntries, now],
   );
 
   const daySlots = useMemo<DoseSlot[]>(() => {
@@ -59,5 +76,5 @@ export function useScheduleData() {
     [activeVials],
   );
 
-  return { now, activeVials, scheduled, daySlots, vialByDropType };
+  return { now, activeVials, upcoming, completado, sinRegistro, daySlots, vialByDropType };
 }

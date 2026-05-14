@@ -11,19 +11,22 @@ export function TimelineRow({
   now,
   vial,
   onDiscardVial,
+  variant = "upcoming",
 }: {
   entry: DropScheduleEntry;
   index: number;
   now: number;
   vial: ActiveVialEntry | null;
   onDiscardVial?: (vial: ActiveVialEntry) => void;
+  variant?: "upcoming" | "completado" | "sinRegistro";
 }) {
   if (!entry.interval_hours) return null;
 
-  const noRecord = !entry.last_logged_at;
-  const computed = noRecord ? null : getCountdown(entry.last_logged_at!, entry.interval_hours, now);
-  const badgeLabel = noRecord ? "Sin registro" : computed!.label;
-  const badgeColor = computed?.color ?? "var(--text-muted)";
+  const noRecord = !entry.last_logged_at || variant === "sinRegistro";
+  const isCompleted = variant === "completado";
+  const computed = (noRecord || isCompleted) ? null : getCountdown(entry.last_logged_at!, entry.interval_hours, now);
+  const badgeLabel = noRecord ? "Sin registro" : isCompleted ? "Completado" : computed!.label;
+  const badgeColor = isCompleted ? "var(--pain-low)" : computed?.color ?? "var(--text-muted)";
   const vialStatus = vial ? getVialStatus(vial, now) : null;
 
   return (
@@ -60,7 +63,7 @@ export function TimelineRow({
             className="font-mono text-[13px] tabular-nums whitespace-nowrap"
             style={{ color: "var(--text-faint)" }}
           >
-            {computed?.nextTime ?? `cada ${entry.interval_hours}h`}
+            {(noRecord || isCompleted) ? `cada ${entry.interval_hours}h` : computed!.nextTime}
           </span>
           <span
             className="truncate text-[17px] font-medium capitalize leading-none"
@@ -108,7 +111,7 @@ export function TimelineRow({
           className="font-mono text-[15px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
-          {noRecord ? badgeLabel : `en ${badgeLabel}`}
+          {(noRecord || isCompleted) ? badgeLabel : `en ${badgeLabel}`}
         </span>
         <CaretRightIcon
           aria-hidden

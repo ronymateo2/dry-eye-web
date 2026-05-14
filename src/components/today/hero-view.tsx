@@ -71,7 +71,7 @@ export function HeroView({
     onError: () => setJustRegistered(null),
   });
 
-  const { now, scheduled, daySlots, vialByDropType } = data;
+  const { now, upcoming, completado, sinRegistro, daySlots, vialByDropType } = data;
 
   const { data: allRecentDrops = [] } = useQuery({
     queryKey: ["drops/recent-all"],
@@ -79,16 +79,16 @@ export function HeroView({
     staleTime: 30_000,
   });
 
-  if (scheduled.length === 0) return null;
+  if (upcoming.length === 0 && completado.length === 0 && sinRegistro.length === 0) return null;
 
-  const heroEntry = scheduled[0];
-  const timelineEntries = scheduled.slice(1);
-  const heroVial = vialByDropType.get(heroEntry.drop_type_id) ?? null;
+  const heroEntry = upcoming[0] ?? null;
+  const timelineEntries = upcoming.slice(1);
+  const heroVial = heroEntry ? (vialByDropType.get(heroEntry.drop_type_id) ?? null) : null;
   const todayCount = allRecentDrops.length;
-  const isRegistered = justRegistered?.dropTypeId === heroEntry.drop_type_id;
+  const isRegistered = heroEntry ? justRegistered?.dropTypeId === heroEntry.drop_type_id : false;
 
   function handleQuickLog() {
-    if (quickLogPending || justRegistered) return;
+    if (!heroEntry || quickLogPending || justRegistered) return;
     const d = new Date();
     const takenAt = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
     setJustRegistered({ dropTypeId: heroEntry.drop_type_id, takenAt });
@@ -96,7 +96,7 @@ export function HeroView({
   }
 
   const computed =
-    heroEntry.last_logged_at && heroEntry.interval_hours
+    heroEntry?.last_logged_at && heroEntry?.interval_hours
       ? getCountdown(heroEntry.last_logged_at, heroEntry.interval_hours, now)
       : null;
 
@@ -130,124 +130,127 @@ export function HeroView({
           </div>
         </div>
 
-        <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
-          <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4">
-            <div className="pt-1">
-              {isRegistered ? (
-                <QuickLogCheck />
-              ) : computed ? (
-                <CountdownValue
-                  label={computed.label}
-                  overdue={computed.overdue}
-                  color={quickLogPending ? "var(--accent-dim)" : computed.color}
-                  progress={computed.progress}
-                  onClick={handleQuickLog}
-                />
-              ) : (
-                <div className="grid gap-2 justify-items-center text-center">
-                  <p className="section-label mb-0">Cada</p>
-                  <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
-                    {heroEntry.interval_hours}h
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <div className="grid min-w-0 gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => !isRegistered && dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
-                aria-label={`Registrar dosis de ${heroEntry.name}`}
-                className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70"
-                style={{ cursor: isRegistered ? "default" : "pointer" }}
-              >
-                <span
-                  className="truncate text-[28px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
-                  style={{
-                    color: isRegistered ? "var(--text-muted)" : "var(--text-primary)",
-                    textDecoration: isRegistered ? "line-through" : "none",
-                    textDecorationColor: "rgba(0,0,0,0.2)",
-                  }}
-                >
-                  {heroEntry.name}
-                </span>
-                {!isRegistered && (
-                  <CaretRightIcon
-                    size={18}
-                    weight="bold"
-                    className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                    style={{ color: "var(--text-faint)" }}
+        {heroEntry && (
+          <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
+            <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4">
+              <div className="pt-1">
+                {isRegistered ? (
+                  <QuickLogCheck />
+                ) : computed ? (
+                  <CountdownValue
+                    label={computed.label}
+                    overdue={computed.overdue}
+                    color={quickLogPending ? "var(--accent-dim)" : computed.color}
+                    progress={computed.progress}
+                    onClick={handleQuickLog}
                   />
-                )}
-              </button>
-
-              {/* alarm/time row — stays in DOM; "Tomada a las" overlaid in same spot */}
-              <div style={{ position: "relative" }}>
-                <div style={{ opacity: isRegistered ? 0 : 1, transition: "opacity 200ms ease" }}>
-                  {computed ? (
-                    <div className="flex items-center gap-1.5">
-                      <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
-                      <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
-                        {computed.nextTime}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="font-mono text-[17px] tabular-nums text-[var(--text-muted)]">
-                      Cada {heroEntry.interval_hours}h
+                ) : (
+                  <div className="grid gap-2 justify-items-center text-center">
+                    <p className="section-label mb-0">Cada</p>
+                    <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
+                      {heroEntry.interval_hours}h
                     </p>
-                  )}
-                </div>
-                {isRegistered && (
-                  <motion.p
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.28, ease: "easeOut" }}
-                    className="absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]"
-                  >
-                    Tomada a las{" "}
-                    <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
-                      {justRegistered.takenAt}
-                    </span>
-                  </motion.p>
+                  </div>
                 )}
               </div>
 
-              <div className="h-px w-[80%] bg-[var(--border)] my-1" />
-
-              {/* vial + badge — stay in DOM (preserve height), hidden when registered */}
-              <div
-                style={{
-                  opacity: isRegistered ? 0 : 1,
-                  transition: "opacity 200ms ease",
-                  pointerEvents: isRegistered ? "none" : "auto",
-                }}
-              >
-                {heroVial && (
-                  <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
-                )}
-                {todayCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setTodayDropsOpen(true)}
-                    aria-label={`Ver ${todayCount} dosis registradas hoy`}
-                    className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-[12px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)]/20 active:opacity-70"
+              <div className="grid min-w-0 gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => !isRegistered && dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
+                  aria-label={`Registrar dosis de ${heroEntry.name}`}
+                  className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70"
+                  style={{ cursor: isRegistered ? "default" : "pointer" }}
+                >
+                  <span
+                    className="truncate text-[28px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                    style={{
+                      color: isRegistered ? "var(--text-muted)" : "var(--text-primary)",
+                      textDecoration: isRegistered ? "line-through" : "none",
+                      textDecorationColor: "rgba(0,0,0,0.2)",
+                    }}
                   >
-                    <EyedropperIcon size={12} weight="bold" />
-                    {todayCount} {todayCount === 1 ? "dosis hoy" : "dosis hoy"}
-                  </button>
-                )}
+                    {heroEntry.name}
+                  </span>
+                  {!isRegistered && (
+                    <CaretRightIcon
+                      size={18}
+                      weight="bold"
+                      className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                      style={{ color: "var(--text-faint)" }}
+                    />
+                  )}
+                </button>
+
+                {/* alarm/time row — stays in DOM; "Tomada a las" overlaid in same spot */}
+                <div style={{ position: "relative" }}>
+                  <div style={{ opacity: isRegistered ? 0 : 1, transition: "opacity 200ms ease" }}>
+                    {computed ? (
+                      <div className="flex items-center gap-1.5">
+                        <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
+                        <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                          {computed.nextTime}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="font-mono text-[17px] tabular-nums text-[var(--text-muted)]">
+                        Cada {heroEntry.interval_hours}h
+                      </p>
+                    )}
+                  </div>
+                  {isRegistered && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.28, ease: "easeOut" }}
+                      className="absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]"
+                    >
+                      Tomada a las{" "}
+                      <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
+                        {justRegistered.takenAt}
+                      </span>
+                    </motion.p>
+                  )}
+                </div>
+
+                <div className="h-px w-[80%] bg-[var(--border)] my-1" />
+
+                {/* vial + badge — stay in DOM (preserve height), hidden when registered */}
+                <div
+                  style={{
+                    opacity: isRegistered ? 0 : 1,
+                    transition: "opacity 200ms ease",
+                    pointerEvents: isRegistered ? "none" : "auto",
+                  }}
+                >
+                  {heroVial && (
+                    <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
+                  )}
+                  {todayCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setTodayDropsOpen(true)}
+                      aria-label={`Ver ${todayCount} dosis registradas hoy`}
+                      className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-[12px] font-semibold text-[var(--accent)] transition-colors hover:bg-[var(--accent)]/20 active:opacity-70"
+                    >
+                      <EyedropperIcon size={12} weight="bold" />
+                      {todayCount} {todayCount === 1 ? "dosis hoy" : "dosis hoy"}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {timelineEntries.length > 0 && (
+        {(timelineEntries.length > 0 || completado.length > 0 || sinRegistro.length > 0) && (
           <div className="relative z-10 border-t border-[var(--border)]">
-            <div className="flex items-baseline gap-3 px-4 py-3">
-              <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">Después de esta</p>
-            </div>
-            <div className="space-y-0 px-1 pb-2">
-              {timelineEntries.map((entry, i) => {
+            <div className="space-y-0 px-1 pb-2 pt-1">
+              {[
+                ...timelineEntries.map((e) => ({ entry: e, variant: "upcoming" as const })),
+                ...completado.map((e) => ({ entry: e, variant: "completado" as const })),
+                ...sinRegistro.map((e) => ({ entry: e, variant: "sinRegistro" as const })),
+              ].map(({ entry, variant }, i) => {
                 const vial = vialByDropType.get(entry.drop_type_id) ?? null;
                 return (
                   <TimelineRow
@@ -257,6 +260,7 @@ export function HeroView({
                     now={now}
                     vial={vial}
                     onDiscardVial={(v) => setDiscardTarget(v)}
+                    variant={variant}
                   />
                 );
               })}
@@ -275,7 +279,7 @@ export function HeroView({
       <TodayDropsSheet
         open={todayDropsOpen}
         onClose={() => setTodayDropsOpen(false)}
-        initialDropTypeId={heroEntry.drop_type_id}
+        initialDropTypeId={heroEntry?.drop_type_id ?? ""}
       />
 
       <DayProjectionSheet

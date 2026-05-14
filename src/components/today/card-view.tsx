@@ -22,9 +22,15 @@ export function CardView({
 
   const discardMutation = useDiscardVial(() => setConfirmingId(null));
 
-  const { activeVials, scheduled, now, daySlots } = data;
+  const { activeVials, upcoming, completado, sinRegistro, now, daySlots } = data;
 
-  if (activeVials.length === 0 && scheduled.length === 0) return null;
+  const annotatedEntries = [
+    ...upcoming.map((e) => ({ entry: e, variant: "upcoming" as const })),
+    ...completado.map((e) => ({ entry: e, variant: "completado" as const })),
+    ...sinRegistro.map((e) => ({ entry: e, variant: "sinRegistro" as const })),
+  ];
+
+  if (activeVials.length === 0 && annotatedEntries.length === 0) return null;
 
   return (
     <>
@@ -35,26 +41,27 @@ export function CardView({
           <div className="flex items-center justify-between gap-3">
           <p className="section-label mb-0">Próximas dosis</p>
           <div className="flex shrink-0 items-center gap-2">
-            {scheduled.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
+            {annotatedEntries.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
 
-        {scheduled.length > 0 && (
+        {annotatedEntries.length > 0 && (
           <div className="space-y-0">
-            {scheduled.map((entry, i) => (
+            {annotatedEntries.map(({ entry, variant }, i) => (
               <TimelineRow
                 key={entry.drop_type_id}
                 entry={entry}
                 index={i}
                 now={now}
                 vial={null}
+                variant={variant}
               />
             ))}
           </div>
         )}
 
-        {activeVials.length > 0 && scheduled.length > 0 && (
+        {activeVials.length > 0 && annotatedEntries.length > 0 && (
           <div className="h-px bg-[var(--border)]" />
         )}
 
