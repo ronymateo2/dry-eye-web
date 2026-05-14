@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 export function CircularProgress({
   size = 100,
@@ -77,8 +77,30 @@ export function CountdownValue({
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
-      style={onClick ? { cursor: "pointer" } : undefined}
+      style={onClick ? { cursor: "pointer", position: "relative" } : undefined}
     >
+      {onClick && (
+        <>
+          <style>{`
+            @keyframes ringPulse {
+              0%   { transform: scale(1);    opacity: 0.35; }
+              65%  { transform: scale(1.18); opacity: 0; }
+              100% { transform: scale(1.18); opacity: 0; }
+            }
+          `}</style>
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              border: `2px solid ${color}`,
+              animation: "ringPulse 2.2s ease-out infinite",
+              pointerEvents: "none",
+            }}
+          />
+        </>
+      )}
       <CircularProgress size={88} progress={progress ?? 0} color={color}>
         <p className="mb-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
           {overdue ? "Vencida" : "En"}
@@ -89,16 +111,29 @@ export function CountdownValue({
             const unit = part.slice(-1);
             return (
               <span key={part} className="inline-flex items-end gap-0.5">
-                <motion.span
-                  key={`val-${part}`}
-                  initial={{ scale: 1.04, opacity: 0.85 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
-                  className="font-mono tabular-nums"
-                  style={{ fontSize: parts.length > 1 ? 20 : 22, fontWeight: 600, lineHeight: 0.9 }}
+                <span
+                  className="relative overflow-hidden inline-block"
+                  style={{
+                    fontSize: parts.length > 1 ? 20 : 22,
+                    fontWeight: 600,
+                    lineHeight: 0.9,
+                    verticalAlign: "bottom",
+                  }}
                 >
-                  {value}
-                </motion.span>
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={`val-${value}`}
+                      initial={{ y: "100%", opacity: 0 }}
+                      animate={{ y: "0%", opacity: 1 }}
+                      exit={{ y: "-100%", opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
+                      className="font-mono tabular-nums block"
+                      style={{ fontSize: "inherit", fontWeight: "inherit", lineHeight: "inherit" }}
+                    >
+                      {value}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
                 <span className="pb-0.5 text-[11px] font-semibold leading-none">
                   {unit}
                 </span>

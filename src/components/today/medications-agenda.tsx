@@ -573,18 +573,6 @@ export function MedicationsAgenda() {
                     </div>
                   </div>
                 </div>
-                {!quickLogging && (
-                  <div className="w-[92px] flex justify-center">
-                    <button
-                      type="button"
-                      onClick={handleQuickLog}
-                      aria-label="Registrar dosis"
-                      className="text-[11px] font-medium text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors duration-[160ms] active:opacity-60"
-                    >
-                      Registrar
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           ) : registered.length > 0 ? (
