@@ -392,6 +392,20 @@ img, svg { display: block; max-width: 100%; }
 .btn-plain-muted:active:not(:disabled),
 .btn-plain-error:active:not(:disabled) { opacity: 0.55; }
 
+/* Hover states — pointer devices only (avoids sticky hover on touch) */
+@media (hover: hover) {
+  .btn-filled:hover:not(:disabled) { opacity: 0.88; }
+  .btn-tinted:hover:not(:disabled) { background: rgba(212, 162, 76, 0.20); }
+  [data-theme="light"] .btn-tinted:hover:not(:disabled) { background: rgba(124, 109, 205, 0.18); }
+  .btn-tinted-error:hover:not(:disabled) { background: rgba(204, 63, 48, 0.16); }
+  [data-theme="light"] .btn-tinted-error:hover:not(:disabled) { background: rgba(235, 75, 98, 0.16); }
+  .btn-tinted-warn:hover:not(:disabled) { background: rgba(224, 147, 42, 0.16); }
+  .btn-gray:hover:not(:disabled) { background: var(--border); }
+  .btn-plain:hover:not(:disabled),
+  .btn-plain-muted:hover:not(:disabled),
+  .btn-plain-error:hover:not(:disabled) { opacity: 0.75; }
+}
+
 /* ── App header ──────────────────────────────────────────────────────────── */
 .app-header {
   display: flex;
