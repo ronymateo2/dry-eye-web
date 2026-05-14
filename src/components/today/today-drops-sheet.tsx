@@ -231,12 +231,17 @@ export function TodayDropsSheet({
         description: `${typeName} · ${formatTime(drop.logged_at)}`,
         panelClassName: "!h-auto",
         content: (
-          <div className="space-y-3 pb-2">
-            <div className="flex items-center justify-center rounded-[12px] bg-[color-mix(in_srgb,var(--error,#e53e3e)_10%,transparent)] py-4">
-              <TrashIcon size={28} className="text-[var(--error,#e53e3e)]" weight="fill" />
+          <div className="space-y-5 pb-2">
+            <div className="rounded-[10px] bg-[var(--surface-el)] px-4 py-3">
+              <p className="mb-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                Dosis a eliminar
+              </p>
+              <p className="text-[15px] text-[var(--text-primary)]">
+                {EYE_LABEL[drop.eye] ?? drop.eye} · ×{drop.quantity}
+              </p>
             </div>
-            <p className="text-[14px] text-[var(--text-muted)]">Esta acción no se puede deshacer.</p>
-            <div className="flex flex-col gap-2 pt-1">
+            <p className="text-[13px] text-[var(--text-muted)]">Esta acción no se puede deshacer.</p>
+            <div className="flex flex-col gap-2">
               <Button
                 variant="tinted-error"
                 size="lg"
