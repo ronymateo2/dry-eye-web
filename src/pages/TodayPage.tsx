@@ -30,6 +30,7 @@ export default function TodayPage() {
     void queryClient.prefetchQuery({ queryKey: ["calendar/events/today"], queryFn: api.getCalendarEventsToday, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["medications"], queryFn: api.getMedications, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["medication-intakes/last-per-med"], queryFn: api.getLastIntakePerMedication, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: ["medication-intakes/today"], queryFn: api.getTodayMedicationIntakes, staleTime: 30_000 });
     void queryClient.prefetchQuery({ queryKey: ["vials/active"], queryFn: api.getActiveVials, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["symptoms/today"], queryFn: api.getSymptomStatusToday, staleTime: 60_000 });
   }, [queryClient]);
@@ -46,9 +47,7 @@ export default function TodayPage() {
         <HeroView data={scheduleData} view={view} setView={setView} />
       )}
 
-      <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
-        <MedicationsAgenda />
-      </div>
+      <MedicationsAgenda />
 
       <div className="space-y-0.5 pt-1">
         <PainCheckInCompact />

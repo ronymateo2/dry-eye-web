@@ -153,6 +153,7 @@ export const api = {
 
   saveMedicationIntake: (body: SaveMedicationIntakeInput) => api.post<{ ok: boolean }>("/medications/intakes", body),
   getLastIntakePerMedication: () => api.get<{ medication_id: string; last_logged_at: string | null }[]>("/medications/intakes/last-per-med"),
+  getTodayMedicationIntakes: () => api.get<{ id: string; medication_id: string; logged_at: string; dosage_taken: string | null; notes: string | null }[]>("/medications/intakes/today"),
   deleteMedicationIntake: (id: string) => api.delete(`/medications/intakes/${id}`),
 
   getCalendarStatus: () => api.get<CalendarStatus>("/calendar/status"),

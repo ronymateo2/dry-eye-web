@@ -48,6 +48,7 @@ export function FloatingQuickActions() {
     queryClient.invalidateQueries({ queryKey: ["history"] });
     queryClient.invalidateQueries({ queryKey: ["medications"] });
     queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
+    queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
     queryClient.invalidateQueries({ queryKey: ["vials/active"] });
     queryClient.invalidateQueries({ queryKey: ["vials/history"] });

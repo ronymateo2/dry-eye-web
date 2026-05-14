@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
@@ -18,7 +18,21 @@ type MedFormState = {
   expanded: boolean;
 };
 
-export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
+type EditProps = {
+  editIntakeId: string;
+  editMedicationId: string;
+  editLoggedAt: string;
+  editDosageTaken: string | null;
+  editNotes: string | null;
+};
+
+export function MedicationSessionSheet({
+  onSaved,
+  editProps,
+}: {
+  onSaved: () => void;
+  editProps?: EditProps;
+}) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: medications = [], isLoading } = useQuery({
@@ -32,60 +46,57 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
   );
 
   const nowISO = useMemo(() => new Date().toISOString(), []);
-  const [globalTime, setGlobalTime] = useState<string | null>(nowISO);
+  const [globalTime, setGlobalTime] = useState<string | null>(
+    editProps?.editLoggedAt ?? nowISO,
+  );
   const [isPending, setIsPending] = useState(false);
 
   const [states, setStates] = useState<Record<string, MedFormState>>({});
 
-  useEffect(() => {
-    const next: Record<string, MedFormState> = {};
+  const effectiveStates = useMemo(() => {
+    const result = { ...states };
     for (const med of activeMeds) {
-      if (!states[med.id]) {
-        next[med.id] = {
-          checked: false,
+      if (!result[med.id]) {
+        const isEditTarget = editProps?.editMedicationId === med.id;
+        result[med.id] = {
+          checked: isEditTarget,
           loggedAt: null,
-          dosageTaken: med.dosage ?? "",
-          notes: "",
-          expanded: false,
+          dosageTaken: isEditTarget
+            ? (editProps?.editDosageTaken ?? med.dosage ?? "")
+            : (med.dosage ?? ""),
+          notes: isEditTarget ? (editProps?.editNotes ?? "") : "",
+          expanded: isEditTarget,
         };
-      } else {
-        next[med.id] = states[med.id];
       }
     }
-    setStates(next);
-  }, [activeMeds]);
+    return result;
+  }, [activeMeds, states, editProps]);
 
   const checkedCount = useMemo(
-    () => activeMeds.filter((m) => states[m.id]?.checked).length,
-    [activeMeds, states],
+    () => activeMeds.filter((m) => effectiveStates[m.id]?.checked).length,
+    [activeMeds, effectiveStates],
   );
 
   const toggleCheck = (id: string) => {
-    setStates((prev) => {
-      const s = prev[id];
-      if (!s) return prev;
-      return { ...prev, [id]: { ...s, checked: !s.checked } };
-    });
+    const s = effectiveStates[id];
+    if (!s) return;
+    setStates((prev) => ({ ...prev, [id]: { ...s, checked: !s.checked } }));
   };
 
   const toggleExpanded = (id: string) => {
-    setStates((prev) => {
-      const s = prev[id];
-      if (!s) return prev;
-      return { ...prev, [id]: { ...s, expanded: !s.expanded } };
-    });
+    const s = effectiveStates[id];
+    if (!s) return;
+    setStates((prev) => ({ ...prev, [id]: { ...s, expanded: !s.expanded } }));
   };
 
   const updateField = (id: string, patch: Partial<MedFormState>) => {
-    setStates((prev) => {
-      const s = prev[id];
-      if (!s) return prev;
-      return { ...prev, [id]: { ...s, ...patch } };
-    });
+    const s = effectiveStates[id];
+    if (!s) return;
+    setStates((prev) => ({ ...prev, [id]: { ...s, ...patch } }));
   };
 
   const handleSave = async () => {
-    const toSave = activeMeds.filter((m) => states[m.id]?.checked);
+    const toSave = activeMeds.filter((m) => effectiveStates[m.id]?.checked);
     if (toSave.length === 0) {
       toast.error("Selecciona al menos un medicamento.");
       return;
@@ -95,7 +106,7 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
 
     const results = await Promise.allSettled(
       toSave.map((med) => {
-        const s = states[med.id];
+        const s = effectiveStates[med.id];
         const ts = s.loggedAt ?? globalTime ?? new Date().toISOString();
         return api.saveMedicationIntake({
           id: crypto.randomUUID(),
@@ -110,7 +121,12 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
     const successCount = results.filter((r) => r.status === "fulfilled").length;
     const failCount = results.length - successCount;
 
+    if (editProps?.editIntakeId) {
+      await api.deleteMedicationIntake(editProps.editIntakeId).catch(() => null);
+    }
+
     queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
+    queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
     queryClient.invalidateQueries({ queryKey: ["history"] });
     queryClient.invalidateQueries({ queryKey: ["medications"] });
 
@@ -175,7 +191,7 @@ export function MedicationSessionSheet({ onSaved }: { onSaved: () => void }) {
       <div className="flex-1 space-y-2.5 overflow-y-auto pb-4">
         <p className="section-label mb-0">Medicamentos</p>
         {activeMeds.map((med) => {
-          const s = states[med.id];
+          const s = effectiveStates[med.id];
           if (!s) return null;
           return (
             <div
