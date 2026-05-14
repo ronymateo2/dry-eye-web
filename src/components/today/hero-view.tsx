@@ -73,12 +73,10 @@ export function HeroView({
 
   const { now, scheduled, daySlots, vialByDropType } = data;
 
-  const heroDropTypeId = scheduled[0]?.drop_type_id ?? "";
-  const { data: recentDrops = [] } = useQuery({
-    queryKey: ["drops/recent", heroDropTypeId],
-    queryFn: () => api.getRecentDrops(heroDropTypeId, 24),
+  const { data: allRecentDrops = [] } = useQuery({
+    queryKey: ["drops/recent-all"],
+    queryFn: () => api.getRecentDropsAll(24),
     staleTime: 30_000,
-    enabled: !!heroDropTypeId,
   });
 
   if (scheduled.length === 0) return null;
@@ -86,7 +84,7 @@ export function HeroView({
   const heroEntry = scheduled[0];
   const timelineEntries = scheduled.slice(1);
   const heroVial = vialByDropType.get(heroEntry.drop_type_id) ?? null;
-  const todayCount = recentDrops.length;
+  const todayCount = allRecentDrops.length;
   const isRegistered = justRegistered?.dropTypeId === heroEntry.drop_type_id;
 
   function handleQuickLog() {
@@ -252,14 +250,14 @@ export function HeroView({
               {timelineEntries.map((entry, i) => {
                 const vial = vialByDropType.get(entry.drop_type_id) ?? null;
                 return (
-                <TimelineRow
-                  key={entry.drop_type_id}
-                  entry={entry}
-                  index={i}
-                  now={now}
-                  vial={vial}
-                  onDiscardVial={(v) => setDiscardTarget(v)}
-                />
+                  <TimelineRow
+                    key={entry.drop_type_id}
+                    entry={entry}
+                    index={i}
+                    now={now}
+                    vial={vial}
+                    onDiscardVial={(v) => setDiscardTarget(v)}
+                  />
                 );
               })}
             </div>

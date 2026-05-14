@@ -31,11 +31,11 @@ export function useQuickLog(opts?: {
     },
     onSuccess: (_data, dropTypeId) => {
       opts?.onSuccess?.(dropTypeId);
-      // Delay so the registered animation plays before data refreshes
+      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["drops/last"] });
         queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
         queryClient.invalidateQueries({ queryKey: ["drops/recent", dropTypeId] });
+        queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
       }, TRANSITION_MS);
     },
     onError: () => {

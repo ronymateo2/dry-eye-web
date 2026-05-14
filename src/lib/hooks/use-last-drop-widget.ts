@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import {
-  getLastDropSnapshot,
-  setLastDrop,
-  subscribeLastDrop,
-} from "@/lib/last-drop-store";
 
 export function formatDropTimeAgo(isoString: string): string {
   const diffMs = Math.max(0, Date.now() - new Date(isoString).getTime());
@@ -21,38 +17,26 @@ export function formatDropTimeAgo(isoString: string): string {
 }
 
 export function useLastDropWidget() {
-  const data = useSyncExternalStore(subscribeLastDrop, getLastDropSnapshot);
   const [, setTick] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const hasFetched = useRef(false);
+  const { data = null, isFetching, refetch } = useQuery({
+    queryKey: ["drops/last"],
+    queryFn: api.getLastDrop,
+    staleTime: 30_000,
+  });
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 60_000);
-    const onVisible = () => { if (document.visibilityState === "visible") setTick((t) => t + 1); };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") setTick((t) => t + 1);
+    };
     document.addEventListener("visibilitychange", onVisible);
-    return () => { clearInterval(id); document.removeEventListener("visibilitychange", onVisible); };
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
-
-  const refresh = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      const result = await api.getLastDrop();
-      setLastDrop(result);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!hasFetched.current && !data) {
-      hasFetched.current = true;
-      refresh();
-    } else {
-      hasFetched.current = true;
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const timeAgo = data ? formatDropTimeAgo(data.logged_at) : null;
 
-  return { data, timeAgo, isRefreshing, refresh };
+  return { data, timeAgo, isRefreshing: isFetching, refresh: refetch };
 }

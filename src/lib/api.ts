@@ -87,6 +87,8 @@ export const api = {
   getDropStatsPerType: () => api.get<DropTypeStats[]>("/drops/stats-per-type"),
   getRecentDrops: (dropTypeId: string, hours: number) =>
     api.get<{ id: string; logged_at: string; quantity: number; eye: string }[]>(`/drops/recent?dropTypeId=${dropTypeId}&hours=${hours}`),
+  getRecentDropsAll: (hours: number) =>
+    api.get<{ id: string; logged_at: string; quantity: number; eye: string }[]>(`/drops/recent?hours=${hours}`),
 
   getTodaySleep: () => api.get<{ id: string; day_key: string; logged_at: string; sleep_hours: number; sleep_quality: string } | null>("/sleep/today"),
   saveSleep: (body: unknown) => api.put("/sleep", body),

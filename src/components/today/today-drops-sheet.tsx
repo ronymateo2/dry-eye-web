@@ -182,6 +182,7 @@ export function TodayDropsSheet({
       queryClient.invalidateQueries({ queryKey: ["drops/recent", typeId] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
     },
   });
 

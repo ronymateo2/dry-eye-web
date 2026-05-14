@@ -12,7 +12,6 @@ import { api } from "@/lib/api";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import { queueDrop } from "@/lib/offline/drops-queue";
-import { setLastDrop } from "@/lib/last-drop-store";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ActionState, DropEye } from "@/types/domain";
 
@@ -88,12 +87,9 @@ export function DropSheet({
     const ts = loggedAt ? new Date(loggedAt).toISOString() : new Date().toISOString();
     const dropTypeName = dropTypes.find((dt) => dt.id === selectedDropType)?.name ?? "";
 
-    const persistLastDrop = () =>
-      setLastDrop({ id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
-
     if (!isOnline) {
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-      persistLastDrop();
+      queryClient.setQueryData(["drops/last"], { id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
       onSaved();
@@ -102,7 +98,6 @@ export function DropSheet({
 
     try {
       await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-      persistLastDrop();
       toast.success(editDrop ? "Gota actualizada." : "Gota registrada.");
 
       if (!editDrop && vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
