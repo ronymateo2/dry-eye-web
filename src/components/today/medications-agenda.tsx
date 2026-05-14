@@ -490,90 +490,101 @@ export function MedicationsAgenda() {
               >
                 {quickLogging ? "Pastilla registrada" : "Próxima pastilla"}
               </p>
-              <div className="grid grid-cols-[92px_minmax(0,1fr)] items-center gap-5">
-                {/* Ring / check */}
-                <div>
-                  <AnimatePresence mode="wait">
-                    {quickLogging === hero.medicationId ? (
-                      <motion.div key="check">
-                        <QuickLogCheck />
-                      </motion.div>
-                    ) : (
-                      <motion.div key="ring" className="flex flex-col items-center gap-1">
-                        <CountdownValue
-                          label={hero.countdownLabel}
-                          overdue={hero.overdue}
-                          color={heroAccent}
-                          progress={hero.countdownProgress}
-                          onClick={handleQuickLog}
-                        />
-                        <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
-                          Registrar
-                        </span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+              <div className="flex flex-col gap-1.5">
+                <div className="grid grid-cols-[92px_minmax(0,1fr)] items-center gap-5">
+                  {/* Ring / check */}
+                  <div>
+                    <AnimatePresence mode="wait">
+                      {quickLogging === hero.medicationId ? (
+                        <motion.div key="check">
+                          <QuickLogCheck />
+                        </motion.div>
+                      ) : (
+                        <motion.div key="ring">
+                          <CountdownValue
+                            label={hero.countdownLabel}
+                            overdue={hero.overdue}
+                            color={heroAccent}
+                            progress={hero.countdownProgress}
+                            onClick={handleQuickLog}
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
-                {/* Name + time */}
-                <div className="grid min-w-0 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => !quickLogging && openSessionSheet(hero.medicationId)}
-                    aria-label={`Registrar ${hero.name} con detalles`}
-                    className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70 rounded-[8px] -mx-1 px-1 py-0.5 hover:bg-[color-mix(in_srgb,var(--surface-el)_30%,transparent)] transition-colors duration-[160ms]"
-                    style={{ cursor: quickLogging ? "default" : "pointer" }}
-                  >
-                    <span
-                      className="truncate text-[22px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
-                      style={{
-                        color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
-                        textDecoration: quickLogging ? "line-through" : "none",
-                        textDecorationColor: "rgba(0,0,0,0.2)",
-                      }}
+                  {/* Name + time */}
+                  <div className="grid min-w-0 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => !quickLogging && openSessionSheet(hero.medicationId)}
+                      aria-label={`Registrar ${hero.name} con detalles`}
+                      className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70 rounded-[8px] -mx-1 px-1 py-0.5 hover:bg-[color-mix(in_srgb,var(--surface-el)_30%,transparent)] transition-colors duration-[160ms]"
+                      style={{ cursor: quickLogging ? "default" : "pointer" }}
                     >
-                      {hero.name}
-                    </span>
-                    {!quickLogging && (
-                      <CaretRightIcon
-                        size={14}
-                        weight="bold"
-                        className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                        style={{ color: "var(--text-faint)" }}
-                      />
-                    )}
-                  </button>
-
-                  {/* Time / "Tomada a las" */}
-                  <div style={{ position: "relative" }}>
-                    <div style={{ opacity: quickLogging ? 0 : 1, transition: "opacity 200ms ease" }}>
-                      <div className="flex items-center gap-1.5">
-                        <AlarmIcon size={18} weight="fill" className="shrink-0 text-[var(--accent)]" />
-                        <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
-                          {hero.slotTime.toLocaleTimeString("es-CO", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                            timeZone: tz,
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    {quickLogging && (
-                      <motion.p
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.28, ease: "easeOut" }}
-                        className="absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]"
+                      <span
+                        className="truncate text-[22px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                        style={{
+                          color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
+                          textDecoration: quickLogging ? "line-through" : "none",
+                          textDecorationColor: "rgba(0,0,0,0.2)",
+                        }}
                       >
-                        Tomada a las{" "}
-                        <span className="font-mono font-semibold" style={{ color: "var(--dose-early)" }}>
-                          {takenAtLabel ?? ""}
-                        </span>
-                      </motion.p>
-                    )}
+                        {hero.name}
+                      </span>
+                      {!quickLogging && (
+                        <CaretRightIcon
+                          size={14}
+                          weight="bold"
+                          className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                          style={{ color: "var(--text-faint)" }}
+                        />
+                      )}
+                    </button>
+
+                    {/* Time / "Tomada a las" */}
+                    <div style={{ position: "relative" }}>
+                      <div style={{ opacity: quickLogging ? 0 : 1, transition: "opacity 200ms ease" }}>
+                        <div className="flex items-center gap-1.5">
+                          <AlarmIcon size={18} weight="fill" className="shrink-0 text-[var(--accent)]" />
+                          <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                            {hero.slotTime.toLocaleTimeString("es-CO", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                              timeZone: tz,
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      {quickLogging && (
+                        <motion.p
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.28, ease: "easeOut" }}
+                          className="absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]"
+                        >
+                          Tomada a las{" "}
+                          <span className="font-mono font-semibold" style={{ color: "var(--dose-early)" }}>
+                            {takenAtLabel ?? ""}
+                          </span>
+                        </motion.p>
+                      )}
+                    </div>
                   </div>
                 </div>
+                {!quickLogging && (
+                  <div className="w-[92px] flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleQuickLog}
+                      aria-label="Registrar dosis"
+                      className="text-[11px] font-medium text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors duration-[160ms] active:opacity-60"
+                    >
+                      Registrar
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ) : registered.length > 0 ? (
