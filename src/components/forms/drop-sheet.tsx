@@ -112,6 +112,7 @@ export function DropSheet({
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
       queryClient.invalidateQueries({ queryKey: ["drops/recent", selectedDropType] });
+      queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
       if (editDrop && editDrop.dropTypeId !== selectedDropType) {
         queryClient.invalidateQueries({ queryKey: ["drops/recent", editDrop.dropTypeId] });
       }
