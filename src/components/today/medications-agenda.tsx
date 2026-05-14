@@ -246,7 +246,6 @@ function QuickLogCheck() {
       </motion.div>
       <style>{`
         @keyframes medMedDrawCheck { to { stroke-dashoffset: 0; } }
-        @keyframes med-strikethrough { from { width: 0 } to { width: 100% } }
       `}</style>
     </div>
   );
@@ -500,7 +499,7 @@ export function MedicationsAgenda() {
                         <QuickLogCheck />
                       </motion.div>
                     ) : (
-                      <motion.div key="ring">
+                      <motion.div key="ring" className="flex flex-col items-center gap-1">
                         <CountdownValue
                           label={hero.countdownLabel}
                           overdue={hero.overdue}
@@ -508,6 +507,9 @@ export function MedicationsAgenda() {
                           progress={hero.countdownProgress}
                           onClick={handleQuickLog}
                         />
+                        <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                          Registrar
+                        </span>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -519,7 +521,7 @@ export function MedicationsAgenda() {
                     type="button"
                     onClick={() => !quickLogging && openSessionSheet(hero.medicationId)}
                     aria-label={`Registrar ${hero.name} con detalles`}
-                    className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70"
+                    className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70 rounded-[8px] -mx-1 px-1 py-0.5 hover:bg-[color-mix(in_srgb,var(--surface-el)_30%,transparent)] transition-colors duration-[160ms]"
                     style={{ cursor: quickLogging ? "default" : "pointer" }}
                   >
                     <span
@@ -534,7 +536,7 @@ export function MedicationsAgenda() {
                     </span>
                     {!quickLogging && (
                       <CaretRightIcon
-                        size={18}
+                        size={14}
                         weight="bold"
                         className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
                         style={{ color: "var(--text-faint)" }}
@@ -546,7 +548,7 @@ export function MedicationsAgenda() {
                   <div style={{ position: "relative" }}>
                     <div style={{ opacity: quickLogging ? 0 : 1, transition: "opacity 200ms ease" }}>
                       <div className="flex items-center gap-1.5">
-                        <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
+                        <AlarmIcon size={18} weight="fill" className="shrink-0 text-[var(--accent)]" />
                         <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
                           {hero.slotTime.toLocaleTimeString("es-CO", {
                             hour: "2-digit",
@@ -619,7 +621,7 @@ export function MedicationsAgenda() {
 
           {/* Registered today */}
           {registered.length > 0 && (
-            <div className="px-4 pb-4 pt-3">
+            <div className="px-5 pb-4 pt-3">
               <p className="section-label mb-2">Registradas hoy</p>
               <div className="space-y-0.5">
                 {registered.map((item) => (
