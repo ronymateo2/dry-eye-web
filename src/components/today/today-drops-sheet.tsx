@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { TrashIcon, PencilSimpleIcon, EyedropperIcon, PlusIcon, CaretRightIcon } from "@phosphor-icons/react";
@@ -36,7 +37,7 @@ function DropTypeGroup({
   typeName: string;
   initialExpanded: boolean;
   onEdit: (drop: RecentDrop, typeId: string) => void;
-  onDelete: (id: string, typeId: string) => void;
+  onDelete: (drop: RecentDrop, typeId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(initialExpanded);
 
@@ -104,35 +105,46 @@ function DropTypeGroup({
         }}
       >
         <div className="rounded-[10px] bg-[var(--surface-el)] mb-1 overflow-hidden divide-y divide-[var(--border)]">
-          {sorted.map((drop) => (
-            <div key={drop.id} className="flex items-center gap-2.5 px-3 py-2.5">
-              <span className="mono text-[13px] tabular-nums text-[var(--text-primary)]">
-                {formatTime(drop.logged_at)}
-              </span>
-              <span className="flex-1 text-[13px] text-[var(--text-muted)]">
-                {EYE_LABEL[drop.eye] ?? drop.eye} · ×{drop.quantity}
-              </span>
-              <button
-                type="button"
-                aria-label="Editar dosis"
-                onClick={() => onEdit(drop, typeId)}
-                className={cn(
-                  "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
-                  "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
-                )}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {sorted.map((drop) => (
+              <motion.div
+                key={drop.id}
+                layout
+                initial={false}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                className="overflow-hidden"
               >
-                <PencilSimpleIcon size={12} weight="bold" />
-              </button>
-              <button
-                type="button"
-                aria-label="Eliminar dosis"
-                onClick={() => onDelete(drop.id, typeId)}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] transition-colors hover:text-[var(--error)]"
-              >
-                <TrashIcon size={12} weight="bold" />
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center gap-2.5 px-3 py-2.5">
+                  <span className="mono text-[13px] tabular-nums text-[var(--text-primary)]">
+                    {formatTime(drop.logged_at)}
+                  </span>
+                  <span className="flex-1 text-[13px] text-[var(--text-muted)]">
+                    {EYE_LABEL[drop.eye] ?? drop.eye} · ×{drop.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Editar dosis"
+                    onClick={() => onEdit(drop, typeId)}
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-full transition-colors",
+                      "text-[var(--text-faint)] hover:text-[var(--text-muted)]",
+                    )}
+                  >
+                    <PencilSimpleIcon size={12} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Eliminar dosis"
+                    onClick={() => onDelete(drop, typeId)}
+                    className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] transition-colors hover:text-[var(--error)]"
+                  >
+                    <TrashIcon size={12} weight="bold" />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -210,6 +222,43 @@ export function TodayDropsSheet({
     [stack.push, stack.pop, dropTypes],
   );
 
+  const handleDelete = useCallback(
+    (drop: RecentDrop, typeId: string) => {
+      const typeName = dropTypes.find((t) => t.id === typeId)?.name ?? "";
+      stack.push({
+        key: "confirm-delete",
+        title: "Eliminar dosis",
+        description: `${typeName} · ${formatTime(drop.logged_at)}`,
+        panelClassName: "!h-auto",
+        content: (
+          <div className="space-y-3 pb-2">
+            <div className="flex items-center justify-center rounded-[12px] bg-[color-mix(in_srgb,var(--error,#e53e3e)_10%,transparent)] py-4">
+              <TrashIcon size={28} className="text-[var(--error,#e53e3e)]" weight="fill" />
+            </div>
+            <p className="text-[14px] text-[var(--text-muted)]">Esta acción no se puede deshacer.</p>
+            <div className="flex flex-col gap-2 pt-1">
+              <Button
+                variant="tinted-error"
+                size="lg"
+                className="w-full"
+                onClick={() => {
+                  deleteMutation.mutate({ id: drop.id, typeId });
+                  stack.pop();
+                }}
+              >
+                Eliminar dosis
+              </Button>
+              <Button variant="plain" size="lg" className="w-full" onClick={stack.pop}>
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        ),
+      });
+    },
+    [stack, dropTypes, deleteMutation],
+  );
+
   const baseContent = (
     <div>
       {dropTypes.map((t) => (
@@ -219,7 +268,7 @@ export function TodayDropsSheet({
           typeName={t.name}
           initialExpanded={t.id === initialDropTypeId}
           onEdit={handleEdit}
-          onDelete={(id, typeId) => deleteMutation.mutate({ id, typeId })}
+          onDelete={handleDelete}
         />
       ))}
 
