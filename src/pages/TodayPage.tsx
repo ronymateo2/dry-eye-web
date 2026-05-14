@@ -34,13 +34,13 @@ export default function TodayPage() {
     void queryClient.prefetchQuery({ queryKey: ["symptoms/today"], queryFn: api.getSymptomStatusToday, staleTime: 60_000 });
   }, [queryClient]);
 
-  const { scheduled } = scheduleData;
+  const { upcoming } = scheduleData;
 
   return (
     <section className="space-y-5">
       <SymptomStatusCard onRegister={openSymptomsSheet} />
 
-      {view === "card" || scheduled.length === 0 ? (
+      {view === "card" || upcoming.length === 0 ? (
         <CardView data={scheduleData} view={view} setView={setView} />
       ) : (
         <HeroView data={scheduleData} view={view} setView={setView} />

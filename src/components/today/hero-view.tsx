@@ -207,7 +207,7 @@ export function HeroView({
                     >
                       Tomada a las{" "}
                       <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
-                        {justRegistered.takenAt}
+                        {justRegistered?.takenAt ?? ""}
                       </span>
                     </motion.p>
                   )}

@@ -24,7 +24,7 @@ export function LastDropLine() {
         aria-label="Actualizar última gota"
         className="app-header__last-drop-refresh"
         disabled={isRefreshing}
-        onClick={refresh}
+        onClick={() => { void refresh(); }}
       >
         <ArrowsClockwiseIcon size={13} className={isRefreshing ? "animate-spin" : ""} />
       </button>

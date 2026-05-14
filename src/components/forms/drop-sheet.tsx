@@ -121,7 +121,7 @@ export function DropSheet({
       onSaved();
     } catch {
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-      persistLastDrop();
+
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
       onSaved();
