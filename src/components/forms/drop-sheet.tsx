@@ -113,7 +113,6 @@ export function DropSheet({
 
       invalidateDrops(selectedDropType);
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
-      queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
       onSaved();
     } catch {
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
