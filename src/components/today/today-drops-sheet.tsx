@@ -280,7 +280,6 @@ export function TodayDropsSheet({
         key: "confirm-delete",
         title: "Eliminar dosis",
         description: `${typeName} · ${formatTime(drop.logged_at)}`,
-        panelClassName: "!h-auto",
         content: (
           <div className="space-y-5 pb-2">
             <div className="rounded-[10px] bg-[var(--surface-el)] px-4 py-3">

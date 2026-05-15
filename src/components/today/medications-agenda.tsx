@@ -441,7 +441,6 @@ function RegisteredBatchRow({
         <div
           key={item.key}
           className="flex min-h-[36px] items-center gap-2"
-          style={i > 0 ? { borderTop: "1px dashed color-mix(in srgb, var(--border) 80%, transparent)" } : undefined}
         >
           <CheckCircleIcon size={16} weight="fill" className="shrink-0" style={{ color: "var(--dose-early)" }} />
           <span className="min-w-0 flex-1 truncate text-[14px] capitalize text-[var(--text-muted)] line-through decoration-[var(--text-faint)]">

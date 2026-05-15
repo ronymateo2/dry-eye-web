@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "motion/react";
+import { toast } from "sonner";
 import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { api } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
 import { QuickLogCheck } from "./quick-log-check";
@@ -30,11 +33,37 @@ export function HeroView({
   const [projectionOpen, setProjectionOpen] = useState(false);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
   const [justRegistered, setJustRegistered] = useState<{ dropTypeId: string; takenAt: string } | null>(null);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const queryClient = useQueryClient();
   const discardMutation = useDiscardVial(() => setDiscardTarget(null));
   const { quickLog, isPending: quickLogPending } = useQuickLog({
-    onSuccess: () => {
-      setTimeout(() => setJustRegistered(null), 1400);
+    onSuccess: (dropTypeId, dropId) => {
+      const dropName = data.upcoming[0]?.name ?? "Dosis";
+      clearTimerRef.current = setTimeout(() => {
+        setJustRegistered(null);
+        void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      }, 2500);
+      toast.success(`${dropName} registrada`, {
+        duration: 2500,
+        action: {
+          label: "Deshacer",
+          onClick: () => {
+            if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+            void (async () => {
+              try {
+                await api.deleteDrop(dropId);
+                setJustRegistered(null);
+                void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/recent", dropTypeId] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+              } catch {
+                toast.error("No se pudo deshacer el registro");
+              }
+            })();
+          },
+        },
+      });
     },
     onError: () => setJustRegistered(null),
   });

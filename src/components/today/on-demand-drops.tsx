@@ -185,7 +185,7 @@ export function OnDemandDrops() {
     <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
       <div className="px-4 pt-4 pb-3">
         <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">
-          A demanda
+          Gota a demanda
         </p>
       </div>
       <div className="space-y-1 px-3 pb-3">
