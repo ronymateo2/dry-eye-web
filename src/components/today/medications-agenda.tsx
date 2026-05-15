@@ -37,8 +37,8 @@ type TodayIntake = {
 
 type UpcomingSlot = {
   key: string;
-  medicationId: string;
-  name: string;
+  medicationIds: string[];
+  names: string[];
   slotTime: Date;
   slotTimeLabel: string;
   overdue: boolean;
@@ -46,7 +46,7 @@ type UpcomingSlot = {
   countdownColor: string;
   countdownProgress: number;
   totalIntervalMs: number;
-  medication: MedicationRecord;
+  medications: MedicationRecord[];
 };
 
 type RegisteredSlot = {
@@ -163,7 +163,6 @@ function buildSchedule(
   tz: string,
 ): { upcoming: UpcomingSlot[]; registered: RegisteredSlot[] } {
   const todayStartMs = getCachedTodayStart(now, tz);
-  const upcoming: UpcomingSlot[] = [];
   const registered: RegisteredSlot[] = [];
 
   const intakesByMed = new Map<string, TodayIntake[]>();
@@ -175,6 +174,21 @@ function buildSchedule(
   for (const arr of intakesByMed.values()) {
     arr.sort((a, b) => a.logged_at.localeCompare(b.logged_at));
   }
+
+  type RawSlot = {
+    key: string;
+    medicationId: string;
+    name: string;
+    slotTime: Date;
+    slotTimeLabel: string;
+    overdue: boolean;
+    countdownLabel: string;
+    countdownColor: string;
+    countdownProgress: number;
+    totalIntervalMs: number;
+    medication: MedicationRecord;
+  };
+  const rawUpcoming: RawSlot[] = [];
 
   for (const med of medications) {
     const times = parseTimesJson(med.times_json);
@@ -209,7 +223,7 @@ function buildSchedule(
     for (let i = nTaken; i < slots.length; i++) {
       const slotTime = slots[i]!;
       const { label, overdue, color, progress } = getCountdown(slotTime.getTime(), now, minInterval);
-      upcoming.push({
+      rawUpcoming.push({
         key: `${med.id}-${i}`,
         medicationId: med.id,
         name: med.name,
@@ -225,7 +239,35 @@ function buildSchedule(
     }
   }
 
-  upcoming.sort((a, b) => a.slotTime.getTime() - b.slotTime.getTime());
+  rawUpcoming.sort((a, b) => a.slotTime.getTime() - b.slotTime.getTime());
+
+  // Group by slotTime — meds at same time share a single countdown
+  const groupedMap = new Map<number, RawSlot[]>();
+  for (const slot of rawUpcoming) {
+    const key = slot.slotTime.getTime();
+    const arr = groupedMap.get(key) ?? [];
+    arr.push(slot);
+    groupedMap.set(key, arr);
+  }
+
+  const upcoming: UpcomingSlot[] = [];
+  for (const [, slots] of groupedMap) {
+    const first = slots[0]!;
+    upcoming.push({
+      key: slots.map((s) => s.key).join("|"),
+      medicationIds: slots.map((s) => s.medicationId),
+      names: slots.map((s) => s.name),
+      slotTime: first.slotTime,
+      slotTimeLabel: first.slotTimeLabel,
+      overdue: first.overdue,
+      countdownLabel: first.countdownLabel,
+      countdownColor: first.countdownColor,
+      countdownProgress: first.countdownProgress,
+      totalIntervalMs: first.totalIntervalMs,
+      medications: slots.map((s) => s.medication),
+    });
+  }
+
   registered.sort((a, b) => a.loggedAt.localeCompare(b.loggedAt));
 
   return { upcoming, registered };
@@ -241,6 +283,8 @@ function TimelineRow({
   index: number;
   onLog: () => void;
 }) {
+  const isGroup = slot.names.length > 1;
+  const countdownDisplay = slot.overdue ? slot.countdownLabel : `en ${slot.countdownLabel}`;
   return (
     <motion.button
       type="button"
@@ -248,34 +292,55 @@ function TimelineRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       onClick={onLog}
-      aria-label={`Registrar ${slot.name}`}
+      aria-label={`Registrar ${slot.names.join(", ")}`}
       className={cn(
         "group grid min-h-[40px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[9px] px-3 py-1.5 text-left",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)] focus-visible:outline-none",
+        isGroup && "py-2",
       )}
     >
-      <span className="flex min-w-0 items-center gap-2.5">
+      <span className="flex min-w-0 items-start gap-2.5">
         <span
-          className="h-4 w-[3px] shrink-0 rounded-full opacity-90"
+          className="mt-[3px] h-4 w-[3px] shrink-0 rounded-full opacity-90"
           style={{ background: slot.countdownColor }}
         />
-        <span className="flex min-w-0 items-baseline gap-1.5">
-          <span className="truncate text-[15px] font-medium capitalize leading-none text-[var(--text-primary)]">
-            {slot.name}
+        {isGroup ? (
+          <span className="flex min-w-0 flex-col gap-0.5">
+            {slot.names.map((name, idx) => (
+              <span key={name} className="flex min-w-0 items-baseline gap-1.5">
+                <span className="truncate text-[14px] font-medium capitalize leading-snug text-[var(--text-primary)]">
+                  {name}
+                </span>
+                {idx === 0 && (
+                  <>
+                    <span className="shrink-0 text-[12px] leading-none text-[var(--text-faint)]">·</span>
+                    <span className="font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
+                      {slot.slotTimeLabel}
+                    </span>
+                  </>
+                )}
+              </span>
+            ))}
           </span>
-          <span className="shrink-0 text-[12px] leading-none text-[var(--text-faint)]">·</span>
-          <span className="font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
-            {slot.slotTimeLabel}
+        ) : (
+          <span className="flex min-w-0 items-baseline gap-1.5">
+            <span className="truncate text-[15px] font-medium capitalize leading-none text-[var(--text-primary)]">
+              {slot.names[0]}
+            </span>
+            <span className="shrink-0 text-[12px] leading-none text-[var(--text-faint)]">·</span>
+            <span className="font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
+              {slot.slotTimeLabel}
+            </span>
           </span>
-        </span>
+        )}
       </span>
       <span className="flex shrink-0 items-center gap-1.5">
         <span
           className="font-mono text-[13px] font-medium tabular-nums"
           style={{ color: slot.countdownColor }}
         >
-          {slot.countdownLabel}
+          {countdownDisplay}
         </span>
         <CaretRightIcon
           aria-hidden
@@ -334,7 +399,7 @@ function RegisteredRow({
 
 // ── main component ────────────────────────────────────────────────────────
 export function MedicationsAgenda({ now }: { now: number }) {
-  const [quickLogging, setQuickLogging] = useState<string | null>(null);
+  const [quickLogging, setQuickLogging] = useState(false);
   const [takenAtLabel, setTakenAtLabel] = useState<string | null>(null);
   const [editIntake, setEditIntake] = useState<EditIntakeState | null>(null);
   const [deleteIntakeId, setDeleteIntakeId] = useState<string | null>(null);
@@ -375,24 +440,53 @@ export function MedicationsAgenda({ now }: { now: number }) {
 
   async function handleQuickLog() {
     if (!hero || quickLogging) return;
-    const medId = hero.medicationId;
     const takenAt = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
     setTakenAtLabel(takenAt);
-    setQuickLogging(medId);
+    setQuickLogging(true);
+
+    const loggedAt = new Date().toISOString();
+    const intakes = hero.medications.map((med) => ({
+      id: crypto.randomUUID(),
+      medicationId: med.id,
+      loggedAt,
+    }));
+
     try {
-      await api.saveMedicationIntake({
-        id: crypto.randomUUID(),
-        medicationId: medId,
-        loggedAt: new Date().toISOString(),
+      await Promise.all(intakes.map((intake) => api.saveMedicationIntake(intake)));
+      const intakeIds = intakes.map((i) => i.id);
+
+      const label = isGroupHero
+        ? `${hero.names.join(" · ")} registradas`
+        : `${hero.names[0]} registrada`;
+
+      toast.success(label, {
+        duration: 3_000,
+        action: {
+          label: "Deshacer",
+          onClick: () => {
+            void (async () => {
+              try {
+                await Promise.all(intakeIds.map((id) => api.deleteMedicationIntake(id)));
+                setQuickLogging(false);
+                setTakenAtLabel(null);
+                void queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
+                void queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
+              } catch {
+                toast.error("No se pudo deshacer el registro");
+              }
+            })();
+          },
+        },
       });
+
       setTimeout(() => {
+        setQuickLogging(false);
+        setTakenAtLabel(null);
         void queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
         void queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
-        setQuickLogging(null);
-        setTakenAtLabel(null);
-      }, 1_400);
+      }, 3_000);
     } catch {
-      setQuickLogging(null);
+      setQuickLogging(false);
       setTakenAtLabel(null);
       toast.error("No se pudo registrar la dosis");
     }
@@ -412,7 +506,7 @@ export function MedicationsAgenda({ now }: { now: number }) {
   }
 
   const heroAccent = hero?.countdownColor ?? "var(--dose-early)";
-
+  const isGroupHero = (hero?.names.length ?? 0) > 1;
   const hasAny = upcoming.length > 0 || registered.length > 0;
 
   // ── loading skeleton ────────────────────────────────────────────────────
@@ -455,14 +549,20 @@ export function MedicationsAgenda({ now }: { now: number }) {
                 className="mb-4 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] transition-colors duration-300"
                 style={{ color: quickLogging ? "var(--dose-early)" : "var(--text-faint)" }}
               >
-                {quickLogging ? "Pastilla registrada" : "Próxima pastilla"}
+                {quickLogging
+                  ? isGroupHero
+                    ? "Pastillas registradas"
+                    : "Pastilla registrada"
+                  : isGroupHero
+                    ? "Próximas pastillas"
+                    : "Próxima pastilla"}
               </p>
               <div className="flex flex-col gap-1.5">
                 <div className="grid grid-cols-[92px_minmax(0,1fr)] items-center gap-5">
                   {/* Ring / check */}
                   <div>
                     <AnimatePresence mode="wait">
-                      {quickLogging === hero.medicationId ? (
+                      {quickLogging ? (
                         <motion.div key="check">
                           <QuickLogCheck color="var(--dose-early)" />
                         </motion.div>
@@ -480,41 +580,24 @@ export function MedicationsAgenda({ now }: { now: number }) {
                     </AnimatePresence>
                   </div>
 
-                  {/* Name + time */}
+                  {/* Name(s) + time */}
                   <div className="grid min-w-0 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => !quickLogging && openSessionSheet(hero.medicationId)}
-                      aria-label={`Registrar ${hero.name} con detalles`}
-                      className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70 rounded-[8px] -mx-1 px-1 py-0.5 hover:bg-[color-mix(in_srgb,var(--surface-el)_30%,transparent)] transition-colors duration-[160ms]"
-                      style={{ cursor: quickLogging ? "default" : "pointer" }}
-                    >
-                      <span
-                        className="truncate text-[22px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
-                        style={{
-                          color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
-                          textDecoration: quickLogging ? "line-through" : "none",
-                          textDecorationColor: "rgba(0,0,0,0.2)",
-                        }}
-                      >
-                        {hero.name}
-                      </span>
-                      {!quickLogging && (
-                        <CaretRightIcon
-                          size={14}
-                          weight="bold"
-                          className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                          style={{ color: "var(--text-faint)" }}
-                        />
-                      )}
-                    </button>
-
-                    {/* Time / "Tomada a las" */}
-                    <div style={{ position: "relative" }}>
-                      <div style={{ opacity: quickLogging ? 0 : 1, transition: "opacity 200ms ease" }}>
-                        <div className="flex items-center gap-1.5">
+                    {isGroupHero ? (
+                      /* Grouped: time (tappable → opens sheet) + stacked names */
+                      <div className="flex min-w-0 flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => !quickLogging && openSessionSheet(hero.medicationIds[0])}
+                          aria-label="Ver detalles de medicamentos"
+                          disabled={quickLogging}
+                          className="inline-flex items-center gap-1.5 rounded-[6px] -mx-1 px-1 py-0.5 active:opacity-70 transition-opacity duration-[160ms]"
+                          style={{ cursor: quickLogging ? "default" : "pointer" }}
+                        >
                           <AlarmIcon size={18} weight="fill" className="shrink-0 text-[var(--accent)]" />
-                          <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                          <p
+                            className="font-mono text-[20px] font-semibold leading-none tabular-nums transition-colors duration-300"
+                            style={{ color: quickLogging ? "var(--text-muted)" : "var(--accent)" }}
+                          >
                             {hero.slotTime.toLocaleTimeString("es-CO", {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -522,22 +605,97 @@ export function MedicationsAgenda({ now }: { now: number }) {
                               timeZone: tz,
                             })}
                           </p>
+                          {!quickLogging && (
+                            <CaretRightIcon
+                              size={11}
+                              weight="bold"
+                              className="shrink-0"
+                              style={{ color: "var(--text-faint)" }}
+                            />
+                          )}
+                        </button>
+                        <div className="flex flex-col gap-0.5">
+                          {hero.names.map((name) => (
+                            <span
+                              key={name}
+                              className="truncate text-[18px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                              style={{
+                                color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
+                                textDecoration: quickLogging ? "line-through" : "none",
+                                textDecorationColor: "rgba(0,0,0,0.2)",
+                              }}
+                            >
+                              {name}
+                            </span>
+                          ))}
                         </div>
                       </div>
+                    ) : (
+                      /* Single med: big name, time below */
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => !quickLogging && openSessionSheet(hero.medicationIds[0])}
+                          aria-label={`Registrar ${hero.names[0]} con detalles`}
+                          className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70 rounded-[8px] -mx-1 px-1 py-0.5 hover:bg-[color-mix(in_srgb,var(--surface-el)_30%,transparent)] transition-colors duration-[160ms]"
+                          style={{ cursor: quickLogging ? "default" : "pointer" }}
+                        >
+                          <span
+                            className="truncate text-[22px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                            style={{
+                              color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
+                              textDecoration: quickLogging ? "line-through" : "none",
+                              textDecorationColor: "rgba(0,0,0,0.2)",
+                            }}
+                          >
+                            {hero.names[0]}
+                          </span>
+                          {!quickLogging && (
+                            <CaretRightIcon
+                              size={14}
+                              weight="bold"
+                              className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                              style={{ color: "var(--text-faint)" }}
+                            />
+                          )}
+                        </button>
+
+                        {/* Time */}
+                        {!quickLogging && (
+                          <div className="flex items-center gap-1.5">
+                            <AlarmIcon size={18} weight="fill" className="shrink-0 text-[var(--accent)]" />
+                            <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                              {hero.slotTime.toLocaleTimeString("es-CO", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                                timeZone: tz,
+                              })}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {/* Logged at (shown after quick log) */}
+                    <AnimatePresence>
                       {quickLogging && (
-                        <motion.p
+                        <motion.div
                           initial={{ opacity: 0, y: 4 }}
                           animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
                           transition={{ duration: 0.28, ease: "easeOut" }}
-                          className="absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]"
+                          className="flex items-center gap-3"
                         >
-                          Tomada a las{" "}
-                          <span className="font-mono font-semibold" style={{ color: "var(--dose-early)" }}>
-                            {takenAtLabel ?? ""}
-                          </span>
-                        </motion.p>
+                          <p className="text-[14px] text-[var(--text-muted)]">
+                            {isGroupHero ? "Tomadas a las" : "Tomada a las"}{" "}
+                            <span className="font-mono font-semibold" style={{ color: "var(--dose-early)" }}>
+                              {takenAtLabel ?? ""}
+                            </span>
+                          </p>
+                        </motion.div>
                       )}
-                    </div>
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
@@ -572,7 +730,7 @@ export function MedicationsAgenda({ now }: { now: number }) {
                     key={slot.key}
                     slot={slot}
                     index={i}
-                    onLog={() => openSessionSheet(slot.medicationId)}
+                    onLog={() => openSessionSheet(slot.medicationIds[0])}
                   />
                 ))}
               </div>

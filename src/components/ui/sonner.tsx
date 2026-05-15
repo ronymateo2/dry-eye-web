@@ -34,6 +34,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
           warning:
             "!border !border-[rgba(224,147,42,0.5)] [&>[data-icon]]:!text-[#e0932a]",
           info: "!border !border-[var(--border)] [&>[data-icon]]:!text-[var(--accent)]",
+          actionButton:
+            "!bg-[var(--accent-dim)] !text-[var(--accent)] !font-medium !rounded-full !text-[12px] !px-3 !py-1 hover:!bg-[color-mix(in_srgb,var(--accent)_22%,transparent)] transition-colors",
         },
       }}
       {...props}
