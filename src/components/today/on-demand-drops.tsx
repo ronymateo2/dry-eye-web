@@ -5,13 +5,13 @@ import { PlusIcon, CheckIcon, DropIcon } from "@phosphor-icons/react";
 import { TodayDropsSheet } from "./today-drops-sheet";
 import { TodayCountBadge } from "./today-count-badge";
 import { useQuickLog } from "./use-quick-log";
+import { IconButton } from "@/components/ui/icon-button";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
 
 function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const [justRegistered, setJustRegistered] = useState<string | null>(null);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
-
   const { data: recentDrops = [] } = useQuery({
     queryKey: ["drops/recent", drop.id],
     queryFn: () => api.getRecentDrops(drop.id, 24),
@@ -49,11 +49,15 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
             : "var(--surface-el)",
         }}
       >
-        <DropIcon
-          size={14}
-          className="shrink-0"
-          style={{ color: justRegistered ? "var(--pain-low)" : "var(--accent)" }}
-        />
+        <IconButton
+          variant={justRegistered ? "tinted-success" : "tinted"}
+          onClick={handleLog}
+          disabled={isPending}
+          whileTap={{ scale: 1.5 }}
+          aria-label={`Registrar dosis de ${drop.name}`}
+        >
+          <DropIcon size={14} />
+        </IconButton>
 
         <div className="min-w-0 flex-1">
           <p

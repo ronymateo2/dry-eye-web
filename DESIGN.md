@@ -269,6 +269,58 @@ import { Button } from "@/components/ui/button";
 - Icon-only buttons: raw `<button>` with manual sizing — do not use `<Button>`.
 - `motion.button` with animations: keep as raw — `<Button>` does not support motion props.
 
+### IconButton
+
+Animated circular icon button. Uses `motion.button` — supports `whileHover` / `whileTap` overrides. Use for single-icon actions (log, delete, edit, close).
+
+**Import:** `import { IconButton } from "@/components/ui/icon-button";`
+
+```
+Variant          Background               Icon color       When
+──────────────────────────────────────────────────────────────────────
+filled           var(--accent)            var(--bg)        Prominent CTA (rare — prefer tinted)
+tinted           accent 15%               var(--accent)    Primary icon action (default)
+tinted-error     pain-high 15%            var(--pain-high) Delete, remove, destructive
+tinted-warn      pain-mid 15%             var(--pain-mid)  Warning action
+tinted-success   pain-low 15%             var(--pain-low)  Confirm, done, registered
+muted            text-faint 10%           var(--text-faint) Inactive, secondary
+ghost            transparent              var(--text-muted) Minimal, contextual
+
+Size   Height   When
+──────────────────────────────────────────────────────────────────────
+sm     28px     Tight layouts, inline with small text
+md     32px     Default — list rows, cards (default)
+lg     40px     Prominent standalone actions
+```
+
+```tsx
+// Log action (default tinted)
+<IconButton onClick={handleLog} aria-label="Registrar dosis">
+  <DropIcon size={14} />
+</IconButton>
+
+// Delete — tinted-error
+<IconButton variant="tinted-error" onClick={handleDelete} aria-label="Eliminar">
+  <TrashIcon size={14} />
+</IconButton>
+
+// Confirmed state — tinted-success
+<IconButton variant="tinted-success" disabled aria-label="Registrado">
+  <CheckIcon size={14} weight="bold" />
+</IconButton>
+
+// Custom tap scale
+<IconButton whileTap={{ scale: 2 }} onClick={handleLog} aria-label="Registrar">
+  <DropIcon size={14} />
+</IconButton>
+```
+
+**Rules:**
+- Always provide `aria-label` — button has no visible text.
+- Pass children as the icon element; do not set `color` on the icon — it inherits from the button.
+- Override `whileTap` / `whileHover` via props when the default scale feels wrong for the context.
+- Do not use `size="icon"` from `<Button>` — that is square, not circular, and has no motion.
+
 ### Toast
 - Position: top of screen, below safe area inset, full width
 - Background: always `var(--surface-el)` (#252014) — never solid color backgrounds (high luminance = harmful for photophobia)
