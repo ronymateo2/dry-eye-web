@@ -1,5 +1,4 @@
 import { type ReactNode } from "react";
-import { motion, AnimatePresence } from "motion/react";
 
 export function CircularProgress({
   size = 100,
@@ -106,33 +105,35 @@ export function CountdownValue({
           {overdue ? "Vencida" : "En"}
         </p>
         <div className="flex flex-nowrap items-end gap-x-0.5 whitespace-nowrap leading-none" style={{ color }}>
+          <style>{`@keyframes odometerIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
           {parts.map((part) => {
             const value = part.slice(0, -1);
             const unit = part.slice(-1);
+            const fs = parts.length > 1 ? 20 : 22;
+            const digitW = Math.round(fs * 0.62);
             return (
-              <span key={part} className="inline-flex items-end gap-0.5">
-                <span
-                  className="relative overflow-hidden inline-block"
-                  style={{
-                    fontSize: parts.length > 1 ? 20 : 22,
-                    fontWeight: 600,
-                    lineHeight: 0.9,
-                    verticalAlign: "bottom",
-                  }}
-                >
-                  <AnimatePresence mode="popLayout" initial={false}>
-                    <motion.span
-                      key={`val-${value}`}
-                      initial={{ y: "100%", opacity: 0 }}
-                      animate={{ y: "0%", opacity: 1 }}
-                      exit={{ y: "-100%", opacity: 0 }}
-                      transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
-                      className="font-mono tabular-nums block"
-                      style={{ fontSize: "inherit", fontWeight: "inherit", lineHeight: "inherit" }}
+              <span key={unit} className="inline-flex items-end gap-0.5">
+                <span className="inline-flex" style={{ height: fs, verticalAlign: "bottom" }}>
+                  {value.split("").map((digit, i) => (
+                    <span
+                      key={`p${i}`}
+                      className="relative inline-block overflow-hidden"
+                      style={{ width: digitW, height: fs }}
                     >
-                      {value}
-                    </motion.span>
-                  </AnimatePresence>
+                      <span
+                        key={digit}
+                        className="font-mono tabular-nums absolute inset-0 flex items-center justify-center"
+                        style={{
+                          fontSize: fs,
+                          fontWeight: 600,
+                          lineHeight: 1,
+                          animation: "odometerIn 0.3s cubic-bezier(0.23,1,0.32,1) forwards",
+                        }}
+                      >
+                        {digit}
+                      </span>
+                    </span>
+                  ))}
                 </span>
                 <span className="pb-0.5 text-[11px] font-semibold leading-none">
                   {unit}
