@@ -92,15 +92,15 @@ const IntensityGauge = memo(function IntensityGauge({
           <style>{`
             @keyframes gaugeRingPulse {
               0%   { transform: scale(1);    opacity: 0.35; }
-              65%  { transform: scale(1.07); opacity: 0; }
-              100% { transform: scale(1.07); opacity: 0; }
+              65%  { transform: scale(1.15); opacity: 0; }
+              100% { transform: scale(1.15); opacity: 0; }
             }
           `}</style>
           <div
             aria-hidden="true"
             style={{
               position: "absolute",
-              inset: 0,
+              inset: 10,
               borderRadius: "50%",
               border: `2px solid ${color}`,
               animation: "gaugeRingPulse 2.2s ease-out infinite",
@@ -127,7 +127,7 @@ const IntensityGauge = memo(function IntensityGauge({
             d={arcPath(startAngle, endAngle, r)}
             fill="none"
             stroke={color}
-            strokeWidth="8"
+            strokeWidth="4"
             strokeLinecap="round"
             style={{ transition: "stroke 0.4s ease, d 0.4s ease" }}
           />
@@ -194,13 +194,13 @@ export function SymptomStatusCard({ onRegister }: Props) {
 
   const allVals = latest
     ? [
-        latest.intensities.dryness,
-        latest.intensities.burning,
-        latest.intensities.photophobia,
-        latest.intensities.blurry_vision,
-        latest.intensities.stinging ?? 0,
-        latest.intensities.pressure ?? 0,
-      ].filter((v) => v > 0)
+      latest.intensities.dryness,
+      latest.intensities.burning,
+      latest.intensities.photophobia,
+      latest.intensities.blurry_vision,
+      latest.intensities.stinging ?? 0,
+      latest.intensities.pressure ?? 0,
+    ].filter((v) => v > 0)
     : [];
   const avgVal =
     allVals.length > 0
@@ -256,64 +256,64 @@ export function SymptomStatusCard({ onRegister }: Props) {
       className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4"
     >
       <TopographicBg position="calc(100% + 20px) calc(100% + 10px)" size="600px" />
-      
+
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-3 flex items-center justify-between">
-        <p className="section-label mb-0">Estado actual</p>
+          <p className="section-label mb-0">Estado actual</p>
+          <button
+            type="button"
+            className="flex items-center justify-center text-[var(--text-faint)] opacity-60 hover:opacity-100 transition-opacity"
+            aria-label="Información sobre el cálculo de estado"
+            title={`Estado calculado a partir de la intensidad promedio de los síntomas. Última actualización: ${timeAgo}`}
+          >
+          </button>
+        </div>
+
+        {/* Main row: state + gauge */}
         <button
           type="button"
-          className="flex items-center justify-center text-[var(--text-faint)] opacity-60 hover:opacity-100 transition-opacity"
-          aria-label="Información sobre el cálculo de estado"
-          title={`Estado calculado a partir de la intensidad promedio de los síntomas. Última actualización: ${timeAgo}`}
+          onClick={onRegister}
+          className="w-full text-left mb-3"
+          aria-label="Actualizar registro de síntomas"
         >
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-[28px] font-bold leading-tight tracking-[-0.02em]" style={{ color }}>
+                {label}
+              </p>
+              <p className="text-[17px] font-medium text-[var(--text-muted)] mt-2">{copy}</p>
+              <p className="text-[13px] text-[var(--text-faint)] mt-1.5">{timeAgo}</p>
+            </div>
+            <IntensityGauge
+              value={avgVal}
+              color={color}
+              onClick={onRegister}
+            />
+          </div>
         </button>
-      </div>
 
-      {/* Main row: state + gauge */}
-      <button
-        type="button"
-        onClick={onRegister}
-        className="w-full text-left mb-3"
-        aria-label="Actualizar registro de síntomas"
-      >
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <p className="text-[28px] font-bold leading-tight tracking-[-0.02em]" style={{ color }}>
-              {label}
-            </p>
-            <p className="text-[17px] font-medium text-[var(--text-muted)] mt-2">{copy}</p>
-            <p className="text-[13px] text-[var(--text-faint)] mt-1.5">{timeAgo}</p>
-          </div>
-          <IntensityGauge
-            value={avgVal}
-            color={color}
-            onClick={onRegister}
-          />
+        {/* Top symptoms grid */}
+        {topSymptoms.length > 0 && (
+          <>
+            <div className="h-px bg-[var(--border)] my-4" />
+            <div className="grid grid-cols-5 gap-x-1 gap-y-3">
+              {topSymptoms.slice(0, 5).map((item) => (
+                <TopSymptomCell key={item.key} item={item} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Advice footer */}
+        <div className="mt-4 h-px bg-[var(--border)]" />
+        <div className="mt-2.5 flex items-start gap-2">
+          <SunIcon size={12} className="mt-[2px] shrink-0 text-[var(--accent)]" />
+          <p className="text-[14px] leading-relaxed text-[var(--text-muted)]">
+            <span className="font-medium text-[var(--text-primary)]">Consejo del día: </span>
+            {ADVICE[state]}
+          </p>
         </div>
-      </button>
-
-      {/* Top symptoms grid */}
-      {topSymptoms.length > 0 && (
-        <>
-          <div className="h-px bg-[var(--border)] my-4" />
-          <div className="grid grid-cols-5 gap-x-1 gap-y-3">
-            {topSymptoms.slice(0, 5).map((item) => (
-              <TopSymptomCell key={item.key} item={item} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {/* Advice footer */}
-      <div className="mt-4 h-px bg-[var(--border)]" />
-      <div className="mt-2.5 flex items-start gap-2">
-        <SunIcon size={12} className="mt-[2px] shrink-0 text-[var(--accent)]" />
-        <p className="text-[14px] leading-relaxed text-[var(--text-muted)]">
-          <span className="font-medium text-[var(--text-primary)]">Consejo del día: </span>
-          {ADVICE[state]}
-        </p>
-      </div>
       </div>
     </motion.div>
   );
