@@ -29,6 +29,7 @@ export type DropTypeRecord = {
   archived_at?: string | null;
   is_vial?: boolean;
   vial_duration?: number | null;
+  quick_action?: boolean;
 };
 
 export type DropScheduleEntry = {

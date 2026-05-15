@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { GearIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
+import { OnDemandDrops } from "@/components/today/on-demand-drops";
 import { SymptomStatusCard } from "@/components/today/symptom-status-card";
 import { SleepStatus } from "@/components/ui/sleep-status";
 import { CardView } from "@/components/today/card-view";
@@ -47,6 +48,8 @@ export default function TodayPage() {
       ) : (
         <HeroView data={scheduleData} view={view} setView={setView} />
       )}
+
+      <OnDemandDrops />
 
       <MedicationsAgenda now={now} />
 

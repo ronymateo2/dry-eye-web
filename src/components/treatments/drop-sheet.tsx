@@ -12,7 +12,7 @@ import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import type { DropTypeRecord } from "@/types/domain";
 
-export type DropForm = { name: string; intervalHours: number | null; startDate: string; endDate: string; isVial: boolean; vialDuration: number | null };
+export type DropForm = { name: string; intervalHours: number | null; startDate: string; endDate: string; isVial: boolean; vialDuration: number | null; quickAction: boolean };
 
 function DropFormContent({
   item,
@@ -34,8 +34,9 @@ function DropFormContent({
           endDate: item.end_date ?? "",
           isVial: item.is_vial ?? false,
           vialDuration: item.vial_duration ?? 24,
+          quickAction: item.quick_action ?? false,
         }
-      : { name: "", intervalHours: null, startDate: "", endDate: "", isVial: false, vialDuration: 24 },
+      : { name: "", intervalHours: null, startDate: "", endDate: "", isVial: false, vialDuration: 24, quickAction: false },
   );
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -48,8 +49,9 @@ function DropFormContent({
             endDate: form.endDate || null,
             isVial: form.isVial,
             vialDuration: form.isVial ? form.vialDuration : null,
+            quickAction: form.intervalHours == null ? form.quickAction : false,
           })
-        : api.createDropType(form.name.trim(), form.intervalHours, form.startDate || null, form.endDate || null, undefined, form.isVial, form.isVial ? form.vialDuration : null),
+        : api.createDropType(form.name.trim(), form.intervalHours, form.startDate || null, form.endDate || null, undefined, form.isVial, form.isVial ? form.vialDuration : null, form.intervalHours == null ? form.quickAction : false),
     onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ["drop-types"] });
       qc.invalidateQueries({ queryKey: ["drops/last-per-type"] });
@@ -156,6 +158,21 @@ function DropFormContent({
           </div>
         )}
       </div>
+
+      {form.intervalHours == null && (
+        <label className="flex items-center gap-3 min-h-[48px] cursor-pointer">
+          <input
+            type="checkbox"
+            checked={form.quickAction}
+            onChange={(e) => setForm((f) => ({ ...f, quickAction: e.target.checked }))}
+            className="h-5 w-5 accent-[var(--accent)]"
+          />
+          <div>
+            <span className="text-[14px] text-[var(--text-primary)]">Acceso rápido en Hoy</span>
+            <p className="text-[12px] text-[var(--text-faint)]">Aparece en "A demanda" para registrar a necesidad</p>
+          </div>
+        </label>
+      )}
 
       <Button
         className="w-full"

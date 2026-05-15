@@ -69,10 +69,10 @@ export const api = {
       notes: string | null;
     } | null>("/check-ins/last"),
 
-  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null; is_vial: boolean; vial_duration: number | null }[]>("/drop-types"),
-  createDropType: (name: string, intervalHours: number | null, startDate?: string | null, endDate?: string | null, suspensionNote?: string | null, isVial?: boolean, vialDuration?: number | null) =>
-    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, startDate, endDate, suspensionNote, isVial, vialDuration }),
-  updateDropType: (id: string, body: { intervalHours?: number | null; startDate?: string | null; endDate?: string | null; suspensionNote?: string | null; isVial?: boolean; vialDuration?: number | null }) =>
+  getDropTypes: () => api.get<{ id: string; name: string; sort_order: number | null; interval_hours: number | null; start_date: string | null; end_date: string | null; suspension_note: string | null; is_vial: boolean; vial_duration: number | null; quick_action: boolean }[]>("/drop-types"),
+  createDropType: (name: string, intervalHours: number | null, startDate?: string | null, endDate?: string | null, suspensionNote?: string | null, isVial?: boolean, vialDuration?: number | null, quickAction?: boolean) =>
+    api.post<{ id: string; name: string }>("/drop-types", { name, intervalHours, startDate, endDate, suspensionNote, isVial, vialDuration, quickAction }),
+  updateDropType: (id: string, body: { intervalHours?: number | null; startDate?: string | null; endDate?: string | null; suspensionNote?: string | null; isVial?: boolean; vialDuration?: number | null; quickAction?: boolean }) =>
     api.put(`/drop-types/${id}`, body),
   updateDropTypeInterval: (id: string, intervalHours: number | null) => api.put(`/drop-types/${id}`, { intervalHours }),
   deleteDropType: (id: string) => api.delete(`/drop-types/${id}`),
