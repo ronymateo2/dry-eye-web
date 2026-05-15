@@ -13,6 +13,7 @@ import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import { queueDrop } from "@/lib/offline/drops-queue";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInvalidateDrops } from "@/lib/hooks/use-invalidate-drops";
 import type { ActionState, DropEye } from "@/types/domain";
 
 export function DropSheet({
@@ -27,6 +28,7 @@ export function DropSheet({
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const invalidateDrops = useInvalidateDrops();
   const user = useUser();
   const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
   const [selectedDropType, setSelectedDropType] = useState<string>(editDrop?.dropTypeId ?? "");
@@ -109,11 +111,7 @@ export function DropSheet({
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
-      queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+      invalidateDrops(selectedDropType);
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
       onSaved();

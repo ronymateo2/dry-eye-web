@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { motion } from "motion/react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import { useInvalidateDrops } from "@/lib/hooks/use-invalidate-drops";
 import { PlusIcon, CheckIcon, DropIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { TodayDropsSheet } from "./today-drops-sheet";
@@ -24,9 +25,9 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const now = useNow(60_000);
   const [justRegistered, setJustRegistered] = useState<string | null>(null);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
-  const queryClient = useQueryClient();
   const lastDropIdRef = useRef<string | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const invalidateDrops = useInvalidateDrops();
   const { data: recentDrops = [] } = useQuery({
     queryKey: ["drops/recent", drop.id],
     queryFn: () => api.getRecentDrops(drop.id, 24),
@@ -41,7 +42,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const lastDrop = recentDrops[0] ?? null;
 
   const { quickLog, isPending } = useQuickLog({
-    onSuccess: (_dropTypeId, dropId) => {
+    onSuccess: (dropTypeId, dropId) => {
       lastDropIdRef.current = dropId;
       toast.success(`${drop.name} registrada`, {
         duration: 3_000,
@@ -55,12 +56,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               try {
                 await api.deleteDrop(id);
                 setJustRegistered(null);
-                void queryClient.invalidateQueries({ queryKey: ["drops/recent", drop.id] });
-                void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
-                void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-                void queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-                void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
-                void queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
+                invalidateDrops(dropTypeId);
               } catch {
                 toast.error("No se pudo deshacer el registro");
               }
@@ -70,12 +66,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
       });
       clearTimerRef.current = setTimeout(() => {
         setJustRegistered(null);
-        void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-        void queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-        void queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
-        void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
-        void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
-        void queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
+        invalidateDrops(dropTypeId);
       }, 3_000);
     },
     onError: () => setJustRegistered(null),
