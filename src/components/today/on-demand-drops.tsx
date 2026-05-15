@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { PlusIcon, CheckIcon, DropIcon } from "@phosphor-icons/react";
 import { TodayDropsSheet } from "./today-drops-sheet";
+import { TodayCountBadge } from "./today-count-badge";
 import { useQuickLog } from "./use-quick-log";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
@@ -78,15 +79,12 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
 
         <div className="flex shrink-0 items-center gap-2">
           {todayCount > 0 && (
-            <button
-              type="button"
+            <TodayCountBadge
+              count={todayCount}
               onClick={() => setTodayDropsOpen(true)}
-              aria-label={`Ver ${todayCount} dosis registradas hoy`}
-              className="inline-flex items-center gap-1 rounded-full bg-[var(--accent)]/10 px-2.5 py-1 text-[12px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/20 active:scale-[0.97]"
-            >
-              <DropIcon size={10} weight="bold" />
-              {todayCount}
-            </button>
+              iconSize={10}
+              className="px-2.5 py-1 text-[12px]"
+            />
           )}
 
           {justRegistered ? (

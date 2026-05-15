@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { AlarmIcon, CaretRightIcon, EyedropperIcon } from "@phosphor-icons/react";
+import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
 import { QuickLogCheck } from "./quick-log-check";
@@ -12,6 +12,7 @@ import { VialDiscardSheet } from "./vial-discard-sheet";
 import { TodayDropsSheet } from "./today-drops-sheet";
 import { useScheduleData } from "./use-schedule-data";
 import { useDiscardVial } from "./use-discard-vial";
+import { TodayCountBadge } from "./today-count-badge";
 import { useQuickLog } from "./use-quick-log";
 import type { ActiveVialEntry } from "./helpers";
 import { getCountdown, dispatchQuickAction } from "./helpers";
@@ -97,15 +98,12 @@ export function HeroView({
           <div className="relative z-10 flex items-center justify-between gap-2 px-4 pb-5 pt-5">
             <p className="text-[15px] font-semibold text-[var(--pain-low)]">Todas las dosis completadas</p>
             {todayCount > 0 && (
-              <button
-                type="button"
+              <TodayCountBadge
+                count={todayCount}
                 onClick={() => setTodayDropsOpen(true)}
-                aria-label={`Ver ${todayCount} dosis registradas hoy`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/20 active:scale-[0.97] active:bg-[var(--accent)]/25"
-              >
-                <EyedropperIcon size={12} weight="bold" />
-                {todayCount} dosis hoy
-              </button>
+                label="dosis hoy"
+                className="px-3 py-1.5 text-[13px]"
+              />
             )}
           </div>
         )}
@@ -207,15 +205,12 @@ export function HeroView({
                     <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
                   )}
                   {todayCount > 0 && (
-                    <button
-                      type="button"
+                    <TodayCountBadge
+                      count={todayCount}
                       onClick={() => setTodayDropsOpen(true)}
-                      aria-label={`Ver ${todayCount} dosis registradas hoy`}
-                      className="mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/20 active:scale-[0.97] active:bg-[var(--accent)]/25"
-                    >
-                      <EyedropperIcon size={12} weight="bold" />
-                      {todayCount} {todayCount === 1 ? "dosis hoy" : "dosis hoy"}
-                    </button>
+                      label="dosis hoy"
+                      className="mt-1 px-3 py-1.5 text-[13px]"
+                    />
                   )}
                 </div>
               </div>
