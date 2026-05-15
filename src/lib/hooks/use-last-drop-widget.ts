@@ -26,13 +26,15 @@ export function useLastDropWidget() {
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 60_000);
-    const onVisible = () => {
+    const onActive = () => {
       if (document.visibilityState === "visible") setTick((t) => t + 1);
     };
-    document.addEventListener("visibilitychange", onVisible);
+    document.addEventListener("visibilitychange", onActive);
+    window.addEventListener("focus", onActive);
     return () => {
       clearInterval(id);
-      document.removeEventListener("visibilitychange", onVisible);
+      document.removeEventListener("visibilitychange", onActive);
+      window.removeEventListener("focus", onActive);
     };
   }, []);
 
