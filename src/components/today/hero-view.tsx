@@ -43,6 +43,11 @@ export function HeroView({
       clearTimerRef.current = setTimeout(() => {
         setJustRegistered(null);
         void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+        void queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+        void queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
+        void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+        void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+        void queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
       }, 2500);
       toast.success(`${dropName} registrada`, {
         duration: 2500,
@@ -56,9 +61,11 @@ export function HeroView({
                 if (vialId) await api.deleteVial(vialId);
                 setJustRegistered(null);
                 void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent", dropTypeId] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
-                if (vialId) void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+                void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+                void queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
               } catch {
                 toast.error("No se pudo deshacer el registro");
               }

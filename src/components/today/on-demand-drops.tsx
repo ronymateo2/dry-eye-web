@@ -26,6 +26,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
   const queryClient = useQueryClient();
   const lastDropIdRef = useRef<string | null>(null);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { data: recentDrops = [] } = useQuery({
     queryKey: ["drops/recent", drop.id],
     queryFn: () => api.getRecentDrops(drop.id, 24),
@@ -47,6 +48,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
         action: {
           label: "Deshacer",
           onClick: () => {
+            if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
             void (async () => {
               const id = lastDropIdRef.current;
               if (!id) return;
@@ -56,6 +58,9 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent", drop.id] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+                void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+                void queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
               } catch {
                 toast.error("No se pudo deshacer el registro");
               }
@@ -63,7 +68,15 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
           },
         },
       });
-      setTimeout(() => setJustRegistered(null), 3_000);
+      clearTimerRef.current = setTimeout(() => {
+        setJustRegistered(null);
+        void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+        void queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+        void queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
+        void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+        void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+        void queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
+      }, 3_000);
     },
     onError: () => setJustRegistered(null),
   });
