@@ -39,56 +39,56 @@ export function CardView({
 
         <div className="relative z-10 space-y-3">
           <div className="flex items-center justify-between gap-3">
-          <p className="section-label mb-0">Próximas dosis</p>
-          <div className="flex shrink-0 items-center gap-2">
-            {annotatedEntries.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
-            <ViewToggle view={view} setView={setView} />
-          </div>
-        </div>
-
-        {annotatedEntries.length > 0 && (
-          <div className="space-y-0">
-            {annotatedEntries.map(({ entry, variant }, i) => (
-              <TimelineRow
-                key={entry.drop_type_id}
-                entry={entry}
-                index={i}
-                now={now}
-                vial={null}
-                variant={variant}
-              />
-            ))}
-          </div>
-        )}
-
-        {activeVials.length > 0 && annotatedEntries.length > 0 && (
-          <div className="h-px bg-[var(--border)]" />
-        )}
-
-        {activeVials.length > 0 && (
-          <div className="space-y-0.5">
-            <p className="section-label mb-0">Viales activos</p>
-            <div className="space-y-0">
-              <AnimatePresence initial={false}>
-                {activeVials.map((vial, i) => (
-                  <VialRow
-                    key={vial.id}
-                    vial={vial}
-                    index={i}
-                    now={now}
-                    isConfirming={confirmingId === vial.id}
-                    onRequestDiscard={() =>
-                      setConfirmingId((prev) => (prev === vial.id ? null : vial.id))
-                    }
-                    onCancel={() => setConfirmingId(null)}
-                    onConfirmDiscard={() => discardMutation.mutate(vial.id)}
-                    isPending={discardMutation.isPending && confirmingId === vial.id}
-                  />
-                ))}
-              </AnimatePresence>
+            <p className="section-label mb-0">Próximas gotas</p>
+            <div className="flex shrink-0 items-center gap-2">
+              {annotatedEntries.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
+              <ViewToggle view={view} setView={setView} />
             </div>
           </div>
-        )}
+
+          {annotatedEntries.length > 0 && (
+            <div className="space-y-0">
+              {annotatedEntries.map(({ entry, variant }, i) => (
+                <TimelineRow
+                  key={entry.drop_type_id}
+                  entry={entry}
+                  index={i}
+                  now={now}
+                  vial={null}
+                  variant={variant}
+                />
+              ))}
+            </div>
+          )}
+
+          {activeVials.length > 0 && annotatedEntries.length > 0 && (
+            <div className="h-px bg-[var(--border)]" />
+          )}
+
+          {activeVials.length > 0 && (
+            <div className="space-y-0.5">
+              <p className="section-label mb-0">Viales activos</p>
+              <div className="space-y-0">
+                <AnimatePresence initial={false}>
+                  {activeVials.map((vial, i) => (
+                    <VialRow
+                      key={vial.id}
+                      vial={vial}
+                      index={i}
+                      now={now}
+                      isConfirming={confirmingId === vial.id}
+                      onRequestDiscard={() =>
+                        setConfirmingId((prev) => (prev === vial.id ? null : vial.id))
+                      }
+                      onCancel={() => setConfirmingId(null)}
+                      onConfirmDiscard={() => discardMutation.mutate(vial.id)}
+                      isPending={discardMutation.isPending && confirmingId === vial.id}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

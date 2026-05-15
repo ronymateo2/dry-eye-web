@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { motion, AnimatePresence, useAnimation } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { TrashIcon, PencilSimpleIcon, EyedropperIcon, CaretRightIcon, DropIcon } from "@phosphor-icons/react";
@@ -11,8 +11,6 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { DropEye } from "@/types/domain";
 import { dispatchQuickAction } from "./helpers";
-
-const EASE_OUT = "cubic-bezier(0.23, 1, 0.32, 1)";
 
 const EYE_SHORT: Record<string, string> = { left: "IZQ", right: "DER", both: "AMB" };
 const EYE_LABEL: Record<string, string> = { left: "Ojo izq.", right: "Ojo der.", both: "Ambos ojos" };
@@ -34,18 +32,7 @@ function isYesterday(isoStr: string): boolean {
   return new Date(isoStr).toDateString() === yesterday.toDateString();
 }
 
-// 06:00–23:00 window (17h) → 0-100%
-function getTimelinePercent(isoStr: string): number {
-  const d = new Date(isoStr);
-  const mins = d.getHours() * 60 + d.getMinutes();
-  return Math.max(0, Math.min(100, ((mins - 360) / (17 * 60)) * 100));
-}
 
-function getNowPercent(): number {
-  const now = new Date();
-  const mins = now.getHours() * 60 + now.getMinutes();
-  return Math.max(0, Math.min(100, ((mins - 360) / (17 * 60)) * 100));
-}
 
 /* ─── Drop type accordion group ────────────────────────────────────────── */
 
@@ -65,7 +52,6 @@ function DropTypeGroup({
   onDelete: (drop: RecentDrop, typeId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(initialExpanded);
-  const badgeAnim = useAnimation();
 
   const { data: drops = [] } = useQuery({
     queryKey: ["drops/recent", typeId],
@@ -83,160 +69,126 @@ function DropTypeGroup({
 
   const visible = show24h ? sorted : sorted.filter((d) => isToday(d.logged_at));
 
-  useEffect(() => {
-    if (visible.length > 0) {
-      void badgeAnim.start({ scale: [1, 1.28, 1], transition: { duration: 0.32, ease: [0.23, 1, 0.32, 1] } });
-    }
-  }, [visible.length, badgeAnim]);
-
   if (visible.length === 0) return null;
 
   const lastDrop = visible[0];
-
-  const nowPct = getNowPercent();
 
   return (
     <div>
       {/* Card */}
       <button
-        className="w-full text-left rounded-2xl px-4 py-3 border"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        className="w-full text-left rounded-xl px-4 py-3"
+        style={{ background: "var(--surface)" }}
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
         aria-label={`${typeName}, ${visible.length} dosis`}
       >
-        {/* Name + count */}
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <DropIcon size={13} weight="regular" className="shrink-0 text-[var(--text-faint)]" />
-            <span className="text-[14px] font-semibold text-[var(--text-primary)] truncate">{typeName}</span>
-          </div>
-          <motion.div animate={badgeAnim} className="ml-3 shrink-0">
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span
-                key={visible.length}
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 5 }}
-                transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
-                className="block text-[18px] font-bold tabular-nums mono leading-none"
-                style={{ color: "var(--accent)" }}
-              >
-                {visible.length}×
-              </motion.span>
-            </AnimatePresence>
-          </motion.div>
-        </div>
-
-        {/* Dose timeline — labels inline */}
-        <div className="flex items-center gap-2 mb-2.5">
-          <span className="text-[10px] mono shrink-0" style={{ color: "var(--text-faint)", opacity: 0.5 }}>06</span>
-          <div className="relative flex-1 h-[2px] rounded-full" style={{ background: "var(--border)" }}>
-            <div
-              className="absolute top-1/2 -translate-x-px -translate-y-1/2 w-px h-[8px] rounded-full"
-              style={{ left: `${nowPct}%`, background: "var(--text-faint)", opacity: 0.4 }}
-            />
-            {visible.map((drop) => (
-              <span
-                key={drop.id}
-                className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-[6px] h-[6px] rounded-full"
-                style={{
-                  left: `${getTimelinePercent(drop.logged_at)}%`,
-                  background: "var(--accent)",
-                  boxShadow: "0 0 0 2px var(--accent-dim)",
-                }}
-              />
-            ))}
-          </div>
-          <span className="text-[10px] mono shrink-0" style={{ color: "var(--text-faint)", opacity: 0.5 }}>23</span>
-        </div>
-
-        {/* Last dose + expand caret */}
         <div className="flex items-center justify-between">
-          <span className="text-[12px] tabular-nums mono" style={{ color: "var(--text-faint)" }}>
-            última {formatTime(lastDrop.logged_at)} · {EYE_SHORT[lastDrop.eye] ?? "—"}
-          </span>
-          <div
-            className="shrink-0"
-            style={{
-              color: "var(--text-faint)",
-              transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-              transition: `transform 220ms ${EASE_OUT}`,
-            }}
-          >
-            <CaretRightIcon size={12} />
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <DropIcon size={14} weight="regular" className="shrink-0 text-[var(--text-faint)]" />
+            <span className="text-[15px] font-semibold text-[var(--text-primary)] truncate">{typeName}</span>
+          </div>
+          <div className="flex items-center gap-3 shrink-0 ml-3">
+            <span className="text-[12px] tabular-nums text-[var(--text-faint)]" style={{ fontFamily: "var(--font-mono)" }}>
+              última {formatTime(lastDrop.logged_at)} · {EYE_SHORT[lastDrop.eye] ?? "—"}
+            </span>
+            <motion.span
+              key={visible.length}
+              initial={{ scale: 1.15, opacity: 0.7 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.25 }}
+              className="block text-[18px] font-bold tabular-nums leading-none"
+              style={{ color: "var(--accent)", fontFamily: "var(--font-mono)" }}
+            >
+              {visible.length}×
+            </motion.span>
+            <motion.div
+              className="shrink-0"
+              style={{ color: "var(--text-faint)" }}
+              animate={{ rotate: expanded ? 90 : 0 }}
+              transition={{ type: "spring", duration: 0.45, bounce: 0.15 }}
+            >
+              <CaretRightIcon size={12} />
+            </motion.div>
           </div>
         </div>
       </button>
 
       {/* Expanded dose list */}
-      <div
-        className="grid"
-        style={{
-          gridTemplateRows: expanded ? "1fr" : "0fr",
-          opacity: expanded ? 1 : 0,
-          transition: `grid-template-rows 260ms ${EASE_OUT}, opacity 180ms ${EASE_OUT}`,
-        }}
-      >
-        <div className="overflow-hidden">
-          <div
-            className="rounded-[12px] overflow-hidden divide-y divide-[var(--border)] mt-1.5"
-            style={{ background: "var(--surface-el)" }}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", duration: 0.5, bounce: 0.08 }}
+            className="overflow-hidden"
           >
-            <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              className="rounded-xl mt-2 overflow-hidden"
+              style={{ background: "var(--surface-el)" }}
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.035 } },
+              }}
+            >
               {visible.map((drop) => (
                 <motion.div
                   key={drop.id}
-                  layout
-                  initial={false}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-                  className="overflow-hidden"
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ type: "spring", duration: 0.45, bounce: 0.1 }}
+                  className="flex items-center gap-2 px-3 py-2.5 border-b border-[var(--border)] last:border-b-0"
                 >
-                  <div className="flex items-center gap-2 px-3 py-2">
-                    <span className="mono text-[14px] font-semibold tabular-nums text-[var(--text-primary)] w-[46px] shrink-0">
-                      {formatTime(drop.logged_at)}
-                    </span>
-                    <span className="flex-1 text-[13px] text-[var(--text-muted)]">
-                      {EYE_LABEL[drop.eye] ?? drop.eye}
-                      <span className="text-[var(--text-faint)]"> · ×{drop.quantity}</span>
-                      {isYesterday(drop.logged_at) && (
-                        <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--text-faint)]">Ayer</span>
-                      )}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label="Editar dosis"
-                      onClick={() => onEdit(drop, typeId)}
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full",
-                        "transition-[background-color,color,transform] duration-[120ms] ease-out",
-                        "text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface)]",
-                        "active:scale-[0.88]",
-                      )}
-                    >
-                      <PencilSimpleIcon size={14} weight="bold" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Eliminar dosis"
-                      onClick={() => onDelete(drop, typeId)}
-                      className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full",
-                        "transition-[background-color,color,transform] duration-[120ms] ease-out",
-                        "text-[var(--text-faint)] hover:text-[var(--error)]",
-                        "active:scale-[0.88]",
-                      )}
-                    >
-                      <TrashIcon size={14} weight="bold" />
-                    </button>
-                  </div>
+                  <span
+                    className="text-[14px] font-semibold tabular-nums text-[var(--text-primary)] w-[46px] shrink-0"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {formatTime(drop.logged_at)}
+                  </span>
+                  <span className="flex-1 text-[13px] text-[var(--text-muted)]">
+                    {EYE_LABEL[drop.eye] ?? drop.eye}
+                    <span className="text-[var(--text-faint)]"> · ×{drop.quantity}</span>
+                    {isYesterday(drop.logged_at) && (
+                      <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--text-faint)]">Ayer</span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Editar dosis"
+                    onClick={() => onEdit(drop, typeId)}
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full",
+                      "transition-[background-color,color] duration-150 ease-out",
+                      "text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface)]",
+                      "active:scale-90",
+                    )}
+                  >
+                    <PencilSimpleIcon size={14} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Eliminar dosis"
+                    onClick={() => onDelete(drop, typeId)}
+                    className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-full",
+                      "transition-[background-color,color] duration-150 ease-out",
+                      "text-[var(--text-faint)] hover:text-[var(--error)]",
+                      "active:scale-90",
+                    )}
+                  >
+                    <TrashIcon size={14} weight="bold" />
+                  </button>
                 </motion.div>
               ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

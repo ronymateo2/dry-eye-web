@@ -42,7 +42,7 @@ export function TimelineRow({
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}
       onClick={() => dispatchQuickAction("drop", { dropTypeId: entry.drop_type_id })}
-      aria-label={`Registrar ${entry.name}. Próxima dosis ${badgeLabel}.`}
+      aria-label={`Registrar ${entry.name}. Próxima gota ${badgeLabel}.`}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

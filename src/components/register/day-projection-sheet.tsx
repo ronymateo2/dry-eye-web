@@ -61,7 +61,7 @@ export function DayProjectionSheet({ open, onClose, slots, now }: DayProjectionS
 
   const selectedKind: "next" | "later" | null = selected ? (selected === next ? "next" : "later") : null;
   const heroAccent = selectedKind === "next" ? "var(--pain-low)" : "var(--accent)";
-  const heroLabel = selectedKind === "next" ? "Próxima dosis" : "Programada";
+  const heroLabel = selectedKind === "next" ? "Próxima gota" : "Programada";
 
   return (
     <MobileSheet open={open} panelClassName="!h-[95dvh]" onClose={onClose} title="Proyección del día" description="Cronograma completo del día">

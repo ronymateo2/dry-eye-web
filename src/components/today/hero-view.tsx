@@ -115,7 +115,7 @@ export function HeroView({
             className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] transition-colors duration-300"
             style={{ color: isRegistered ? "var(--pain-low)" : "var(--text-faint)" }}
           >
-            {isRegistered ? "Dosis registrada" : "Próxima dosis"}
+            {isRegistered ? "Gota registrada" : "Próxima gota"}
           </p>
           <div className="flex shrink-0 items-center gap-2">
             <ViewDayButton onClick={() => setProjectionOpen(true)} />

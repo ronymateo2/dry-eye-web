@@ -86,8 +86,8 @@ function ScheduleRow({ entry, index, now }: { entry: DropScheduleEntry; index: n
   const ariaLabel = noRecord
     ? `Registrar ${entry.name}. Sin registro previo, intervalo cada ${entry.interval_hours} horas.`
     : isUrgentSuspension
-      ? `Registrar ${entry.name}. Suspender en ${suspDays}d. Próxima dosis ${computed!.label}.`
-      : `Registrar ${entry.name}. Próxima dosis ${computed!.label}, a las ${computed!.nextTime}.`;
+      ? `Registrar ${entry.name}. Suspender en ${suspDays}d. Próxima gota ${computed!.label}.`
+      : `Registrar ${entry.name}. Próxima gota ${computed!.label}, a las ${computed!.nextTime}.`;
 
   const openDropSheet = () => {
     window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop", dropTypeId: entry.drop_type_id } }));
@@ -212,7 +212,7 @@ export function DropsScheduleCard() {
     <>
       <div className="space-y-0.5">
         <div className="flex items-center justify-between">
-          <p className="section-label mb-0">Próximas dosis</p>
+          <p className="section-label mb-0">Próximas gotas</p>
           <button
             type="button"
             onClick={() => setProjectionOpen(true)}
