@@ -54,8 +54,8 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
                 await api.deleteDrop(id);
                 setJustRegistered(null);
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent", drop.id] });
-                void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
               } catch {
                 toast.error("No se pudo deshacer el registro");
               }

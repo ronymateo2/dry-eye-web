@@ -235,9 +235,9 @@ export function TodayDropsSheet({
     },
     onSettled: (_data, _err, { typeId }) => {
       queryClient.invalidateQueries({ queryKey: ["drops/recent", typeId] });
+      queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
     },
   });
 

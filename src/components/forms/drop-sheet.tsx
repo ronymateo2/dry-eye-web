@@ -111,11 +111,8 @@ export function DropSheet({
 
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent", selectedDropType] });
+      queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
       queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
-      if (editDrop && editDrop.dropTypeId !== selectedDropType) {
-        queryClient.invalidateQueries({ queryKey: ["drops/recent", editDrop.dropTypeId] });
-      }
       queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       queryClient.invalidateQueries({ queryKey: ["calendar/events/today"] });
