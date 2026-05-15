@@ -42,8 +42,17 @@ const ADVICE: Record<SymptomState, string> = {
   brote: "Considera compresas frías y consulta con tu médico",
 };
 
-const IntensityGauge = memo(function IntensityGauge({ value, state }: { value: number; state: SymptomState }) {
-  const color = SYMPTOM_STATE_COLOR[state];
+const IntensityGauge = memo(function IntensityGauge({
+  value,
+  color,
+  label,
+  onClick,
+}: {
+  value: number;
+  color: string;
+  label?: string;
+  onClick?: () => void;
+}) {
   const pct = value / 10;
   const size = 120;
   const cx = size / 2;
@@ -69,14 +78,44 @@ const IntensityGauge = memo(function IntensityGauge({ value, state }: { value: n
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center shrink-0" style={{ width: size, height: size }}>
+    <div
+      className="relative flex flex-col items-center justify-center shrink-0"
+      style={{ width: size, height: size, cursor: onClick ? "pointer" : undefined }}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
+      aria-label={label ? `${label}: ${value} de 10` : `Intensidad promedio ${value} de 10`}
+    >
       <svg
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        aria-label={`Intensidad promedio ${value} de 10, estado ${SYMPTOM_STATE_LABEL[state]}`}
-        role="img"
+        aria-hidden="true"
       >
+        {onClick && (
+          <>
+            <style>{`
+              @keyframes arcPulse {
+                0%   { transform: scale(1);    opacity: 0.35; }
+                65%  { transform: scale(1.16); opacity: 0; }
+                100% { transform: scale(1.16); opacity: 0; }
+              }
+            `}</style>
+            <path
+              d={arcPath(startAngle, startAngle + sweepAngle, r)}
+              fill="none"
+              stroke={color}
+              strokeWidth="8"
+              strokeLinecap="round"
+              style={{
+                transformOrigin: `${cx}px ${cy}px`,
+                animation: "arcPulse 2.2s ease-out infinite",
+                pointerEvents: "none",
+              }}
+            />
+          </>
+        )}
         <path
           d={arcPath(startAngle, startAngle + sweepAngle, r)}
           fill="none"
@@ -91,13 +130,26 @@ const IntensityGauge = memo(function IntensityGauge({ value, state }: { value: n
             stroke={color}
             strokeWidth="8"
             strokeLinecap="round"
+            style={{ transition: "stroke 0.4s ease, d 0.4s ease" }}
           />
         )}
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
         <span className="mono text-[24px] font-bold leading-none" style={{ color }}>
           {value}/10
         </span>
+        {label && (
+          <motion.span
+            key={label}
+            initial={{ opacity: 0, y: 3 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="text-[9px] font-semibold uppercase tracking-[0.08em] leading-none"
+            style={{ color: "var(--text-faint)" }}
+          >
+            {label}
+          </motion.span>
+        )}
       </div>
     </div>
   );
@@ -138,6 +190,24 @@ export function SymptomStatusCard({ onRegister }: Props) {
   const latest = data?.latest ?? null;
   const topSymptoms = data?.top_symptoms ?? [];
 
+  const state = (latest?.calculated_state ?? "calmado") as SymptomState;
+  const color = SYMPTOM_STATE_COLOR[state];
+
+  const allVals = latest
+    ? [
+        latest.intensities.dryness,
+        latest.intensities.burning,
+        latest.intensities.photophobia,
+        latest.intensities.blurry_vision,
+        latest.intensities.stinging ?? 0,
+        latest.intensities.pressure ?? 0,
+      ].filter((v) => v > 0)
+    : [];
+  const avgVal =
+    allVals.length > 0
+      ? Math.round(allVals.reduce((a, b) => a + b, 0) / allVals.length)
+      : 0;
+
   if (isLoading) {
     return (
       <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
@@ -175,24 +245,8 @@ export function SymptomStatusCard({ onRegister }: Props) {
     );
   }
 
-  const state = latest.calculated_state as SymptomState;
-  const color = SYMPTOM_STATE_COLOR[state];
   const copy = SYMPTOM_STATE_COPY[state];
   const label = SYMPTOM_STATE_LABEL[state];
-
-  const allVals = [
-    latest.intensities.dryness,
-    latest.intensities.burning,
-    latest.intensities.photophobia,
-    latest.intensities.blurry_vision,
-    latest.intensities.stinging ?? 0,
-    latest.intensities.pressure ?? 0,
-  ].filter((v) => v > 0);
-  const avgVal =
-    allVals.length > 0
-      ? Math.round(allVals.reduce((a, b) => a + b, 0) / allVals.length)
-      : 0;
-
   const timeAgo = formatRelative(latest.logged_at);
 
   return (
@@ -232,7 +286,11 @@ export function SymptomStatusCard({ onRegister }: Props) {
             <p className="text-[17px] font-medium text-[var(--text-muted)] mt-2">{copy}</p>
             <p className="text-[13px] text-[var(--text-faint)] mt-1.5">{timeAgo}</p>
           </div>
-          <IntensityGauge value={avgVal} state={state} />
+          <IntensityGauge
+            value={avgVal}
+            color={color}
+            onClick={onRegister}
+          />
         </div>
       </button>
 

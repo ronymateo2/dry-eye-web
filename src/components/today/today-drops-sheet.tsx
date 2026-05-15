@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence, useAnimation } from "motion/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { TrashIcon, PencilSimpleIcon, EyedropperIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { TrashIcon, PencilSimpleIcon, EyedropperIcon, CaretRightIcon, DropIcon } from "@phosphor-icons/react";
 import { StackedSheet } from "@/components/layout/stacked-sheet";
 import { useSheetStack } from "@/lib/hooks/use-sheet-stack";
 import { DropSheet } from "@/components/forms/drop-sheet";
@@ -32,6 +32,19 @@ function isYesterday(isoStr: string): boolean {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   return new Date(isoStr).toDateString() === yesterday.toDateString();
+}
+
+// 06:00–23:00 window (17h) → 0-100%
+function getTimelinePercent(isoStr: string): number {
+  const d = new Date(isoStr);
+  const mins = d.getHours() * 60 + d.getMinutes();
+  return Math.max(0, Math.min(100, ((mins - 360) / (17 * 60)) * 100));
+}
+
+function getNowPercent(): number {
+  const now = new Date();
+  const mins = now.getHours() * 60 + now.getMinutes();
+  return Math.max(0, Math.min(100, ((mins - 360) / (17 * 60)) * 100));
 }
 
 /* ─── Drop type accordion group ────────────────────────────────────────── */
@@ -80,59 +93,83 @@ function DropTypeGroup({
 
   const lastDrop = visible[0];
 
+  const nowPct = getNowPercent();
+
   return (
     <div>
+      {/* Card */}
       <button
-        className="w-full flex items-center gap-3 py-3.5 text-left rounded-lg transition-[background-color,transform] duration-150 ease-out active:bg-[var(--surface-el)] active:scale-[0.99]"
+        className="w-full text-left rounded-2xl px-4 py-3 border"
+        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
         aria-label={`${typeName}, ${visible.length} dosis`}
       >
-        <span
-          className="w-2 h-2 rounded-full shrink-0"
-          style={{ background: "var(--pain-low)" }}
-        />
-        <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-[var(--text-primary)]">
-          {typeName}
-        </span>
-        <motion.span
-          animate={badgeAnim}
-          className="overflow-hidden inline-flex items-center justify-center rounded-full min-w-[32px] px-2 py-0.5 text-[12px] font-semibold tabular-nums mono"
-          style={{
-            color: "var(--pain-low)",
-            background: "color-mix(in srgb, var(--pain-low) 12%, transparent)",
-          }}
-        >
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span
-              key={visible.length}
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-              className="block"
-            >
-              {visible.length}×
-            </motion.span>
-          </AnimatePresence>
-        </motion.span>
-        <span className="mono text-[13px] font-medium tabular-nums text-[var(--text-muted)]">
-          {formatTime(lastDrop.logged_at)}
-        </span>
-        <span className="mono w-[30px] shrink-0 text-right text-[11px] uppercase tracking-[0.08em] text-[var(--text-faint)]">
-          {EYE_SHORT[lastDrop.eye] ?? "—"}
-        </span>
-        <div
-          className="shrink-0 text-[var(--text-faint)] will-change-transform"
-          style={{
-            transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-            transition: `transform 220ms ${EASE_OUT}`,
-          }}
-        >
-          <CaretRightIcon size={14} />
+        {/* Name + count */}
+        <div className="flex items-center justify-between mb-2.5">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <DropIcon size={13} weight="regular" className="shrink-0 text-[var(--text-faint)]" />
+            <span className="text-[14px] font-semibold text-[var(--text-primary)] truncate">{typeName}</span>
+          </div>
+          <motion.div animate={badgeAnim} className="ml-3 shrink-0">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.span
+                key={visible.length}
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
+                className="block text-[18px] font-bold tabular-nums mono leading-none"
+                style={{ color: "var(--accent)" }}
+              >
+                {visible.length}×
+              </motion.span>
+            </AnimatePresence>
+          </motion.div>
+        </div>
+
+        {/* Dose timeline — labels inline */}
+        <div className="flex items-center gap-2 mb-2.5">
+          <span className="text-[10px] mono shrink-0" style={{ color: "var(--text-faint)", opacity: 0.5 }}>06</span>
+          <div className="relative flex-1 h-[2px] rounded-full" style={{ background: "var(--border)" }}>
+            <div
+              className="absolute top-1/2 -translate-x-px -translate-y-1/2 w-px h-[8px] rounded-full"
+              style={{ left: `${nowPct}%`, background: "var(--text-faint)", opacity: 0.4 }}
+            />
+            {visible.map((drop) => (
+              <span
+                key={drop.id}
+                className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-[6px] h-[6px] rounded-full"
+                style={{
+                  left: `${getTimelinePercent(drop.logged_at)}%`,
+                  background: "var(--accent)",
+                  boxShadow: "0 0 0 2px var(--accent-dim)",
+                }}
+              />
+            ))}
+          </div>
+          <span className="text-[10px] mono shrink-0" style={{ color: "var(--text-faint)", opacity: 0.5 }}>23</span>
+        </div>
+
+        {/* Last dose + expand caret */}
+        <div className="flex items-center justify-between">
+          <span className="text-[12px] tabular-nums mono" style={{ color: "var(--text-faint)" }}>
+            última {formatTime(lastDrop.logged_at)} · {EYE_SHORT[lastDrop.eye] ?? "—"}
+          </span>
+          <div
+            className="shrink-0"
+            style={{
+              color: "var(--text-faint)",
+              transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
+              transition: `transform 220ms ${EASE_OUT}`,
+            }}
+          >
+            <CaretRightIcon size={12} />
+          </div>
         </div>
       </button>
 
+      {/* Expanded dose list */}
       <div
         className="grid"
         style={{
@@ -142,7 +179,10 @@ function DropTypeGroup({
         }}
       >
         <div className="overflow-hidden">
-          <div className="rounded-[12px] bg-[var(--surface-el)] mb-3 overflow-hidden divide-y divide-[var(--border)]">
+          <div
+            className="rounded-[12px] overflow-hidden divide-y divide-[var(--border)] mt-1.5"
+            style={{ background: "var(--surface-el)" }}
+          >
             <AnimatePresence mode="popLayout" initial={false}>
               {visible.map((drop) => (
                 <motion.div
@@ -345,7 +385,7 @@ export function TodayDropsSheet({
           })}
         </div>
       </div>
-      <div className="divide-y divide-[var(--border)]">
+      <div className="flex flex-col gap-2">
         {dropTypes.map((t) => (
           <DropTypeGroup
             key={t.id}
