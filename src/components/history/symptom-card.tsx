@@ -7,21 +7,21 @@ export function SymptomCard({ item, timezone }: { item: DisplaySymptomGroup; tim
   const time = formatTime(item.loggedAt, timezone);
 
   return (
-    <article className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
-      <div className="mb-2 flex items-center gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-el)]">
-          <PulseIcon size={15} color="var(--text-muted)" />
+    <article className="rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-3 py-2">
+      <div className="mb-1.5 flex items-center gap-2">
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--surface-el)]">
+          <PulseIcon size={13} color="var(--text-muted)" />
         </div>
         <div>
-          <p className="text-[15px] font-medium text-[var(--text-primary)]">Síntomas</p>
-          <p className="mono text-[12px] font-normal text-[var(--text-muted)]">{time}</p>
+          <p className="text-[14px] font-medium text-[var(--text-primary)]">Síntomas</p>
+          <p className="mono text-[11px] font-normal text-[var(--text-muted)]">{time}</p>
         </div>
       </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 pl-[42px]">
+      <div className="flex flex-wrap gap-x-2 gap-y-1 pl-[36px]">
         {item.symptomTypes.map((type, i) => {
           const label = SYMPTOM_OPTIONS.find((o) => o.value === type)?.label ?? type;
           return (
-            <span key={i} className="text-[13px] text-[var(--text-muted)]">{label}</span>
+            <span key={i} className="text-[12px] text-[var(--text-muted)]">{label}</span>
           );
         })}
       </div>

@@ -87,35 +87,34 @@ const IntensityGauge = memo(function IntensityGauge({
       onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } } : undefined}
       aria-label={label ? `${label}: ${value} de 10` : `Intensidad promedio ${value} de 10`}
     >
+      {onClick && (
+        <>
+          <style>{`
+            @keyframes gaugeRingPulse {
+              0%   { transform: scale(1);    opacity: 0.35; }
+              65%  { transform: scale(1.07); opacity: 0; }
+              100% { transform: scale(1.07); opacity: 0; }
+            }
+          `}</style>
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              border: `2px solid ${color}`,
+              animation: "gaugeRingPulse 2.2s ease-out infinite",
+              pointerEvents: "none",
+            }}
+          />
+        </>
+      )}
       <svg
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
         aria-hidden="true"
       >
-        {onClick && (
-          <>
-            <style>{`
-              @keyframes arcPulse {
-                0%   { transform: scale(1);    opacity: 0.35; }
-                65%  { transform: scale(1.16); opacity: 0; }
-                100% { transform: scale(1.16); opacity: 0; }
-              }
-            `}</style>
-            <path
-              d={arcPath(startAngle, startAngle + sweepAngle, r)}
-              fill="none"
-              stroke={color}
-              strokeWidth="8"
-              strokeLinecap="round"
-              style={{
-                transformOrigin: `${cx}px ${cy}px`,
-                animation: "arcPulse 2.2s ease-out infinite",
-                pointerEvents: "none",
-              }}
-            />
-          </>
-        )}
         <path
           d={arcPath(startAngle, startAngle + sweepAngle, r)}
           fill="none"
