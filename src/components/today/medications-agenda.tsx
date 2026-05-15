@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from "react";
+import { useState, useMemo, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlarmIcon,
@@ -7,6 +7,7 @@ import {
   TrashIcon,
   CheckCircleIcon,
 } from "@phosphor-icons/react";
+import { QuickLogCheck } from "./quick-log-check";
 import { CountdownValue } from "./countdown-value";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ type UpcomingSlot = {
   medicationId: string;
   name: string;
   slotTime: Date;
+  slotTimeLabel: string;
   overdue: boolean;
   countdownLabel: string;
   countdownColor: string;
@@ -68,6 +70,18 @@ type EditIntakeState = {
 };
 
 // ── timezone helpers ────────────────────────────────────────────────────
+let _cachedDayKey = "";
+let _cachedTodayStartMs = 0;
+
+function getCachedTodayStart(now: number, tz: string): number {
+  const dayKey = new Date(now).toLocaleDateString("en-CA", { timeZone: tz });
+  if (dayKey !== _cachedDayKey) {
+    _cachedDayKey = dayKey;
+    _cachedTodayStartMs = getTodayStartUtcMs(now, tz);
+  }
+  return _cachedTodayStartMs;
+}
+
 function getTodayStartUtcMs(now: number, tz: string): number {
   const todayKey = new Date(now).toLocaleDateString("en-CA", { timeZone: tz });
   const [y, mo, d] = todayKey.split("-").map(Number) as [number, number, number];
@@ -148,7 +162,7 @@ function buildSchedule(
   now: number,
   tz: string,
 ): { upcoming: UpcomingSlot[]; registered: RegisteredSlot[] } {
-  const todayStartMs = getTodayStartUtcMs(now, tz);
+  const todayStartMs = getCachedTodayStart(now, tz);
   const upcoming: UpcomingSlot[] = [];
   const registered: RegisteredSlot[] = [];
 
@@ -200,6 +214,7 @@ function buildSchedule(
         medicationId: med.id,
         name: med.name,
         slotTime,
+        slotTimeLabel: slotTime.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: tz }),
         overdue,
         countdownLabel: label,
         countdownColor: color,
@@ -216,51 +231,14 @@ function buildSchedule(
   return { upcoming, registered };
 }
 
-// ── quick-log check (copied from hero-view) ──────────────────────────────
-function QuickLogCheck() {
-  return (
-    <div style={{ width: 88, height: 88, display: "grid", placeItems: "center" }}>
-      <motion.div
-        initial={{ scale: 0.65, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.38, ease: [0.23, 1, 0.32, 1] }}
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: "50%",
-          background: "color-mix(in srgb, var(--dose-early) 16%, transparent)",
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        <svg viewBox="0 0 24 24" width={34} height={34} fill="none" stroke="var(--dose-early)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <path
-            d="M5 12.5l4.5 4.5L19 7"
-            style={{
-              strokeDasharray: 30,
-              strokeDashoffset: 30,
-              animation: "medMedDrawCheck 400ms ease-out 130ms forwards",
-            }}
-          />
-        </svg>
-      </motion.div>
-      <style>{`
-        @keyframes medMedDrawCheck { to { stroke-dashoffset: 0; } }
-      `}</style>
-    </div>
-  );
-}
-
 // ── timeline row ─────────────────────────────────────────────────────────
 function TimelineRow({
   slot,
   index,
-  tz,
   onLog,
 }: {
   slot: UpcomingSlot;
   index: number;
-  tz: string;
   onLog: () => void;
 }) {
   return (
@@ -288,12 +266,7 @@ function TimelineRow({
           </span>
           <span className="shrink-0 text-[12px] leading-none text-[var(--text-faint)]">·</span>
           <span className="font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
-            {slot.slotTime.toLocaleTimeString("es-CO", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-              timeZone: tz,
-            })}
+            {slot.slotTimeLabel}
           </span>
         </span>
       </span>
@@ -360,8 +333,7 @@ function RegisteredRow({
 }
 
 // ── main component ────────────────────────────────────────────────────────
-export function MedicationsAgenda() {
-  const [now, setNow] = useState(() => Date.now());
+export function MedicationsAgenda({ now }: { now: number }) {
   const [quickLogging, setQuickLogging] = useState<string | null>(null);
   const [takenAtLabel, setTakenAtLabel] = useState<string | null>(null);
   const [editIntake, setEditIntake] = useState<EditIntakeState | null>(null);
@@ -370,11 +342,6 @@ export function MedicationsAgenda() {
   const user = useUser();
   const tz = user.timezone;
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000);
-    return () => clearInterval(id);
-  }, []);
 
   const { data: medications = [], isLoading } = useQuery({
     queryKey: ["medications"],
@@ -497,7 +464,7 @@ export function MedicationsAgenda() {
                     <AnimatePresence mode="wait">
                       {quickLogging === hero.medicationId ? (
                         <motion.div key="check">
-                          <QuickLogCheck />
+                          <QuickLogCheck color="var(--dose-early)" />
                         </motion.div>
                       ) : (
                         <motion.div key="ring">
@@ -605,7 +572,6 @@ export function MedicationsAgenda() {
                     key={slot.key}
                     slot={slot}
                     index={i}
-                    tz={tz}
                     onLog={() => openSessionSheet(slot.medicationId)}
                   />
                 ))}

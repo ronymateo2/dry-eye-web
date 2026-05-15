@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import {
@@ -41,7 +42,7 @@ const ADVICE: Record<SymptomState, string> = {
   brote: "Considera compresas frías y consulta con tu médico",
 };
 
-function IntensityGauge({ value, state }: { value: number; state: SymptomState }) {
+const IntensityGauge = memo(function IntensityGauge({ value, state }: { value: number; state: SymptomState }) {
   const color = SYMPTOM_STATE_COLOR[state];
   const pct = value / 10;
   const size = 120;
@@ -100,7 +101,7 @@ function IntensityGauge({ value, state }: { value: number; state: SymptomState }
       </div>
     </div>
   );
-}
+});
 
 function TopSymptomCell({ item }: { item: SymptomTopItem }) {
   const Icon = SYMPTOM_ICONS[item.key];

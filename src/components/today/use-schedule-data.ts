@@ -1,13 +1,11 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { DoseSlot } from "@/components/register/day-projection-sheet";
 import { api } from "@/lib/api";
 import { daysUntilEnd } from "@/lib/utils";
 import { getNextMs, isPrevDayOverdue, isCompletedToday, buildDayProjection } from "./helpers";
 
-export function useScheduleData() {
-  const [now, setNow] = useState(() => Date.now());
-
+export function useScheduleData(now: number) {
   const { data: activeVials = [] } = useQuery({
     queryKey: ["vials/active"],
     queryFn: api.getActiveVials,
@@ -25,11 +23,6 @@ export function useScheduleData() {
     queryFn: api.getCalendarEventsToday,
     staleTime: 60_000,
   });
-
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 30_000);
-    return () => clearInterval(id);
-  }, []);
 
   const validEntries = useMemo(
     () =>
@@ -76,5 +69,16 @@ export function useScheduleData() {
     [activeVials],
   );
 
-  return { now, activeVials, upcoming, completado, sinRegistro, daySlots, vialByDropType };
+  const { data: allRecentDrops = [] } = useQuery({
+    queryKey: ["drops/recent-all"],
+    queryFn: () => api.getRecentDropsAll(24),
+    staleTime: 30_000,
+  });
+
+  const todayCount = useMemo(() => {
+    const todayStr = new Date().toDateString();
+    return allRecentDrops.filter((d) => new Date(d.logged_at).toDateString() === todayStr).length;
+  }, [allRecentDrops]);
+
+  return { now, activeVials, upcoming, completado, sinRegistro, daySlots, vialByDropType, todayCount };
 }

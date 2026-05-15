@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { AlarmIcon, CaretRightIcon, EyedropperIcon } from "@phosphor-icons/react";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
+import { QuickLogCheck } from "./quick-log-check";
 import { CountdownValue } from "./countdown-value";
 import { ViewDayButton, ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
@@ -13,41 +13,8 @@ import { TodayDropsSheet } from "./today-drops-sheet";
 import { useScheduleData } from "./use-schedule-data";
 import { useDiscardVial } from "./use-discard-vial";
 import { useQuickLog } from "./use-quick-log";
-import { api } from "@/lib/api";
 import type { ActiveVialEntry } from "./helpers";
 import { getCountdown, dispatchQuickAction } from "./helpers";
-
-function QuickLogCheck() {
-  return (
-    <div style={{ width: 88, height: 88, display: "grid", placeItems: "center" }}>
-      <motion.div
-        initial={{ scale: 0.65, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.38, ease: [0.23, 1, 0.32, 1] }}
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: "50%",
-          background: "color-mix(in srgb, var(--pain-low) 16%, transparent)",
-          display: "grid",
-          placeItems: "center",
-        }}
-      >
-        <svg viewBox="0 0 24 24" width={34} height={34} fill="none" stroke="var(--pain-low)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-          <path
-            d="M5 12.5l4.5 4.5L19 7"
-            style={{
-              strokeDasharray: 30,
-              strokeDashoffset: 30,
-              animation: "qlDrawCheck 400ms ease-out 130ms forwards",
-            }}
-          />
-        </svg>
-      </motion.div>
-      <style>{`@keyframes qlDrawCheck { to { stroke-dashoffset: 0; } }`}</style>
-    </div>
-  );
-}
 
 export function HeroView({
   data,
@@ -71,22 +38,13 @@ export function HeroView({
     onError: () => setJustRegistered(null),
   });
 
-  const { now, upcoming, completado, sinRegistro, daySlots, vialByDropType } = data;
-
-  const { data: allRecentDrops = [] } = useQuery({
-    queryKey: ["drops/recent-all"],
-    queryFn: () => api.getRecentDropsAll(24),
-    staleTime: 30_000,
-  });
+  const { now, upcoming, completado, sinRegistro, daySlots, vialByDropType, todayCount } = data;
 
   if (upcoming.length === 0 && completado.length === 0 && sinRegistro.length === 0) return null;
 
   const heroEntry = upcoming[0] ?? null;
   const timelineEntries = upcoming.slice(1);
   const heroVial = heroEntry ? (vialByDropType.get(heroEntry.drop_type_id) ?? null) : null;
-  const todayCount = allRecentDrops.filter(
-    (d) => new Date(d.logged_at).toDateString() === new Date().toDateString(),
-  ).length;
   const isRegistered = heroEntry ? justRegistered?.dropTypeId === heroEntry.drop_type_id : false;
 
   function handleQuickLog() {
@@ -135,12 +93,29 @@ export function HeroView({
           </div>
         </div>
 
+        {!heroEntry && completado.length > 0 && sinRegistro.length === 0 && (
+          <div className="relative z-10 flex items-center justify-between gap-2 px-4 pb-5 pt-5">
+            <p className="text-[15px] font-semibold text-[var(--pain-low)]">Todas las dosis completadas</p>
+            {todayCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setTodayDropsOpen(true)}
+                aria-label={`Ver ${todayCount} dosis registradas hoy`}
+                className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent)]/10 px-3 py-1.5 text-[13px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/20 active:scale-[0.97] active:bg-[var(--accent)]/25"
+              >
+                <EyedropperIcon size={12} weight="bold" />
+                {todayCount} dosis hoy
+              </button>
+            )}
+          </div>
+        )}
+
         {heroEntry && (
           <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
             <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4">
               <div className="pt-1">
                 {isRegistered ? (
-                  <QuickLogCheck />
+                  <QuickLogCheck color="var(--pain-low)" />
                 ) : computed ? (
                   <CountdownValue
                     label={computed.label}

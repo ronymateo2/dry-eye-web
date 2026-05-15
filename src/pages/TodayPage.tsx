@@ -13,6 +13,7 @@ import { dispatchQuickAction } from "@/components/today/helpers";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
+import { useNow } from "@/lib/hooks/use-now";
 
 const openSymptomsSheet = () => dispatchQuickAction("symptoms");
 
@@ -21,7 +22,8 @@ export default function TodayPage() {
   const queryClient = useQueryClient();
   const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
 
-  const scheduleData = useScheduleData();
+  const now = useNow(30_000);
+  const scheduleData = useScheduleData(now);
 
   useEffect(() => {
     void queryClient.prefetchQuery({ queryKey: ["check-ins/last"], queryFn: api.getLastCheckIn, staleTime: 60_000 });
@@ -33,21 +35,20 @@ export default function TodayPage() {
     void queryClient.prefetchQuery({ queryKey: ["medication-intakes/today"], queryFn: api.getTodayMedicationIntakes, staleTime: 30_000 });
     void queryClient.prefetchQuery({ queryKey: ["vials/active"], queryFn: api.getActiveVials, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["symptoms/today"], queryFn: api.getSymptomStatusToday, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: ["drops/recent-all"], queryFn: () => api.getRecentDropsAll(24), staleTime: 30_000 });
   }, [queryClient]);
-
-  const { upcoming } = scheduleData;
 
   return (
     <section className="space-y-5">
       <SymptomStatusCard onRegister={openSymptomsSheet} />
 
-      {view === "card" || upcoming.length === 0 ? (
+      {view === "card" ? (
         <CardView data={scheduleData} view={view} setView={setView} />
       ) : (
         <HeroView data={scheduleData} view={view} setView={setView} />
       )}
 
-      <MedicationsAgenda />
+      <MedicationsAgenda now={now} />
 
       <div className="space-y-0.5 pt-1">
         <PainCheckInCompact />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AnimatePresence } from "motion/react";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
@@ -24,11 +24,11 @@ export function CardView({
 
   const { activeVials, upcoming, completado, sinRegistro, now, daySlots } = data;
 
-  const annotatedEntries = [
+  const annotatedEntries = useMemo(() => [
     ...upcoming.map((e) => ({ entry: e, variant: "upcoming" as const })),
     ...completado.map((e) => ({ entry: e, variant: "completado" as const })),
     ...sinRegistro.map((e) => ({ entry: e, variant: "sinRegistro" as const })),
-  ];
+  ], [upcoming, completado, sinRegistro]);
 
   if (activeVials.length === 0 && annotatedEntries.length === 0) return null;
 
