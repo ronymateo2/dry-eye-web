@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { motion } from "motion/react";
 import { painColor, qualityColor, painGradient, qualityGradient } from "@/lib/pain";
 
 type PainSliderProps = {
@@ -20,20 +21,42 @@ function normalizeValue(value: number, scale: "integer" | "vas"): number {
   return Math.round(value);
 }
 
-export const PainSlider = memo(function PainSlider({ label, labelClassName, icon, value, onChange, scale = "integer", variant = "pain" }: PainSliderProps) {
+export const PainSlider = memo(function PainSlider({
+  label,
+  labelClassName,
+  icon,
+  value,
+  onChange,
+  scale = "integer",
+  variant = "pain",
+}: PainSliderProps) {
   const colorFn = variant === "quality" ? qualityColor : painColor;
   const gradientFn = variant === "quality" ? qualityGradient : painGradient;
   const displayValue = formatValue(value, scale);
+  const color = colorFn(value);
 
   return (
     <div className="space-y-1">
       <div className="flex items-end justify-between gap-4">
-        <span className={labelClassName ?? "flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]"}>
-          {icon}{label}
+        <span
+          className={
+            labelClassName ??
+            "flex items-center gap-1.5 text-[13px] font-medium text-[var(--text-primary)]"
+          }
+        >
+          {icon}
+          {label}
         </span>
-        <span className="mono text-[22px] font-normal" style={{ color: colorFn(value), transition: "color 200ms cubic-bezier(0.16, 1, 0.3, 1)" }}>
+        <motion.span
+          key={displayValue}
+          initial={{ scale: 1.12, opacity: 0.8 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", duration: 0.45, bounce: 0.2 }}
+          className="text-[24px] font-normal tabular-nums leading-none"
+          style={{ color, fontFamily: "var(--font-mono)" }}
+        >
           {displayValue}
-        </span>
+        </motion.span>
       </div>
       <input
         aria-label={label}
@@ -45,7 +68,12 @@ export const PainSlider = memo(function PainSlider({ label, labelClassName, icon
         max={10}
         min={0}
         step={scale === "vas" ? 0.1 : 1}
-        style={{ "--track-bg": gradientFn(value), "--thumb-color": colorFn(value) } as React.CSSProperties}
+        style={
+          {
+            "--track-bg": gradientFn(value),
+            "--thumb-color": color,
+          } as React.CSSProperties
+        }
         type="range"
         value={value}
         onChange={(e) => onChange(normalizeValue(Number(e.target.value), scale))}
