@@ -1,17 +1,31 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "motion/react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, CheckIcon, DropIcon } from "@phosphor-icons/react";
+import { toast } from "sonner";
 import { TodayDropsSheet } from "./today-drops-sheet";
 import { TodayCountBadge } from "./today-count-badge";
 import { useQuickLog } from "./use-quick-log";
+import { useNow } from "@/lib/hooks/use-now";
 import { IconButton } from "@/components/ui/icon-button";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
 
+function formatTimeAgo(dateStr: string, now: number): string {
+  const diffMin = Math.floor((now - new Date(dateStr).getTime()) / 60_000);
+  if (diffMin < 1) return "ahora mismo";
+  if (diffMin < 60) return `hace ${diffMin}min`;
+  const h = Math.floor(diffMin / 60);
+  const m = diffMin % 60;
+  return m > 0 ? `hace ${h}h ${m}min` : `hace ${h}h`;
+}
+
 function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
+  const now = useNow(60_000);
   const [justRegistered, setJustRegistered] = useState<string | null>(null);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const lastDropIdRef = useRef<string | null>(null);
   const { data: recentDrops = [] } = useQuery({
     queryKey: ["drops/recent", drop.id],
     queryFn: () => api.getRecentDrops(drop.id, 24),
@@ -23,8 +37,34 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
     return recentDrops.filter((d) => new Date(d.logged_at).toDateString() === todayStr).length;
   }, [recentDrops]);
 
+  const lastDrop = recentDrops[0] ?? null;
+
   const { quickLog, isPending } = useQuickLog({
-    onSuccess: () => setTimeout(() => setJustRegistered(null), 1400),
+    onSuccess: (_dropTypeId, dropId) => {
+      lastDropIdRef.current = dropId;
+      toast.success(`${drop.name} registrada`, {
+        duration: 3_000,
+        action: {
+          label: "Deshacer",
+          onClick: () => {
+            void (async () => {
+              const id = lastDropIdRef.current;
+              if (!id) return;
+              try {
+                await api.deleteDrop(id);
+                setJustRegistered(null);
+                void queryClient.invalidateQueries({ queryKey: ["drops/recent", drop.id] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+                void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+              } catch {
+                toast.error("No se pudo deshacer el registro");
+              }
+            })();
+          },
+        },
+      });
+      setTimeout(() => setJustRegistered(null), 3_000);
+    },
     onError: () => setJustRegistered(null),
   });
 
@@ -66,7 +106,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
           >
             {drop.name}
           </p>
-          {justRegistered && (
+          {justRegistered ? (
             <motion.p
               initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
@@ -78,7 +118,12 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
                 {justRegistered}
               </span>
             </motion.p>
-          )}
+          ) : lastDrop ? (
+            <p className="text-[12px] text-[var(--text-faint)]">
+              última{" "}
+              <span className="font-mono">{formatTimeAgo(lastDrop.logged_at, now)}</span>
+            </p>
+          ) : null}
         </div>
 
         <div className="flex shrink-0 items-center gap-2">

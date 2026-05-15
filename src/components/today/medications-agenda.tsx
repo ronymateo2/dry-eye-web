@@ -273,6 +273,25 @@ function buildSchedule(
   return { upcoming, registered };
 }
 
+// ── batch grouping helper ────────────────────────────────────────────────
+function groupRegisteredByBatch(registered: RegisteredSlot[]): RegisteredSlot[][] {
+  if (registered.length === 0) return [];
+  const batches: RegisteredSlot[][] = [];
+  let current: RegisteredSlot[] = [registered[0]!];
+  for (let i = 1; i < registered.length; i++) {
+    const prev = new Date(current[current.length - 1]!.loggedAt).getTime();
+    const curr = new Date(registered[i]!.loggedAt).getTime();
+    if (Math.abs(curr - prev) <= 2000) {
+      current.push(registered[i]!);
+    } else {
+      batches.push(current);
+      current = [registered[i]!];
+    }
+  }
+  batches.push(current);
+  return batches;
+}
+
 // ── timeline row ─────────────────────────────────────────────────────────
 function TimelineRow({
   slot,
@@ -306,22 +325,28 @@ function TimelineRow({
           style={{ background: slot.countdownColor }}
         />
         {isGroup ? (
-          <span className="flex min-w-0 flex-col gap-0.5">
-            {slot.names.map((name, idx) => (
-              <span key={name} className="flex min-w-0 items-baseline gap-1.5">
-                <span className="truncate text-[14px] font-medium capitalize leading-snug text-[var(--text-primary)]">
+          <span className="flex min-w-0 flex-col gap-1">
+            <span className="flex items-center gap-1.5">
+              <span
+                className="inline-flex items-center rounded-full px-1.5 py-[2px] text-[10px] font-bold"
+                style={{
+                  background: "color-mix(in srgb, var(--accent) 12%, transparent)",
+                  color: "var(--accent)",
+                }}
+              >
+                ×{slot.names.length}
+              </span>
+              <span className="font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
+                {slot.slotTimeLabel}
+              </span>
+            </span>
+            <span className="flex min-w-0 flex-col gap-0">
+              {slot.names.map((name) => (
+                <span key={name} className="truncate text-[13px] font-medium capitalize leading-snug text-[var(--text-primary)]">
                   {name}
                 </span>
-                {idx === 0 && (
-                  <>
-                    <span className="shrink-0 text-[12px] leading-none text-[var(--text-faint)]">·</span>
-                    <span className="font-mono text-[12px] leading-none tabular-nums text-[var(--text-faint)]">
-                      {slot.slotTimeLabel}
-                    </span>
-                  </>
-                )}
-              </span>
-            ))}
+              ))}
+            </span>
           </span>
         ) : (
           <span className="flex min-w-0 items-baseline gap-1.5">
@@ -393,6 +418,58 @@ function RegisteredRow({
       >
         <TrashIcon size={14} />
       </button>
+    </div>
+  );
+}
+
+// ── registered batch row ─────────────────────────────────────────────────
+function RegisteredBatchRow({
+  batch,
+  onEdit,
+  onDelete,
+}: {
+  batch: RegisteredSlot[];
+  onEdit: (item: RegisteredSlot) => void;
+  onDelete: (item: RegisteredSlot) => void;
+}) {
+  return (
+    <div
+      className="border-l-2 pl-2.5"
+      style={{ borderColor: "color-mix(in srgb, var(--dose-early) 45%, transparent)" }}
+    >
+      {batch.map((item, i) => (
+        <div
+          key={item.key}
+          className="flex min-h-[36px] items-center gap-2"
+          style={i > 0 ? { borderTop: "1px dashed color-mix(in srgb, var(--border) 80%, transparent)" } : undefined}
+        >
+          <CheckCircleIcon size={16} weight="fill" className="shrink-0" style={{ color: "var(--dose-early)" }} />
+          <span className="min-w-0 flex-1 truncate text-[14px] capitalize text-[var(--text-muted)] line-through decoration-[var(--text-faint)]">
+            {item.name}
+          </span>
+          {i === 0 && (
+            <span className="font-mono text-[13px] tabular-nums text-[var(--text-faint)]">
+              {item.timeLabel}
+            </span>
+          )}
+          <button
+            type="button"
+            aria-label={`Editar registro de ${item.name}`}
+            onClick={() => onEdit(item)}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--text-faint)] transition-colors hover:text-[var(--text-primary)]"
+          >
+            <PencilSimpleIcon size={14} />
+          </button>
+          <button
+            type="button"
+            aria-label={`Eliminar registro de ${item.name}`}
+            onClick={() => onDelete(item)}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[var(--text-faint)] transition-colors hover:text-[var(--error)]"
+          >
+            <TrashIcon size={14} />
+          </button>
+        </div>
+      ))}
     </div>
   );
 }
@@ -583,52 +660,67 @@ export function MedicationsAgenda({ now }: { now: number }) {
                   {/* Name(s) + time */}
                   <div className="grid min-w-0 gap-3">
                     {isGroupHero ? (
-                      /* Grouped: time (tappable → opens sheet) + stacked names */
+                      /* Grouped: count badge → names (tappable) → time below */
                       <div className="flex min-w-0 flex-col gap-2">
+                        {/* Count badge */}
+                        {!quickLogging && (
+                          <span
+                            className="inline-flex w-fit items-center rounded-full px-2.5 py-[3px] text-[11px] font-semibold tracking-wide"
+                            style={{
+                              background: "color-mix(in srgb, var(--accent) 14%, transparent)",
+                              color: "var(--accent)",
+                            }}
+                          >
+                            {hero.names.length} pastillas
+                          </span>
+                        )}
+                        {/* Names — tappable, same pattern as single med */}
                         <button
                           type="button"
                           onClick={() => !quickLogging && openSessionSheet(hero.medicationIds[0])}
                           aria-label="Ver detalles de medicamentos"
                           disabled={quickLogging}
-                          className="inline-flex items-center gap-1.5 rounded-[6px] -mx-1 px-1 py-0.5 active:opacity-70 transition-opacity duration-[160ms]"
+                          className="group inline-flex min-w-0 items-end gap-1.5 rounded-[8px] -mx-1 px-1 py-0.5 hover:bg-[color-mix(in_srgb,var(--surface-el)_30%,transparent)] active:opacity-70 transition-[background-color,opacity] duration-[160ms] text-left"
                           style={{ cursor: quickLogging ? "default" : "pointer" }}
                         >
-                          <AlarmIcon size={18} weight="fill" className="shrink-0 text-[var(--accent)]" />
-                          <p
-                            className="font-mono text-[20px] font-semibold leading-none tabular-nums transition-colors duration-300"
-                            style={{ color: quickLogging ? "var(--text-muted)" : "var(--accent)" }}
-                          >
-                            {hero.slotTime.toLocaleTimeString("es-CO", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: false,
-                              timeZone: tz,
-                            })}
-                          </p>
+                          <span className="flex min-w-0 flex-col gap-0.5">
+                            {hero.names.map((name) => (
+                              <span
+                                key={name}
+                                className="truncate text-[20px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                                style={{
+                                  color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
+                                  textDecoration: quickLogging ? "line-through" : "none",
+                                  textDecorationColor: "rgba(0,0,0,0.2)",
+                                }}
+                              >
+                                {name}
+                              </span>
+                            ))}
+                          </span>
                           {!quickLogging && (
                             <CaretRightIcon
-                              size={11}
+                              size={12}
                               weight="bold"
-                              className="shrink-0"
+                              className="mb-[2px] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
                               style={{ color: "var(--text-faint)" }}
                             />
                           )}
                         </button>
-                        <div className="flex flex-col gap-0.5">
-                          {hero.names.map((name) => (
-                            <span
-                              key={name}
-                              className="truncate text-[18px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
-                              style={{
-                                color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
-                                textDecoration: quickLogging ? "line-through" : "none",
-                                textDecorationColor: "rgba(0,0,0,0.2)",
-                              }}
-                            >
-                              {name}
-                            </span>
-                          ))}
-                        </div>
+                        {/* Time row */}
+                        {!quickLogging && (
+                          <div className="flex items-center gap-1.5">
+                            <AlarmIcon size={16} weight="fill" className="shrink-0 text-[var(--accent)]" />
+                            <p className="font-mono text-[18px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+                              {hero.slotTime.toLocaleTimeString("es-CO", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                                timeZone: tz,
+                              })}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       /* Single med: big name, time below */
@@ -687,12 +779,19 @@ export function MedicationsAgenda({ now }: { now: number }) {
                           transition={{ duration: 0.28, ease: "easeOut" }}
                           className="flex items-center gap-3"
                         >
-                          <p className="text-[14px] text-[var(--text-muted)]">
-                            {isGroupHero ? "Tomadas a las" : "Tomada a las"}{" "}
-                            <span className="font-mono font-semibold" style={{ color: "var(--dose-early)" }}>
-                              {takenAtLabel ?? ""}
-                            </span>
-                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            <p className="text-[14px] text-[var(--text-muted)]">
+                              {isGroupHero ? "Tomadas a las" : "Tomada a las"}{" "}
+                              <span className="font-mono font-semibold" style={{ color: "var(--dose-early)" }}>
+                                {takenAtLabel ?? ""}
+                              </span>
+                            </p>
+                            {isGroupHero && (
+                              <p className="text-[12px] text-[var(--text-faint)]">
+                                {hero.names.join(" · ")}
+                              </p>
+                            )}
+                          </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -747,22 +846,39 @@ export function MedicationsAgenda({ now }: { now: number }) {
             <div className="px-5 pb-4 pt-3">
               <p className="section-label mb-2">Registradas hoy</p>
               <div className="space-y-0.5">
-                {registered.map((item) => (
-                  <RegisteredRow
-                    key={item.key}
-                    item={item}
-                    onEdit={() =>
-                      setEditIntake({
-                        intakeId: item.intakeId,
-                        medicationId: item.medicationId,
-                        loggedAt: item.loggedAt,
-                        dosageTaken: item.dosageTaken,
-                        notes: item.notes,
-                      })
-                    }
-                    onDelete={() => setDeleteIntakeId(item.intakeId)}
-                  />
-                ))}
+                {groupRegisteredByBatch(registered).map((batch) =>
+                  batch.length === 1 ? (
+                    <RegisteredRow
+                      key={batch[0]!.key}
+                      item={batch[0]!}
+                      onEdit={() =>
+                        setEditIntake({
+                          intakeId: batch[0]!.intakeId,
+                          medicationId: batch[0]!.medicationId,
+                          loggedAt: batch[0]!.loggedAt,
+                          dosageTaken: batch[0]!.dosageTaken,
+                          notes: batch[0]!.notes,
+                        })
+                      }
+                      onDelete={() => setDeleteIntakeId(batch[0]!.intakeId)}
+                    />
+                  ) : (
+                    <RegisteredBatchRow
+                      key={batch.map((i) => i.key).join("|")}
+                      batch={batch}
+                      onEdit={(item) =>
+                        setEditIntake({
+                          intakeId: item.intakeId,
+                          medicationId: item.medicationId,
+                          loggedAt: item.loggedAt,
+                          dosageTaken: item.dosageTaken,
+                          notes: item.notes,
+                        })
+                      }
+                      onDelete={(item) => setDeleteIntakeId(item.intakeId)}
+                    />
+                  )
+                )}
               </div>
             </div>
           )}

@@ -6,7 +6,7 @@ import type { DropEye } from "@/types/domain";
 const TRANSITION_MS = 1400;
 
 export function useQuickLog(opts?: {
-  onSuccess?: (dropTypeId: string) => void;
+  onSuccess?: (dropTypeId: string, dropId: string) => void;
   onError?: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -21,20 +21,21 @@ export function useQuickLog(opts?: {
           ? (cached[0].eye as DropEye)
           : "both";
 
-      return api.saveDrop({
-        id: crypto.randomUUID(),
+      const id = crypto.randomUUID();
+      await api.saveDrop({
+        id,
         dropTypeId,
         loggedAt: new Date().toISOString(),
         quantity: 1,
         eye: lastEye,
       });
+      return { id, dropTypeId };
     },
-    onSuccess: (_data, dropTypeId) => {
-      opts?.onSuccess?.(dropTypeId);
+    onSuccess: (data) => {
+      opts?.onSuccess?.(data.dropTypeId, data.id);
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-        queryClient.invalidateQueries({ queryKey: ["drops/recent", dropTypeId] });
+        queryClient.invalidateQueries({ queryKey: ["drops/recent", data.dropTypeId] });
         queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
       }, TRANSITION_MS);
     },
