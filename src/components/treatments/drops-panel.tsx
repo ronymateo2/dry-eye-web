@@ -11,7 +11,7 @@ import { ArchivedItems } from "@/components/treatments/archived-items";
 import { DropSheet } from "@/components/treatments/drop-sheet";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
-import { EyeIcon, } from "@phosphor-icons/react";
+import { DropIcon, } from "@phosphor-icons/react";
 
 export function DropsPanel() {
   const qc = useQueryClient();
@@ -63,7 +63,7 @@ export function DropsPanel() {
           <EmptyState
             label="Agregar primera gota"
             description="Registra los tipos de gota que usas para que aparezcan al registrar tu día."
-            icon={<EyeIcon size={24} color="var(--accent)" weight="fill" />}
+            icon={<DropIcon size={24} color="var(--accent)" weight="fill" />}
             onClick={() => setEditingItem("new")}
             buttonLabel="Agregar gota"
           />
@@ -96,7 +96,7 @@ export function DropsPanel() {
                       detail={detail}
                       isOnly={dropTypes.length === 1}
                       onClick={() => setEditingItem(dt)}
-                      icon={<EyeIcon size={18} color="var(--accent)" weight="fill" />}
+                      icon={<DropIcon size={18} color="var(--accent)" />}
                     />
                   );
                 })}
