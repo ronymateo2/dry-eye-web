@@ -67,7 +67,7 @@ export function TimelineRow({
 
       <span className="min-w-0 flex-1 flex items-center gap-1.5 ml-1 overflow-hidden">
         <span
-          className="truncate text-[15px] font-medium capitalize leading-none"
+          className="truncate text-[17px] font-medium capitalize leading-none"
           style={{ color: "var(--text-primary)" }}
         >
           {entry.name}
@@ -75,13 +75,13 @@ export function TimelineRow({
         {vialStatus && vial && onDiscardVial && (
           <span className="flex shrink-0 items-center gap-1">
             <EyedropperSampleIcon
-              size={10}
+              size={12}
               weight="fill"
               className="shrink-0"
               style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
             />
             <span
-              className="font-mono text-[10px] font-medium uppercase tracking-[0.04em] tabular-nums whitespace-nowrap"
+              className="text-[12px] font-medium uppercase tracking-[0.04em] tabular-nums whitespace-nowrap"
               style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
             >
               {vialStatus.isExpired ? `+${vialStatus.timeStr}` : vialStatus.timeStr}
@@ -103,7 +103,7 @@ export function TimelineRow({
 
       <span className="flex shrink-0 items-center gap-1.5 pointer-events-none">
         <span
-          className="font-mono text-[13px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+          className="font-mono text-[15px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
           style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
         >
           {badgeText}
