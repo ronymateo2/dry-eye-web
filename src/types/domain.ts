@@ -38,6 +38,7 @@ export type DropScheduleEntry = {
   interval_hours: number | null;
   last_logged_at: string | null;
   end_date?: string | null;
+  is_vial?: boolean;
 };
 
 export type DropTypeStats = {

@@ -85,7 +85,7 @@ export function HeroView({
       hour12: false
     });
     setJustRegistered({ dropTypeId: heroEntry.drop_type_id, takenAt });
-    quickLog(heroEntry.drop_type_id);
+    quickLog(heroEntry.drop_type_id, !!(heroEntry.is_vial && !heroVial));
   }
 
   const computed =
