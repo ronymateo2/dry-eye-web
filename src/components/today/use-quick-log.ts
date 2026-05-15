@@ -7,7 +7,7 @@ import type { DropEye } from "@/types/domain";
 const TRANSITION_MS = 1400;
 
 export function useQuickLog(opts?: {
-  onSuccess?: (dropTypeId: string, dropId: string) => void;
+  onSuccess?: (dropTypeId: string, dropId: string, vialId?: string) => void;
   onError?: () => void;
 }) {
   const queryClient = useQueryClient();
@@ -39,19 +39,22 @@ export function useQuickLog(opts?: {
         return { id, dropTypeId, autoCreateVial: false };
       }
 
+      let vialId: string | undefined;
       if (autoCreateVial) {
         try {
-          await api.createVial({ id: crypto.randomUUID(), dropTypeId, startedAt: loggedAt, dropId: id });
+          vialId = crypto.randomUUID();
+          await api.createVial({ id: vialId, dropTypeId, startedAt: loggedAt, dropId: id });
         } catch {
+          vialId = undefined;
           toast.warning("Gota guardada. No se pudo abrir el vial — ábrelo manualmente.");
         }
       }
-      return { id, dropTypeId, autoCreateVial };
+      return { id, dropTypeId, vialId };
     },
     onSuccess: (data) => {
-      opts?.onSuccess?.(data.dropTypeId, data.id);
+      opts?.onSuccess?.(data.dropTypeId, data.id, data.vialId);
       queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-      if (data.autoCreateVial) {
+      if (data.vialId) {
         queryClient.invalidateQueries({ queryKey: ["vials/active"] });
       }
       setTimeout(() => {

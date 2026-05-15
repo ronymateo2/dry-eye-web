@@ -38,7 +38,7 @@ export function HeroView({
   const queryClient = useQueryClient();
   const discardMutation = useDiscardVial(() => setDiscardTarget(null));
   const { quickLog, isPending: quickLogPending } = useQuickLog({
-    onSuccess: (dropTypeId, dropId) => {
+    onSuccess: (dropTypeId, dropId, vialId) => {
       const dropName = data.upcoming[0]?.name ?? "Dosis";
       clearTimerRef.current = setTimeout(() => {
         setJustRegistered(null);
@@ -53,10 +53,12 @@ export function HeroView({
             void (async () => {
               try {
                 await api.deleteDrop(dropId);
+                if (vialId) await api.deleteVial(vialId);
                 setJustRegistered(null);
                 void queryClient.invalidateQueries({ queryKey: ["drops/last"] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent", dropTypeId] });
                 void queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+                if (vialId) void queryClient.invalidateQueries({ queryKey: ["vials/active"] });
               } catch {
                 toast.error("No se pudo deshacer el registro");
               }

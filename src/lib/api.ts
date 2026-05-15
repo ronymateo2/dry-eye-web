@@ -202,4 +202,5 @@ export const api = {
     return api.get<{ ok: boolean; vials: { id: string; drop_type_id: string; drop_type_name: string; started_at: string; ended_at: string | null; status: string; vial_duration: number | null }[]; hasMore: boolean }>(`/vials/history${q ? `?${q}` : ""}`);
   },
   discardVial: (id: string) => api.put<{ ok: boolean }>(`/vials/${id}/discard`, {}),
+  deleteVial: (id: string) => api.delete<{ ok: boolean }>(`/vials/${id}`),
 };
