@@ -367,13 +367,14 @@ img, svg { display: block; max-width: 100%; }
 /* Sizes */
 .btn-lg { min-height: 50px; padding: 0 24px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .btn-md { min-height: 48px; padding: 0 20px; font-size: 15px; font-weight: 500; }
-.btn-sm { min-height: 34px; padding: 0 14px; font-size: 13px; font-weight: 500; }
+.btn-sm { min-height: 34px; padding: 0 14px; font-size: 14px; font-weight: 500; }
 /* Filled — primary CTA */
 .btn-filled { background: var(--accent); color: var(--btn-primary-text); }
 .btn-filled:active:not(:disabled) { background: var(--accent-bright); transform: scale(0.97); }
 
 /* Tinted — secondary accent */
-.btn-tinted { background: var(--accent-dim); color: var(--accent); }
+.btn-tinted { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(212, 162, 76, 0.35); }
+[data-theme="light"] .btn-tinted { border-color: rgba(124, 109, 205, 0.35); }
 .btn-tinted:active:not(:disabled) { background: rgba(212, 162, 76, 0.25); transform: scale(0.97); }
 [data-theme="light"] .btn-tinted:active:not(:disabled) { background: rgba(124, 109, 205, 0.22); }
 
@@ -387,7 +388,7 @@ img, svg { display: block; max-width: 100%; }
 .btn-tinted-warn:active:not(:disabled) { background: rgba(224, 147, 42, 0.20); transform: scale(0.97); }
 
 /* Gray — neutral secondary */
-.btn-gray { background: var(--surface-el); color: var(--text-primary); }
+.btn-gray { background: var(--surface-el); color: var(--text-primary); border: 1px solid var(--text-primary); }
 .btn-gray:active:not(:disabled) { background: var(--border); transform: scale(0.97); }
 
 /* Plain — text only (least prominent) */

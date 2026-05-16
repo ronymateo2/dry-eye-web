@@ -11,6 +11,8 @@ import {
   CheckCircleIcon,
   ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
+import { formatGap } from "@/components/history/utils";
+import { SYMPTOM_STATE_LABEL, SYMPTOM_STATE_COLOR } from "@/lib/symptom-state";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -95,6 +97,13 @@ export function SymptomsSheet({ onSaved }: Props) {
     setLoadedLast(true);
   }, [latest]);
 
+  const resetValues = useCallback(() => {
+    setIntensities(DEFAULT_INTENSITIES);
+    setSelectedTriggers([]);
+    setNote("");
+    setLoadedLast(false);
+  }, []);
+
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const setField = useCallback((key: keyof SymptomIntensities, val: number) => {
@@ -164,38 +173,42 @@ export function SymptomsSheet({ onSaved }: Props) {
 
         {/* Symptom sliders — compact single-row per symptom */}
         <div className="space-y-2">
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center justify-between mb-3">
             <p className="section-label mb-0">1. Intensidad de síntomas</p>
-            <div className="flex flex-col items-end gap-1.5">
-              {previewState && (
-                <span
-                  className="rounded-full px-2.5 py-0.5 text-[12px] font-semibold capitalize shrink-0"
-                  style={{
-                    background: `color-mix(in srgb, ${previewStateColor(previewState)} 15%, transparent)`,
-                    color: previewStateColor(previewState),
-                  }}
-                >
-                  {previewState}
-                </span>
-              )}
-              {latest && (
-                loadedLast ? (
-                  <span className="text-[11px] font-medium text-[var(--text-faint)]">
-                    Últimos cargados
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={loadLastValues}
-                    className="flex items-center gap-1 text-[11px] font-medium text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
-                  >
-                    <ClockCounterClockwiseIcon size={11} />
-                    Cargar últimos
-                  </button>
-                )
+          </div>
+
+          {latest && (
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-[12px] bg-[var(--surface-el)] px-3.5 py-2.5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--surface)]">
+                  <ClockCounterClockwiseIcon size={13} color="var(--text-muted)" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-medium text-[var(--text-primary)] leading-snug">
+                    Último registro · hace {formatGap(latest.logged_at, new Date().toISOString())}
+                  </p>
+                  <p className="text-[14px] font-medium leading-snug flex items-center gap-1">
+                    <span className="text-[var(--text-muted)]">{SYMPTOM_STATE_LABEL[latest.calculated_state]}</span>
+                    {previewState && (
+                      <>
+                        <span className="text-[var(--text-faint)]">→</span>
+                        <span style={{ color: SYMPTOM_STATE_COLOR[previewState] }}>{SYMPTOM_STATE_LABEL[previewState]}</span>
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              {loadedLast ? (
+                <Button variant="tinted" size="sm" onClick={resetValues} className="shrink-0">
+                  Empezar de cero
+                </Button>
+              ) : (
+                <Button variant="tinted" size="sm" onClick={loadLastValues} className="shrink-0">
+                  Cargar
+                </Button>
               )}
             </div>
-          </div>
+          )}
 
           {SYMPTOM_FIELDS.map(({ key, label, Icon }) => {
             const val = (intensities[key] ?? 0) as number;
