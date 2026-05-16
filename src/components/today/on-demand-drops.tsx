@@ -8,6 +8,7 @@ import { TodayDropsSheet } from "./today-drops-sheet";
 import { TodayCountBadge } from "./today-count-badge";
 import { useQuickLog } from "./use-quick-log";
 import { useNow } from "@/lib/hooks/use-now";
+import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
@@ -85,14 +86,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
 
   return (
     <>
-      <div
-        className="flex min-h-[72px] items-center gap-4 rounded-[14px] px-4 py-3.5 transition-colors duration-300"
-        style={{
-          background: justRegistered
-            ? "color-mix(in srgb, var(--pain-low) 8%, var(--surface-card))"
-            : "var(--surface-el)",
-        }}
-      >
+      <div className="flex min-h-[64px] items-center gap-4 px-4 py-3">
         <IconButton
           variant={justRegistered ? "tinted-success" : "tinted"}
           onClick={handleLog}
@@ -106,7 +100,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
 
         <div className="min-w-0 flex-1">
           <p
-            className="truncate text-[17px] font-semibold capitalize leading-snug transition-colors duration-300"
+            className="truncate text-[15px] font-semibold capitalize leading-snug transition-colors duration-300"
             style={{ color: justRegistered ? "var(--text-muted)" : "var(--text-primary)" }}
           >
             {drop.name}
@@ -116,7 +110,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="mt-0.5 text-[13px] text-[var(--text-faint)]"
+              className="mt-0.5 text-[12px] text-[var(--text-faint)]"
             >
               Tomada a las{" "}
               <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
@@ -124,7 +118,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               </span>
             </motion.p>
           ) : lastDrop ? (
-            <p className="mt-0.5 text-[13px] text-[var(--text-faint)]">
+            <p className="mt-0.5 text-[12px] text-[var(--text-faint)]">
               última{" "}
               <span className="font-mono">{formatTimeAgo(lastDrop.logged_at, now)}</span>
             </p>
@@ -152,16 +146,16 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               <CheckIcon size={18} weight="bold" style={{ color: "var(--pain-low)" }} />
             </motion.div>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="tinted"
+              size="sm"
               onClick={handleLog}
               disabled={isPending}
               aria-label={`Registrar dosis de ${drop.name}`}
-              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--accent)]/15 px-4 text-[15px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/25 active:scale-[0.97] disabled:opacity-50"
             >
-              <PlusIcon size={14} weight="bold" />
+              <PlusIcon size={12} weight="bold" />
               Registrar
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -193,7 +187,7 @@ export function OnDemandDrops() {
           Gota a demanda
         </p>
       </div>
-      <div className="space-y-1 px-3 pb-3">
+      <div className="divide-y divide-[var(--border)]">
         {quickActionDrops.map((drop) => (
           <OnDemandDropItem key={drop.id} drop={drop} />
         ))}
