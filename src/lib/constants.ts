@@ -89,19 +89,6 @@ export const OBS_CATEGORY_LABELS: Record<string, string> = {
   postural: "Postural",
 };
 
-export const PROPERTY_TYPE_OPTIONS = [
-  { label: "Escala 0-10", value: "scale" },
-  { label: "Sí/No", value: "boolean" },
-  { label: "Opciones", value: "select" },
-] as const;
-
-export const PROPERTY_TYPE_LABELS: Record<string, string> = {
-  scale: "Escala 0-10",
-  boolean: "Sí/No",
-  select: "Opciones",
-  text: "Texto",
-};
-
 export const TRIGGER_OPTIONS = [
   { id: "screens", label: "Pantallas", value: "screens" },
   { id: "tv", label: "TV", value: "tv" },

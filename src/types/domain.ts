@@ -1,4 +1,3 @@
-export type TimeOfDay = "morning" | "evening" | "other" | "trigger";
 export type SleepQuality = "muy_malo" | "malo" | "regular" | "bueno" | "excelente";
 export type DropEye = "left" | "right" | "both";
 export type TriggerType =
@@ -260,23 +259,6 @@ export type User = {
   timezone: string;
   theme: "dark" | "light";
   font: "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded" | null;
-};
-
-export type VialRecord = {
-  id: string;
-  drop_type_id: string;
-  drop_type_name: string;
-  started_at: string;
-  ended_at: string | null;
-  status: "active" | "discarded";
-  vial_duration: number | null;
-};
-
-export type SaveVialInput = {
-  id: string;
-  dropTypeId: string;
-  startedAt: string;
-  dropId?: string;
 };
 
 export type SymptomState = "calmado" | "leve" | "sensible" | "reactivo" | "brote";

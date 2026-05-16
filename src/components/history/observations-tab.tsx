@@ -5,8 +5,9 @@ import { EyedropperIcon, StethoscopeIcon, MoonIcon, PillIcon } from "@phosphor-i
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
 import { OBS_EYE_LABELS } from "@/lib/constants";
+import { painColor } from "@/lib/pain";
 import type { OccurrenceRow } from "./types";
-import { formatTime, getDayPillLabel, formatShortDate, painColor } from "./utils";
+import { formatTime, getDayPillLabel, formatShortDate } from "./utils";
 
 const OBS_PAGE_SIZE = 5;
 

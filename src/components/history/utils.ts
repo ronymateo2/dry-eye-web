@@ -79,12 +79,6 @@ export function getTimeOfDay(loggedAt: string, timezone: string): { label: strin
   return { label: "Noche", isMoon: true };
 }
 
-export function painColor(score: number): string {
-  if (score >= 7) return "var(--pain-high)";
-  if (score >= 4) return "var(--pain-mid)";
-  return "var(--pain-low)";
-}
-
 export function intensityColor(intensity: 1 | 2 | 3): string {
   if (intensity === 3) return "var(--pain-high)";
   if (intensity === 2) return "var(--pain-mid)";

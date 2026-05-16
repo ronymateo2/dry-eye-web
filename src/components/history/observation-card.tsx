@@ -1,8 +1,9 @@
 import { NotePencilIcon } from "@phosphor-icons/react";
 import { OBS_EYE_LABELS } from "@/lib/constants";
+import { painColor } from "@/lib/pain";
 import type { DisplayObservation } from "./types";
 import type { PropertyDef, PropertyValue } from "@/types/domain";
-import { formatTime, painColor } from "./utils";
+import { formatTime } from "./utils";
 
 function PropertyValueChips({
   propertyValues,

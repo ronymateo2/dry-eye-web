@@ -3,7 +3,8 @@ import { MoonIcon, SunIcon } from "@phosphor-icons/react";
 import type { DisplayCheckIn } from "./types";
 import type { ScoreField } from "./types";
 import { PRIMARY_FIELDS, PERIPHERAL_FIELDS, ALL_SCORE_FIELDS, TRIGGER_LABELS } from "./types";
-import { formatTime, getTimeOfDay, painColor } from "./utils";
+import { formatTime, getTimeOfDay } from "./utils";
+import { painColor } from "@/lib/pain";
 
 function PrimaryRow({ field, value, barsReady }: { field: ScoreField; value: number; barsReady: boolean }) {
   return (
