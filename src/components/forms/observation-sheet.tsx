@@ -20,6 +20,8 @@ const PROP_TYPE_OPTIONS: { label: string; value: PropertyType }[] = [
   { label: "Escala", value: "scale" },
   { label: "Sí/No", value: "boolean" },
   { label: "Opciones", value: "select" },
+  { label: "Número", value: "number" },
+  { label: "Texto", value: "text" },
 ];
 
 function slugify(s: string): string {
@@ -34,11 +36,13 @@ type InitialObs = {
   body_zone_custom?: string | null;
   category?: string | null;
   propertiesSchema?: PropertyDef[];
+  use_intensity?: boolean;
+  use_duration?: boolean;
 };
 
 type Props = {
   initialObservation?: InitialObs;
-  onSaved: (obs: { id: string; title: string; eye: string; propertiesSchema?: PropertyDef[] | null }) => void;
+  onSaved: (obs: { id: string; title: string; eye: string; propertiesSchema?: PropertyDef[] | null; use_intensity: boolean; use_duration: boolean }) => void;
 };
 
 function PillGrid<T extends string>({
@@ -119,6 +123,7 @@ function SelectOptionsEditor({
           className="flex-1 rounded-[8px] border border-[var(--border)] bg-[var(--surface-el)] px-2.5 py-1 text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
           placeholder="Nueva opción"
           value={newOpt}
+          autoComplete="off"
           onChange={(e) => setNewOpt(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
         />
@@ -139,11 +144,13 @@ function PropertyRow({
   onChange,
   onRemove,
   showError,
+  isDupe,
 }: {
   prop: PropertyDef;
   onChange: (p: PropertyDef) => void;
   onRemove: () => void;
   showError?: boolean;
+  isDupe?: boolean;
 }) {
   const updateLabel = (label: string) => {
     const key = slugify(label) || `prop_${Date.now()}`;
@@ -151,22 +158,27 @@ function PropertyRow({
   };
 
   const updateType = (type: PropertyType) => {
-    const base = { key: prop.key, label: prop.label };
+    const base = { id: prop.id, key: prop.key, label: prop.label };
     if (type === "scale") onChange({ ...base, type: "scale" });
     else if (type === "boolean") onChange({ ...base, type: "boolean" });
+    else if (type === "number") onChange({ ...base, type: "number" });
+    else if (type === "text") onChange({ ...base, type: "text" });
     else onChange({ ...base, type: "select", options: [] });
   };
+
+  const hasError = showError && (!prop.label.trim() || isDupe);
 
   return (
     <div className={cn(
       "space-y-2 rounded-[12px] border bg-[var(--surface)] p-3",
-      showError && !prop.label.trim() ? "border-[var(--pain-high)]" : "border-[var(--border)]"
+      hasError ? "border-[var(--pain-high)]" : "border-[var(--border)]"
     )}>
       <div className="flex items-center gap-2">
         <input
           className="flex-1 bg-transparent text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] placeholder:italic focus:outline-none"
           placeholder={showError && !prop.label.trim() ? "Nombre requerido" : "Nombre del campo…"}
           value={prop.label}
+          autoComplete="off"
           onChange={(e) => updateLabel(e.target.value)}
         />
         <button
@@ -179,21 +191,25 @@ function PropertyRow({
         </button>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {PROP_TYPE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => updateType(opt.value)}
-            className={cn(
-              "rounded-full border px-2.5 py-1 text-[12px] font-medium transition duration-[120ms] ease-out active:scale-95",
-              prop.type === opt.value
-                ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
-                : "border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-muted)]"
-            )}
-          >
-            {opt.label}
-          </button>
-        ))}
+        {PROP_TYPE_OPTIONS.map((opt) => {
+          const active = prop.type === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => updateType(opt.value)}
+              className="rounded-full px-2.5 py-1 text-[12px] font-medium active:scale-95"
+              style={{
+                background: active ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent",
+                color: active ? "var(--accent)" : "var(--text-faint)",
+                border: active ? "1.5px solid var(--accent)" : "1px solid var(--border)",
+                transition: "color 120ms ease-out, background 120ms ease-out, border-color 120ms ease-out",
+              }}
+            >
+              {opt.label}
+            </button>
+          );
+        })}
       </div>
       {prop.type === "select" && (
         <SelectOptionsEditor
@@ -215,8 +231,16 @@ function PropertyEditorSection({
   showErrors?: boolean;
 }) {
   const add = () => {
-    onChange([...properties, { key: `prop_${properties.length + 1}`, label: "", type: "scale" }]);
+    onChange([...properties, { id: crypto.randomUUID(), key: `prop_${properties.length + 1}`, label: "", type: "scale" }]);
   };
+
+  const seenLabels = new Set<string>();
+  const dupeIndices = new Set<number>();
+  for (let i = 0; i < properties.length; i++) {
+    const l = properties[i].label.trim().toLowerCase();
+    if (l && seenLabels.has(l)) dupeIndices.add(i);
+    else if (l) seenLabels.add(l);
+  }
 
   return (
     <div className="space-y-3">
@@ -228,6 +252,7 @@ function PropertyEditorSection({
           onChange={(updated) => onChange(properties.map((p, j) => j === i ? updated : p))}
           onRemove={() => onChange(properties.filter((_, j) => j !== i))}
           showError={showErrors}
+          isDupe={dupeIndices.has(i)}
         />
       ))}
       <button
@@ -239,6 +264,40 @@ function PropertyEditorSection({
         Añadir campo
       </button>
     </div>
+  );
+}
+
+function ToggleRow({ label, description, active, onToggle }: {
+  label: string;
+  description: string;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={cn(
+        "flex w-full items-center gap-3 rounded-[12px] border px-4 py-3 text-left transition duration-[120ms] ease-out active:scale-[0.99]",
+        active ? "border-[var(--accent)]/50 bg-[var(--accent-dim)]" : "border-[var(--border)] bg-[var(--surface)]"
+      )}
+    >
+      <div className="flex-1">
+        <p className={cn("text-[14px] font-medium", active ? "text-[var(--accent)]" : "text-[var(--text-primary)]")}>
+          {label}
+        </p>
+        <p className="text-[12px] text-[var(--text-faint)]">{description}</p>
+      </div>
+      <div className={cn(
+        "relative h-5 w-9 rounded-full border-2 transition-colors duration-150",
+        active ? "border-[var(--accent)] bg-[var(--accent)]" : "border-[var(--text-faint)] bg-transparent"
+      )}>
+        <div className={cn(
+          "absolute top-0.5 h-3 w-3 rounded-full transition-all duration-150",
+          active ? "left-[calc(100%-14px)] bg-white" : "left-0.5 bg-[var(--text-faint)]"
+        )} />
+      </div>
+    </button>
   );
 }
 
@@ -260,8 +319,12 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
     (initialObservation?.category as ObservationCategory | null) ?? null
   );
   const [properties, setProperties] = useState<PropertyDef[]>(
-    initialObservation?.propertiesSchema ?? []
+    (initialObservation?.propertiesSchema ?? []).map((p) =>
+      p.id ? p : { ...p, id: crypto.randomUUID() }
+    )
   );
+  const [useIntensity, setUseIntensity] = useState(initialObservation?.use_intensity ?? false);
+  const [useDuration, setUseDuration] = useState(initialObservation?.use_duration ?? false);
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [showPropErrors, setShowPropErrors] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -272,6 +335,13 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
     if (properties.some((p) => !p.label.trim())) {
       setShowPropErrors(true);
       setState({ status: "error", message: "Todos los campos necesitan un nombre." });
+      return;
+    }
+    const labels = properties.map((p) => p.label.trim().toLowerCase());
+    const hasDupes = labels.some((l, i) => labels.indexOf(l) !== i);
+    if (hasDupes) {
+      setShowPropErrors(true);
+      setState({ status: "error", message: "Los campos no pueden tener nombres repetidos." });
       return;
     }
     setShowPropErrors(false);
@@ -285,9 +355,11 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
           body_zone_custom: bodyZone === "other" ? (bodyZoneCustom.trim() || null) : null,
           category,
           propertiesSchema: properties.length > 0 ? properties : undefined,
+          useIntensity,
+          useDuration,
         };
 
-        let result: { id: string; title: string; eye: string; properties_schema?: PropertyDef[] | null };
+        let result: { id: string; title: string; eye: string; properties_schema?: PropertyDef[] | null; use_intensity: boolean; use_duration: boolean };
         if (isEdit) {
           result = await api.updateObservation(initialObservation.id, payload);
         } else {
@@ -300,6 +372,8 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
           title: result.title,
           eye: result.eye,
           propertiesSchema: result.properties_schema,
+          use_intensity: result.use_intensity,
+          use_duration: result.use_duration,
         });
       } catch {
         setState({ status: "error", message: "No se pudo guardar." });
@@ -324,6 +398,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
             maxLength={MAX_TITLE}
             placeholder="Ej: Ardor párpado superior OI"
             value={title}
+            autoComplete="off"
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
@@ -364,6 +439,7 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
                   placeholder="Especificar zona..."
                   maxLength={60}
                   value={bodyZoneCustom}
+                  autoComplete="off"
                   onChange={(e) => setBodyZoneCustom(e.target.value)}
                 />
               </motion.div>
@@ -386,6 +462,22 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
               <option key={o.value} value={o.value}>{o.label}</option>
             ))}
           </NativeSelect>
+        </div>
+
+        <div className="space-y-3">
+          <p className="section-label">Campos de registro</p>
+          <ToggleRow
+            label="Intensidad"
+            description="Slider 0–10 al registrar"
+            active={useIntensity}
+            onToggle={() => setUseIntensity((v) => !v)}
+          />
+          <ToggleRow
+            label="Duración"
+            description="Cuántos minutos duró"
+            active={useDuration}
+            onToggle={() => setUseDuration((v) => !v)}
+          />
         </div>
 
         <PropertyEditorSection properties={properties} onChange={setProperties} showErrors={showPropErrors} />

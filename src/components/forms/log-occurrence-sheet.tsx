@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CaretDownIcon, DropIcon, StethoscopeIcon, MoonStarsIcon, PillIcon, type Icon as PhosphorIcon } from "@phosphor-icons/react";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,10 @@ type Props = {
     body_zone_custom?: string | null;
     category?: string | null;
     propertiesSchema?: PropertyDef[] | null;
+    use_intensity?: boolean;
+    use_duration?: boolean;
   };
+  initialOccurrence?: PrevOccurrence;
   onSaved: () => void;
 };
 
@@ -62,13 +66,16 @@ function PrevOccurrencesSection({ observationId, schema }: { observationId: stri
 
   function formatPrev(occ: PrevOccurrence): string {
     const parts: string[] = [];
-    if (occ.intensity != null) parts.push(`${occ.intensity}/10`);
+    if (observation.use_intensity && occ.intensity != null) parts.push(`${occ.intensity}/10`);
+    if (observation.use_duration && occ.durationMinutes != null) parts.push(`${occ.durationMinutes} min`);
     if (occ.propertyValues && schema) {
       for (const def of schema) {
         const v = occ.propertyValues[def.key];
         if (v === undefined || v === null || v === "") continue;
         if (def.type === "boolean") parts.push(`${def.label}: ${v ? "Sí" : "No"}`);
         else if (def.type === "scale") parts.push(`${def.label}: ${v}/10`);
+        else if (def.type === "number") parts.push(`${def.label}: ${v}`);
+        else if (def.type === "text") parts.push(`${def.label}: ${String(v).slice(0, 30)}${String(v).length > 30 ? "…" : ""}`);
         else if (def.type === "select") {
           const opt = def.options.find((o) => o.value === v);
           parts.push(`${def.label}: ${opt?.label ?? String(v)}`);
@@ -170,6 +177,42 @@ function DynamicPropertyField({
             </button>
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (def.type === "number") {
+    const numStr = value !== undefined && value !== null ? String(value) : "";
+    return (
+      <div className="space-y-2">
+        <p className="section-label">{def.label}</p>
+        <input
+          type="number"
+          inputMode="decimal"
+          className="w-full rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+          placeholder="0"
+          value={numStr}
+          onChange={(e) => {
+            const n = parseFloat(e.target.value);
+            if (!isNaN(n)) onChange(n);
+            else if (e.target.value === "" || e.target.value === "-") onChange(e.target.value);
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (def.type === "text") {
+    const strVal = typeof value === "string" ? value : "";
+    return (
+      <div className="space-y-2">
+        <p className="section-label">{def.label}</p>
+        <textarea
+          className="w-full resize-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] min-h-[72px]"
+          placeholder="Escribir..."
+          value={strVal}
+          onChange={(e) => onChange(e.target.value)}
+        />
       </div>
     );
   }
@@ -347,13 +390,22 @@ function LinkRow({
   );
 }
 
-export function LogOccurrenceSheet({ observation, onSaved }: Props) {
-  const [intensity, setIntensity] = useState(0);
-  const [propertyValues, setPropertyValues] = useState<Record<string, PropertyValue>>({});
-  const [notes, setNotes] = useState("");
-  const [links, setLinks] = useState<ObservationLinks>({});
+export function LogOccurrenceSheet({ observation, initialOccurrence, onSaved }: Props) {
+  const isEdit = !!initialOccurrence;
+  const [propertyValues, setPropertyValues] = useState<Record<string, PropertyValue>>(
+    initialOccurrence?.propertyValues ?? {}
+  );
+  const [notes, setNotes] = useState(initialOccurrence?.notes ?? "");
+  const [links, setLinks] = useState<ObservationLinks>(initialOccurrence?.links ?? {});
+  const [intensity, setIntensity] = useState<number>(initialOccurrence?.intensity ?? 5);
+  const [durationMinutes, setDurationMinutes] = useState<string>(
+    initialOccurrence?.durationMinutes != null ? String(initialOccurrence.durationMinutes) : ""
+  );
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [isPending, setIsPending] = useState(false);
+  const [loggedAt, setLoggedAt] = useState<string>(
+    () => initialOccurrence ? initialOccurrence.loggedAt : new Date().toISOString()
+  );
 
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -367,15 +419,17 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
       const hasLinks = Object.values(links).some((v) =>
         Array.isArray(v) ? v.length > 0 : v !== undefined
       );
+      const durNum = durationMinutes.trim() !== "" ? parseInt(durationMinutes, 10) : null;
       await api.saveOccurrence(observation.id, {
-        id: crypto.randomUUID(),
-        loggedAt: new Date().toISOString(),
-        intensity,
+        id: initialOccurrence?.id ?? crypto.randomUUID(),
+        loggedAt: loggedAt,
+        intensity: observation.use_intensity ? intensity : null,
+        durationMinutes: observation.use_duration && durNum !== null && !isNaN(durNum) ? durNum : null,
         notes: notes.trim() || undefined,
         propertyValues: Object.keys(propertyValues).length > 0 ? propertyValues : undefined,
         links: hasLinks ? links : undefined,
       });
-      toast.success("Ocurrencia guardada.");
+      toast.success(isEdit ? "Ocurrencia actualizada." : "Ocurrencia guardada.");
       onSaved();
     } catch {
       setState({ status: "error", message: "No se pudo guardar." });
@@ -390,7 +444,40 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
 
         <ObsContextCard observation={observation} />
 
-        <PainSlider label="Intensidad" labelClassName="section-label" value={intensity} onChange={setIntensity} />
+        <div className="space-y-1.5">
+          <p className="section-label">{isEdit ? "Fecha del registro" : "Fecha y hora"}</p>
+          <DateTimePicker
+            value={loggedAt}
+            onChange={(v) => { if (v) setLoggedAt(v); }}
+            max={new Date()}
+          />
+        </div>
+
+        {observation.use_intensity && (
+          <div className="space-y-2">
+            <PainSlider
+              label="Intensidad"
+              labelClassName="section-label"
+              value={intensity}
+              onChange={setIntensity}
+            />
+          </div>
+        )}
+
+        {observation.use_duration && (
+          <div className="space-y-2">
+            <p className="section-label">Duración (minutos)</p>
+            <input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              className="w-full rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-[16px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)]"
+              placeholder="Ej: 30"
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(e.target.value)}
+            />
+          </div>
+        )}
 
         {(observation.propertiesSchema ?? []).map((def) => (
           <DynamicPropertyField
@@ -408,6 +495,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
             maxLength={300}
             placeholder="¿Qué más notaste?"
             value={notes}
+            autoComplete="off"
             onChange={(e) => setNotes(e.target.value)}
           />
         </div>
@@ -425,7 +513,7 @@ export function LogOccurrenceSheet({ observation, onSaved }: Props) {
         style={{ background: "linear-gradient(to top, var(--bg) 60%, transparent)" }}
       >
         <Button className="w-full" disabled={isPending} onClick={handleSave}>
-          {isPending ? "Guardando..." : "Guardar ocurrencia"}
+          {isPending ? "Guardando..." : isEdit ? "Guardar cambios" : "Guardar ocurrencia"}
         </Button>
       </div>
     </>

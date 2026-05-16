@@ -89,6 +89,14 @@ export const OBS_CATEGORY_LABELS: Record<string, string> = {
   postural: "Postural",
 };
 
+export const OBS_CATEGORY_ICON_NAME: Record<string, string> = {
+  sensory: "Sparkle",
+  pain: "Lightning",
+  functional: "Wrench",
+  environmental: "Cloud",
+  postural: "PersonSimple",
+};
+
 export const TRIGGER_OPTIONS = [
   { id: "screens", label: "Pantallas", value: "screens" },
   { id: "tv", label: "TV", value: "tv" },

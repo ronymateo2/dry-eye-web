@@ -4,9 +4,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { StackedSheet, type SheetLayer } from "@/components/layout/stacked-sheet";
 import { useSheetStack } from "@/lib/hooks/use-sheet-stack";
 import { ObservationsListSheet } from "./observations-list-sheet";
+import { ObservationDetailSheet } from "./observation-detail-sheet";
 import { LogOccurrenceSheet } from "./log-occurrence-sheet";
 import { ObservationSheet } from "./observation-sheet";
-import type { ObservationRecord } from "@/types/domain";
+import type { ObservationRecord, PrevOccurrence } from "@/types/domain";
 
 type Props = {
   open: boolean;
@@ -26,10 +27,11 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
     queryClient.invalidateQueries({ queryKey: ["history"] });
     queryClient.invalidateQueries({ queryKey: ["observations"] });
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
+    queryClient.invalidateQueries({ queryKey: ["observation-prev"] });
     pop();
   }, [pop, queryClient]);
 
-  const handleSelectObs = useCallback(
+  const pushLogOccurrence = useCallback(
     (obs: ObservationRecord) => {
       push({
         key: `log-${obs.id}`,
@@ -46,7 +48,7 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
     [push, handleOccurrenceSaved],
   );
 
-  const handleEditObs = useCallback(
+  const pushEditObs = useCallback(
     (obs: ObservationRecord) => {
       push({
         key: `edit-${obs.id}`,
@@ -63,12 +65,65 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
               category: obs.category,
               propertiesSchema: obs.properties_schema ?? undefined,
             }}
-            onSaved={() => pop()}
+            onSaved={() => {
+              queryClient.invalidateQueries({ queryKey: ["observations"] });
+              pop();
+            }}
           />
         ),
       });
     },
-    [push, pop],
+    [push, pop, queryClient],
+  );
+
+  const pushEditOccurrence = useCallback(
+    (obs: ObservationRecord, occ: PrevOccurrence) => {
+      push({
+        key: `edit-occ-${occ.id}`,
+        title: "Editar registro",
+        description: "Modifica los datos de esta ocurrencia.",
+        content: (
+          <LogOccurrenceSheet
+            observation={{ ...obs, propertiesSchema: obs.properties_schema }}
+            initialOccurrence={occ}
+            onSaved={() => {
+              queryClient.invalidateQueries({ queryKey: ["observation-prev", obs.id] });
+              queryClient.invalidateQueries({ queryKey: ["observations"] });
+              pop();
+            }}
+          />
+        ),
+      });
+    },
+    [push, pop, queryClient],
+  );
+
+  // Tap card body → opens instance list
+  const handleSelectObs = useCallback(
+    (obs: ObservationRecord) => {
+      push({
+        key: `detail-${obs.id}`,
+        title: obs.title,
+        description: "Registros de esta observacion.",
+        content: (
+          <ObservationDetailSheet
+            observation={obs}
+            onLogNew={() => pushLogOccurrence(obs)}
+            onEdit={() => pushEditObs(obs)}
+            onEditOccurrence={(occ) => pushEditOccurrence(obs, occ)}
+          />
+        ),
+      });
+    },
+    [push, pushLogOccurrence, pushEditObs, pushEditOccurrence],
+  );
+
+  // + button → log occurrence directly
+  const handleLogNew = useCallback(
+    (obs: ObservationRecord) => {
+      pushLogOccurrence(obs);
+    },
+    [pushLogOccurrence],
   );
 
   const handleCreateNew = useCallback(() => {
@@ -86,7 +141,7 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
               description: "Registra cuando ocurre esta observacion.",
               content: (
                 <LogOccurrenceSheet
-                  observation={obs}
+                  observation={{ ...obs, propertiesSchema: obs.propertiesSchema }}
                   onSaved={handleOccurrenceSaved}
                 />
               ),
@@ -105,12 +160,12 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
       content: (
         <ObservationsListSheet
           onSelectObservation={handleSelectObs}
-          onEditObservation={handleEditObs}
+          onLogNew={handleLogNew}
           onCreateNew={handleCreateNew}
         />
       ),
     }),
-    [handleSelectObs, handleEditObs, handleCreateNew],
+    [handleSelectObs, handleLogNew, handleCreateNew],
   );
 
   return (

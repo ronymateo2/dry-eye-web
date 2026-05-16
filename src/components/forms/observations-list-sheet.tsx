@@ -1,23 +1,35 @@
 import { useState, useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { NotePencilIcon, PlusIcon, MagnifyingGlassIcon, XIcon, PencilSimpleIcon } from "@phosphor-icons/react";
+import {
+  NotePencilIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
+  XIcon,
+  SparkleIcon,
+  LightningIcon,
+  WrenchIcon,
+  CloudIcon,
+  PersonSimpleIcon,
+  FileTextIcon,
+  CaretRightIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import type { ObservationEye, PropertyDef, PropertyValue, ObservationRecord, LastOccurrenceSnippet } from "@/types/domain";
+import type { ObservationEye, PropertyDef, PropertyValue, ObservationRecord } from "@/types/domain";
 
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
 
-type MatchedNote = { note: string; logged_at: string };
+type MatchedNote = { note: string | null; logged_at: string; property_values: string | null };
 type Obs = ObservationRecord & { matched_notes?: MatchedNote[] | null };
 
 type Props = {
   onSelectObservation: (obs: Obs) => void;
-  onEditObservation?: (obs: Obs) => void;
+  onLogNew: (obs: Obs) => void;
   onCreateNew: () => void;
 };
 
@@ -46,6 +58,46 @@ function highlightMatch(text: string, query: string) {
   );
 }
 
+function CategoryIcon({ category, size = 14 }: { category?: string | null; size?: number }) {
+  const cls = "shrink-0 text-[var(--text-faint)]";
+  switch (category) {
+    case "sensory": return <SparkleIcon size={size} className={cls} />;
+    case "pain": return <LightningIcon size={size} className={cls} />;
+    case "functional": return <WrenchIcon size={size} className={cls} />;
+    case "environmental": return <CloudIcon size={size} className={cls} />;
+    case "postural": return <PersonSimpleIcon size={size} className={cls} />;
+    default: return <FileTextIcon size={size} className={cls} />;
+  }
+}
+
+function matchedPropSnippet(
+  propertyValuesJson: string | null,
+  schema: PropertyDef[] | null,
+  query: string
+): string | null {
+  if (!propertyValuesJson || !schema) return null;
+  let vals: Record<string, PropertyValue>;
+  try { vals = JSON.parse(propertyValuesJson); } catch { return null; }
+  const q = query.toLowerCase();
+  const parts: string[] = [];
+  for (const def of schema) {
+    const v = vals[def.key];
+    if (v === undefined || v === null || v === "") continue;
+    let display = "";
+    if (def.type === "boolean") display = v ? "Sí" : "No";
+    else if (def.type === "scale") display = `${v}/10`;
+    else if (def.type === "number") display = String(v);
+    else if (def.type === "text") display = String(v);
+    else if (def.type === "select") {
+      const opt = def.options.find((o) => o.value === v);
+      display = opt?.label ?? String(v);
+    }
+    const matches = def.label.toLowerCase().includes(q) || display.toLowerCase().includes(q);
+    if (matches) parts.push(`${def.label}: ${display}`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
 function ZonePill({ bodyZone, bodyZoneCustom, eye }: { bodyZone?: string | null; bodyZoneCustom?: string | null; eye: string }) {
   const label = bodyZone
     ? (bodyZone === "other" && bodyZoneCustom ? bodyZoneCustom : OBS_BODY_ZONE_LABELS[bodyZone])
@@ -60,58 +112,35 @@ function ZonePill({ bodyZone, bodyZoneCustom, eye }: { bodyZone?: string | null;
   );
 }
 
-function renderOccurrenceSnippet(
-  occ: LastOccurrenceSnippet,
-  schema: PropertyDef[] | null,
-  index: number,
-) {
-  const parts: string[] = [];
-  if (occ.intensity != null) parts.push(`${occ.intensity}/10`);
-  if (occ.notes) {
-    parts.push(`"${occ.notes.length > 50 ? occ.notes.slice(0, 50) + "…" : occ.notes}"`);
-  } else if (occ.field_values && schema && schema.length > 0) {
-    const chip = renderFieldValueSnippet(occ.field_values, schema);
-    if (chip) parts.push(chip);
-  }
-  if (parts.length === 0) return null;
+const PROP_TYPE_LABELS: Record<string, string> = {
+  scale: "Escala",
+  boolean: "Sí/No",
+  select: "Opciones",
+  text: "Texto",
+  number: "Número",
+};
+
+function SchemaPills({ schema }: { schema: PropertyDef[] }) {
+  if (schema.length === 0) return null;
   return (
-    <span
-      key={index}
-      className="block truncate text-[12px] text-[var(--text-faint)]"
-      style={{ opacity: 1 - index * 0.25 }}
-    >
-      {parts.join(" · ")}
-    </span>
+    <div className="flex flex-wrap gap-1">
+      {schema.slice(0, 4).map((def, i) => (
+        <span
+          key={i}
+          className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--text-faint)]"
+        >
+          {def.label || PROP_TYPE_LABELS[def.type]}
+        </span>
+      ))}
+      {schema.length > 4 && (
+        <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--text-faint)]">
+          +{schema.length - 4}
+        </span>
+      )}
+    </div>
   );
 }
 
-function renderFieldValueSnippet(
-  fieldValues: Record<string, PropertyValue>,
-  schema: PropertyDef[]
-): string {
-  const parts: string[] = [];
-  for (const def of schema) {
-    const v = fieldValues[def.key];
-    if (v === undefined || v === null || v === "") continue;
-    if (def.type === "boolean") parts.push(`${def.label}: ${v ? "Sí" : "No"}`);
-    else if (def.type === "scale") parts.push(`${def.label}: ${v}/10`);
-    else if (def.type === "select") {
-      const opt = def.options.find((o) => o.value === v);
-      parts.push(`${def.label}: ${opt?.label ?? String(v)}`);
-    }
-    if (parts.length >= 3) break;
-  }
-  return parts.join(" · ");
-}
-
-function CategoryPill({ category }: { category?: string | null }) {
-  if (!category) return null;
-  return (
-    <span className="rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[11px] text-[var(--accent)]">
-      {OBS_CATEGORY_LABELS[category]}
-    </span>
-  );
-}
 
 function SkeletonRow({ delay }: { delay: number }) {
   return (
@@ -134,88 +163,199 @@ function formatMatchedAt(iso: string): string {
   return d.toLocaleDateString("es", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
-function ObsRow({ obs, index, isSearching, submittedQuery, onSelect, onEdit }: {
+function ObsRow({ obs, index, isSearching, submittedQuery, onSelect, onLogNew }: {
   obs: Obs;
   index: number;
   isSearching: boolean;
   submittedQuery: string;
   onSelect: (obs: Obs) => void;
-  onEdit?: (obs: Obs) => void;
+  onLogNew: (obs: Obs) => void;
 }) {
+  const hasOccurrences = obs.occurrence_count > 0;
+  const schema = obs.properties_schema ?? [];
+
   return (
-    <motion.button
-      type="button"
+    <motion.div
       layout
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -6, scale: 0.97 }}
       transition={{ ...SPRING, delay: index * 0.035 }}
-      whileTap={{ scale: 0.975 }}
       className={cn(
-        "flex w-full flex-col gap-1.5 rounded-[14px]",
-        "border border-[var(--border)] bg-[var(--surface)] px-4 py-3",
-        "text-left"
+        "flex w-full gap-3 rounded-[14px]",
+        "border border-[var(--border)] bg-[var(--surface)] px-3.5 py-3"
       )}
-      onClick={() => onSelect(obs)}
     >
-      <div className="flex items-start justify-between gap-2 min-w-0">
-        <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
-          {obs.title}
-        </span>
-        <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
-          {obs.occurrence_count > 0 && (
-            <span className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--text-faint)]">
-              {obs.occurrence_count}
-            </span>
-          )}
-          {onEdit && (
-            <button
-              type="button"
-              aria-label={`Editar ${obs.title}`}
-              className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--text-faint)] active:opacity-60"
-              onClick={(e) => { e.stopPropagation(); onEdit(obs); }}
-            >
-              <PencilSimpleIcon size={14} />
-            </button>
-          )}
+      {/* Page icon — tappable: open detail */}
+      <button
+        type="button"
+        aria-label={`Ver registros de ${obs.title}`}
+        className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] bg-[var(--surface-el)] active:opacity-60"
+        onClick={() => onSelect(obs)}
+      >
+        <CategoryIcon category={obs.category} size={14} />
+      </button>
+
+      {/* Content — tap to open detail */}
+      <button
+        type="button"
+        className="min-w-0 flex-1 text-left active:opacity-70"
+        onClick={() => onSelect(obs)}
+      >
+        <div className="flex items-start gap-2">
+          <span className="text-[15px] font-medium leading-snug text-[var(--text-primary)] break-words min-w-0">
+            {obs.title}
+          </span>
         </div>
-      </div>
-      {(obs.body_zone || obs.eye !== "none" || obs.category) && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <ZonePill bodyZone={obs.body_zone} bodyZoneCustom={obs.body_zone_custom} eye={obs.eye} />
-          <CategoryPill category={obs.category} />
-        </div>
-      )}
-      {/* Snippets: last N occurrences — note → field chips → nothing per occurrence */}
-      {!isSearching && obs.last_occurrences.length > 0 && (
-        <div className="space-y-0.5">
-          {obs.last_occurrences.map((occ, i) =>
-            renderOccurrenceSnippet(occ, obs.properties_schema, i)
-          )}
-        </div>
-      )}
-      <span className="text-[12px] text-[var(--text-muted)]">
-        {obs.last_logged_at ? timeAgo(obs.last_logged_at) : "Sin registros"}
-      </span>
-      {isSearching && obs.matched_notes && obs.matched_notes.length > 0 && (
-        <div className="mt-0.5 space-y-1.5">
-          {obs.matched_notes.map((entry, ni) => (
-            <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
-              <span className="mb-0.5 block text-[11px] text-[var(--accent)]/70">
-                {formatMatchedAt(entry.logged_at)}
+
+        {/* Zone + category pills */}
+        {(obs.body_zone || obs.eye !== "none" || obs.category) && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            <ZonePill bodyZone={obs.body_zone} bodyZoneCustom={obs.body_zone_custom} eye={obs.eye} />
+            {obs.category && (
+              <span className="rounded-full bg-[var(--accent-dim)] px-2 py-0.5 text-[11px] text-[var(--accent)]">
+                {OBS_CATEGORY_LABELS[obs.category]}
               </span>
-              <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
-                {highlightMatch(entry.note, submittedQuery)}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-    </motion.button>
+            )}
+          </div>
+        )}
+
+        {/* Schema preview when no occurrences */}
+        {!hasOccurrences && schema.length > 0 && !isSearching && (
+          <div className="mt-1.5">
+            <SchemaPills schema={schema} />
+          </div>
+        )}
+
+        {/* Status line — browse only */}
+        {!isSearching && (
+          <span className="mt-1 block text-[12px] text-[var(--text-muted)]">
+            {hasOccurrences
+              ? `${obs.occurrence_count} registro${obs.occurrence_count !== 1 ? "s" : ""} · ${timeAgo(obs.last_logged_at!)}`
+              : "Sin registros"}
+          </span>
+        )}
+
+        {/* Search matched notes */}
+        {isSearching && obs.matched_notes && obs.matched_notes.length > 0 && (
+          <div className="mt-1.5 space-y-1.5">
+            {obs.matched_notes.map((entry, ni) => {
+              const propSnippet = matchedPropSnippet(entry.property_values, obs.properties_schema, submittedQuery);
+              return (
+                <div key={ni} className="border-l-2 border-[var(--accent)]/35 pl-2.5">
+                  <span className="mb-0.5 block text-[11px] text-[var(--accent)]/70">
+                    {formatMatchedAt(entry.logged_at)}
+                  </span>
+                  {propSnippet && (
+                    <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                      {highlightMatch(propSnippet, submittedQuery)}
+                    </span>
+                  )}
+                  {entry.note && !propSnippet && (
+                    <span className="line-clamp-2 text-[12px] leading-relaxed text-[var(--text-faint)]">
+                      {highlightMatch(entry.note, submittedQuery)}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Compact count in search mode */}
+        {isSearching && (
+          <span className="mt-1.5 block text-[11px] text-[var(--text-faint)]">
+            {obs.occurrence_count} registro{obs.occurrence_count !== 1 ? "s" : ""}
+          </span>
+        )}
+      </button>
+
+      {/* + button — log new occurrence directly */}
+      <button
+        type="button"
+        aria-label={`Nueva ocurrencia de ${obs.title}`}
+        className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-faint)] active:opacity-60"
+        onClick={() => onLogNew(obs)}
+      >
+        <PlusIcon size={14} />
+      </button>
+    </motion.div>
   );
 }
 
-export function ObservationsListSheet({ onSelectObservation, onEditObservation, onCreateNew }: Props) {
+const CATEGORY_ORDER = ["sensory", "pain", "functional", "environmental", "postural", null] as const;
+
+function CategorySection({
+  category,
+  items,
+  startIndex,
+  isSearching,
+  submittedQuery,
+  onSelect,
+  onLogNew,
+}: {
+  category: string | null;
+  items: Obs[];
+  startIndex: number;
+  isSearching: boolean;
+  submittedQuery: string;
+  onSelect: (obs: Obs) => void;
+  onLogNew: (obs: Obs) => void;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  const label = category ? OBS_CATEGORY_LABELS[category] : "Sin categoría";
+
+  return (
+    <div className="space-y-2">
+      <button
+        type="button"
+        className="flex w-full items-center gap-1.5 px-0.5 active:opacity-70"
+        onClick={() => setCollapsed((c) => !c)}
+      >
+        <motion.span
+          animate={{ rotate: collapsed ? -90 : 0 }}
+          transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+          className="flex items-center"
+        >
+          <CaretRightIcon size={10} className="text-[var(--text-faint)]" weight="bold" style={{ transform: collapsed ? "rotate(-90deg)" : "rotate(90deg)" }} />
+        </motion.span>
+        <CategoryIcon category={category} size={11} />
+        <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">
+          {label}
+        </span>
+        <span className="ml-auto text-[11px] text-[var(--text-faint)]">{items.length}</span>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {!collapsed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-2 pl-1">
+              {items.map((obs, i) => (
+                <ObsRow
+                  key={obs.id}
+                  obs={obs}
+                  index={startIndex + i}
+                  isSearching={isSearching}
+                  submittedQuery={submittedQuery}
+                  onSelect={onSelect}
+                  onLogNew={onLogNew}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export function ObservationsListSheet({ onSelectObservation, onLogNew, onCreateNew }: Props) {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -257,6 +397,19 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
     inputRef.current?.focus();
   };
 
+  // Group by category for browse mode
+  const recientes = !isSearching
+    ? observations.filter((o) => o.last_logged_at !== null).slice(0, 3)
+    : [];
+
+  const grouped: Map<string | null, Obs[]> = new Map();
+  if (!isSearching) {
+    for (const cat of CATEGORY_ORDER) {
+      const items = observations.filter((o) => (o.category ?? null) === cat);
+      if (items.length > 0) grouped.set(cat, items);
+    }
+  }
+
   return (
     <>
       <div className="space-y-3 pb-4">
@@ -270,7 +423,6 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
             onSubmit={handleSubmit}
             transition={SPRING}
           >
-            {/* Magnifying glass icon */}
             <motion.span
               layout
               className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
@@ -306,7 +458,6 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
               onBlur={() => setIsFocused(false)}
             />
 
-            {/* Clear × button */}
             <AnimatePresence>
               {query.length > 0 && (
                 <motion.button
@@ -326,7 +477,6 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
             </AnimatePresence>
           </motion.form>
 
-          {/* Cancelar button — slides in from right on focus */}
           <AnimatePresence>
             {showCancel && (
               <motion.button
@@ -345,7 +495,7 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
           </AnimatePresence>
         </div>
 
-        {/* Search status tag */}
+        {/* Search status */}
         <AnimatePresence>
           {isSearching && !loading && (
             <motion.p
@@ -396,31 +546,64 @@ export function ObservationsListSheet({ onSelectObservation, onEditObservation, 
                   : "No tienes observaciones creadas.\nCrea una para comenzar a registrar ocurrencias."}
               </p>
             </motion.div>
-          ) : (
-            <motion.div key={`list-${submittedQuery}`} className="space-y-2">
-              {/* Recientes — top 3 with prior occurrences, shown when not searching */}
-              {!isSearching && (() => {
-                const recientes = displayed.filter((o) => o.last_logged_at !== null).slice(0, 3);
-                if (recientes.length === 0) return null;
-                return (
-                  <>
-                    <p className="px-0.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">
-                      Recientes
-                    </p>
-                    {recientes.map((obs, i) => (
-                      <ObsRow key={obs.id} obs={obs} index={i} isSearching={false} submittedQuery="" onSelect={onSelectObservation} onEdit={onEditObservation} />
-                    ))}
-                    {displayed.length > recientes.length && (
-                      <p className="px-0.5 pt-1 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">
-                        Todas
-                      </p>
-                    )}
-                  </>
-                );
-              })()}
+          ) : isSearching ? (
+            /* Search results — flat list */
+            <motion.div key={`search-${submittedQuery}`} className="space-y-2">
               {displayed.map((obs, i) => (
-                <ObsRow key={obs.id} obs={obs} index={i} isSearching={isSearching} submittedQuery={submittedQuery} onSelect={onSelectObservation} onEdit={onEditObservation} />
+                <ObsRow
+                  key={obs.id}
+                  obs={obs}
+                  index={i}
+                  isSearching={true}
+                  submittedQuery={submittedQuery}
+                  onSelect={onSelectObservation}
+                  onLogNew={onLogNew}
+                />
               ))}
+            </motion.div>
+          ) : (
+            /* Browse mode — recientes + grouped by category */
+            <motion.div key="browse" className="space-y-4">
+              {/* Recientes */}
+              {recientes.length > 0 && (
+                <div className="space-y-2">
+                  <p className="px-0.5 text-[11px] font-medium uppercase tracking-wider text-[var(--text-faint)]">
+                    Recientes
+                  </p>
+                  {recientes.map((obs, i) => (
+                    <ObsRow
+                      key={obs.id}
+                      obs={obs}
+                      index={i}
+                      isSearching={false}
+                      submittedQuery=""
+                      onSelect={onSelectObservation}
+                      onLogNew={onLogNew}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Category groups */}
+              {grouped.size > 0 && (
+                <div className="space-y-4">
+                  {recientes.length > 0 && (
+                    <div className="h-px bg-[var(--border)]" />
+                  )}
+                  {Array.from(grouped.entries()).map(([cat, items], gi) => (
+                    <CategorySection
+                      key={cat ?? "__none__"}
+                      category={cat}
+                      items={items}
+                      startIndex={gi * 3}
+                      isSearching={false}
+                      submittedQuery=""
+                      onSelect={onSelectObservation}
+                      onLogNew={onLogNew}
+                    />
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

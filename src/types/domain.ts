@@ -114,12 +114,14 @@ export type SaveMedicationInput = {
 
 export type PainQuality = "ardor" | "hormigueo" | "electrico" | "presion" | "alodinia";
 
-export type PropertyType = "scale" | "boolean" | "select" | "text";
+export type PropertyType = "scale" | "boolean" | "select" | "text" | "number";
 
 export type PropertyDef =
-  | { key: string; label: string; type: "scale"; min?: number; max?: number }
-  | { key: string; label: string; type: "boolean" }
-  | { key: string; label: string; type: "select"; options: { value: string; label: string }[] };
+  | { id: string; key: string; label: string; type: "scale"; min?: number; max?: number }
+  | { id: string; key: string; label: string; type: "boolean" }
+  | { id: string; key: string; label: string; type: "select"; options: { value: string; label: string }[] }
+  | { id: string; key: string; label: string; type: "number" }
+  | { id: string; key: string; label: string; type: "text" };
 
 export type PropertyValue = number | boolean | string;
 
@@ -145,6 +147,8 @@ export type ObservationRecord = {
   body_zone_custom: string | null;
   category: string | null;
   properties_schema: PropertyDef[] | null;
+  use_intensity: boolean;
+  use_duration: boolean;
   last_logged_at: string | null;
   last_occurrences: LastOccurrenceSnippet[];
   occurrence_count: number;
@@ -170,8 +174,10 @@ export type PrevOccurrence = {
   id: string;
   loggedAt: string;
   intensity: number | null;
+  durationMinutes: number | null;
   notes: string | null;
   propertyValues: Record<string, PropertyValue> | null;
+  links: ObservationLinks | null;
 };
 
 export type TherapyType = "miofascial" | "other";
@@ -200,7 +206,8 @@ export type SaveOccurrenceInput = {
   id: string;
   observationId: string;
   loggedAt: string;
-  intensity: number;
+  intensity?: number | null;
+  durationMinutes?: number | null;
   notes?: string;
   propertyValues?: Record<string, PropertyValue>;
   links?: ObservationLinks;

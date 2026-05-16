@@ -137,11 +137,13 @@ export const api = {
   getObservationPrevious: (observationId: string, limit = 3) =>
     api.get<import("@/types/domain").PrevOccurrence[]>(`/observations/${observationId}/occurrences?limit=${limit}`),
   searchObservations: (q: string) => api.get<(import("@/types/domain").ObservationRecord & { matched_notes: { note: string; logged_at: string }[] | null })[]>(`/observations/search?q=${encodeURIComponent(q)}`),
-  createObservation: (body: { title: string; eye?: string; body_zone?: string | null; body_zone_custom?: string | null; category?: string | null; propertiesSchema?: import("@/types/domain").PropertyDef[] }) => api.post<import("@/types/domain").ObservationRecord>("/observations", body),
-  updateObservation: (id: string, body: { title?: string; eye?: string; body_zone?: string | null; body_zone_custom?: string | null; category?: string | null; propertiesSchema?: import("@/types/domain").PropertyDef[] }) => api.put<import("@/types/domain").ObservationRecord>(`/observations/${id}`, body),
+  createObservation: (body: { title: string; eye?: string; body_zone?: string | null; body_zone_custom?: string | null; category?: string | null; propertiesSchema?: import("@/types/domain").PropertyDef[]; useIntensity?: boolean; useDuration?: boolean }) => api.post<import("@/types/domain").ObservationRecord>("/observations", body),
+  updateObservation: (id: string, body: { title?: string; eye?: string; body_zone?: string | null; body_zone_custom?: string | null; category?: string | null; propertiesSchema?: import("@/types/domain").PropertyDef[]; useIntensity?: boolean; useDuration?: boolean }) => api.put<import("@/types/domain").ObservationRecord>(`/observations/${id}`, body),
   deleteObservation: (id: string) => api.delete(`/observations/${id}`),
   saveOccurrence: (observationId: string, body: Omit<SaveOccurrenceInput, "observationId">) =>
     api.post(`/observations/${observationId}/occurrences`, body),
+  deleteOccurrence: (observationId: string, occurrenceId: string) =>
+    api.delete(`/observations/${observationId}/occurrences/${occurrenceId}`),
 
   getMedications: () => api.get<{ id: string; name: string; dosage: string | null; frequency: string | null; notes: string | null; sort_order: number | null; start_date: string | null; end_date: string | null; phases_json: string | null; times_json: string | null }[]>("/medications"),
   createMedication: (body: SaveMedicationInput) => api.post("/medications", body),
