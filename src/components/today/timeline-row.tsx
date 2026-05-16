@@ -59,7 +59,7 @@ export function TimelineRow({
       />
 
       <span
-        className="font-mono text-[13px] tabular-nums whitespace-nowrap w-[46px] shrink-0 text-right pt-[10px]"
+        className="font-mono text-[13px] tabular-nums whitespace-nowrap w-[46px] shrink-0 text-right pt-[6px]"
         style={{ color: "var(--text-faint)" }}
       >
         {timeLabel}
