@@ -10,6 +10,7 @@ import { PainSlider } from "@/components/ui/pain-slider";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getDayKey } from "@/lib/utils";
+import { formatPropertyValue } from "@/lib/observations";
 import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
 import type { ActionState, PropertyDef, PropertyValue, ObservationEye, ObservationLinks, PrevOccurrence } from "@/types/domain";
 
@@ -72,14 +73,9 @@ function PrevOccurrencesSection({ observationId, schema, useIntensity, useDurati
       for (const def of schema) {
         const v = occ.propertyValues[def.key];
         if (v === undefined || v === null || v === "") continue;
-        if (def.type === "boolean") parts.push(`${def.label}: ${v ? "Sí" : "No"}`);
-        else if (def.type === "scale") parts.push(`${def.label}: ${v}/10`);
-        else if (def.type === "number") parts.push(`${def.label}: ${v}`);
-        else if (def.type === "text") parts.push(`${def.label}: ${String(v).slice(0, 30)}${String(v).length > 30 ? "…" : ""}`);
-        else if (def.type === "select") {
-          const opt = def.options.find((o) => o.value === v);
-          parts.push(`${def.label}: ${opt?.label ?? String(v)}`);
-        }
+        const display = formatPropertyValue(def, v);
+        const truncated = def.type === "text" && display.length > 30 ? display.slice(0, 30) + "…" : display;
+        parts.push(`${def.label}: ${truncated}`);
       }
     }
     if (occ.notes) parts.push(`"${occ.notes.slice(0, 40)}${occ.notes.length > 40 ? "…" : ""}"`);

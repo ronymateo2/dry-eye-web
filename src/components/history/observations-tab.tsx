@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { EyedropperIcon, StethoscopeIcon, MoonIcon, PillIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 import { getDayKey } from "@/lib/utils";
+import { formatPropertyValue } from "@/lib/observations";
 import { OBS_EYE_LABELS } from "@/lib/constants";
 import { painColor } from "@/lib/pain";
 import type { OccurrenceRow } from "./types";
@@ -124,14 +125,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                         {item.propertiesSchema!.map((def) => {
                           const v = item.propertyValues![def.key];
                           if (v === undefined || v === null || v === "") return null;
-                          let display: string;
-                          if (def.type === "scale") display = `${v}/10`;
-                          else if (def.type === "boolean") display = v ? "Sí" : "No";
-                          else if (def.type === "number" || def.type === "text") display = String(v);
-                          else {
-                            const opt = def.options.find((o: { value: string; label: string }) => o.value === v);
-                            display = opt?.label ?? String(v);
-                          }
+                          const display = formatPropertyValue(def, v);
                           return (
                             <span key={def.key} className="rounded-full bg-[var(--surface-el)] px-2 py-0.5 text-[12px] text-[var(--text-muted)]">
                               {def.label}: <span className="font-medium text-[var(--text-primary)]">{display}</span>

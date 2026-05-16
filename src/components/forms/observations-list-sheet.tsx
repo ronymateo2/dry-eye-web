@@ -19,6 +19,7 @@ import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { formatPropertyValue } from "@/lib/observations";
 import type { ObservationEye, PropertyDef, PropertyValue, ObservationRecord } from "@/types/domain";
 
 const SPRING = { type: "spring" as const, stiffness: 420, damping: 36, mass: 0.75 };
@@ -83,15 +84,7 @@ function matchedPropSnippet(
   for (const def of schema) {
     const v = vals[def.key];
     if (v === undefined || v === null || v === "") continue;
-    let display = "";
-    if (def.type === "boolean") display = v ? "Sí" : "No";
-    else if (def.type === "scale") display = `${v}/10`;
-    else if (def.type === "number") display = String(v);
-    else if (def.type === "text") display = String(v);
-    else if (def.type === "select") {
-      const opt = def.options.find((o) => o.value === v);
-      display = opt?.label ?? String(v);
-    }
+    const display = formatPropertyValue(def, v);
     const matches = def.label.toLowerCase().includes(q) || display.toLowerCase().includes(q);
     if (matches) parts.push(`${def.label}: ${display}`);
   }

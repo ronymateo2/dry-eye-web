@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { formatPropertyValue } from "@/lib/observations";
 import type { ObservationEye, ObservationRecord, PrevOccurrence, PropertyDef, PropertyValue } from "@/types/domain";
 
 const EASE_OUT = { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const };
@@ -50,16 +51,11 @@ function PropChips({ occ, schema, useIntensity, useDuration }: {
     for (const def of schema) {
       const v: PropertyValue | undefined = occ.propertyValues[def.key];
       if (v === undefined || v === null || v === "") continue;
-      let display = "";
-      if (def.type === "boolean") display = v ? "Sí" : "No";
-      else if (def.type === "scale") display = `${v}/10`;
-      else if (def.type === "number") display = String(v);
-      else if (def.type === "text") chips.push({ label: def.label, value: String(v), isText: true });
-      else if (def.type === "select") {
-        const opt = def.options.find((o) => o.value === v);
-        display = opt?.label ?? String(v);
+      if (def.type === "text") {
+        chips.push({ label: def.label, value: String(v), isText: true });
+      } else {
+        chips.push({ label: def.label, value: formatPropertyValue(def, v) });
       }
-      if (display) chips.push({ label: def.label, value: display });
     }
   }
 
