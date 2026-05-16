@@ -37,7 +37,7 @@ export function TimelineRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
       className={cn(
-        "group relative flex items-center gap-2 w-full rounded-[10px] px-3 min-h-[40px] cursor-pointer",
+        "group relative flex items-baseline gap-2 w-full rounded-[10px] px-3 min-h-[40px] cursor-pointer",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}
@@ -59,21 +59,38 @@ export function TimelineRow({
       />
 
       <span
-        className="font-mono text-[13px] tabular-nums whitespace-nowrap w-[46px] shrink-0 text-right"
+        className="font-mono text-[13px] tabular-nums whitespace-nowrap w-[46px] shrink-0 text-right pt-[10px]"
         style={{ color: "var(--text-faint)" }}
       >
         {timeLabel}
       </span>
 
-      <span className="min-w-0 flex-1 flex items-center gap-1.5 ml-1 overflow-hidden">
-        <span
-          className="truncate text-[17px] font-medium capitalize leading-none"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {entry.name}
-        </span>
+      <div className="min-w-0 flex-1 flex flex-col ml-1">
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="truncate text-[17px] font-medium capitalize leading-none"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {entry.name}
+          </span>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <span
+              className="font-mono text-[15px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
+              style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
+            >
+              {badgeText}
+            </span>
+            <CaretRightIcon
+              aria-hidden
+              size={9}
+              weight="bold"
+              className="text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70"
+            />
+          </div>
+        </div>
+
         {vialStatus && vial && onDiscardVial && (
-          <span className="flex shrink-0 items-center gap-1">
+          <div className="flex items-center gap-1 mt-0.5">
             <EyedropperSampleIcon
               size={12}
               weight="fill"
@@ -97,24 +114,9 @@ export function TimelineRow({
             >
               <TrashIcon size={12} weight="regular" />
             </button>
-          </span>
+          </div>
         )}
-      </span>
-
-      <span className="flex shrink-0 items-center gap-1.5 pointer-events-none">
-        <span
-          className="font-mono text-[15px] font-medium tabular-nums transition-transform duration-[160ms] ease-out group-hover:-translate-x-0.5"
-          style={{ color: badgeColor, transition: "color 0.4s ease, transform 160ms ease-out" }}
-        >
-          {badgeText}
-        </span>
-        <CaretRightIcon
-          aria-hidden
-          size={9}
-          weight="bold"
-          className="text-[var(--text-faint)] transition-[opacity,transform] duration-[160ms] ease-out group-hover:translate-x-0.5 group-hover:opacity-70"
-        />
-      </span>
+      </div>
     </motion.div>
   );
 }
