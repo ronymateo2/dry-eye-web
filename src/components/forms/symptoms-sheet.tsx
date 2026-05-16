@@ -12,16 +12,14 @@ import {
   ClockCounterClockwiseIcon,
 } from "@phosphor-icons/react";
 import { formatGap } from "@/components/history/utils";
-import { SYMPTOM_STATE_LABEL, SYMPTOM_STATE_COLOR } from "@/lib/symptom-state";
+import { SYMPTOM_STATE_LABEL, SYMPTOM_STATE_COLOR, calcSymptomState } from "@/lib/symptom-state";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { SymptomStatusToday } from "@/types/domain";
-import { getDayKey } from "@/lib/utils";
+import { getDayKey, cn } from "@/lib/utils";
 import { TRIGGER_OPTIONS } from "@/lib/constants";
 import { queueSymptomEntry } from "@/lib/offline/symptoms-queue";
-import { calcSymptomState } from "@/lib/symptom-state";
-import { cn } from "@/lib/utils";
 import type { SymptomIntensities, SaveSymptomEntryInput, TriggerType } from "@/types/domain";
 
 type Props = {
@@ -41,19 +39,12 @@ const SYMPTOM_FIELDS: {
     { key: "pressure", label: "Presión", Icon: CircleHalfIcon },
   ];
 
-const INTENSITY_COLOR: Record<number, string> = {
-  0: "var(--text-faint)",
-  1: "var(--pain-low)",
-  2: "var(--pain-low)",
-  3: "var(--pain-low)",
-  4: "var(--pain-mid)",
-  5: "var(--pain-mid)",
-  6: "var(--pain-mid)",
-  7: "var(--pain-high)",
-  8: "var(--pain-high)",
-  9: "var(--pain-high)",
-  10: "var(--pain-high)",
-};
+function intensityColor(v: number) {
+  if (v >= 7) return "var(--pain-high)";
+  if (v >= 4) return "var(--pain-mid)";
+  if (v > 0) return "var(--pain-low)";
+  return "var(--text-faint)";
+}
 
 
 const DEFAULT_INTENSITIES: SymptomIntensities = {
@@ -157,7 +148,7 @@ export function SymptomsSheet({ onSaved }: Props) {
 
   return (
     <>
-      <div className="space-y-5 pb-4">
+      <div className="space-y-5 pb-28">
         {/* Date/time */}
         <div className="space-y-2">
           <p className="section-label">Fecha y hora</p>
@@ -189,7 +180,7 @@ export function SymptomsSheet({ onSaved }: Props) {
                   </p>
                   <p className="text-[14px] font-medium leading-snug flex items-center gap-1">
                     <span className="text-[var(--text-muted)]">{SYMPTOM_STATE_LABEL[latest.calculated_state]}</span>
-                    {previewState && (
+                    {previewState && previewState !== latest.calculated_state && (
                       <>
                         <span className="text-[var(--text-faint)]">→</span>
                         <span style={{ color: SYMPTOM_STATE_COLOR[previewState] }}>{SYMPTOM_STATE_LABEL[previewState]}</span>
@@ -212,12 +203,12 @@ export function SymptomsSheet({ onSaved }: Props) {
 
           {SYMPTOM_FIELDS.map(({ key, label, Icon }) => {
             const val = (intensities[key] ?? 0) as number;
-            const color = INTENSITY_COLOR[val];
+            const color = intensityColor(val);
             return (
               <div key={key} className="grid items-center gap-3" style={{ gridTemplateColumns: "96px 1fr 36px" }}>
                 <span className="flex items-center gap-2 min-w-0">
-                  <Icon size={14} className="shrink-0 text-[var(--text-faint)]" />
-                  <span className="truncate text-[13px] font-medium text-[var(--text-muted)]">{label}</span>
+                  <Icon size={14} className="shrink-0" style={{ color: val > 0 ? intensityColor(val) : 'var(--text-faint)' }} />
+                  <span className="truncate text-[15px] text-[var(--text-muted)]">{label}</span>
                 </span>
                 <input
                   type="range"
@@ -300,10 +291,4 @@ export function SymptomsSheet({ onSaved }: Props) {
       </div>
     </>
   );
-}
-
-function previewStateColor(state: string): string {
-  if (state === "brote" || state === "reactivo") return "var(--pain-high)";
-  if (state === "sensible") return "var(--pain-mid)";
-  return "var(--pain-low)";
 }
