@@ -153,7 +153,6 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               disabled={isPending}
               aria-label={`Registrar dosis de ${drop.name}`}
             >
-              <PlusIcon size={12} weight="bold" />
               Registrar
             </Button>
           )}
