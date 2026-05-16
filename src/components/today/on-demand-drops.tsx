@@ -86,7 +86,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   return (
     <>
       <div
-        className="flex min-h-[52px] items-center gap-3 rounded-[10px] px-3 py-2 transition-colors duration-300"
+        className="flex min-h-[72px] items-center gap-4 rounded-[14px] px-4 py-3.5 transition-colors duration-300"
         style={{
           background: justRegistered
             ? "color-mix(in srgb, var(--pain-low) 8%, var(--surface-card))"
@@ -97,15 +97,16 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
           variant={justRegistered ? "tinted-success" : "tinted"}
           onClick={handleLog}
           disabled={isPending}
-          whileTap={{ scale: 1.5 }}
+          whileTap={{ scale: 1.4 }}
           aria-label={`Registrar dosis de ${drop.name}`}
+          className="h-11 w-11 shrink-0"
         >
-          <DropIcon size={14} />
+          <DropIcon size={18} />
         </IconButton>
 
         <div className="min-w-0 flex-1">
           <p
-            className="truncate text-[15px] font-semibold capitalize leading-tight transition-colors duration-300"
+            className="truncate text-[17px] font-semibold capitalize leading-snug transition-colors duration-300"
             style={{ color: justRegistered ? "var(--text-muted)" : "var(--text-primary)" }}
           >
             {drop.name}
@@ -115,7 +116,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               initial={{ opacity: 0, y: 3 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="text-[12px] text-[var(--text-faint)]"
+              className="mt-0.5 text-[13px] text-[var(--text-faint)]"
             >
               Tomada a las{" "}
               <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
@@ -123,20 +124,20 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               </span>
             </motion.p>
           ) : lastDrop ? (
-            <p className="text-[12px] text-[var(--text-faint)]">
+            <p className="mt-0.5 text-[13px] text-[var(--text-faint)]">
               última{" "}
               <span className="font-mono">{formatTimeAgo(lastDrop.logged_at, now)}</span>
             </p>
           ) : null}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2.5">
           {todayCount > 0 && (
             <TodayCountBadge
               count={todayCount}
               onClick={() => setTodayDropsOpen(true)}
-              iconSize={10}
-              className="px-2.5 py-1 text-[12px]"
+              iconSize={11}
+              className="px-3 py-1.5 text-[13px]"
             />
           )}
 
@@ -145,10 +146,10 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              className="flex h-8 w-8 items-center justify-center rounded-full"
+              className="flex h-10 w-10 items-center justify-center rounded-full"
               style={{ background: "color-mix(in srgb, var(--pain-low) 18%, transparent)" }}
             >
-              <CheckIcon size={14} weight="bold" style={{ color: "var(--pain-low)" }} />
+              <CheckIcon size={18} weight="bold" style={{ color: "var(--pain-low)" }} />
             </motion.div>
           ) : (
             <button
@@ -156,9 +157,9 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               onClick={handleLog}
               disabled={isPending}
               aria-label={`Registrar dosis de ${drop.name}`}
-              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[var(--accent)]/15 px-3 text-[13px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/25 active:scale-[0.97] disabled:opacity-50"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full bg-[var(--accent)]/15 px-4 text-[15px] font-semibold text-[var(--accent)] transition-all hover:bg-[var(--accent)]/25 active:scale-[0.97] disabled:opacity-50"
             >
-              <PlusIcon size={12} weight="bold" />
+              <PlusIcon size={14} weight="bold" />
               Registrar
             </button>
           )}
