@@ -127,8 +127,9 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
                           let display: string;
                           if (def.type === "scale") display = `${v}/10`;
                           else if (def.type === "boolean") display = v ? "Sí" : "No";
+                          else if (def.type === "number" || def.type === "text") display = String(v);
                           else {
-                            const opt = def.options.find((o) => o.value === v);
+                            const opt = def.options.find((o: { value: string; label: string }) => o.value === v);
                             display = opt?.label ?? String(v);
                           }
                           return (

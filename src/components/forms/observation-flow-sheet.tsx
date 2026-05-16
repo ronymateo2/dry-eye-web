@@ -141,7 +141,7 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
               description: "Registra cuando ocurre esta observacion.",
               content: (
                 <LogOccurrenceSheet
-                  observation={{ ...obs, propertiesSchema: obs.propertiesSchema }}
+                  observation={obs}
                   onSaved={handleOccurrenceSaved}
                 />
               ),

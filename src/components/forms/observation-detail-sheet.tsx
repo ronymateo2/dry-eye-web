@@ -54,7 +54,7 @@ function PropChips({ occ, schema, useIntensity, useDuration }: {
       if (def.type === "boolean") display = v ? "Sí" : "No";
       else if (def.type === "scale") display = `${v}/10`;
       else if (def.type === "number") display = String(v);
-      else if (def.type === "text") { chips.push({ label: def.label, value: String(v), isText: true }); continue; }
+      else if (def.type === "text") chips.push({ label: def.label, value: String(v), isText: true });
       else if (def.type === "select") {
         const opt = def.options.find((o) => o.value === v);
         display = opt?.label ?? String(v);

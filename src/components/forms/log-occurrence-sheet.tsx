@@ -55,7 +55,7 @@ function ObsContextCard({ observation }: { observation: Props["observation"] }) 
   );
 }
 
-function PrevOccurrencesSection({ observationId, schema }: { observationId: string; schema?: PropertyDef[] | null }) {
+function PrevOccurrencesSection({ observationId, schema, useIntensity, useDuration }: { observationId: string; schema?: PropertyDef[] | null; useIntensity?: boolean; useDuration?: boolean }) {
   const [open, setOpen] = useState(false);
 
   const { data: prev = [], isLoading } = useQuery({
@@ -66,8 +66,8 @@ function PrevOccurrencesSection({ observationId, schema }: { observationId: stri
 
   function formatPrev(occ: PrevOccurrence): string {
     const parts: string[] = [];
-    if (observation.use_intensity && occ.intensity != null) parts.push(`${occ.intensity}/10`);
-    if (observation.use_duration && occ.durationMinutes != null) parts.push(`${occ.durationMinutes} min`);
+    if (useIntensity && occ.intensity != null) parts.push(`${occ.intensity}/10`);
+    if (useDuration && occ.durationMinutes != null) parts.push(`${occ.durationMinutes} min`);
     if (occ.propertyValues && schema) {
       for (const def of schema) {
         const v = occ.propertyValues[def.key];
@@ -505,6 +505,8 @@ export function LogOccurrenceSheet({ observation, initialOccurrence, onSaved }: 
         <PrevOccurrencesSection
           observationId={observation.id}
           schema={observation.propertiesSchema}
+          useIntensity={observation.use_intensity}
+          useDuration={observation.use_duration}
         />
       </div>
 
