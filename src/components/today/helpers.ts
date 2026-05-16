@@ -48,21 +48,17 @@ export function getCountdown(
   return { label, overdue: diffMs <= 0, nextTime, color, progress };
 }
 
-export function isPrevDayOverdue(entry: DropScheduleEntry, now: number): boolean {
-  if (!entry.last_logged_at || !entry.interval_hours) return false;
-  const nextMs = new Date(entry.last_logged_at).getTime() + entry.interval_hours * 3_600_000;
-  if (nextMs >= now) return false;
-  return new Date(entry.last_logged_at).toDateString() !== new Date(now).toDateString();
+export function isLoggedToday(entry: DropScheduleEntry, now: number): boolean {
+  if (!entry.last_logged_at) return false;
+  return new Date(entry.last_logged_at).toDateString() === new Date(now).toDateString();
 }
 
 export function isCompletedToday(entry: DropScheduleEntry, now: number): boolean {
   if (!entry.last_logged_at || !entry.interval_hours) return false;
-  const lastMs = new Date(entry.last_logged_at).getTime();
-  const nextMs = lastMs + entry.interval_hours * 3_600_000;
+  if (!isLoggedToday(entry, now)) return false;
+  const nextMs = new Date(entry.last_logged_at).getTime() + entry.interval_hours * 3_600_000;
   if (nextMs <= now) return false;
-  const today = new Date(now).toDateString();
-  if (new Date(lastMs).toDateString() !== today) return false;
-  return new Date(nextMs).toDateString() !== today;
+  return new Date(nextMs).toDateString() !== new Date(now).toDateString();
 }
 
 export function getNextMs(entry: DropScheduleEntry): number {

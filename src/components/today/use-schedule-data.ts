@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { DoseSlot } from "@/components/register/day-projection-sheet";
 import { api } from "@/lib/api";
 import { daysUntilEnd } from "@/lib/utils";
-import { getNextMs, isPrevDayOverdue, isCompletedToday, buildDayProjection } from "./helpers";
+import { getNextMs, isLoggedToday, isCompletedToday, buildDayProjection } from "./helpers";
 
 export function useScheduleData(now: number) {
   const { data: activeVials = [] } = useQuery({
@@ -35,7 +35,7 @@ export function useScheduleData(now: number) {
   const upcoming = useMemo(
     () =>
       validEntries
-        .filter((e) => !isPrevDayOverdue(e, now) && !isCompletedToday(e, now))
+        .filter((e) => isLoggedToday(e, now) && !isCompletedToday(e, now))
         .sort((a, b) => getNextMs(a) - getNextMs(b)),
     [validEntries, now],
   );
@@ -46,7 +46,7 @@ export function useScheduleData(now: number) {
   );
 
   const sinRegistro = useMemo(
-    () => validEntries.filter((e) => isPrevDayOverdue(e, now) || !e.last_logged_at),
+    () => validEntries.filter((e) => !isLoggedToday(e, now) && !isCompletedToday(e, now)),
     [validEntries, now],
   );
 

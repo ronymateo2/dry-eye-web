@@ -64,9 +64,12 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
               body_zone_custom: obs.body_zone_custom,
               category: obs.category,
               propertiesSchema: obs.properties_schema ?? undefined,
+              use_intensity: obs.use_intensity,
+              use_duration: obs.use_duration,
             }}
             onSaved={() => {
               queryClient.invalidateQueries({ queryKey: ["observations"] });
+              pop();
               pop();
             }}
           />
