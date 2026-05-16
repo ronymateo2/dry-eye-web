@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { motion } from "motion/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -224,12 +225,16 @@ export function SymptomsSheet({ onSaved }: Props) {
                   style={{ "--track-bg": `linear-gradient(to right, ${color} ${val * 10}%, var(--surface-el) ${val * 10}%)`, "--thumb-color": color } as React.CSSProperties}
                   onChange={(e) => setField(key, Number(e.target.value))}
                 />
-                <span
+                <motion.span
+                  key={val}
+                  initial={{ y: -4, opacity: 0.5 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ type: "spring", duration: 0.35, bounce: 0.3 }}
                   className="mono text-right text-[15px] font-bold tabular-nums"
                   style={{ color }}
                 >
                   {val}
-                </span>
+                </motion.span>
               </div>
             );
           })}
