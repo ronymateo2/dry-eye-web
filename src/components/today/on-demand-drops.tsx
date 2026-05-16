@@ -2,7 +2,7 @@ import { useState, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { useInvalidateDrops } from "@/lib/hooks/use-invalidate-drops";
-import { PlusIcon, CheckIcon, DropIcon } from "@phosphor-icons/react";
+import { CheckIcon, DropIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { TodayDropsSheet } from "./today-drops-sheet";
 import { TodayCountBadge } from "./today-count-badge";
