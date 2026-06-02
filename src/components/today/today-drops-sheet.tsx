@@ -1,197 +1,25 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useCallback } from "react";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { TrashIcon, PencilSimpleIcon, EyedropperIcon, CaretRightIcon, DropIcon } from "@phosphor-icons/react";
+import { TrashIcon, PencilSimpleIcon, EyedropperIcon } from "@phosphor-icons/react";
 import { StackedSheet } from "@/components/layout/stacked-sheet";
 import { useSheetStack } from "@/lib/hooks/use-sheet-stack";
 import { DropSheet } from "@/components/forms/drop-sheet";
 import { Button } from "@/components/ui/button";
+import { TimelineRow, TimelineDot, TimelineGap } from "@/components/history/timeline-ui";
+import { formatTime, formatGap } from "@/components/history/utils";
+import { useUser } from "@/lib/auth";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { getDayKey } from "@/lib/utils";
 import type { DropEye } from "@/types/domain";
 import { dispatchQuickAction } from "./helpers";
 
-const EYE_SHORT: Record<string, string> = { left: "IZQ", right: "DER", both: "AMB" };
 const EYE_LABEL: Record<string, string> = { left: "Ojo izq.", right: "Ojo der.", both: "Ambos ojos" };
+const EYE_SHORT: Record<string, string> = { left: "IZQ", right: "DER", both: "AMB" };
 
 type RecentDrop = { id: string; logged_at: string; quantity: number; eye: string };
-
-function formatTime(isoStr: string): string {
-  const d = new Date(isoStr);
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-function isToday(isoStr: string): boolean {
-  return new Date(isoStr).toDateString() === new Date().toDateString();
-}
-
-function isYesterday(isoStr: string): boolean {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return new Date(isoStr).toDateString() === yesterday.toDateString();
-}
-
-
-
-/* ─── Drop type accordion group ────────────────────────────────────────── */
-
-function DropTypeGroup({
-  typeId,
-  typeName,
-  initialExpanded,
-  show24h,
-  onEdit,
-  onDelete,
-}: {
-  typeId: string;
-  typeName: string;
-  initialExpanded: boolean;
-  show24h: boolean;
-  onEdit: (drop: RecentDrop, typeId: string) => void;
-  onDelete: (drop: RecentDrop, typeId: string) => void;
-}) {
-  const [expanded, setExpanded] = useState(initialExpanded);
-
-  const { data: drops = [] } = useQuery({
-    queryKey: ["drops/recent", typeId],
-    queryFn: () => api.getRecentDrops(typeId, 24),
-    staleTime: 30_000,
-  });
-
-  const sorted = useMemo(
-    () =>
-      [...drops].sort(
-        (a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime(),
-      ),
-    [drops],
-  );
-
-  const visible = show24h ? sorted : sorted.filter((d) => isToday(d.logged_at));
-
-  if (visible.length === 0) return null;
-
-  const lastDrop = visible[0];
-
-  return (
-    <div>
-      {/* Card */}
-      <button
-        className="w-full text-left rounded-xl px-4 py-3"
-        style={{ background: "var(--surface)" }}
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
-        aria-label={`${typeName}, ${visible.length} dosis`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <DropIcon size={14} weight="regular" className="shrink-0 text-[var(--text-faint)]" />
-            <span className="text-[15px] font-semibold text-[var(--text-primary)] truncate">{typeName}</span>
-          </div>
-          <div className="flex items-center gap-3 shrink-0 ml-3">
-            <span className="text-[12px] tabular-nums text-[var(--text-faint)]" style={{ fontFamily: "var(--font-mono)" }}>
-              última {formatTime(lastDrop.logged_at)} · {EYE_SHORT[lastDrop.eye] ?? "—"}
-            </span>
-            <motion.span
-              key={visible.length}
-              initial={{ scale: 1.15, opacity: 0.7 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", duration: 0.5, bounce: 0.25 }}
-              className="block text-[18px] font-bold tabular-nums leading-none"
-              style={{ color: "var(--accent)", fontFamily: "var(--font-mono)" }}
-            >
-              {visible.length}×
-            </motion.span>
-            <motion.div
-              className="shrink-0"
-              style={{ color: "var(--text-faint)" }}
-              animate={{ rotate: expanded ? 90 : 0 }}
-              transition={{ type: "spring", duration: 0.45, bounce: 0.15 }}
-            >
-              <CaretRightIcon size={12} />
-            </motion.div>
-          </div>
-        </div>
-      </button>
-
-      {/* Expanded dose list */}
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: "spring", duration: 0.5, bounce: 0.08 }}
-            className="overflow-hidden"
-          >
-            <motion.div
-              className="rounded-xl mt-2 overflow-hidden"
-              style={{ background: "var(--surface-el)" }}
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.035 } },
-              }}
-            >
-              {visible.map((drop) => (
-                <motion.div
-                  key={drop.id}
-                  variants={{
-                    hidden: { opacity: 0, y: 10 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  transition={{ type: "spring", duration: 0.45, bounce: 0.1 }}
-                  className="flex items-center gap-2 px-3 py-2.5 border-b border-[var(--border)] last:border-b-0"
-                >
-                  <span
-                    className="text-[14px] font-semibold tabular-nums text-[var(--text-primary)] w-[46px] shrink-0"
-                    style={{ fontFamily: "var(--font-mono)" }}
-                  >
-                    {formatTime(drop.logged_at)}
-                  </span>
-                  <span className="flex-1 text-[13px] text-[var(--text-muted)]">
-                    {EYE_LABEL[drop.eye] ?? drop.eye}
-                    <span className="text-[var(--text-faint)]"> · ×{drop.quantity}</span>
-                    {isYesterday(drop.logged_at) && (
-                      <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--text-faint)]">Ayer</span>
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="Editar dosis"
-                    onClick={() => onEdit(drop, typeId)}
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full",
-                      "transition-[background-color,color] duration-150 ease-out",
-                      "text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface)]",
-                      "active:scale-90",
-                    )}
-                  >
-                    <PencilSimpleIcon size={14} weight="bold" />
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Eliminar dosis"
-                    onClick={() => onDelete(drop, typeId)}
-                    className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full",
-                      "transition-[background-color,color] duration-150 ease-out",
-                      "text-[var(--text-faint)] hover:text-[var(--error)]",
-                      "active:scale-90",
-                    )}
-                  >
-                    <TrashIcon size={14} weight="bold" />
-                  </button>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+type TimelineDrop = RecentDrop & { typeId: string; typeName: string; occurrence: number };
 
 /* ─── Main export ────────────────────────────────────────────────────────── */
 
@@ -206,7 +34,8 @@ export function TodayDropsSheet({
 }) {
   const queryClient = useQueryClient();
   const stack = useSheetStack();
-  const [show24h, setShow24h] = useState(false);
+  const user = useUser();
+  const timezone = user.timezone ?? "America/Bogota";
 
   useEffect(() => {
     if (!open) stack.clear();
@@ -217,6 +46,42 @@ export function TodayDropsSheet({
     queryFn: api.getDropTypes,
     staleTime: 120_000,
   });
+
+  const recentQueries = useQueries({
+    queries: dropTypes.map((t) => ({
+      queryKey: ["drops/recent", t.id],
+      queryFn: () => api.getRecentDrops(t.id, 24),
+      staleTime: 30_000,
+    })),
+  });
+
+  const todayKey = getDayKey(new Date().toISOString(), timezone);
+
+  const rows = useMemo<TimelineDrop[]>(() => {
+    const merged: Omit<TimelineDrop, "occurrence">[] = [];
+    dropTypes.forEach((t, i) => {
+      const drops = recentQueries[i]?.data ?? [];
+      for (const d of drops) merged.push({ ...d, typeId: t.id, typeName: t.name });
+    });
+
+    const visible = merged.filter((d) => getDayKey(d.logged_at, timezone) === todayKey);
+
+    const asc = [...visible].sort(
+      (a, b) => new Date(a.logged_at).getTime() - new Date(b.logged_at).getTime(),
+    );
+    const counts = new Map<string, number>();
+    const occById = new Map<string, number>();
+    for (const d of asc) {
+      const n = (counts.get(d.typeId) ?? 0) + 1;
+      counts.set(d.typeId, n);
+      occById.set(d.id, n);
+    }
+
+    return [...visible]
+      .sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime())
+      .map((d) => ({ ...d, occurrence: occById.get(d.id) ?? 1 }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dropTypes, recentQueries.map((q) => q.dataUpdatedAt).join(","), timezone, todayKey]);
 
   const deleteMutation = useMutation({
     mutationFn: ({ id }: { id: string; typeId: string }) => api.deleteDrop(id),
@@ -247,7 +112,7 @@ export function TodayDropsSheet({
       stack.push({
         key: "edit",
         title: "Editar dosis",
-        description: `${typeName} · ${formatTime(drop.logged_at)}`,
+        description: `${typeName} · ${formatTime(drop.logged_at, timezone)}`,
         content: (
           <DropSheet
             editDrop={{
@@ -262,7 +127,7 @@ export function TodayDropsSheet({
         ),
       });
     },
-    [stack.push, stack.pop, dropTypes],
+    [stack.push, stack.pop, dropTypes, timezone],
   );
 
   const handleDelete = useCallback(
@@ -271,7 +136,7 @@ export function TodayDropsSheet({
       stack.push({
         key: "confirm-delete",
         title: "Eliminar dosis",
-        description: `${typeName} · ${formatTime(drop.logged_at)}`,
+        description: `${typeName} · ${formatTime(drop.logged_at, timezone)}`,
         content: (
           <div className="space-y-5 pb-2">
             <div className="rounded-[10px] bg-[var(--surface-el)] px-4 py-3">
@@ -303,55 +168,78 @@ export function TodayDropsSheet({
         ),
       });
     },
-    [stack, dropTypes, deleteMutation],
+    [stack, dropTypes, deleteMutation, timezone],
   );
 
   const baseContent = (
     <div>
-      <div className="mb-4 flex justify-center">
-        <div
-          className="inline-flex rounded-full p-0.5"
-          style={{ background: "var(--surface-el)" }}
-        >
-          {([false, true] as const).map((is24h) => {
-            const isActive = show24h === is24h;
-            return (
-              <button
-                key={String(is24h)}
-                type="button"
-                onClick={() => setShow24h(is24h)}
-                className="relative px-5 py-1.5 rounded-full text-[12px] font-semibold tracking-[0.02em] transition-colors duration-150 ease-out z-[1]"
-                style={{ color: isActive ? "var(--text-primary)" : "var(--text-faint)" }}
-              >
-                {isActive && (
-                  <motion.div
-                    layoutId="seg-thumb"
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: "var(--surface)" }}
-                    transition={{ type: "spring", duration: 0.3, bounce: 0.08 }}
-                  />
-                )}
-                <span className="relative z-[1]">{is24h ? "Últimas 24h" : "Hoy"}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        {dropTypes.map((t) => (
-          <DropTypeGroup
-            key={t.id}
-            typeId={t.id}
-            typeName={t.name}
-            initialExpanded={t.id === initialDropTypeId}
-            show24h={show24h}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
+      <div className="relative">
+        {rows.map((d, i) => {
+          const next = rows[i + 1];
+          const isLast = i === rows.length - 1;
+          const gap = next ? formatGap(next.logged_at, d.logged_at) : null;
+
+          return (
+            <div key={d.id}>
+              <TimelineRow time={formatTime(d.logged_at, timezone)}>
+                <TimelineDot />
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <span className="min-w-0 flex-1 truncate text-[15px] font-medium text-[var(--text-primary)]">
+                    {d.typeName}
+                  </span>
+                  <span
+                    className="mono inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] px-1 text-[11px] font-normal tracking-wider text-[var(--text-faint)]"
+                    style={{ background: "color-mix(in srgb, var(--surface-el) 60%, transparent)" }}
+                  >
+                    {d.occurrence}×
+                  </span>
+                  <span className="mono text-[11px] font-normal uppercase tracking-[0.08em] text-[var(--accent)]">
+                    {EYE_SHORT[d.eye] ?? "—"}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Editar dosis"
+                    onClick={() => handleEdit(d, d.typeId)}
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                      "transition-[background-color,color] duration-150 ease-out",
+                      "text-[var(--text-faint)] hover:text-[var(--text-muted)] hover:bg-[var(--surface-el)]",
+                      "active:scale-90",
+                    )}
+                  >
+                    <PencilSimpleIcon size={14} weight="bold" />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Eliminar dosis"
+                    onClick={() => handleDelete(d, d.typeId)}
+                    className={cn(
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
+                      "transition-[background-color,color] duration-150 ease-out",
+                      "text-[var(--text-faint)] hover:text-[var(--error)]",
+                      "active:scale-90",
+                    )}
+                  >
+                    <TrashIcon size={14} weight="bold" />
+                  </button>
+                </div>
+              </TimelineRow>
+              {!isLast && (
+                <TimelineGap>
+                  <span className="mono text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                    {gap}
+                  </span>
+                </TimelineGap>
+              )}
+            </div>
+          );
+        })}
+        {rows.length === 0 && (
+          <p className="text-[15px] text-[var(--text-muted)]">Sin gotas registradas hoy.</p>
+        )}
       </div>
 
-      <div className="pt-3">
+      <div className="pt-4">
         <Button
           variant="tinted"
           size="lg"
@@ -374,7 +262,7 @@ export function TodayDropsSheet({
       onClose={onClose}
       stack={stack}
       panelClassName="!h-[95dvh]"
-      baseLayer={{ key: "drops-today", title: "Dosis de hoy", description: show24h ? "Últimas 24 horas" : "Solo hoy", content: baseContent }}
+      baseLayer={{ key: "drops-today", title: "Dosis de hoy", description: "Solo hoy", content: baseContent }}
     />
   );
 }
