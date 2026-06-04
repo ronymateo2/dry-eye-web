@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { AnimatePresence, motion } from "motion/react";
 import { EyeIcon, TrophyIcon, WrenchIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { hygieneApi } from "@/features/hygiene";
 import type { HygieneRecord, SaveHygieneInput, ActionState } from "@/types/domain";
 import { type View, identityLabel } from "./hygiene/constants";
 import { CalibratingView } from "./hygiene/calibrating-view";
@@ -40,8 +40,8 @@ export function HygieneSheet({
 
   useEffect(() => {
     mounted.current = true;
-    api
-      .getHygieneDashboard()
+    hygieneApi
+      .getDashboard()
       .then(({ firstDayKey, totalCompletedDays, recentRecords, todayCompletedCount }) => {
         setFirstDayKey(firstDayKey);
         setTotalCompletedDays(totalCompletedDays);
@@ -61,7 +61,7 @@ export function HygieneSheet({
       currentViewRef.current = next;
       setDisplayedView(next);
       if (next === "servo" && sessions === null) {
-        api.getHygieneSessions().then(({ sessions }) => setSessions(sessions));
+        hygieneApi.getSessions().then(({ sessions }) => setSessions(sessions));
       }
     },
     [sessions],
@@ -110,7 +110,7 @@ export function HygieneSheet({
 
   async function saveHygiene(input: SaveHygieneInput): Promise<boolean> {
     try {
-      const result = await api.saveHygiene(input);
+      const result = await hygieneApi.save(input);
       if (!result.ok) {
         setActionState({ status: "error", message: "No se pudo guardar." });
         return false;

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "./auth";
-import { api } from "./api";
+import { userApi } from "@/features/user";
 
 type Theme = "dark" | "light";
 type ThemeContextType = { theme: Theme; setTheme: (t: Theme) => Promise<void> };
@@ -31,7 +31,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setLocalTheme(t);
     localStorage.setItem("weqe_theme", t);
     try {
-      await api.updateMe({ theme: t });
+      await userApi.updateMe({ theme: t });
       await refreshUser();
     } catch {
       setLocalTheme(previous);

@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { observationsApi, observationKeys } from "@/features/observations";
 import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { formatPropertyValue } from "@/lib/observations";
@@ -138,7 +138,7 @@ function OccurrenceRow({
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await api.deleteOccurrence(observationId, occ.id);
+      await observationsApi.deleteOccurrence(observationId, occ.id);
       onDeleted();
     } catch {
       setDeleting(false);
@@ -262,14 +262,14 @@ function ObsHeader({ observation, onEdit }: { observation: ObservationRecord; on
 export function ObservationDetailSheet({ observation, onLogNew, onEdit, onEditOccurrence }: Props) {
   const queryClient = useQueryClient();
   const { data: occurrences = [], isLoading } = useQuery({
-    queryKey: ["observation-prev", observation.id, "detail"],
-    queryFn: () => api.getObservationPrevious(observation.id, 20),
+    queryKey: observationKeys.prevDetail(observation.id),
+    queryFn: () => observationsApi.getPrevious(observation.id, 20),
   });
 
   const handleDeleted = () => {
-    queryClient.invalidateQueries({ queryKey: ["observation-prev", observation.id] });
-    queryClient.invalidateQueries({ queryKey: ["observations"] });
-    queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
+    queryClient.invalidateQueries({ queryKey: observationKeys.prev(observation.id) });
+    queryClient.invalidateQueries({ queryKey: observationKeys.list() });
+    queryClient.invalidateQueries({ queryKey: observationKeys.occurrences() });
   };
 
   return (

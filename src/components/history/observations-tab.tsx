@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { EyedropperIcon, StethoscopeIcon, MoonIcon, PillIcon } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { observationsApi, observationKeys } from "@/features/observations";
 import { getDayKey } from "@/lib/utils";
 import { formatPropertyValue } from "@/lib/observations";
 import { OBS_EYE_LABELS } from "@/lib/constants";
@@ -14,8 +14,8 @@ const OBS_PAGE_SIZE = 5;
 
 export function ObservationsTab({ timezone }: { timezone: string }) {
   const { data: firstPage, isLoading } = useQuery({
-    queryKey: ["observation-occurrences"],
-    queryFn: () => api.getObservationOccurrences({ limit: OBS_PAGE_SIZE }),
+    queryKey: observationKeys.occurrences(),
+    queryFn: () => observationsApi.getOccurrences({ limit: OBS_PAGE_SIZE }),
   });
 
   const [extra, setExtra] = useState<OccurrenceRow[]>([]);
@@ -35,7 +35,7 @@ export function ObservationsTab({ timezone }: { timezone: string }) {
     const before = occurrences[occurrences.length - 1].loggedAt;
     setIsLoadingMore(true);
     try {
-      const data = await api.getObservationOccurrences({ limit: OBS_PAGE_SIZE, before });
+      const data = await observationsApi.getOccurrences({ limit: OBS_PAGE_SIZE, before });
       setExtra((prev) => [...prev, ...data.occurrences]);
       setExtraHasMore(data.hasMore);
     } finally {

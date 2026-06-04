@@ -6,7 +6,8 @@ import { PillIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/lib/api";
+import { medicationsApi, medicationKeys } from "@/features/medications";
+import { historyKeys } from "@/features/history";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +37,8 @@ export function MedicationSessionSheet({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { data: medications = [], isLoading } = useQuery({
-    queryKey: ["medications"],
-    queryFn: api.getMedications,
+    queryKey: medicationKeys.list(),
+    queryFn: medicationsApi.getList,
   });
 
   const activeMeds = useMemo(
@@ -108,7 +109,7 @@ export function MedicationSessionSheet({
       toSave.map((med) => {
         const s = effectiveStates[med.id];
         const ts = s.loggedAt ?? globalTime ?? new Date().toISOString();
-        return api.saveMedicationIntake({
+        return medicationsApi.saveIntake({
           id: crypto.randomUUID(),
           medicationId: med.id,
           loggedAt: new Date(ts).toISOString(),
@@ -122,13 +123,13 @@ export function MedicationSessionSheet({
     const failCount = results.length - successCount;
 
     if (editProps?.editIntakeId) {
-      await api.deleteMedicationIntake(editProps.editIntakeId).catch(() => null);
+      await medicationsApi.deleteIntake(editProps.editIntakeId).catch(() => null);
     }
 
-    queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
-    queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
-    queryClient.invalidateQueries({ queryKey: ["history"] });
-    queryClient.invalidateQueries({ queryKey: ["medications"] });
+    queryClient.invalidateQueries({ queryKey: medicationKeys.intakesLastPerMed() });
+    queryClient.invalidateQueries({ queryKey: medicationKeys.intakesToday() });
+    queryClient.invalidateQueries({ queryKey: historyKeys.all });
+    queryClient.invalidateQueries({ queryKey: medicationKeys.list() });
 
     if (failCount === 0) {
       toast.success(

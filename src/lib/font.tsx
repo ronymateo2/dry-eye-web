@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "./auth";
-import { api } from "./api";
+import { userApi } from "@/features/user";
 
 export type FontOption = "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded";
 
@@ -39,7 +39,7 @@ export function FontProvider({ children }: { children: ReactNode }) {
     setLocalFont(f);
     localStorage.setItem("weqe_font", f);
     try {
-      await api.updateMe({ font: f });
+      await userApi.updateMe({ font: f });
       await refreshUser();
     } catch {
       setLocalFont(previous);

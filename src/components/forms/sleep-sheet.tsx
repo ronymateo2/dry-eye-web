@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SleepHoursInput } from "@/components/ui/sleep-hours-input";
 import { SleepQualitySelector } from "@/components/ui/sleep-quality-selector";
 import { StatusBanner } from "@/components/ui/status-banner";
-import { api } from "@/lib/api";
+import { sleepApi } from "@/features/sleep";
 import { toast } from "sonner";
 import type { ActionState, SleepQuality } from "@/types/domain";
 
@@ -53,7 +53,7 @@ export function SleepSheet({ onSaved }: SleepSheetProps) {
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    api.getTodaySleep()
+    sleepApi.getToday()
       .then((record) => {
         if (record) {
           setExistingId(record.id);
@@ -86,7 +86,7 @@ export function SleepSheet({ onSaved }: SleepSheetProps) {
 
     setIsPending(true);
     try {
-      await api.saveSleep(input);
+      await sleepApi.save(input);
       toast.success(`${hours}h de sueno registradas.`);
       onSaved();
     } catch {

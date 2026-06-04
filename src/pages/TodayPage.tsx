@@ -11,8 +11,12 @@ import { HeroView } from "@/components/today/hero-view";
 import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
 import { useScheduleData } from "@/components/today/use-schedule-data";
 import { dispatchQuickAction } from "@/components/today/helpers";
-import { api } from "@/lib/api";
 import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
+import { calendarApi, calendarKeys } from "@/features/calendar";
+import { medicationsApi, medicationKeys } from "@/features/medications";
+import { symptomsApi, symptomKeys } from "@/features/symptoms";
+import { sleepApi, sleepKeys } from "@/features/sleep";
+import { checkInsApi, checkInKeys } from "@/features/check-ins";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { useNow } from "@/lib/hooks/use-now";
@@ -28,15 +32,15 @@ export default function TodayPage() {
   const scheduleData = useScheduleData(now);
 
   useEffect(() => {
-    void queryClient.prefetchQuery({ queryKey: ["check-ins/last"], queryFn: api.getLastCheckIn, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["sleep/today"], queryFn: api.getTodaySleep, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: checkInKeys.last(), queryFn: checkInsApi.getLast, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: sleepKeys.today(), queryFn: sleepApi.getToday, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: dropKeys.lastPerType(), queryFn: dropsApi.getLastPerType, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["calendar/events/today"], queryFn: api.getCalendarEventsToday, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["medications"], queryFn: api.getMedications, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["medication-intakes/last-per-med"], queryFn: api.getLastIntakePerMedication, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["medication-intakes/today"], queryFn: api.getTodayMedicationIntakes, staleTime: 30_000 });
+    void queryClient.prefetchQuery({ queryKey: calendarKeys.eventsToday(), queryFn: calendarApi.getEventsToday, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: medicationKeys.list(), queryFn: medicationsApi.getList, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: medicationKeys.intakesLastPerMed(), queryFn: medicationsApi.getLastIntakePerMed, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: medicationKeys.intakesToday(), queryFn: medicationsApi.getTodayIntakes, staleTime: 30_000 });
     void queryClient.prefetchQuery({ queryKey: vialKeys.active(), queryFn: dropsApi.getActiveVials, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["symptoms/today"], queryFn: api.getSymptomStatusToday, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: symptomKeys.today(), queryFn: symptomsApi.getStatusToday, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: dropKeys.recentAll(), queryFn: () => dropsApi.getRecentAll(24), staleTime: 30_000 });
   }, [queryClient]);
 

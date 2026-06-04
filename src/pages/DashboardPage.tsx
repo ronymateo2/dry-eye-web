@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/lib/api";
+import { dashboardApi, dashboardKeys } from "@/features/dashboard";
 import { DashboardScreen, type DashboardSummaryData, type DashboardCorrelationsData } from "@/components/dashboard/dashboard-screen";
 import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
@@ -9,13 +9,13 @@ export default function DashboardPage() {
   const [showCorrelations, setShowCorrelations] = useLocalStorage("weqe_show_correlations", false);
 
   const { data: summary, isLoading: isLoadingSummary } = useQuery<DashboardSummaryData>({
-    queryKey: ["dashboard", "summary"],
-    queryFn: api.getDashboardSummary as () => Promise<DashboardSummaryData>,
+    queryKey: dashboardKeys.summary(),
+    queryFn: dashboardApi.getSummary as () => Promise<DashboardSummaryData>,
   });
 
   const { data: correlations, isLoading: isLoadingCorrelations } = useQuery<DashboardCorrelationsData>({
-    queryKey: ["dashboard", "correlations"],
-    queryFn: api.getDashboardCorrelations as () => Promise<DashboardCorrelationsData>,
+    queryKey: dashboardKeys.correlations(),
+    queryFn: dashboardApi.getCorrelations as () => Promise<DashboardCorrelationsData>,
     enabled: showCorrelations,
   });
 

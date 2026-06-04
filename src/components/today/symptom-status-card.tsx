@@ -10,7 +10,7 @@ import {
   CircleHalfIcon,
   EyeClosedIcon,
 } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { symptomsApi, symptomKeys } from "@/features/symptoms";
 import { SYMPTOM_STATE_COLOR, SYMPTOM_STATE_COPY, SYMPTOM_STATE_LABEL } from "@/lib/symptom-state";
 import { cn } from "@/lib/utils";
 import { TopographicBg } from "@/components/ui/topographic-bg";
@@ -181,8 +181,8 @@ type Props = {
 
 export function SymptomStatusCard({ onRegister }: Props) {
   const { data, isLoading } = useQuery({
-    queryKey: ["symptoms/today"],
-    queryFn: api.getSymptomStatusToday,
+    queryKey: symptomKeys.today(),
+    queryFn: symptomsApi.getStatusToday,
     staleTime: 60_000,
   });
 

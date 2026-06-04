@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/ui/text-input";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
-import { api } from "@/lib/api";
+import { therapyApi } from "@/features/therapy";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { TherapyType } from "@/types/domain";
@@ -30,7 +30,7 @@ export function TherapySheet({ onSaved }: { onSaved: () => void }) {
   const handleSave = async () => {
     setIsPending(true);
     try {
-      await api.saveTherapySession({
+      await therapyApi.saveSession({
         id: crypto.randomUUID(),
         loggedAt: loggedAt ?? new Date().toISOString(),
         therapyType,

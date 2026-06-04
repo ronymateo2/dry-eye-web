@@ -7,8 +7,8 @@ import { TextInput } from "@/components/ui/text-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { IntervalPills } from "@/components/treatments/interval-pills";
 import { ArchiveConfirm } from "@/components/treatments/archive-confirm";
-import { api } from "@/lib/api";
 import { dropsApi, dropKeys, dropTypeKeys } from "@/features/drops";
+import { calendarApi, calendarKeys } from "@/features/calendar";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import type { DropTypeRecord } from "@/types/domain";
@@ -68,9 +68,9 @@ function DropFormContent({
       if (isEdit) {
         try {
           const dayKey = getDayKey(new Date().toISOString(), user.timezone);
-          await api.reprocessCalendarDay(item!.id, dayKey);
-          qc.invalidateQueries({ queryKey: ["calendar/events/today"] });
-          qc.invalidateQueries({ queryKey: ["calendar/status"] });
+          await calendarApi.reprocessDay(item!.id, dayKey);
+          qc.invalidateQueries({ queryKey: calendarKeys.eventsToday() });
+          qc.invalidateQueries({ queryKey: calendarKeys.status() });
         } catch {
           // Calendar reprocess failure is non-blocking
         }

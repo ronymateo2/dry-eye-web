@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/lib/api";
+import { reportApi, reportKeys } from "@/features/report";
 import { ReportScreen, type ReportData } from "@/components/report/report-screen";
 
 type ReportResult = ReportData | { ok: false; message: string };
 
 export default function ReportPage() {
   const { data, isLoading } = useQuery<ReportResult>({
-    queryKey: ["report"],
-    queryFn: api.getReport as () => Promise<ReportResult>,
+    queryKey: reportKeys.all,
+    queryFn: reportApi.get as () => Promise<ReportResult>,
   });
 
   if (isLoading || !data) {

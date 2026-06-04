@@ -10,7 +10,7 @@ import { TreatmentCard } from "@/components/treatments/treatment-card";
 import { ArchivedItems } from "@/components/treatments/archived-items";
 import { PhaseListInline } from "@/components/treatments/phase-list-inline";
 import { MedSheet } from "@/components/treatments/med-sheet";
-import { api } from "@/lib/api";
+import { medicationsApi, medicationKeys } from "@/features/medications";
 import type { MedicationRecord } from "@/types/domain";
 import { PillIcon } from "@phosphor-icons/react";
 
@@ -18,8 +18,8 @@ export function MedicationsPanel() {
   const qc = useQueryClient();
 
   const { data: medications = [], isLoading } = useQuery({
-    queryKey: ["medications"],
-    queryFn: api.getMedications,
+    queryKey: medicationKeys.list(),
+    queryFn: medicationsApi.getList,
   });
 
   const [editingItem, setEditingItem] = useState<MedicationRecord | null | "new">(null);
@@ -31,7 +31,7 @@ export function MedicationsPanel() {
   );
 
   const reorderMutation = useMutation({
-    mutationFn: (ids: string[]) => api.reorderMedications(ids),
+    mutationFn: (ids: string[]) => medicationsApi.reorder(ids),
   });
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -40,7 +40,7 @@ export function MedicationsPanel() {
     const oldIndex = medications.findIndex((m) => m.id === active.id);
     const newIndex = medications.findIndex((m) => m.id === over.id);
     const reordered = arrayMove(medications, oldIndex, newIndex);
-    qc.setQueryData(["medications"], reordered);
+    qc.setQueryData(medicationKeys.list(), reordered);
     reorderMutation.mutate(reordered.map((m) => m.id));
   };
 
@@ -119,10 +119,10 @@ export function MedicationsPanel() {
 
       <ArchivedItems
         label="Medicamento"
-        queryKey={["medications"]}
-        archivedQueryKey={["medications/archived"]}
-        fetchArchived={api.getArchivedMedications}
-        unarchive={api.unarchiveMedication}
+        queryKey={medicationKeys.list()}
+        archivedQueryKey={medicationKeys.archived()}
+        fetchArchived={medicationsApi.getArchived}
+        unarchive={medicationsApi.unarchive}
         renderItem={(item) => (
           <span className="text-[14px] text-[var(--text-muted)]">{item.name}</span>
         )}

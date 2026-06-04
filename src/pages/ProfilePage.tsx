@@ -4,7 +4,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/ui/text-input";
-import { api, setToken } from "@/lib/api";
+import { setToken } from "@/lib/http";
+import { calendarApi, calendarKeys } from "@/features/calendar";
+import { userApi } from "@/features/user";
 import { useAuth, useUser } from "@/lib/auth";
 import {
   ArrowCounterClockwiseIcon,
@@ -32,15 +34,15 @@ export default function ProfilePage() {
   const [reprocessingId, setReprocessingId] = useState<string | null>(null);
 
   const { data: calendarStatus, isLoading: calendarLoading } = useQuery({
-    queryKey: ["calendar/status"],
-    queryFn: api.getCalendarStatus,
+    queryKey: calendarKeys.status(),
+    queryFn: calendarApi.getStatus,
   });
 
   useEffect(() => {
     const calResult = searchParams.get("calendar");
     if (calResult === "connected") {
       toast.success("Google Calendar conectado.");
-      qc.invalidateQueries({ queryKey: ["calendar/status"] });
+      qc.invalidateQueries({ queryKey: calendarKeys.status() });
       setSearchParams({}, { replace: true });
     } else if (calResult === "error") {
       const reason = searchParams.get("reason") ?? "";
@@ -61,8 +63,8 @@ export default function ProfilePage() {
     const dayKey = new Date().toLocaleDateString("en-CA", { timeZone: user.timezone });
     setReprocessingId(dropTypeId);
     try {
-      await api.reprocessCalendarDay(dropTypeId, dayKey);
-      qc.invalidateQueries({ queryKey: ["calendar/status"] });
+      await calendarApi.reprocessDay(dropTypeId, dayKey);
+      qc.invalidateQueries({ queryKey: calendarKeys.status() });
       toast.success("Eventos de Calendar reprocesados.");
     } catch {
       toast.error("No se pudieron reprocesar los eventos.");
@@ -101,7 +103,7 @@ export default function ProfilePage() {
   const handleTimezoneSelect = async (tz: string) => {
     setTzPending(true);
     try {
-      const res = await api.updateMe({ timezone: tz });
+      const res = await userApi.updateMe({ timezone: tz });
       if (res.token) setToken(res.token);
       await refreshUser();
       setTimezone(tz);

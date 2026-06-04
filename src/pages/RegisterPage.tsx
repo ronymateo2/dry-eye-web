@@ -6,7 +6,8 @@ import { PainSlider } from "@/components/ui/pain-slider";
 import { TextInput } from "@/components/ui/text-input";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
-import { api } from "@/lib/api";
+import { checkInsApi, checkInKeys, type LastCheckIn as LastCheckInData } from "@/features/check-ins";
+import { symptomsApi } from "@/features/symptoms";
 import { TRIGGER_OPTIONS, SYMPTOM_OPTIONS, PAIN_QUALITY_OPTIONS } from "@/lib/constants";
 import { cn, formatLoggedAt } from "@/lib/utils";
 import { toast } from "sonner";
@@ -37,7 +38,7 @@ const defaultPain = {
 };
 
 type ContextTab = "now" | "custom";
-type LastCheckIn = NonNullable<Awaited<ReturnType<typeof api.getLastCheckIn>>>;
+type LastCheckIn = NonNullable<LastCheckInData>;
 
 
 function getTriggerLabel(triggerType: string | null): string | null {
@@ -85,8 +86,8 @@ export default function RegisterPage() {
     isLoading: isLastCheckInLoading,
     isError: isLastCheckInError,
   } = useQuery({
-    queryKey: ["check-ins/last"],
-    queryFn: api.getLastCheckIn,
+    queryKey: checkInKeys.last(),
+    queryFn: checkInsApi.getLast,
     staleTime: 0,
   });
 
@@ -178,7 +179,7 @@ export default function RegisterPage() {
       const uniqueTriggerTypes = [...new Set(triggerTypes)];
       const triggerValue = uniqueTriggerTypes[0] as TriggerType | undefined;
 
-      await api.saveCheckIn({
+      await checkInsApi.save({
         id: checkInId,
         loggedAt: checkInLoggedAt,
         timeOfDay: null,
@@ -210,7 +211,7 @@ export default function RegisterPage() {
         notes,
       };
       queryClient.setQueryData<LastCheckIn | null>(
-        ["check-ins/last"],
+        checkInKeys.last(),
         cachedCheckIn,
       );
 
@@ -223,7 +224,7 @@ export default function RegisterPage() {
       if (symptomsToSave.length > 0) {
         await Promise.all(
           symptomsToSave.map((st) =>
-            api.saveSymptom({
+            symptomsApi.saveLegacy({
               id: crypto.randomUUID(),
               loggedAt: checkInLoggedAt,
               symptomType: st,
@@ -233,7 +234,7 @@ export default function RegisterPage() {
       }
 
       resetForm();
-      queryClient.invalidateQueries({ queryKey: ["check-ins/last"] });
+      queryClient.invalidateQueries({ queryKey: checkInKeys.last() });
       toast.success("Registro guardado.");
     } catch {
       toast.error("No se pudo guardar. Intenta de nuevo.");

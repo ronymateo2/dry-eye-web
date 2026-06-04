@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { DoseSlot } from "@/components/register/day-projection-sheet";
-import { api } from "@/lib/api";
 import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
+import { calendarApi, calendarKeys } from "@/features/calendar";
 import { daysUntilEnd } from "@/lib/utils";
 import { getNextMs, isLoggedToday, isCompletedToday, buildDayProjection } from "./helpers";
 
@@ -20,8 +20,8 @@ export function useScheduleData(now: number) {
   });
 
   const { data: calendarData } = useQuery({
-    queryKey: ["calendar/events/today"],
-    queryFn: api.getCalendarEventsToday,
+    queryKey: calendarKeys.eventsToday(),
+    queryFn: calendarApi.getEventsToday,
     staleTime: 60_000,
   });
 

@@ -7,7 +7,7 @@ import { TextInput } from "@/components/ui/text-input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { TimesPicker, parseTimesJson } from "@/components/treatments/times-picker";
 import { ArchiveConfirm } from "@/components/treatments/archive-confirm";
-import { api } from "@/lib/api";
+import { medicationsApi, medicationKeys } from "@/features/medications";
 import type { MedicationRecord, MedicationPhase } from "@/types/domain";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 
@@ -79,10 +79,10 @@ function MedFormContent({
         phasesJson: form.phases.length > 0 ? JSON.stringify(form.phases) : null,
         timesJson: form.times.length > 0 ? form.times : null,
       };
-      return isEdit ? api.updateMedication(item!.id, body) : api.createMedication(body);
+      return isEdit ? medicationsApi.update(item!.id, body) : medicationsApi.create(body);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["medications"] });
+      qc.invalidateQueries({ queryKey: medicationKeys.list() });
       toast.success(isEdit ? "Medicamento actualizado." : "Medicamento guardado.");
       onClose();
     },
@@ -90,10 +90,10 @@ function MedFormContent({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => api.deleteMedication(item!.id),
+    mutationFn: () => medicationsApi.remove(item!.id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["medications"] });
-      qc.invalidateQueries({ queryKey: ["medications/archived"] });
+      qc.invalidateQueries({ queryKey: medicationKeys.list() });
+      qc.invalidateQueries({ queryKey: medicationKeys.archived() });
       toast.success("Medicamento archivado.");
       onClose();
     },

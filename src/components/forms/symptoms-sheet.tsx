@@ -16,7 +16,8 @@ import { formatGap } from "@/components/history/utils";
 import { SYMPTOM_STATE_LABEL, SYMPTOM_STATE_COLOR, calcSymptomState } from "@/lib/symptom-state";
 import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { symptomsApi, symptomKeys } from "@/features/symptoms";
+import { historyKeys } from "@/features/history";
 import type { SymptomStatusToday } from "@/types/domain";
 import { getDayKey, cn } from "@/lib/utils";
 import { TRIGGER_OPTIONS } from "@/lib/constants";
@@ -67,8 +68,8 @@ export function SymptomsSheet({ onSaved }: Props) {
   const [loadedLast, setLoadedLast] = useState(false);
 
   const { data: todayStatus } = useQuery<SymptomStatusToday>({
-    queryKey: ["symptoms/today"],
-    queryFn: api.getSymptomStatusToday,
+    queryKey: symptomKeys.today(),
+    queryFn: symptomsApi.getStatusToday,
     staleTime: 60_000,
   });
 
@@ -127,12 +128,12 @@ export function SymptomsSheet({ onSaved }: Props) {
     };
 
     try {
-      await api.saveSymptomEntry(input);
+      await symptomsApi.saveEntry(input);
     } catch {
       if (!navigator.onLine) {
         await queueSymptomEntry(input);
         toast.success("Guardado sin conexión. Se enviará al reconectar.");
-        queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
+        queryClient.invalidateQueries({ queryKey: symptomKeys.today() });
         onSaved();
         return;
       }
@@ -142,8 +143,8 @@ export function SymptomsSheet({ onSaved }: Props) {
     }
 
     toast.success("Síntomas guardados");
-    queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
-    queryClient.invalidateQueries({ queryKey: ["history"] });
+    queryClient.invalidateQueries({ queryKey: symptomKeys.today() });
+    queryClient.invalidateQueries({ queryKey: historyKeys.all });
     onSaved();
   }
 

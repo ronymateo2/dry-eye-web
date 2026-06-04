@@ -2,14 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { PulseIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { api } from "@/lib/api";
+import { checkInsApi, checkInKeys } from "@/features/check-ins";
 import { timeAgo } from "./helpers";
 
 export function PainCheckInCompact() {
   const navigate = useNavigate();
   const { data: lastCheckIn } = useQuery({
-    queryKey: ["check-ins/last"],
-    queryFn: api.getLastCheckIn,
+    queryKey: checkInKeys.last(),
+    queryFn: checkInsApi.getLast,
     staleTime: 60_000,
   });
 

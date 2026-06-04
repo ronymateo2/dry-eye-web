@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { api } from "@/lib/api";
 import { dropsApi, dropKeys } from "@/features/drops";
+import { symptomsApi, symptomKeys } from "@/features/symptoms";
 import { getPendingDrops, removePendingDrop } from "@/lib/offline/drops-queue";
 import { getPendingSymptomEntries, removePendingSymptomEntry } from "@/lib/offline/symptoms-queue";
 
@@ -28,14 +28,14 @@ export function useOfflineSync() {
     const pendingSymptoms = await getPendingSymptomEntries();
     for (const entry of pendingSymptoms) {
       try {
-        await api.saveSymptomEntry(entry);
+        await symptomsApi.saveEntry(entry);
         await removePendingSymptomEntry(entry.id);
       } catch {
         // keep in queue
       }
     }
     if (pendingSymptoms.length > 0) {
-      queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
+      queryClient.invalidateQueries({ queryKey: symptomKeys.today() });
     }
   }, [queryClient]);
 

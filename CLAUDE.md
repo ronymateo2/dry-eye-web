@@ -38,7 +38,8 @@ src/
   App.tsx               # BrowserRouter → AuthProvider → ThemeProvider → routes
   globals.css           # CSS variables (dual theme)
   lib/
-    api.ts              # Typed fetch wrapper; all endpoints as named methods
+    http.ts             # Typed base HTTP client (http.get/post/put/delete<T>) + token + 401 handling
+    report-error.ts     # Client error reporter → POST /api/errors + global handlers
     auth.tsx             # AuthProvider, useAuth(), useUser() — JWT from localStorage
     theme.tsx            # ThemeProvider — dark default, light opt-in, persisted to server
     constants.ts         # UI constants, options lists
@@ -52,6 +53,11 @@ src/
       use-last-drop-widget.ts
     offline/
       drops-queue.ts     # IndexedDB queue (idb-keyval)
+  features/             # Feature-slice data layer (one folder per domain)
+    drops/ medications/ observations/ symptoms/ dashboard/ calendar/
+    sleep/ check-ins/ history/ report/ therapy/ hygiene/ user/
+    #   query-keys.ts (hierarchical) · api.ts (wraps http) · queries/mutations/hooks · types.ts
+    #   components import feature hooks/keys/api — never @/lib/http directly for endpoints
   types/domain.ts       # All shared domain types — single source of truth
   pages/                 # Lazy-loaded route pages
   components/
@@ -89,17 +95,17 @@ src/
 
 1. Google OAuth button → API redirect to `/auth/callback?token=<jwt>`
 2. `AuthCallbackPage` extracts token → `localStorage.weqe_token` → cleans URL
-3. `api.ts` injects `Authorization: Bearer <token>` on every request
+3. `lib/http.ts` injects `Authorization: Bearer <token>` on every request
 4. 401 response → `clearToken()` + `window.location.href = "/"`
 
 ## Theme
 
-Dual theme: dark (default, clinical necessity for photophobia) and light (opt-in). `ThemeProvider` reads user preference from server (`auth.user.theme`), persists via `api.updateMe({ theme })`. Toggle: `document.documentElement.dataset.theme = "light"|"dark"`. **Always use CSS variables — never hardcode colors.** Full palette in `DESIGN.md`.
+Dual theme: dark (default, clinical necessity for photophobia) and light (opt-in). `ThemeProvider` reads user preference from server (`auth.user.theme`), persists via `userApi.updateMe({ theme })`. Toggle: `document.documentElement.dataset.theme = "light"|"dark"`. **Always use CSS variables — never hardcode colors.** Full palette in `DESIGN.md`.
 
 ## Offline
 
 - Only **drops** queue offline (IndexedDB via `idb-keyval`)
-- `useOfflineSync`: on `navigator.onLine`, syncs queue then invalidates `["drops/last"]`
+- `useOfflineSync`: on `navigator.onLine`, syncs queue then invalidates `dropKeys.last()`
 - `DropSheet` detects offline and queues directly
 
 ## Domain types (`src/types/domain.ts`)
@@ -119,14 +125,22 @@ HygieneStatus, FrictionType, PainQuality, TherapyType, MedicationPhase
 
 Always define new shared types here.
 
-## Query keys — kebab-case
+## Query keys — centralized & hierarchical
+
+Never write inline `queryKey` arrays. Each feature owns a `query-keys.ts` with a
+hierarchical factory rooted at the feature name:
 
 ```ts
-["drop-types"]    // ✓
-["drops/last"]     // ✓
-["dashboard"]     // ✓
-["dropTypes"]     // ✗
+export const dropKeys = {
+  all: ["drops"] as const,
+  last: () => [...dropKeys.all, "last"] as const,
+  recent: (id: string) => [...dropKeys.all, "recent", id] as const,
+};
 ```
+
+This lets `invalidateQueries({ queryKey: dropKeys.all })` invalidate the whole
+feature in one call (TanStack prefix-matches). Components import the factory:
+`dropKeys.last()` — never `["drops","last"]` or `["drops/last"]`.
 
 ## Conventions
 

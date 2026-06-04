@@ -6,6 +6,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "./mobile-sheet";
 import { QuickActionsSheet } from "./quick-actions-sheet";
 import { vialKeys } from "@/features/drops";
+import { medicationKeys } from "@/features/medications";
+import { observationKeys } from "@/features/observations";
+import { symptomKeys } from "@/features/symptoms";
+import { historyKeys } from "@/features/history";
 import { cn } from "@/lib/utils";
 
 const DropSheet = lazy(() => import("@/components/forms/drop-sheet").then((m) => ({ default: m.DropSheet })));
@@ -46,14 +50,14 @@ export function FloatingQuickActions() {
   const closeAll = () => { setSheet(null); setMenuOpen(false); setInitialDropTypeId(undefined); };
   const savedAndClose = () => {
     window.dispatchEvent(new CustomEvent("history:refresh"));
-    queryClient.invalidateQueries({ queryKey: ["history"] });
-    queryClient.invalidateQueries({ queryKey: ["medications"] });
-    queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
-    queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
-    queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
+    queryClient.invalidateQueries({ queryKey: historyKeys.all });
+    queryClient.invalidateQueries({ queryKey: medicationKeys.list() });
+    queryClient.invalidateQueries({ queryKey: medicationKeys.intakesLastPerMed() });
+    queryClient.invalidateQueries({ queryKey: medicationKeys.intakesToday() });
+    queryClient.invalidateQueries({ queryKey: observationKeys.occurrences() });
     queryClient.invalidateQueries({ queryKey: vialKeys.active() });
     queryClient.invalidateQueries({ queryKey: vialKeys.history() });
-    queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
+    queryClient.invalidateQueries({ queryKey: symptomKeys.today() });
     closeAll();
   };
 

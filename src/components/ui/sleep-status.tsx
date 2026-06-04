@@ -2,7 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoonIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
-import { api } from "@/lib/api";
+import { sleepApi, sleepKeys, type TodaySleep } from "@/features/sleep";
 import { cn } from "@/lib/utils";
 
 const SleepSheet = lazy(() =>
@@ -17,13 +17,13 @@ const QUALITY_LABELS: Record<string, string> = {
   excelente: "Excelente",
 };
 
-type SleepData = Awaited<ReturnType<typeof api.getTodaySleep>>;
+type SleepData = TodaySleep;
 
 export function SleepStatus() {
   const queryClient = useQueryClient();
   const { data: sleep, isLoading } = useQuery<SleepData>({
-    queryKey: ["sleep/today"],
-    queryFn: api.getTodaySleep,
+    queryKey: sleepKeys.today(),
+    queryFn: sleepApi.getToday,
     staleTime: 60_000,
   });
   const [open, setOpen] = useState(false);
@@ -80,7 +80,7 @@ export function SleepStatus() {
           <SleepSheet
             onSaved={() => {
               setOpen(false);
-              queryClient.invalidateQueries({ queryKey: ["sleep/today"] });
+              queryClient.invalidateQueries({ queryKey: sleepKeys.today() });
             }}
           />
         </Suspense>

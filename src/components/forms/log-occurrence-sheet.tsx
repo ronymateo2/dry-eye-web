@@ -7,8 +7,11 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { PainSlider } from "@/components/ui/pain-slider";
-import { api } from "@/lib/api";
 import { dropsApi, dropKeys } from "@/features/drops";
+import { observationsApi, observationKeys } from "@/features/observations";
+import { sleepApi, sleepKeys } from "@/features/sleep";
+import { checkInsApi, checkInKeys } from "@/features/check-ins";
+import { medicationsApi, medicationKeys } from "@/features/medications";
 import { cn } from "@/lib/utils";
 import { getDayKey } from "@/lib/utils";
 import { formatPropertyValue } from "@/lib/observations";
@@ -61,8 +64,8 @@ function PrevOccurrencesSection({ observationId, schema, useIntensity, useDurati
   const [open, setOpen] = useState(false);
 
   const { data: prev = [], isLoading } = useQuery({
-    queryKey: ["observation-prev", observationId],
-    queryFn: () => api.getObservationPrevious(observationId, 3),
+    queryKey: observationKeys.prev(observationId),
+    queryFn: () => observationsApi.getPrevious(observationId, 3),
     enabled: open,
   });
 
@@ -256,16 +259,16 @@ function LinksSection({
     queryFn: dropsApi.getLastPerType,
   });
   const { data: todaySleep } = useQuery({
-    queryKey: ["sleep/today"],
-    queryFn: api.getTodaySleep,
+    queryKey: sleepKeys.today(),
+    queryFn: sleepApi.getToday,
   });
   const { data: lastCheckIn } = useQuery({
-    queryKey: ["check-ins/last"],
-    queryFn: api.getLastCheckIn,
+    queryKey: checkInKeys.last(),
+    queryFn: checkInsApi.getLast,
   });
   const { data: medications = [] } = useQuery({
-    queryKey: ["medications"],
-    queryFn: api.getMedications,
+    queryKey: medicationKeys.list(),
+    queryFn: medicationsApi.getList,
   });
 
   const todayDropTypes = dropSchedule.filter(
@@ -417,7 +420,7 @@ export function LogOccurrenceSheet({ observation, initialOccurrence, onSaved }: 
         Array.isArray(v) ? v.length > 0 : v !== undefined
       );
       const durNum = durationMinutes.trim() !== "" ? parseInt(durationMinutes, 10) : null;
-      await api.saveOccurrence(observation.id, {
+      await observationsApi.saveOccurrence(observation.id, {
         id: initialOccurrence?.id ?? crypto.randomUUID(),
         loggedAt: loggedAt,
         intensity: observation.use_intensity ? intensity : null,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { api } from "@/lib/api";
+import { historyApi } from "@/features/history";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import type { HistoryFeed, HygieneRecord } from "@/types/domain";
@@ -104,7 +104,7 @@ export default function HistoryPage() {
   const loadFeed = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await api.getHistory();
+      const data = await historyApi.getFeed();
       setFeed(data);
       const todayKey = getDayKey(new Date().toISOString(), data.timezone);
       setExpandedDays(new Set([todayKey]));
@@ -119,7 +119,7 @@ export default function HistoryPage() {
 
   useEffect(() => {
     const handler = async () => {
-      const data = await api.getHistory();
+      const data = await historyApi.getFeed();
       setFeed(data);
     };
     window.addEventListener("history:refresh", handler);
@@ -133,7 +133,7 @@ export default function HistoryPage() {
     setIsLoadingMore(true);
     setLoadError(null);
     try {
-      const more = await api.getHistoryMore(lastGroup.dayKey);
+      const more = await historyApi.getMore(lastGroup.dayKey);
       setFeed((prev) => {
         if (!prev) return more;
         const hygieneByDay = new Map<string, HygieneRecord>();

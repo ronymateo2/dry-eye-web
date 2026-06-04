@@ -7,6 +7,8 @@ import { ObservationsListSheet } from "./observations-list-sheet";
 import { ObservationDetailSheet } from "./observation-detail-sheet";
 import { LogOccurrenceSheet } from "./log-occurrence-sheet";
 import { ObservationSheet } from "./observation-sheet";
+import { observationKeys } from "@/features/observations";
+import { historyKeys } from "@/features/history";
 import type { ObservationRecord, PrevOccurrence } from "@/types/domain";
 
 type Props = {
@@ -24,10 +26,10 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
 
   const handleOccurrenceSaved = useCallback(() => {
     window.dispatchEvent(new CustomEvent("history:refresh"));
-    queryClient.invalidateQueries({ queryKey: ["history"] });
-    queryClient.invalidateQueries({ queryKey: ["observations"] });
-    queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
-    queryClient.invalidateQueries({ queryKey: ["observation-prev"] });
+    queryClient.invalidateQueries({ queryKey: historyKeys.all });
+    queryClient.invalidateQueries({ queryKey: observationKeys.list() });
+    queryClient.invalidateQueries({ queryKey: observationKeys.occurrences() });
+    queryClient.invalidateQueries({ queryKey: observationKeys.prevAll() });
     pop();
   }, [pop, queryClient]);
 
@@ -68,7 +70,7 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
               use_duration: obs.use_duration,
             }}
             onSaved={() => {
-              queryClient.invalidateQueries({ queryKey: ["observations"] });
+              queryClient.invalidateQueries({ queryKey: observationKeys.list() });
               pop();
               pop();
             }}
@@ -90,8 +92,8 @@ export function ObservationFlowSheet({ open, onClose }: Props) {
             observation={{ ...obs, propertiesSchema: obs.properties_schema }}
             initialOccurrence={occ}
             onSaved={() => {
-              queryClient.invalidateQueries({ queryKey: ["observation-prev", obs.id] });
-              queryClient.invalidateQueries({ queryKey: ["observations"] });
+              queryClient.invalidateQueries({ queryKey: observationKeys.prev(obs.id) });
+              queryClient.invalidateQueries({ queryKey: observationKeys.list() });
               pop();
             }}
           />

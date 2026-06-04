@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { api, setToken, clearToken } from "./api";
+import { setToken, clearToken } from "@/lib/http";
+import { userApi } from "@/features/user";
 import type { User } from "@/types/domain";
 
 type AuthState =
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const user = await api.getMe();
+      const user = await userApi.getMe();
       setAuth({ status: "authenticated", user });
     } catch {
       clearToken();
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const user = await api.getMe();
+      const user = await userApi.getMe();
       setAuth({ status: "authenticated", user });
     } catch {
       signOut();

@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OBS_EYE_LABELS, OBS_BODY_ZONE_LABELS, OBS_CATEGORY_LABELS } from "@/lib/constants";
-import { api } from "@/lib/api";
+import { observationsApi, observationKeys } from "@/features/observations";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { formatPropertyValue } from "@/lib/observations";
@@ -358,13 +358,13 @@ export function ObservationsListSheet({ onSelectObservation, onLogNew, onCreateN
   const showCancel = isFocused || query.length > 0;
 
   const { data: observations = [], isLoading, isError } = useQuery({
-    queryKey: ["observations"],
-    queryFn: api.getObservations,
+    queryKey: observationKeys.list(),
+    queryFn: observationsApi.getList,
   });
 
   const { data: searchResults = [], isFetching: isSearchFetching } = useQuery({
-    queryKey: ["observations", "search", submittedQuery],
-    queryFn: () => api.searchObservations(submittedQuery),
+    queryKey: observationKeys.search(submittedQuery),
+    queryFn: () => observationsApi.search(submittedQuery),
     enabled: isSearching,
   });
 

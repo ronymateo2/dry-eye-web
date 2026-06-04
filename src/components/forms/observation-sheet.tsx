@@ -5,7 +5,7 @@ import { PlusIcon, XIcon } from "@phosphor-icons/react";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
-import { api } from "@/lib/api";
+import { observationsApi, observationKeys } from "@/features/observations";
 import { cn } from "@/lib/utils";
 import {
   OBS_EYE_OPTIONS,
@@ -361,12 +361,12 @@ export function ObservationSheet({ initialObservation, onSaved }: Props) {
 
         let result: { id: string; title: string; eye: string; properties_schema?: PropertyDef[] | null; use_intensity: boolean; use_duration: boolean };
         if (isEdit) {
-          result = await api.updateObservation(initialObservation.id, payload);
+          result = await observationsApi.update(initialObservation.id, payload);
         } else {
-          result = await api.createObservation(payload);
+          result = await observationsApi.create(payload);
         }
 
-        queryClient.invalidateQueries({ queryKey: ["observations"] });
+        queryClient.invalidateQueries({ queryKey: observationKeys.list() });
         onSaved({
           id: result.id,
           title: result.title,

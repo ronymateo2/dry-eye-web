@@ -8,8 +8,8 @@ import { StatusBanner } from "@/components/ui/status-banner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClockIcon, EyedropperIcon, TimerIcon, TrashIcon, WarningIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
-import { api } from "@/lib/api";
 import { dropsApi, dropKeys, dropTypeKeys, vialKeys, useInvalidateDrops } from "@/features/drops";
+import { calendarApi } from "@/features/calendar";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import { queueDrop } from "@/lib/offline/drops-queue";
@@ -112,7 +112,7 @@ export function DropSheet({
       }
 
       invalidateDrops(selectedDropType);
-      await api.syncCalendarDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
+      await calendarApi.syncDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
       onSaved();
     } catch {
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });

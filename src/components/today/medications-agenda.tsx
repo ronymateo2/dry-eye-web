@@ -11,7 +11,7 @@ import { QuickLogCheck } from "./quick-log-check";
 import { CountdownValue } from "./countdown-value";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { medicationsApi, medicationKeys } from "@/features/medications";
 import { cn } from "@/lib/utils";
 import { parseTimesJson } from "@/components/treatments/times-picker";
 import { useUser } from "@/lib/auth";
@@ -485,14 +485,14 @@ export function MedicationsAgenda({ now }: { now: number }) {
   const queryClient = useQueryClient();
 
   const { data: medications = [], isLoading } = useQuery({
-    queryKey: ["medications"],
-    queryFn: api.getMedications,
+    queryKey: medicationKeys.list(),
+    queryFn: medicationsApi.getList,
     staleTime: 60_000,
   });
 
   const { data: todayIntakes = [] } = useQuery({
-    queryKey: ["medication-intakes/today"],
-    queryFn: api.getTodayMedicationIntakes,
+    queryKey: medicationKeys.intakesToday(),
+    queryFn: medicationsApi.getTodayIntakes,
     staleTime: 30_000,
   });
 
@@ -528,7 +528,7 @@ export function MedicationsAgenda({ now }: { now: number }) {
     }));
 
     try {
-      await Promise.all(intakes.map((intake) => api.saveMedicationIntake(intake)));
+      await Promise.all(intakes.map((intake) => medicationsApi.saveIntake(intake)));
       const intakeIds = intakes.map((i) => i.id);
 
       const label = isGroupHero
@@ -542,11 +542,11 @@ export function MedicationsAgenda({ now }: { now: number }) {
           onClick: () => {
             void (async () => {
               try {
-                await Promise.all(intakeIds.map((id) => api.deleteMedicationIntake(id)));
+                await Promise.all(intakeIds.map((id) => medicationsApi.deleteIntake(id)));
                 setQuickLogging(false);
                 setTakenAtLabel(null);
-                void queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
-                void queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
+                void queryClient.invalidateQueries({ queryKey: medicationKeys.intakesToday() });
+                void queryClient.invalidateQueries({ queryKey: medicationKeys.intakesLastPerMed() });
               } catch {
                 toast.error("No se pudo deshacer el registro");
               }
@@ -558,8 +558,8 @@ export function MedicationsAgenda({ now }: { now: number }) {
       setTimeout(() => {
         setQuickLogging(false);
         setTakenAtLabel(null);
-        void queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
-        void queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
+        void queryClient.invalidateQueries({ queryKey: medicationKeys.intakesToday() });
+        void queryClient.invalidateQueries({ queryKey: medicationKeys.intakesLastPerMed() });
       }, 3_000);
     } catch {
       setQuickLogging(false);
@@ -573,9 +573,9 @@ export function MedicationsAgenda({ now }: { now: number }) {
     const id = deleteIntakeId;
     setDeleteIntakeId(null);
     try {
-      await api.deleteMedicationIntake(id);
-      void queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
-      void queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
+      await medicationsApi.deleteIntake(id);
+      void queryClient.invalidateQueries({ queryKey: medicationKeys.intakesToday() });
+      void queryClient.invalidateQueries({ queryKey: medicationKeys.intakesLastPerMed() });
     } catch {
       toast.error("No se pudo eliminar el registro");
     }
