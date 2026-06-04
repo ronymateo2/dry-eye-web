@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TimerIcon, EyedropperSampleIcon, PlusIcon, CaretDownIcon } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { dropsApi, dropKeys, dropTypeKeys, vialKeys, invalidateDrops } from "@/features/drops";
 import { cn } from "@/lib/utils";
 
 function timeAgo(dateStr: string): string {
@@ -51,8 +51,8 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
   const [selectedDropId, setSelectedDropId] = useState<string | null>(null);
 
   const { data: dropTypes = [], isLoading: typesLoading } = useQuery({
-    queryKey: ["drop-types"],
-    queryFn: api.getDropTypes,
+    queryKey: dropTypeKeys.list(),
+    queryFn: dropsApi.getTypes,
   });
 
   const vialTypes = useMemo(() => dropTypes.filter((dt) => dt.is_vial), [dropTypes]);
@@ -61,14 +61,14 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
   const hours = selectedTypeInfo?.vial_duration ?? 24;
 
   const { data: recentDrops = [], isLoading: dropsLoading } = useQuery({
-    queryKey: ["drops/recent-no-vial", selectedDropType, hours],
-    queryFn: () => api.getRecentDrops(selectedDropType, hours, { hasVial: false }),
+    queryKey: dropKeys.recentNoVial(selectedDropType, hours),
+    queryFn: () => dropsApi.getRecent(selectedDropType, hours, { hasVial: false }),
     enabled: !!selectedDropType,
   });
 
   const { data: activeVials = [] } = useQuery({
-    queryKey: ["vials/active"],
-    queryFn: api.getActiveVials,
+    queryKey: vialKeys.active(),
+    queryFn: dropsApi.getActiveVials,
   });
 
   const activeVialForType = useMemo(() => activeVials.find((v) => v.drop_type_id === selectedDropType), [activeVials, selectedDropType]);
@@ -85,11 +85,9 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
   }, [activeVialForType]);
 
   const createVialMutation = useMutation({
-    mutationFn: api.createVial,
+    mutationFn: dropsApi.createVial,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vials/active"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      invalidateDrops(queryClient);
       toast.success("Vial abierto.");
       onClose();
     },

@@ -2,8 +2,7 @@ import { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
-import { useInvalidateDrops } from "@/lib/hooks/use-invalidate-drops";
+import { dropsApi, useInvalidateDrops } from "@/features/drops";
 import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
 import { QuickLogCheck } from "./quick-log-check";
@@ -52,8 +51,8 @@ export function HeroView({
             if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
             void (async () => {
               try {
-                await api.deleteDrop(dropId);
-                if (vialId) await api.deleteVial(vialId);
+                await dropsApi.remove(dropId);
+                if (vialId) await dropsApi.deleteVial(vialId);
                 setJustRegistered(null);
                 invalidateDrops(dropTypeId);
               } catch {

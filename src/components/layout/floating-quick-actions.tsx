@@ -5,6 +5,7 @@ import { PlusIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "./mobile-sheet";
 import { QuickActionsSheet } from "./quick-actions-sheet";
+import { vialKeys } from "@/features/drops";
 import { cn } from "@/lib/utils";
 
 const DropSheet = lazy(() => import("@/components/forms/drop-sheet").then((m) => ({ default: m.DropSheet })));
@@ -50,8 +51,8 @@ export function FloatingQuickActions() {
     queryClient.invalidateQueries({ queryKey: ["medication-intakes/last-per-med"] });
     queryClient.invalidateQueries({ queryKey: ["medication-intakes/today"] });
     queryClient.invalidateQueries({ queryKey: ["observation-occurrences"] });
-    queryClient.invalidateQueries({ queryKey: ["vials/active"] });
-    queryClient.invalidateQueries({ queryKey: ["vials/history"] });
+    queryClient.invalidateQueries({ queryKey: vialKeys.active() });
+    queryClient.invalidateQueries({ queryKey: vialKeys.history() });
     queryClient.invalidateQueries({ queryKey: ["symptoms/today"] });
     closeAll();
   };

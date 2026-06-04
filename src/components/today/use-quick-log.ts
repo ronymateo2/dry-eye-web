@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
 import { queueDrop } from "@/lib/offline/drops-queue";
 import type { DropEye } from "@/types/domain";
 
@@ -15,7 +15,7 @@ export function useQuickLog(opts?: {
   const mutation = useMutation({
     mutationFn: async ({ dropTypeId, autoCreateVial }: { dropTypeId: string; autoCreateVial?: boolean }) => {
       const cached = queryClient.getQueryData<{ id: string; logged_at: string; quantity: number; eye: string }[]>(
-        ["drops/recent", dropTypeId],
+        dropKeys.recent(dropTypeId),
       );
       const lastEye: DropEye =
         cached && cached.length > 0 && ["left", "right", "both"].includes(cached[0].eye)
@@ -32,7 +32,7 @@ export function useQuickLog(opts?: {
       }
 
       try {
-        await api.saveDrop({ id, dropTypeId, loggedAt, quantity: 1, eye: lastEye });
+        await dropsApi.save({ id, dropTypeId, loggedAt, quantity: 1, eye: lastEye });
       } catch {
         await queueDrop({ id, dropTypeId, loggedAt, quantity: 1, eye: lastEye });
         toast.success("Gota en cola — se sincronizará al reconectar.");
@@ -43,7 +43,7 @@ export function useQuickLog(opts?: {
       if (autoCreateVial) {
         try {
           vialId = crypto.randomUUID();
-          await api.createVial({ id: vialId, dropTypeId, startedAt: loggedAt, dropId: id });
+          await dropsApi.createVial({ id: vialId, dropTypeId, startedAt: loggedAt, dropId: id });
         } catch {
           vialId = undefined;
           toast.warning("Gota guardada. No se pudo abrir el vial — ábrelo manualmente.");
@@ -53,13 +53,13 @@ export function useQuickLog(opts?: {
     },
     onSuccess: (data) => {
       opts?.onSuccess?.(data.dropTypeId, data.id, data.vialId);
-      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      queryClient.invalidateQueries({ queryKey: dropKeys.last() });
       if (data.vialId) {
-        queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+        queryClient.invalidateQueries({ queryKey: vialKeys.active() });
       }
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["drops/recent", data.dropTypeId] });
-        queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
+        queryClient.invalidateQueries({ queryKey: dropKeys.recent(data.dropTypeId) });
+        queryClient.invalidateQueries({ queryKey: dropKeys.recentAll() });
       }, TRANSITION_MS);
     },
     onError: () => {

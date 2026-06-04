@@ -12,6 +12,7 @@ import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
 import { useScheduleData } from "@/components/today/use-schedule-data";
 import { dispatchQuickAction } from "@/components/today/helpers";
 import { api } from "@/lib/api";
+import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { useNow } from "@/lib/hooks/use-now";
@@ -29,14 +30,14 @@ export default function TodayPage() {
   useEffect(() => {
     void queryClient.prefetchQuery({ queryKey: ["check-ins/last"], queryFn: api.getLastCheckIn, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["sleep/today"], queryFn: api.getTodaySleep, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["drops/last-per-type"], queryFn: api.getLastDropPerType, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: dropKeys.lastPerType(), queryFn: dropsApi.getLastPerType, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["calendar/events/today"], queryFn: api.getCalendarEventsToday, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["medications"], queryFn: api.getMedications, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["medication-intakes/last-per-med"], queryFn: api.getLastIntakePerMedication, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["medication-intakes/today"], queryFn: api.getTodayMedicationIntakes, staleTime: 30_000 });
-    void queryClient.prefetchQuery({ queryKey: ["vials/active"], queryFn: api.getActiveVials, staleTime: 60_000 });
+    void queryClient.prefetchQuery({ queryKey: vialKeys.active(), queryFn: dropsApi.getActiveVials, staleTime: 60_000 });
     void queryClient.prefetchQuery({ queryKey: ["symptoms/today"], queryFn: api.getSymptomStatusToday, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: ["drops/recent-all"], queryFn: () => api.getRecentDropsAll(24), staleTime: 30_000 });
+    void queryClient.prefetchQuery({ queryKey: dropKeys.recentAll(), queryFn: () => dropsApi.getRecentAll(24), staleTime: 30_000 });
   }, [queryClient]);
 
   return (

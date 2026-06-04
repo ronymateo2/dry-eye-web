@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArchiveIcon, ArrowUUpLeftIcon } from "@phosphor-icons/react";
@@ -13,8 +13,8 @@ export function ArchivedItems({
   renderItem,
 }: {
   label: string;
-  queryKey: string[];
-  archivedQueryKey: string[];
+  queryKey: QueryKey;
+  archivedQueryKey: QueryKey;
   fetchArchived: () => Promise<{ id: string; name: string; archived_at: string }[]>;
   unarchive: (id: string) => Promise<{ ok: boolean }>;
   renderItem: (item: { id: string; name: string; archived_at: string }) => React.ReactNode;

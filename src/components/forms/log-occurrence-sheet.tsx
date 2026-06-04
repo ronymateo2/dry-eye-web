@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBanner } from "@/components/ui/status-banner";
 import { PainSlider } from "@/components/ui/pain-slider";
 import { api } from "@/lib/api";
+import { dropsApi, dropKeys } from "@/features/drops";
 import { cn } from "@/lib/utils";
 import { getDayKey } from "@/lib/utils";
 import { formatPropertyValue } from "@/lib/observations";
@@ -251,8 +252,8 @@ function LinksSection({
   const todayKey = getDayKey(new Date().toISOString(), timezone);
 
   const { data: dropSchedule = [] } = useQuery({
-    queryKey: ["drops/last-per-type"],
-    queryFn: api.getLastDropPerType,
+    queryKey: dropKeys.lastPerType(),
+    queryFn: dropsApi.getLastPerType,
   });
   const { data: todaySleep } = useQuery({
     queryKey: ["sleep/today"],

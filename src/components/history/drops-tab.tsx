@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion, useReducedMotion } from "motion/react";
 import { CalendarIcon, EyedropperIcon } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { dropsApi, dropKeys } from "@/features/drops";
 import { getDayKey } from "@/lib/utils";
 import { EYE_SHORT } from "./types";
 import { formatShortDate, getDayPillLabel } from "./utils";
@@ -29,8 +29,8 @@ function StatCell({ label, children }: { label: string; children: React.ReactNod
 export function DropsTab({ timezone }: { timezone: string }) {
   const reducedMotion = useReducedMotion();
   const { data: stats, isLoading } = useQuery({
-    queryKey: ["drops/stats-per-type"],
-    queryFn: api.getDropStatsPerType,
+    queryKey: dropKeys.statsPerType(),
+    queryFn: dropsApi.getStatsPerType,
   });
 
   if (isLoading) {

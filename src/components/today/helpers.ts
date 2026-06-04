@@ -1,8 +1,8 @@
 import type { DropScheduleEntry } from "@/types/domain";
 import type { DoseSlot } from "@/components/register/day-projection-sheet";
-import { api } from "@/lib/api";
+import type { ActiveVial } from "@/features/drops";
 
-export type ActiveVialEntry = Awaited<ReturnType<typeof api.getActiveVials>>[0];
+export type ActiveVialEntry = ActiveVial;
 
 export function timeAgo(dateStr: string | null): string | null {
   if (!dateStr) return null;

@@ -2,19 +2,20 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { DoseSlot } from "@/components/register/day-projection-sheet";
 import { api } from "@/lib/api";
+import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
 import { daysUntilEnd } from "@/lib/utils";
 import { getNextMs, isLoggedToday, isCompletedToday, buildDayProjection } from "./helpers";
 
 export function useScheduleData(now: number) {
   const { data: activeVials = [] } = useQuery({
-    queryKey: ["vials/active"],
-    queryFn: api.getActiveVials,
+    queryKey: vialKeys.active(),
+    queryFn: dropsApi.getActiveVials,
     staleTime: 60_000,
   });
 
   const { data: entries = [] } = useQuery({
-    queryKey: ["drops/last-per-type"],
-    queryFn: api.getLastDropPerType,
+    queryKey: dropKeys.lastPerType(),
+    queryFn: dropsApi.getLastPerType,
     staleTime: 60_000,
   });
 
@@ -70,8 +71,8 @@ export function useScheduleData(now: number) {
   );
 
   const { data: allRecentDrops = [] } = useQuery({
-    queryKey: ["drops/recent-all"],
-    queryFn: () => api.getRecentDropsAll(24),
+    queryKey: dropKeys.recentAll(),
+    queryFn: () => dropsApi.getRecentAll(24),
     staleTime: 30_000,
   });
 

@@ -9,11 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClockIcon, EyedropperIcon, TimerIcon, TrashIcon, WarningIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { DROP_EYES } from "@/lib/constants";
 import { api } from "@/lib/api";
+import { dropsApi, dropKeys, dropTypeKeys, vialKeys, useInvalidateDrops } from "@/features/drops";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import { queueDrop } from "@/lib/offline/drops-queue";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useInvalidateDrops } from "@/lib/hooks/use-invalidate-drops";
 import type { ActionState, DropEye } from "@/types/domain";
 
 export function DropSheet({
@@ -30,7 +30,7 @@ export function DropSheet({
   const queryClient = useQueryClient();
   const invalidateDrops = useInvalidateDrops();
   const user = useUser();
-  const { data: dropTypes = [], isLoading } = useQuery({ queryKey: ["drop-types"], queryFn: api.getDropTypes });
+  const { data: dropTypes = [], isLoading } = useQuery({ queryKey: dropTypeKeys.list(), queryFn: dropsApi.getTypes });
   const [selectedDropType, setSelectedDropType] = useState<string>(editDrop?.dropTypeId ?? "");
   const [quantity, setQuantity] = useState(editDrop?.quantity ?? 1);
   const [eye, setEye] = useState<DropEye>(editDrop?.eye ?? "left");
@@ -42,20 +42,20 @@ export function DropSheet({
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   const { data: lastDrop, isLoading: lastDropLoading } = useQuery({
-    queryKey: ["drops/last"],
-    queryFn: api.getLastDrop,
+    queryKey: dropKeys.last(),
+    queryFn: dropsApi.getLast,
     staleTime: 0,
   });
 
   const { data: activeVials = [] } = useQuery({
-    queryKey: ["vials/active"],
-    queryFn: api.getActiveVials,
+    queryKey: vialKeys.active(),
+    queryFn: dropsApi.getActiveVials,
   });
 
   const discardVialMutation = useMutation({
-    mutationFn: (id: string) => api.discardVial(id),
+    mutationFn: (id: string) => dropsApi.discardVial(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vials/active"] });
+      queryClient.invalidateQueries({ queryKey: vialKeys.active() });
       setShowDiscardConfirm(false);
     },
     onError: () => {
@@ -91,7 +91,7 @@ export function DropSheet({
 
     if (!isOnline) {
       await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-      queryClient.setQueryData(["drops/last"], { id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
+      queryClient.setQueryData(dropKeys.last(), { id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
       toast.success("Gota en cola — se sincronizará al reconectar.");
       setIsPending(false);
       onSaved();
@@ -99,12 +99,12 @@ export function DropSheet({
     }
 
     try {
-      await api.saveDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
+      await dropsApi.save({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
       toast.success(editDrop ? "Gota actualizada." : "Gota registrada.");
 
       if (!editDrop && vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
         try {
-          await api.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
+          await dropsApi.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
           toast.success(`Vial abierto · ${dropTypeName}`);
         } catch {
           toast.warning("Gota guardada. No se pudo abrir el vial — ábrelo manualmente desde Tratamientos.");

@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { dropsApi, dropKeys } from "@/features/drops";
 import { getPendingDrops, removePendingDrop } from "@/lib/offline/drops-queue";
 import { getPendingSymptomEntries, removePendingSymptomEntry } from "@/lib/offline/symptoms-queue";
 
@@ -13,15 +14,15 @@ export function useOfflineSync() {
     const pendingDrops = await getPendingDrops();
     for (const drop of pendingDrops) {
       try {
-        await api.saveDrop(drop);
+        await dropsApi.save(drop);
         await removePendingDrop(drop.id);
       } catch {
         // keep in queue
       }
     }
     if (pendingDrops.length > 0) {
-      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      queryClient.invalidateQueries({ queryKey: dropKeys.last() });
+      queryClient.invalidateQueries({ queryKey: dropKeys.lastPerType() });
     }
 
     const pendingSymptoms = await getPendingSymptomEntries();

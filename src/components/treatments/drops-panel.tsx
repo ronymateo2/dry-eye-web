@@ -9,7 +9,7 @@ import { intervalLabel } from "@/components/treatments/interval-pills";
 import { TreatmentCard } from "@/components/treatments/treatment-card";
 import { ArchivedItems } from "@/components/treatments/archived-items";
 import { DropSheet } from "@/components/treatments/drop-sheet";
-import { api } from "@/lib/api";
+import { dropsApi, dropTypeKeys } from "@/features/drops";
 import type { DropTypeRecord } from "@/types/domain";
 import { DropIcon, } from "@phosphor-icons/react";
 
@@ -17,8 +17,8 @@ export function DropsPanel() {
   const qc = useQueryClient();
 
   const { data: dropTypes = [], isLoading } = useQuery({
-    queryKey: ["drop-types"],
-    queryFn: api.getDropTypes,
+    queryKey: dropTypeKeys.list(),
+    queryFn: dropsApi.getTypes,
   });
 
   const [editingItem, setEditingItem] = useState<DropTypeRecord | null | "new">(null);
@@ -30,7 +30,7 @@ export function DropsPanel() {
   );
 
   const reorderMutation = useMutation({
-    mutationFn: (ids: string[]) => api.reorderDropTypes(ids),
+    mutationFn: (ids: string[]) => dropsApi.reorderTypes(ids),
   });
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -39,7 +39,7 @@ export function DropsPanel() {
     const oldIndex = dropTypes.findIndex((d) => d.id === active.id);
     const newIndex = dropTypes.findIndex((d) => d.id === over.id);
     const reordered = arrayMove(dropTypes, oldIndex, newIndex);
-    qc.setQueryData(["drop-types"], reordered);
+    qc.setQueryData(dropTypeKeys.list(), reordered);
     reorderMutation.mutate(reordered.map((d) => d.id));
   };
 
@@ -108,10 +108,10 @@ export function DropsPanel() {
 
       <ArchivedItems
         label="Gota"
-        queryKey={["drop-types"]}
-        archivedQueryKey={["drop-types/archived"]}
-        fetchArchived={api.getArchivedDropTypes}
-        unarchive={api.unarchiveDropType}
+        queryKey={dropTypeKeys.list()}
+        archivedQueryKey={dropTypeKeys.archived()}
+        fetchArchived={dropsApi.getArchivedTypes}
+        unarchive={dropsApi.unarchiveType}
         renderItem={(item) => (
           <span className="text-[14px] text-[var(--text-muted)]">{item.name}</span>
         )}

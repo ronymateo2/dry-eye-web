@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { FontProvider } from "@/lib/font";
 import { AppShell } from "@/components/layout/app-shell";
 import { SplashScreen } from "@/components/layout/splash-screen";
+import { ErrorBoundary } from "@/components/layout/error-boundary";
 
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const TodayPage = lazy(() => import("@/pages/TodayPage"));
@@ -29,6 +30,7 @@ function AppRoutes() {
       <SplashScreen isLoading={isLoading} />
       {!isLoading && (
         <AppShell isAuthenticated={isAuthenticated}>
+          <ErrorBoundary key={location.pathname}>
           <Suspense fallback={null}>
             <motion.div
               key={location.pathname}
@@ -60,6 +62,7 @@ function AppRoutes() {
               </Routes>
             </motion.div>
           </Suspense>
+          </ErrorBoundary>
         </AppShell>
       )}
     </>

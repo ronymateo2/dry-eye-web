@@ -8,6 +8,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { IntervalPills } from "@/components/treatments/interval-pills";
 import { ArchiveConfirm } from "@/components/treatments/archive-confirm";
 import { api } from "@/lib/api";
+import { dropsApi, dropKeys, dropTypeKeys } from "@/features/drops";
 import { useUser } from "@/lib/auth";
 import { getDayKey } from "@/lib/utils";
 import type { DropTypeRecord } from "@/types/domain";
@@ -43,7 +44,7 @@ function DropFormContent({
   const saveMutation = useMutation({
     mutationFn: () =>
       isEdit
-        ? api.updateDropType(item!.id, {
+        ? dropsApi.updateType(item!.id, {
             intervalHours: form.intervalHours,
             startDate: form.startDate || null,
             endDate: form.endDate || null,
@@ -51,10 +52,18 @@ function DropFormContent({
             vialDuration: form.isVial ? form.vialDuration : null,
             quickAction: form.intervalHours == null ? form.quickAction : false,
           })
-        : api.createDropType(form.name.trim(), form.intervalHours, form.startDate || null, form.endDate || null, undefined, form.isVial, form.isVial ? form.vialDuration : null, form.intervalHours == null ? form.quickAction : false),
+        : dropsApi.createType({
+            name: form.name.trim(),
+            intervalHours: form.intervalHours,
+            startDate: form.startDate || null,
+            endDate: form.endDate || null,
+            isVial: form.isVial,
+            vialDuration: form.isVial ? form.vialDuration : null,
+            quickAction: form.intervalHours == null ? form.quickAction : false,
+          }),
     onSuccess: async () => {
-      qc.invalidateQueries({ queryKey: ["drop-types"] });
-      qc.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      qc.invalidateQueries({ queryKey: dropTypeKeys.list() });
+      qc.invalidateQueries({ queryKey: dropKeys.lastPerType() });
 
       if (isEdit) {
         try {
@@ -74,11 +83,11 @@ function DropFormContent({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => api.deleteDropType(item!.id),
+    mutationFn: () => dropsApi.deleteType(item!.id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["drop-types"] });
-      qc.invalidateQueries({ queryKey: ["drop-types/archived"] });
-      qc.invalidateQueries({ queryKey: ["drops/last-per-type"] });
+      qc.invalidateQueries({ queryKey: dropTypeKeys.list() });
+      qc.invalidateQueries({ queryKey: dropTypeKeys.archived() });
+      qc.invalidateQueries({ queryKey: dropKeys.lastPerType() });
       toast.success("Gota archivada.");
       onClose();
     },

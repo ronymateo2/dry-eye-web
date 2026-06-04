@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircleIcon } from "@phosphor-icons/react";
-import { api } from "@/lib/api";
+import { dropsApi, vialKeys } from "@/features/drops";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function VialsTab() {
   const [loadError] = useState<string | null>(null);
 
   const { data: historyData, isLoading } = useQuery({
-    queryKey: ["vials/history"],
-    queryFn: () => api.getVialHistory({ limit: 20 }),
+    queryKey: vialKeys.history(),
+    queryFn: () => dropsApi.getVialHistory({ limit: 20 }),
   });
 
   return (

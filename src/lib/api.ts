@@ -1,51 +1,13 @@
 import type { SaveDropInput, SaveHygieneInput, SaveOccurrenceInput, SaveMedicationInput, SaveMedicationIntakeInput, SaveTherapySessionInput, TherapySessionRecord, TherapyCorrelation, HistoryFeed, DropScheduleEntry, DropTypeStats, CalendarStatus, CalendarEventEntry, SaveSymptomEntryInput, SymptomStatusToday, SymptomEntryRecord } from "@/types/domain";
+import { http } from "@/lib/http";
 
-const BASE = import.meta.env.VITE_API_URL ?? "/api";
-
-function getToken(): string | null {
-  return localStorage.getItem("weqe_token");
-}
-
-export function setToken(token: string): void {
-  localStorage.setItem("weqe_token", token);
-}
-
-export function clearToken(): void {
-  localStorage.removeItem("weqe_token");
-}
-
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const token = getToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
-
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
-
-  if (!res.ok) {
-    if (res.status === 401) {
-      clearToken();
-      window.location.href = "/";
-    }
-    const text = await res.text().catch(() => "");
-    throw new Error(text || res.statusText);
-  }
-
-  return res.json() as Promise<T>;
-}
+export { setToken, clearToken } from "@/lib/http";
 
 export const api = {
-  get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: "POST", body: JSON.stringify(body) }),
-  put: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: "PUT", body: JSON.stringify(body) }),
-  delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  get: http.get,
+  post: <T>(path: string, body: unknown) => http.post<T>(path, body),
+  put: <T>(path: string, body: unknown) => http.put<T>(path, body),
+  delete: http.delete,
 
   // Named endpoints
   getMe: () => api.get<{ id: string; name: string | null; email: string | null; image: string | null; timezone: string; theme: "dark" | "light"; font: "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded" | null }>("/user/me"),

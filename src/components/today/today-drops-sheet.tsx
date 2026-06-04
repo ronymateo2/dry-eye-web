@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { TimelineRow, TimelineDot, TimelineGap } from "@/components/history/timeline-ui";
 import { formatTime, formatGap } from "@/components/history/utils";
 import { useUser } from "@/lib/auth";
-import { api } from "@/lib/api";
+import { dropsApi, dropKeys, dropTypeKeys } from "@/features/drops";
 import { cn } from "@/lib/utils";
 import { getDayKey } from "@/lib/utils";
 import type { DropEye } from "@/types/domain";
@@ -42,15 +42,15 @@ export function TodayDropsSheet({
   }, [open, stack.clear]);
 
   const { data: dropTypes = [] } = useQuery({
-    queryKey: ["drop-types"],
-    queryFn: api.getDropTypes,
+    queryKey: dropTypeKeys.list(),
+    queryFn: dropsApi.getTypes,
     staleTime: 120_000,
   });
 
   const recentQueries = useQueries({
     queries: dropTypes.map((t) => ({
-      queryKey: ["drops/recent", t.id],
-      queryFn: () => api.getRecentDrops(t.id, 24),
+      queryKey: dropKeys.recent(t.id),
+      queryFn: () => dropsApi.getRecent(t.id, 24),
       staleTime: 30_000,
     })),
   });
@@ -84,25 +84,25 @@ export function TodayDropsSheet({
   }, [dropTypes, recentQueries.map((q) => q.dataUpdatedAt).join(","), timezone, todayKey]);
 
   const deleteMutation = useMutation({
-    mutationFn: ({ id }: { id: string; typeId: string }) => api.deleteDrop(id),
+    mutationFn: ({ id }: { id: string; typeId: string }) => dropsApi.remove(id),
     onMutate: async ({ id, typeId }) => {
-      await queryClient.cancelQueries({ queryKey: ["drops/recent", typeId] });
-      const prev = queryClient.getQueryData<RecentDrop[]>(["drops/recent", typeId]);
+      await queryClient.cancelQueries({ queryKey: dropKeys.recent(typeId) });
+      const prev = queryClient.getQueryData<RecentDrop[]>(dropKeys.recent(typeId));
       queryClient.setQueryData<RecentDrop[]>(
-        ["drops/recent", typeId],
+        dropKeys.recent(typeId),
         (old) => old?.filter((d) => d.id !== id) ?? [],
       );
       return { prev, typeId };
     },
     onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(["drops/recent", ctx.typeId], ctx.prev);
+      if (ctx?.prev) queryClient.setQueryData(dropKeys.recent(ctx.typeId), ctx.prev);
       toast.error("No se pudo eliminar. Intenta de nuevo.");
     },
     onSettled: (_data, _err, { typeId }) => {
-      queryClient.invalidateQueries({ queryKey: ["drops/recent", typeId] });
-      queryClient.invalidateQueries({ queryKey: ["drops/recent-all"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/last-per-type"] });
-      queryClient.invalidateQueries({ queryKey: ["drops/last"] });
+      queryClient.invalidateQueries({ queryKey: dropKeys.recent(typeId) });
+      queryClient.invalidateQueries({ queryKey: dropKeys.recentAll() });
+      queryClient.invalidateQueries({ queryKey: dropKeys.lastPerType() });
+      queryClient.invalidateQueries({ queryKey: dropKeys.last() });
     },
   });
 

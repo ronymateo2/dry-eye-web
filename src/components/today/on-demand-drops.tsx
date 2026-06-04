@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
-import { useInvalidateDrops } from "@/lib/hooks/use-invalidate-drops";
+import { dropsApi, dropKeys, dropTypeKeys, useInvalidateDrops } from "@/features/drops";
 import { CheckIcon, DropIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { TodayDropsSheet } from "./today-drops-sheet";
@@ -10,7 +10,6 @@ import { useQuickLog } from "./use-quick-log";
 import { useNow } from "@/lib/hooks/use-now";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { api } from "@/lib/api";
 import type { DropTypeRecord } from "@/types/domain";
 
 function formatTimeAgo(dateStr: string, now: number): string {
@@ -30,8 +29,8 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const invalidateDrops = useInvalidateDrops();
   const { data: recentDrops = [] } = useQuery({
-    queryKey: ["drops/recent", drop.id],
-    queryFn: () => api.getRecentDrops(drop.id, 24),
+    queryKey: dropKeys.recent(drop.id),
+    queryFn: () => dropsApi.getRecent(drop.id, 24),
     staleTime: 30_000,
   });
 
@@ -55,7 +54,7 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
               const id = lastDropIdRef.current;
               if (!id) return;
               try {
-                await api.deleteDrop(id);
+                await dropsApi.remove(id);
                 setJustRegistered(null);
                 invalidateDrops(dropTypeId);
               } catch {
@@ -170,8 +169,8 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
 
 export function OnDemandDrops() {
   const { data: dropTypes = [] } = useQuery({
-    queryKey: ["drop-types"],
-    queryFn: api.getDropTypes,
+    queryKey: dropTypeKeys.list(),
+    queryFn: dropsApi.getTypes,
     staleTime: 60_000,
   });
 

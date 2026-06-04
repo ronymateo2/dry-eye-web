@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { dropsApi, dropKeys } from "@/features/drops";
 
 export function formatDropTimeAgo(isoString: string): string {
   const diffMs = Math.max(0, Date.now() - new Date(isoString).getTime());
@@ -19,8 +19,8 @@ export function formatDropTimeAgo(isoString: string): string {
 export function useLastDropWidget() {
   const [, setTick] = useState(0);
   const { data = null, isFetching, refetch } = useQuery({
-    queryKey: ["drops/last"],
-    queryFn: api.getLastDrop,
+    queryKey: dropKeys.last(),
+    queryFn: dropsApi.getLast,
     staleTime: 30_000,
   });
 
