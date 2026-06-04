@@ -437,7 +437,7 @@ export function MedicationsAgenda({ now }: { now: number }) {
                                 className="truncate text-[20px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
                                 style={{
                                   color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
-                                  textDecoration: quickLogging ? "line-through" : "none",
+                                  textDecorationLine: quickLogging ? "line-through" : "none",
                                   textDecorationColor: "rgba(0,0,0,0.2)",
                                 }}
                               >
@@ -483,7 +483,7 @@ export function MedicationsAgenda({ now }: { now: number }) {
                             className="truncate text-[22px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
                             style={{
                               color: quickLogging ? "var(--text-muted)" : "var(--text-primary)",
-                              textDecoration: quickLogging ? "line-through" : "none",
+                              textDecorationLine: quickLogging ? "line-through" : "none",
                               textDecorationColor: "rgba(0,0,0,0.2)",
                             }}
                           >

@@ -171,7 +171,7 @@ export function HeroView({
                     className="truncate text-[26px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
                     style={{
                       color: isRegistered ? "var(--text-muted)" : "var(--text-primary)",
-                      textDecoration: isRegistered ? "line-through" : "none",
+                      textDecorationLine: isRegistered ? "line-through" : "none",
                       textDecorationColor: "rgba(0,0,0,0.2)",
                     }}
                   >
