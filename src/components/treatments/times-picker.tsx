@@ -57,13 +57,4 @@ export function TimesPicker({
   );
 }
 
-export function parseTimesJson(json: string | null | undefined): string[] {
-  if (!json) return [];
-  try {
-    const parsed = JSON.parse(json);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((t): t is string => typeof t === "string" && /^\d{2}:\d{2}$/.test(t));
-  } catch {
-    return [];
-  }
-}
+export { parseTimesJson } from "@/features/medications/domain";

@@ -16,4 +16,14 @@ export {
   useReorderDropTypes,
 } from "./mutations";
 export { invalidateDrops, invalidateDropTypes, useInvalidateDrops } from "./invalidation";
+export {
+  timeAgo,
+  getCountdown,
+  isLoggedToday,
+  isCompletedToday,
+  getNextMs,
+  buildDayProjection,
+  getVialStatus,
+} from "./domain";
+export type { DoseSlot, ActiveVialEntry } from "./domain";
 export type * from "./types";

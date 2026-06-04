@@ -1,16 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { http } from "@/lib/http";
 import type { MedicationRecord, SaveMedicationInput, SaveMedicationIntakeInput } from "@/types/domain";
+import type { TodayIntake } from "./domain";
+
+export type { TodayIntake } from "./domain";
+export {
+  parseTimesJson,
+  buildSchedule,
+  groupRegisteredByBatch,
+  type UpcomingSlot,
+  type RegisteredSlot,
+} from "./domain";
 
 export type ArchivedMedication = MedicationRecord & { archived_at: string };
 export type LastIntakePerMed = { medication_id: string; last_logged_at: string | null };
-export type TodayIntake = {
-  id: string;
-  medication_id: string;
-  logged_at: string;
-  dosage_taken: string | null;
-  notes: string | null;
-};
 
 export const medicationKeys = {
   all: ["medications"] as const,

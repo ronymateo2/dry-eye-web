@@ -2,12 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ClockCountdownIcon, DropIcon, ArrowUUpLeftIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
-
-export type DoseSlot = {
-  time: number;
-  name: string;
-  drop_type_id: string;
-};
+import type { DoseSlot } from "@/features/drops/domain";
+export type { DoseSlot };
 
 interface DayProjectionSheetProps {
   open: boolean;

@@ -15,6 +15,7 @@ npm run dev       # vite — puerto 5173, proxy /api → localhost:8787
 npm run build     # tsc -b && vite build (CI runs this)
 npm run check     # tsc && vite build (full type+build check)
 npm run lint      # eslint .
+npm run test      # vitest run — pure-domain unit tests (features/*/domain.test.ts)
 npm run deploy    # wrangler deploy (production)
 npm run cf-typegen  # wrangler types (Cloudflare bindings)
 ```
@@ -57,6 +58,7 @@ src/
     drops/ medications/ observations/ symptoms/ dashboard/ calendar/
     sleep/ check-ins/ history/ report/ therapy/ hygiene/ user/
     #   query-keys.ts (hierarchical) · api.ts (wraps http) · queries/mutations/hooks · types.ts
+    #   domain.ts = pure rules (no React/IO), unit-tested in domain.test.ts (drops, medications)
     #   components import feature hooks/keys/api — never @/lib/http directly for endpoints
   types/domain.ts       # All shared domain types — single source of truth
   pages/                 # Lazy-loaded route pages
