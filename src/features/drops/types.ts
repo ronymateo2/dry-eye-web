@@ -14,6 +14,7 @@ export type RecentDrop = {
   logged_at: string;
   quantity: number;
   eye: string;
+  drop_type_id: string;
 };
 
 export type DropTypeFull = {

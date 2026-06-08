@@ -1,6 +1,5 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { GearIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
 import { OnDemandDrops } from "@/components/today/on-demand-drops";
@@ -11,38 +10,61 @@ import { HeroView } from "@/components/today/hero-view";
 import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
 import { useScheduleData } from "@/components/today/use-schedule-data";
 import { dispatchQuickAction } from "@/components/today/helpers";
-import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
-import { calendarApi, calendarKeys } from "@/features/calendar";
-import { medicationsApi, medicationKeys } from "@/features/medications";
-import { symptomsApi, symptomKeys } from "@/features/symptoms";
-import { sleepApi, sleepKeys } from "@/features/sleep";
-import { checkInsApi, checkInKeys } from "@/features/check-ins";
+import { dropKeys, dropTypeKeys, vialKeys } from "@/features/drops";
+import { calendarKeys } from "@/features/calendar";
+import { medicationKeys } from "@/features/medications";
+import { symptomKeys } from "@/features/symptoms";
+import { sleepKeys } from "@/features/sleep";
+import { checkInKeys } from "@/features/check-ins";
+import { todayApi, todayKeys, type TodayBundle } from "@/features/today";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 import { useNow } from "@/lib/hooks/use-now";
 
 const openSymptomsSheet = () => dispatchQuickAction("symptoms");
 
-export default function TodayPage() {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
+function seedTodayCaches(qc: QueryClient, bundle: TodayBundle) {
+  const seed = (key: readonly unknown[], val: unknown) => {
+    if (qc.getQueryData(key) === undefined) qc.setQueryData(key, val);
+  };
+  seed(checkInKeys.last(), bundle.checkInLast);
+  seed(sleepKeys.today(), bundle.sleepToday);
+  seed(dropKeys.lastPerType(), bundle.dropsLastPerType);
+  seed(calendarKeys.eventsToday(), bundle.calendarEventsToday);
+  seed(medicationKeys.list(), bundle.medications);
+  seed(medicationKeys.intakesToday(), bundle.medicationIntakesToday);
+  seed(medicationKeys.intakesLastPerMed(), bundle.medicationIntakesLastPerMed);
+  seed(vialKeys.active(), bundle.vialsActive);
+  seed(symptomKeys.today(), bundle.symptomsToday);
+  seed(dropTypeKeys.list(), bundle.dropTypes);
+  seed(dropKeys.recentAll(), bundle.dropsRecent24h);
+  for (const t of bundle.dropTypes) {
+    if (!t.quick_action) continue;
+    seed(
+      dropKeys.recent(t.id),
+      bundle.dropsRecent24h.filter((d) => d.drop_type_id === t.id),
+    );
+  }
+}
 
+function TodaySkeleton() {
+  return (
+    <section className="space-y-5" aria-busy="true" aria-label="Cargando">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="h-28 animate-pulse rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]"
+        />
+      ))}
+    </section>
+  );
+}
+
+function TodayContent() {
+  const navigate = useNavigate();
+  const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
   const now = useNow(30_000);
   const scheduleData = useScheduleData(now);
-
-  useEffect(() => {
-    void queryClient.prefetchQuery({ queryKey: checkInKeys.last(), queryFn: checkInsApi.getLast, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: sleepKeys.today(), queryFn: sleepApi.getToday, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: dropKeys.lastPerType(), queryFn: dropsApi.getLastPerType, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: calendarKeys.eventsToday(), queryFn: calendarApi.getEventsToday, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: medicationKeys.list(), queryFn: medicationsApi.getList, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: medicationKeys.intakesLastPerMed(), queryFn: medicationsApi.getLastIntakePerMed, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: medicationKeys.intakesToday(), queryFn: medicationsApi.getTodayIntakes, staleTime: 30_000 });
-    void queryClient.prefetchQuery({ queryKey: vialKeys.active(), queryFn: dropsApi.getActiveVials, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: symptomKeys.today(), queryFn: symptomsApi.getStatusToday, staleTime: 60_000 });
-    void queryClient.prefetchQuery({ queryKey: dropKeys.recentAll(), queryFn: () => dropsApi.getRecentAll(24), staleTime: 30_000 });
-  }, [queryClient]);
 
   return (
     <section className="space-y-5">
@@ -79,4 +101,19 @@ export default function TodayPage() {
       </div>
     </section>
   );
+}
+
+export default function TodayPage() {
+  const queryClient = useQueryClient();
+
+  const { data: bundle, isPending } = useQuery({
+    queryKey: todayKeys.all,
+    queryFn: todayApi.getBundle,
+    staleTime: 30_000,
+  });
+
+  if (bundle) seedTodayCaches(queryClient, bundle);
+
+  if (isPending) return <TodaySkeleton />;
+  return <TodayContent />;
 }
