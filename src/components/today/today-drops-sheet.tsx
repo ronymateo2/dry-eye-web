@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useCallback } from "react";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { TrashIcon, PencilSimpleIcon, EyedropperIcon } from "@phosphor-icons/react";
 import { StackedSheet } from "@/components/layout/stacked-sheet";
@@ -11,14 +11,13 @@ import { formatTime, formatGap } from "@/components/history/utils";
 import { useUser } from "@/lib/auth";
 import { dropsApi, dropKeys, dropTypeKeys } from "@/features/drops";
 import { cn } from "@/lib/utils";
-import { getDayKey } from "@/lib/utils";
 import type { DropEye } from "@/types/domain";
 import { dispatchQuickAction } from "./helpers";
 
 const EYE_LABEL: Record<string, string> = { left: "Ojo izq.", right: "Ojo der.", both: "Ambos ojos" };
 const EYE_SHORT: Record<string, string> = { left: "IZQ", right: "DER", both: "AMB" };
 
-type RecentDrop = { id: string; logged_at: string; quantity: number; eye: string };
+type RecentDrop = { id: string; logged_at: string; quantity: number; eye: string; drop_type_id: string };
 type TimelineDrop = RecentDrop & { typeId: string; typeName: string; occurrence: number };
 
 /* ─── Main export ────────────────────────────────────────────────────────── */
@@ -47,26 +46,21 @@ export function TodayDropsSheet({
     staleTime: 120_000,
   });
 
-  const recentQueries = useQueries({
-    queries: dropTypes.map((t) => ({
-      queryKey: dropKeys.recent(t.id),
-      queryFn: () => dropsApi.getRecent(t.id, 24),
-      staleTime: 30_000,
-    })),
+  const { data: todayDrops = [] } = useQuery({
+    queryKey: dropKeys.today(),
+    queryFn: dropsApi.getToday,
+    staleTime: 30_000,
   });
 
-  const todayKey = getDayKey(new Date().toISOString(), timezone);
-
   const rows = useMemo<TimelineDrop[]>(() => {
-    const merged: Omit<TimelineDrop, "occurrence">[] = [];
-    dropTypes.forEach((t, i) => {
-      const drops = recentQueries[i]?.data ?? [];
-      for (const d of drops) merged.push({ ...d, typeId: t.id, typeName: t.name });
-    });
+    const nameById = new Map(dropTypes.map((t) => [t.id, t.name]));
+    const merged = todayDrops.map((d) => ({
+      ...d,
+      typeId: d.drop_type_id,
+      typeName: nameById.get(d.drop_type_id) ?? "",
+    }));
 
-    const visible = merged.filter((d) => getDayKey(d.logged_at, timezone) === todayKey);
-
-    const asc = [...visible].sort(
+    const asc = [...merged].sort(
       (a, b) => new Date(a.logged_at).getTime() - new Date(b.logged_at).getTime(),
     );
     const counts = new Map<string, number>();
@@ -77,30 +71,28 @@ export function TodayDropsSheet({
       occById.set(d.id, n);
     }
 
-    return [...visible]
+    return [...merged]
       .sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime())
       .map((d) => ({ ...d, occurrence: occById.get(d.id) ?? 1 }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dropTypes, recentQueries.map((q) => q.dataUpdatedAt).join(","), timezone, todayKey]);
+  }, [dropTypes, todayDrops]);
 
   const deleteMutation = useMutation({
-    mutationFn: ({ id }: { id: string; typeId: string }) => dropsApi.remove(id),
-    onMutate: async ({ id, typeId }) => {
-      await queryClient.cancelQueries({ queryKey: dropKeys.recent(typeId) });
-      const prev = queryClient.getQueryData<RecentDrop[]>(dropKeys.recent(typeId));
+    mutationFn: ({ id }: { id: string }) => dropsApi.remove(id),
+    onMutate: async ({ id }) => {
+      await queryClient.cancelQueries({ queryKey: dropKeys.today() });
+      const prev = queryClient.getQueryData<RecentDrop[]>(dropKeys.today());
       queryClient.setQueryData<RecentDrop[]>(
-        dropKeys.recent(typeId),
+        dropKeys.today(),
         (old) => old?.filter((d) => d.id !== id) ?? [],
       );
-      return { prev, typeId };
+      return { prev };
     },
     onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(dropKeys.recent(ctx.typeId), ctx.prev);
+      if (ctx?.prev) queryClient.setQueryData(dropKeys.today(), ctx.prev);
       toast.error("No se pudo eliminar. Intenta de nuevo.");
     },
-    onSettled: (_data, _err, { typeId }) => {
-      queryClient.invalidateQueries({ queryKey: dropKeys.recent(typeId) });
-      queryClient.invalidateQueries({ queryKey: dropKeys.recentAll() });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: dropKeys.today() });
       queryClient.invalidateQueries({ queryKey: dropKeys.lastPerType() });
       queryClient.invalidateQueries({ queryKey: dropKeys.last() });
     },
@@ -154,7 +146,7 @@ export function TodayDropsSheet({
                 size="lg"
                 className="w-full"
                 onClick={() => {
-                  deleteMutation.mutate({ id: drop.id, typeId });
+                  deleteMutation.mutate({ id: drop.id });
                   stack.pop();
                 }}
               >

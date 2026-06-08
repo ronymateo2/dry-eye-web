@@ -14,12 +14,13 @@ export function useQuickLog(opts?: {
 
   const mutation = useMutation({
     mutationFn: async ({ dropTypeId, autoCreateVial }: { dropTypeId: string; autoCreateVial?: boolean }) => {
-      const cached = queryClient.getQueryData<{ id: string; logged_at: string; quantity: number; eye: string }[]>(
-        dropKeys.recent(dropTypeId),
+      const cached = queryClient.getQueryData<{ id: string; logged_at: string; quantity: number; eye: string; drop_type_id: string }[]>(
+        dropKeys.today(),
       );
+      const lastForType = cached?.find((d) => d.drop_type_id === dropTypeId);
       const lastEye: DropEye =
-        cached && cached.length > 0 && ["left", "right", "both"].includes(cached[0].eye)
-          ? (cached[0].eye as DropEye)
+        lastForType && ["left", "right", "both"].includes(lastForType.eye)
+          ? (lastForType.eye as DropEye)
           : "both";
 
       const id = crypto.randomUUID();
@@ -58,8 +59,7 @@ export function useQuickLog(opts?: {
         queryClient.invalidateQueries({ queryKey: vialKeys.active() });
       }
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: dropKeys.recent(data.dropTypeId) });
-        queryClient.invalidateQueries({ queryKey: dropKeys.recentAll() });
+        queryClient.invalidateQueries({ queryKey: dropKeys.today() });
       }, TRANSITION_MS);
     },
     onError: () => {

@@ -70,16 +70,13 @@ export function useScheduleData(now: number) {
     [activeVials],
   );
 
-  const { data: allRecentDrops = [] } = useQuery({
-    queryKey: dropKeys.recentAll(),
-    queryFn: () => dropsApi.getRecentAll(24),
+  const { data: todayDrops = [] } = useQuery({
+    queryKey: dropKeys.today(),
+    queryFn: dropsApi.getToday,
     staleTime: 30_000,
   });
 
-  const todayCount = useMemo(() => {
-    const todayStr = new Date().toDateString();
-    return allRecentDrops.filter((d) => new Date(d.logged_at).toDateString() === todayStr).length;
-  }, [allRecentDrops]);
+  const todayCount = todayDrops.length;
 
   return { now, activeVials, upcoming, completado, sinRegistro, daySlots, vialByDropType, todayCount };
 }

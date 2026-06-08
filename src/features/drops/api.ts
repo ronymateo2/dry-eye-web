@@ -23,7 +23,7 @@ export const dropsApi = {
     http.get<RecentDrop[]>(
       `/drops/recent?dropTypeId=${dropTypeId}&hours=${hours}${opts?.hasVial ? "&hasVial=true" : ""}`,
     ),
-  getRecentAll: (hours: number) => http.get<RecentDrop[]>(`/drops/recent?hours=${hours}`),
+  getToday: () => http.get<RecentDrop[]>("/drops/today"),
 
   // drop-types
   getTypes: () => http.get<DropTypeFull[]>("/drop-types"),

@@ -16,5 +16,5 @@ export type TodayBundle = {
   vialsActive: ActiveVial[];
   symptomsToday: SymptomStatusToday & { ok: boolean };
   dropTypes: DropTypeFull[];
-  dropsRecent24h: RecentDrop[];
+  dropsToday: RecentDrop[];
 };

@@ -37,14 +37,7 @@ function seedTodayCaches(qc: QueryClient, bundle: TodayBundle) {
   seed(vialKeys.active(), bundle.vialsActive);
   seed(symptomKeys.today(), bundle.symptomsToday);
   seed(dropTypeKeys.list(), bundle.dropTypes);
-  seed(dropKeys.recentAll(), bundle.dropsRecent24h);
-  for (const t of bundle.dropTypes) {
-    if (!t.quick_action) continue;
-    seed(
-      dropKeys.recent(t.id),
-      bundle.dropsRecent24h.filter((d) => d.drop_type_id === t.id),
-    );
-  }
+  seed(dropKeys.today(), bundle.dropsToday);
 }
 
 function TodaySkeleton() {

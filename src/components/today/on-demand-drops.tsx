@@ -28,18 +28,19 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const lastDropIdRef = useRef<string | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const invalidateDrops = useInvalidateDrops();
-  const { data: recentDrops = [] } = useQuery({
-    queryKey: dropKeys.recent(drop.id),
-    queryFn: () => dropsApi.getRecent(drop.id, 24),
+  const { data: todayDrops = [] } = useQuery({
+    queryKey: dropKeys.today(),
+    queryFn: dropsApi.getToday,
     staleTime: 30_000,
   });
 
-  const todayCount = useMemo(() => {
-    const todayStr = new Date().toDateString();
-    return recentDrops.filter((d) => new Date(d.logged_at).toDateString() === todayStr).length;
-  }, [recentDrops]);
+  const mine = useMemo(
+    () => todayDrops.filter((d) => d.drop_type_id === drop.id),
+    [todayDrops, drop.id],
+  );
 
-  const lastDrop = recentDrops[0] ?? null;
+  const todayCount = mine.length;
+  const lastDrop = mine[0] ?? null;
 
   const { quickLog, isPending } = useQuickLog({
     onSuccess: (dropTypeId, dropId) => {
