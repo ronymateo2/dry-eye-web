@@ -116,22 +116,22 @@ export function HeroView({
             {isRegistered ? "Gota registrada" : "Próxima gota"}
           </p>
           <div className="flex shrink-0 items-center gap-2">
-            <ViewDayButton onClick={() => setProjectionOpen(true)} />
+            {todayCount > 0 && (
+              <TodayCountBadge
+                count={todayCount}
+                onClick={() => setTodayDropsOpen(true)}
+                className="h-8 px-2.5 text-[13px]"
+                iconSize={13}
+              />
+            )}
+            <ViewDayButton compact onClick={() => setProjectionOpen(true)} />
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
 
         {!heroEntry && completado.length > 0 && sinRegistro.length === 0 && (
-          <div className="relative z-10 flex items-center justify-between gap-2 px-4 pb-5 pt-5">
+          <div className="relative z-10 px-4 pb-5 pt-5">
             <p className="text-[15px] font-semibold text-[var(--pain-low)]">Todas las dosis completadas</p>
-            {todayCount > 0 && (
-              <TodayCountBadge
-                count={todayCount}
-                onClick={() => setTodayDropsOpen(true)}
-                label="dosis hoy"
-                className="px-3 py-1.5 text-[13px]"
-              />
-            )}
           </div>
         )}
 
@@ -218,28 +218,21 @@ export function HeroView({
                   )}
                 </div>
 
-                <div className="h-px w-[80%] bg-[var(--border)]" />
-
-                {/* vial + badge — stay in DOM (preserve height), hidden when registered */}
-                <div
-                  style={{
-                    opacity: isRegistered ? 0 : 1,
-                    transition: "opacity 200ms ease",
-                    pointerEvents: isRegistered ? "none" : "auto",
-                  }}
-                >
-                  {heroVial && (
-                    <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
-                  )}
-                  {todayCount > 0 && (
-                    <TodayCountBadge
-                      count={todayCount}
-                      onClick={() => setTodayDropsOpen(true)}
-                      label="dosis hoy"
-                      className="mt-1 px-3 py-1.5 text-[13px]"
-                    />
-                  )}
-                </div>
+                {heroVial && (
+                  <>
+                    <div className="h-px w-[80%] bg-[var(--border)]" />
+                    {/* vial — stays in DOM (preserve height), hidden when registered */}
+                    <div
+                      style={{
+                        opacity: isRegistered ? 0 : 1,
+                        transition: "opacity 200ms ease",
+                        pointerEvents: isRegistered ? "none" : "auto",
+                      }}
+                    >
+                      <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
