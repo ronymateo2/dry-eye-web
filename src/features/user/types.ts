@@ -8,6 +8,9 @@ export type Me = {
   timezone: string;
   theme: "dark" | "light";
   font: UserFont | null;
+  notifications_enabled: boolean;
+  quiet_start: string | null;
+  quiet_end: string | null;
 };
 
 export type UpdateMeBody = {

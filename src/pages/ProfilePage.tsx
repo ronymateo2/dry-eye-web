@@ -7,9 +7,11 @@ import { TextInput } from "@/components/ui/text-input";
 import { setToken } from "@/lib/http";
 import { calendarApi, calendarKeys } from "@/features/calendar";
 import { userApi } from "@/features/user";
+import { notificationsApi, usePush } from "@/features/notifications";
 import { useAuth, useUser } from "@/lib/auth";
 import {
   ArrowCounterClockwiseIcon,
+  BellRingingIcon,
   CalendarDotsIcon,
   CaretRightIcon,
   ClockIcon,
@@ -125,6 +127,46 @@ export default function ProfilePage() {
       toast.error("No se pudo cambiar el tema.");
     } finally {
       setThemePending(false);
+    }
+  };
+
+  const push = usePush();
+  const [quietStart, setQuietStart] = useState(user.quiet_start ?? "");
+  const [quietEnd, setQuietEnd] = useState(user.quiet_end ?? "");
+
+  const handlePushToggle = async () => {
+    try {
+      if (push.isSubscribed) {
+        await push.disable();
+        await refreshUser();
+        toast.success("Recordatorios desactivados.");
+      } else {
+        const ok = await push.enable();
+        if (ok) {
+          await refreshUser();
+          toast.success("Recordatorios activados.");
+        } else {
+          toast.error("Permiso de notificaciones denegado.");
+        }
+      }
+    } catch {
+      toast.error("No se pudieron actualizar los recordatorios.");
+    }
+  };
+
+  const saveQuietHours = async () => {
+    if ((quietStart || null) === (user.quiet_start ?? null) && (quietEnd || null) === (user.quiet_end ?? null)) {
+      return;
+    }
+    try {
+      await notificationsApi.updatePreferences({
+        quietStart: quietStart || null,
+        quietEnd: quietEnd || null,
+      });
+      await refreshUser();
+      toast.success("Horas de silencio guardadas.");
+    } catch {
+      toast.error("No se pudieron guardar las horas de silencio.");
     }
   };
 
@@ -290,6 +332,84 @@ export default function ProfilePage() {
                 </motion.span>
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Recordatorios */}
+        <div className="space-y-3">
+          <p className="section-label">Recordatorios</p>
+          <div className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
+            <div className="flex min-h-[72px] items-center gap-3 px-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                <BellRingingIcon size={16} color="var(--accent)" weight="fill" />
+              </div>
+              <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
+                  Notificaciones de dosis
+                </span>
+                <span className="text-[14px] text-[var(--text-primary)]">
+                  {push.isSubscribed ? "Activadas" : "Desactivadas"}
+                </span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={push.isSubscribed}
+                aria-label="Notificaciones de dosis"
+                disabled={push.busy || !push.isSupported}
+                onClick={handlePushToggle}
+                className="relative h-[28px] w-[48px] shrink-0 rounded-full transition-colors disabled:opacity-40"
+                style={{ backgroundColor: push.isSubscribed ? "var(--accent)" : "var(--surface-el)" }}
+              >
+                <span
+                  className="absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white transition-all"
+                  style={{ left: push.isSubscribed ? 23 : 3 }}
+                />
+              </button>
+            </div>
+
+            {!push.isSupported && (
+              <p className="border-t border-[var(--border)] px-4 py-3 text-[12px] text-[var(--text-faint)]">
+                Tu navegador no soporta notificaciones push.
+              </p>
+            )}
+            {push.isSupported && !push.isStandalone && (
+              <p className="border-t border-[var(--border)] px-4 py-3 text-[12px] text-[var(--text-faint)]">
+                En iPhone, añade la app a la pantalla de inicio para recibir notificaciones.
+              </p>
+            )}
+
+            {push.isSubscribed && (
+              <div className="flex min-h-[72px] items-center gap-3 border-t border-[var(--border)] px-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                  <MoonIcon size={16} color="var(--accent)" weight="fill" />
+                </div>
+                <div className="flex flex-1 flex-col gap-1 min-w-0">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
+                    No molestar
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="time"
+                      value={quietStart}
+                      aria-label="Inicio de no molestar"
+                      onChange={(e) => setQuietStart(e.target.value)}
+                      onBlur={saveQuietHours}
+                      className="mono rounded-[8px] border border-[var(--border)] bg-[var(--surface-el)] px-2 py-1 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                    />
+                    <span className="text-[var(--text-faint)]">—</span>
+                    <input
+                      type="time"
+                      value={quietEnd}
+                      aria-label="Fin de no molestar"
+                      onChange={(e) => setQuietEnd(e.target.value)}
+                      onBlur={saveQuietHours}
+                      className="mono rounded-[8px] border border-[var(--border)] bg-[var(--surface-el)] px-2 py-1 text-[13px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

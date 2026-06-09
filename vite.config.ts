@@ -23,14 +23,13 @@ export default defineConfig({
     },
   },
   plugins: [react(), tailwindcss(), VitePWA({
+    strategies: "injectManifest",
+    srcDir: "src",
+    filename: "sw.ts",
     registerType: "autoUpdate",
     injectRegister: "auto",
-    workbox: {
+    injectManifest: {
       globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2,webp}"],
-      cleanupOutdatedCaches: true,
-      skipWaiting: true,
-      clientsClaim: true,
-
     },
     includeAssets: ["favicon.svg", "apple-touch-icon.png"],
     manifest: {
