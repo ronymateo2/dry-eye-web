@@ -37,6 +37,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => { loadUser(); }, []);
 
   const signOut = () => {
+    // Revoca server-side (best-effort) antes de borrar el token local, para que
+    // un token filtrado no siga válido los 30 días de expiración.
+    userApi.revokeSessions().catch(() => {});
     clearToken();
     setAuth({ status: "unauthenticated" });
   };
@@ -70,8 +73,12 @@ export function useUser(): User {
 }
 
 export function storeTokenFromUrl(): string | null {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+  // El token llega en el fragmento (#token=...): no se envía al servidor ni
+  // queda en logs/Referer. Soporta el query legado (?token=) por compatibilidad.
+  const hash = window.location.hash.replace(/^#/, "");
+  const token =
+    new URLSearchParams(hash).get("token") ??
+    new URLSearchParams(window.location.search).get("token");
   if (token) {
     setToken(token);
     window.history.replaceState({}, "", window.location.pathname);
