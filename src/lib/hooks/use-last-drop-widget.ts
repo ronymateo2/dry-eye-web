@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { dropsApi, dropKeys } from "@/features/drops";
+import { useNow } from "@/lib/hooks/use-now";
 
-export function formatDropTimeAgo(isoString: string): string {
-  const diffMs = Math.max(0, Date.now() - new Date(isoString).getTime());
+export function formatDropTimeAgo(isoString: string, now: number = Date.now()): string {
+  const diffMs = Math.max(0, now - new Date(isoString).getTime());
   const diffMin = Math.floor(diffMs / 60_000);
   if (diffMin < 1) return "ahora mismo";
   if (diffMin < 60) return `hace ${diffMin} min`;
@@ -17,28 +17,14 @@ export function formatDropTimeAgo(isoString: string): string {
 }
 
 export function useLastDropWidget() {
-  const [, setTick] = useState(0);
+  const now = useNow(60_000);
   const { data = null, isFetching, refetch } = useQuery({
     queryKey: dropKeys.last(),
     queryFn: dropsApi.getLast,
     staleTime: 30_000,
   });
 
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 60_000);
-    const onActive = () => {
-      if (document.visibilityState === "visible") setTick((t) => t + 1);
-    };
-    document.addEventListener("visibilitychange", onActive);
-    window.addEventListener("focus", onActive);
-    return () => {
-      clearInterval(id);
-      document.removeEventListener("visibilitychange", onActive);
-      window.removeEventListener("focus", onActive);
-    };
-  }, []);
-
-  const timeAgo = data ? formatDropTimeAgo(data.logged_at) : null;
+  const timeAgo = data ? formatDropTimeAgo(data.logged_at, now) : null;
 
   return { data, timeAgo, isRefreshing: isFetching, refresh: refetch };
 }
