@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from "react";
+import { memo, useState, useMemo, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlarmIcon,
@@ -16,12 +16,14 @@ import {
   medicationKeys,
   parseTimesJson,
   buildSchedule,
+  getSlotCountdown,
   groupRegisteredByBatch,
   type UpcomingSlot,
   type RegisteredSlot,
 } from "@/features/medications";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/auth";
+import { useNow } from "@/lib/hooks/use-now";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { Button } from "@/components/ui/button";
 
@@ -40,6 +42,29 @@ type EditIntakeState = {
   notes: string | null;
 };
 
+// ── countdown leaf — own clock tick, keeps parents quiet ─────────────────
+function SlotCountdown({
+  slotTime,
+  totalMs,
+  onClick,
+}: {
+  slotTime: Date;
+  totalMs: number;
+  onClick: () => void;
+}) {
+  const now = useNow(30_000);
+  const cd = getSlotCountdown(slotTime.getTime(), now, totalMs);
+  return (
+    <CountdownValue
+      label={cd.label}
+      overdue={cd.overdue}
+      color={cd.color}
+      progress={cd.progress}
+      onClick={onClick}
+    />
+  );
+}
+
 // ── timeline row ─────────────────────────────────────────────────────────
 function TimelineRow({
   slot,
@@ -50,8 +75,10 @@ function TimelineRow({
   index: number;
   onLog: () => void;
 }) {
+  const now = useNow(30_000);
+  const cd = getSlotCountdown(slot.slotTime.getTime(), now, slot.totalIntervalMs);
   const isGroup = slot.names.length > 1;
-  const countdownDisplay = slot.overdue ? slot.countdownLabel : `en ${slot.countdownLabel}`;
+  const countdownDisplay = cd.overdue ? cd.label : `en ${cd.label}`;
   return (
     <motion.button
       type="button"
@@ -70,7 +97,7 @@ function TimelineRow({
       <span className="flex min-w-0 items-start gap-2.5">
         <span
           className="mt-[3px] h-4 w-[3px] shrink-0 rounded-full opacity-90"
-          style={{ background: slot.countdownColor }}
+          style={{ background: cd.color }}
         />
         {isGroup ? (
           <span className="flex min-w-0 flex-col gap-1">
@@ -111,7 +138,7 @@ function TimelineRow({
       <span className="flex shrink-0 items-center gap-1.5">
         <span
           className="font-mono text-[13px] font-medium tabular-nums"
-          style={{ color: slot.countdownColor }}
+          style={{ color: cd.color }}
         >
           {countdownDisplay}
         </span>
@@ -222,7 +249,7 @@ function RegisteredBatchRow({
 }
 
 // ── main component ────────────────────────────────────────────────────────
-export function MedicationsAgenda({ now }: { now: number }) {
+export const MedicationsAgenda = memo(function MedicationsAgenda() {
   const [quickLogging, setQuickLogging] = useState(false);
   const [takenAtLabel, setTakenAtLabel] = useState<string | null>(null);
   const [editIntake, setEditIntake] = useState<EditIntakeState | null>(null);
@@ -232,21 +259,24 @@ export function MedicationsAgenda({ now }: { now: number }) {
   const tz = user.timezone;
   const queryClient = useQueryClient();
 
-  const { data: medications = [], isLoading } = useQuery({
+  const { data: medications = [], isLoading, dataUpdatedAt: medsUpdatedAt } = useQuery({
     queryKey: medicationKeys.list(),
     queryFn: medicationsApi.getList,
     staleTime: 60_000,
   });
 
-  const { data: todayIntakes = [] } = useQuery({
+  const { data: todayIntakes = [], dataUpdatedAt: intakesUpdatedAt } = useQuery({
     queryKey: medicationKeys.intakesToday(),
     queryFn: medicationsApi.getTodayIntakes,
     staleTime: 30_000,
   });
 
+  // anchor = last fetch time: pure stand-in for "now" that only moves on data
+  // refresh, so schedule structure stays referentially stable between ticks
+  const scheduleAnchor = Math.max(medsUpdatedAt, intakesUpdatedAt);
   const { upcoming, registered } = useMemo(
-    () => buildSchedule(medications, todayIntakes, now, tz),
-    [medications, todayIntakes, now, tz],
+    () => buildSchedule(medications, todayIntakes, scheduleAnchor, tz),
+    [medications, todayIntakes, scheduleAnchor, tz],
   );
 
   const hero = upcoming[0] ?? null;
@@ -329,7 +359,6 @@ export function MedicationsAgenda({ now }: { now: number }) {
     }
   }
 
-  const heroAccent = hero?.countdownColor ?? "var(--dose-early)";
   const isGroupHero = (hero?.names.length ?? 0) > 1;
   const hasAny = upcoming.length > 0 || registered.length > 0;
 
@@ -392,11 +421,9 @@ export function MedicationsAgenda({ now }: { now: number }) {
                         </motion.div>
                       ) : (
                         <motion.div key="ring">
-                          <CountdownValue
-                            label={hero.countdownLabel}
-                            overdue={hero.overdue}
-                            color={heroAccent}
-                            progress={hero.countdownProgress}
+                          <SlotCountdown
+                            slotTime={hero.slotTime}
+                            totalMs={hero.totalIntervalMs}
                             onClick={handleQuickLog}
                           />
                         </motion.div>
@@ -676,4 +703,4 @@ export function MedicationsAgenda({ now }: { now: number }) {
       </MobileSheet>
     </div>
   );
-}
+});

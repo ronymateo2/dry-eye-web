@@ -17,6 +17,7 @@ export {
 export {
   parseTimesJson,
   buildSchedule,
+  getSlotCountdown,
   groupRegisteredByBatch,
   type UpcomingSlot,
   type RegisteredSlot,

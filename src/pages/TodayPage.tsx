@@ -71,7 +71,7 @@ function TodayContent() {
 
       <OnDemandDrops />
 
-      <MedicationsAgenda now={now} />
+      <MedicationsAgenda />
 
       <div className="space-y-0.5 pt-1">
         <PainCheckInCompact />

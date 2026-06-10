@@ -99,7 +99,7 @@ function formatTime24(isoStr: string, tz: string): string {
   });
 }
 
-function getSlotCountdown(
+export function getSlotCountdown(
   slotMs: number,
   now: number,
   totalMs: number,
