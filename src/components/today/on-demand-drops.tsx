@@ -21,7 +21,12 @@ function formatTimeAgo(dateStr: string, now: number): string {
   return m > 0 ? `hace ${h}h ${m}min` : `hace ${h}h`;
 }
 
-function OnDemandDropItem({ drop, now }: { drop: DropTypeRecord; now: number }) {
+function LastDropTime({ iso }: { iso: string }) {
+  const now = useNow(60_000);
+  return <span className="font-mono">{formatTimeAgo(iso, now)}</span>;
+}
+
+function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   const [justRegistered, setJustRegistered] = useState<string | null>(null);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
   const lastDropIdRef = useRef<string | null>(null);
@@ -118,8 +123,7 @@ function OnDemandDropItem({ drop, now }: { drop: DropTypeRecord; now: number }) 
             </motion.p>
           ) : lastDrop ? (
             <p className="mt-0.5 text-[12px] text-[var(--text-faint)]">
-              última{" "}
-              <span className="font-mono">{formatTimeAgo(lastDrop.logged_at, now)}</span>
+              última <LastDropTime iso={lastDrop.logged_at} />
             </p>
           ) : null}
         </div>
@@ -168,7 +172,6 @@ function OnDemandDropItem({ drop, now }: { drop: DropTypeRecord; now: number }) 
 }
 
 export const OnDemandDrops = memo(function OnDemandDrops() {
-  const now = useNow(60_000);
   const { data: dropTypes = [] } = useQuery({
     queryKey: dropTypeKeys.list(),
     queryFn: dropsApi.getTypes,
@@ -188,7 +191,7 @@ export const OnDemandDrops = memo(function OnDemandDrops() {
       </div>
       <div className="divide-y divide-[var(--border)]">
         {quickActionDrops.map((drop) => (
-          <OnDemandDropItem key={drop.id} drop={drop} now={now} />
+          <OnDemandDropItem key={drop.id} drop={drop} />
         ))}
       </div>
     </div>
