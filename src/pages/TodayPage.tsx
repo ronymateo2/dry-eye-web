@@ -53,21 +53,26 @@ function TodaySkeleton() {
   );
 }
 
-function TodayContent() {
-  const navigate = useNavigate();
+function ScheduleSection() {
   const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
   const now = useNow(30_000);
   const scheduleData = useScheduleData(now);
+
+  return view === "card" ? (
+    <CardView data={scheduleData} view={view} setView={setView} />
+  ) : (
+    <HeroView data={scheduleData} view={view} setView={setView} />
+  );
+}
+
+function TodayContent() {
+  const navigate = useNavigate();
 
   return (
     <section className="space-y-5">
       <SymptomStatusCard onRegister={openSymptomsSheet} />
 
-      {view === "card" ? (
-        <CardView data={scheduleData} view={view} setView={setView} />
-      ) : (
-        <HeroView data={scheduleData} view={view} setView={setView} />
-      )}
+      <ScheduleSection />
 
       <OnDemandDrops />
 
