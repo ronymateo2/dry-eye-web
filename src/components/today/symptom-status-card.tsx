@@ -180,9 +180,13 @@ type Props = {
   onRegister: () => void;
 };
 
-export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }: Props) {
+function RelativeTime({ iso }: { iso: string }) {
   const now = useNow(60_000);
-  const { data, isLoading } = useQuery({
+  return <>{formatRelative(iso, now)}</>;
+}
+
+export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }: Props) {
+  const { data, isLoading, dataUpdatedAt } = useQuery({
     queryKey: symptomKeys.today(),
     queryFn: symptomsApi.getStatusToday,
     staleTime: 60_000,
@@ -248,7 +252,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
 
   const copy = SYMPTOM_STATE_COPY[state];
   const label = SYMPTOM_STATE_LABEL[state];
-  const timeAgo = formatRelative(latest.logged_at, now);
+  const timeAgo = formatRelative(latest.logged_at, dataUpdatedAt);
 
   return (
     <motion.div
@@ -285,7 +289,9 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
                 {label}
               </p>
               <p className="text-[17px] font-medium text-[var(--text-muted)] mt-2">{copy}</p>
-              <p className="text-[13px] text-[var(--text-faint)] mt-1.5">{timeAgo}</p>
+              <p className="text-[13px] text-[var(--text-faint)] mt-1.5">
+                <RelativeTime iso={latest.logged_at} />
+              </p>
             </div>
             <IntensityGauge
               value={avgVal}
