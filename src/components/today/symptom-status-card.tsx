@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNow } from "@/lib/hooks/use-now";
 import { motion } from "motion/react";
 import {
   DropHalfIcon,
@@ -179,7 +180,8 @@ type Props = {
   onRegister: () => void;
 };
 
-export function SymptomStatusCard({ onRegister }: Props) {
+export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }: Props) {
+  const now = useNow(60_000);
   const { data, isLoading } = useQuery({
     queryKey: symptomKeys.today(),
     queryFn: symptomsApi.getStatusToday,
@@ -246,7 +248,7 @@ export function SymptomStatusCard({ onRegister }: Props) {
 
   const copy = SYMPTOM_STATE_COPY[state];
   const label = SYMPTOM_STATE_LABEL[state];
-  const timeAgo = formatRelative(latest.logged_at);
+  const timeAgo = formatRelative(latest.logged_at, now);
 
   return (
     <motion.div
@@ -317,10 +319,10 @@ export function SymptomStatusCard({ onRegister }: Props) {
       </div>
     </motion.div>
   );
-}
+});
 
-function formatRelative(isoStr: string): string {
-  const diffMs = Date.now() - new Date(isoStr).getTime();
+function formatRelative(isoStr: string, now: number): string {
+  const diffMs = now - new Date(isoStr).getTime();
   const diffMin = Math.floor(diffMs / 60_000);
   const diffHr = Math.floor(diffMin / 60);
   if (diffHr >= 24) return `hace ${Math.floor(diffHr / 24)}d`;

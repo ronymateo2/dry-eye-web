@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+import { memo, useState, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { dropsApi, dropKeys, dropTypeKeys, useInvalidateDrops } from "@/features/drops";
@@ -21,8 +21,7 @@ function formatTimeAgo(dateStr: string, now: number): string {
   return m > 0 ? `hace ${h}h ${m}min` : `hace ${h}h`;
 }
 
-function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
-  const now = useNow(60_000);
+function OnDemandDropItem({ drop, now }: { drop: DropTypeRecord; now: number }) {
   const [justRegistered, setJustRegistered] = useState<string | null>(null);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
   const lastDropIdRef = useRef<string | null>(null);
@@ -168,7 +167,8 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
   );
 }
 
-export function OnDemandDrops() {
+export const OnDemandDrops = memo(function OnDemandDrops() {
+  const now = useNow(60_000);
   const { data: dropTypes = [] } = useQuery({
     queryKey: dropTypeKeys.list(),
     queryFn: dropsApi.getTypes,
@@ -188,9 +188,9 @@ export function OnDemandDrops() {
       </div>
       <div className="divide-y divide-[var(--border)]">
         {quickActionDrops.map((drop) => (
-          <OnDemandDropItem key={drop.id} drop={drop} />
+          <OnDemandDropItem key={drop.id} drop={drop} now={now} />
         ))}
       </div>
     </div>
   );
-}
+});

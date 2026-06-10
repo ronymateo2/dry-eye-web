@@ -99,13 +99,15 @@ function TodayContent() {
 export default function TodayPage() {
   const queryClient = useQueryClient();
 
-  const { data: bundle, isPending } = useQuery({
+  const { isPending } = useQuery({
     queryKey: todayKeys.all,
-    queryFn: todayApi.getBundle,
+    queryFn: async () => {
+      const bundle = await todayApi.getBundle();
+      seedTodayCaches(queryClient, bundle);
+      return bundle;
+    },
     staleTime: 30_000,
   });
-
-  if (bundle) seedTodayCaches(queryClient, bundle);
 
   if (isPending) return <TodaySkeleton />;
   return <TodayContent />;

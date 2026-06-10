@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, memo, Suspense, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MoonIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
@@ -19,7 +19,7 @@ const QUALITY_LABELS: Record<string, string> = {
 
 type SleepData = TodaySleep;
 
-export function SleepStatus() {
+export const SleepStatus = memo(function SleepStatus() {
   const queryClient = useQueryClient();
   const { data: sleep, isLoading } = useQuery<SleepData>({
     queryKey: sleepKeys.today(),
@@ -87,4 +87,4 @@ export function SleepStatus() {
       </MobileSheet>
     </>
   );
-}
+});

@@ -1,19 +1,22 @@
+import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { PulseIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { checkInsApi, checkInKeys } from "@/features/check-ins";
+import { useNow } from "@/lib/hooks/use-now";
 import { timeAgo } from "./helpers";
 
-export function PainCheckInCompact() {
+export const PainCheckInCompact = memo(function PainCheckInCompact() {
   const navigate = useNavigate();
+  const now = useNow(60_000);
   const { data: lastCheckIn } = useQuery({
     queryKey: checkInKeys.last(),
     queryFn: checkInsApi.getLast,
     staleTime: 60_000,
   });
 
-  const lastAgo = timeAgo(lastCheckIn?.logged_at ?? null);
+  const lastAgo = timeAgo(lastCheckIn?.logged_at ?? null, now);
   const label = lastAgo ? `Dolor · ${lastAgo}` : "Dolor";
 
   return (
@@ -34,4 +37,4 @@ export function PainCheckInCompact() {
       <CaretRightIcon size={10} className="ml-auto shrink-0 text-[var(--text-faint)]" />
     </button>
   );
-}
+});
