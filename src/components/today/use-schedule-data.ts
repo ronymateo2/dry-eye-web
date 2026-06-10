@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { DoseSlot } from "@/components/register/day-projection-sheet";
 import { dropsApi, dropKeys, vialKeys } from "@/features/drops";
-import { calendarApi, calendarKeys } from "@/features/calendar";
 import { daysUntilEnd } from "@/lib/utils";
-import { getNextMs, isLoggedToday, isCompletedToday, buildDayProjection } from "./helpers";
+import { getNextMs, isLoggedToday, isCompletedToday } from "./helpers";
 
 export function useScheduleData(now: number) {
   const { data: activeVials = [] } = useQuery({
@@ -16,12 +14,6 @@ export function useScheduleData(now: number) {
   const { data: entries = [] } = useQuery({
     queryKey: dropKeys.lastPerType(),
     queryFn: dropsApi.getLastPerType,
-    staleTime: 60_000,
-  });
-
-  const { data: calendarData } = useQuery({
-    queryKey: calendarKeys.eventsToday(),
-    queryFn: calendarApi.getEventsToday,
     staleTime: 60_000,
   });
 
@@ -51,20 +43,6 @@ export function useScheduleData(now: number) {
     [validEntries, now],
   );
 
-  const daySlots = useMemo<DoseSlot[]>(() => {
-    const calEvents = calendarData?.events;
-    if (calEvents && calEvents.length > 0) {
-      return calEvents
-        .map((e) => ({
-          time: new Date(e.scheduled_at).getTime(),
-          name: e.name,
-          drop_type_id: e.drop_type_id,
-        }))
-        .sort((a, b) => a.time - b.time);
-    }
-    return buildDayProjection(entries);
-  }, [calendarData, entries]);
-
   const vialByDropType = useMemo(
     () => new Map(activeVials.map((v) => [v.drop_type_id, v])),
     [activeVials],
@@ -78,5 +56,5 @@ export function useScheduleData(now: number) {
 
   const todayCount = todayDrops.length;
 
-  return { now, activeVials, upcoming, completado, sinRegistro, daySlots, vialByDropType, todayCount };
+  return { now, activeVials, upcoming, completado, sinRegistro, vialByDropType, todayCount };
 }

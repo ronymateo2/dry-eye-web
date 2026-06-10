@@ -5,7 +5,6 @@ import {
   isLoggedToday,
   isCompletedToday,
   getNextMs,
-  buildDayProjection,
   getVialStatus,
 } from "./domain";
 import type { DropScheduleEntry } from "@/types/domain";
@@ -80,28 +79,6 @@ describe("isLoggedToday / isCompletedToday", () => {
   it("not completed when next dose still today", () => {
     const e = entry({ last_logged_at: new Date(now - HOUR).toISOString(), interval_hours: 4 });
     expect(isCompletedToday(e, now)).toBe(false);
-  });
-});
-
-describe("buildDayProjection", () => {
-  it("skips entries without interval/last log", () => {
-    expect(buildDayProjection([entry({ interval_hours: null })])).toEqual([]);
-  });
-  it("slots sorted ascending and within today", () => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const todayStart = start.getTime();
-    const todayEnd = todayStart + 86_400_000;
-    const slots = buildDayProjection([
-      entry({ last_logged_at: new Date(todayStart + HOUR).toISOString(), interval_hours: 4 }),
-    ]);
-    expect(slots.length).toBeGreaterThan(0);
-    for (const s of slots) {
-      expect(s.time).toBeGreaterThanOrEqual(todayStart);
-      expect(s.time).toBeLessThan(todayEnd);
-    }
-    const times = slots.map((s) => s.time);
-    expect(times).toEqual([...times].sort((a, b) => a - b));
   });
 });
 

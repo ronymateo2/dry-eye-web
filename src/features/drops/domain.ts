@@ -71,26 +71,6 @@ export function getNextMs(entry: DropScheduleEntry): number {
   return new Date(entry.last_logged_at).getTime() + entry.interval_hours * 3_600_000;
 }
 
-export function buildDayProjection(entries: DropScheduleEntry[]): DoseSlot[] {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const todayEnd = todayStart.getTime() + 86_400_000;
-  const slots: DoseSlot[] = [];
-  for (const entry of entries) {
-    if (!entry.interval_hours || !entry.last_logged_at) continue;
-    const intervalMs = entry.interval_hours * 3_600_000;
-    let cursor = new Date(entry.last_logged_at).getTime() + intervalMs;
-    while (cursor - intervalMs >= todayStart.getTime()) cursor -= intervalMs;
-    while (cursor < todayEnd) {
-      if (cursor >= todayStart.getTime()) {
-        slots.push({ time: cursor, name: entry.name, drop_type_id: entry.drop_type_id });
-      }
-      cursor += intervalMs;
-    }
-  }
-  return slots.sort((a, b) => a.time - b.time);
-}
-
 export function getVialStatus(vial: ActiveVialEntry, now: number) {
   const durationMs = (vial.vial_duration ?? 24) * 3_600_000;
   const diffMs = new Date(vial.started_at).getTime() + durationMs - now;

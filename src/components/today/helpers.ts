@@ -5,7 +5,6 @@ export {
   isLoggedToday,
   isCompletedToday,
   getNextMs,
-  buildDayProjection,
   getVialStatus,
 } from "@/features/drops/domain";
 

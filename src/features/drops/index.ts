@@ -22,7 +22,6 @@ export {
   isLoggedToday,
   isCompletedToday,
   getNextMs,
-  buildDayProjection,
   getVialStatus,
 } from "./domain";
 export type { DoseSlot, ActiveVialEntry } from "./domain";

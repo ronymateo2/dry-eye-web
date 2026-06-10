@@ -3,11 +3,10 @@ import { motion } from "motion/react";
 import { toast } from "sonner";
 import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { dropsApi, useInvalidateDrops } from "@/features/drops";
-import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
 import { QuickLogCheck } from "./quick-log-check";
 import { CountdownValue } from "./countdown-value";
-import { ViewDayButton, ViewToggle } from "./view-toggle";
+import { ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
 import { HeroVialStatus } from "./hero-vial-status";
 import { VialDiscardSheet } from "./vial-discard-sheet";
@@ -29,7 +28,6 @@ export function HeroView({
   setView: (v: "card" | "hero") => void;
 }) {
   const [discardTarget, setDiscardTarget] = useState<ActiveVialEntry | null>(null);
-  const [projectionOpen, setProjectionOpen] = useState(false);
   const [todayDropsOpen, setTodayDropsOpen] = useState(false);
   const [justRegistered, setJustRegistered] = useState<{ dropTypeId: string; takenAt: string } | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,7 +64,7 @@ export function HeroView({
     onError: () => setJustRegistered(null),
   });
 
-  const { now, upcoming, completado, sinRegistro, daySlots, vialByDropType, todayCount } = data;
+  const { now, upcoming, completado, sinRegistro, vialByDropType, todayCount } = data;
 
   if (upcoming.length === 0 && completado.length === 0 && sinRegistro.length === 0) return null;
 
@@ -124,7 +122,6 @@ export function HeroView({
                 iconSize={13}
               />
             )}
-            <ViewDayButton compact onClick={() => setProjectionOpen(true)} />
             <ViewToggle view={view} setView={setView} />
           </div>
         </div>
@@ -275,13 +272,6 @@ export function HeroView({
         open={todayDropsOpen}
         onClose={() => setTodayDropsOpen(false)}
         initialDropTypeId={heroEntry?.drop_type_id ?? ""}
-      />
-
-      <DayProjectionSheet
-        open={projectionOpen}
-        onClose={() => setProjectionOpen(false)}
-        slots={daySlots}
-        now={now}
       />
     </>
   );

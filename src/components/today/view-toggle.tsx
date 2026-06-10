@@ -1,24 +1,5 @@
-import { CalendarDotsIcon, PresentationIcon, ListDashesIcon } from "@phosphor-icons/react";
+import { PresentationIcon, ListDashesIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-
-export function ViewDayButton({ onClick, compact = false }: { onClick: () => void; compact?: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label="Ver proyección del día"
-      className={cn(
-        "flex items-center rounded-full transition-colors duration-[160ms] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40",
-        compact
-          ? "h-8 w-8 justify-center bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 active:scale-[0.97] active:bg-[var(--accent)]/25"
-          : "min-h-8 gap-1 px-1 text-[12px] font-medium hover:opacity-75 active:opacity-50",
-      )}
-    >
-      <CalendarDotsIcon size={compact ? 16 : 13} weight="bold" aria-hidden style={{ color: "var(--accent)" }} />
-      {!compact && <span style={{ color: "var(--accent)" }}>Horario</span>}
-    </button>
-  );
-}
 
 export function ViewToggle({
   view,

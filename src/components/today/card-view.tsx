@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
 import { AnimatePresence } from "motion/react";
-import { DayProjectionSheet } from "@/components/register/day-projection-sheet";
 import { TopographicBg } from "@/components/ui/topographic-bg";
-import { ViewDayButton, ViewToggle } from "./view-toggle";
+import { ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
 import { VialRow } from "./vial-row";
 import { useScheduleData } from "./use-schedule-data";
@@ -18,11 +17,10 @@ export function CardView({
   setView: (v: "card" | "hero") => void;
 }) {
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const [projectionOpen, setProjectionOpen] = useState(false);
 
   const discardMutation = useDiscardVial(() => setConfirmingId(null));
 
-  const { activeVials, upcoming, completado, sinRegistro, now, daySlots } = data;
+  const { activeVials, upcoming, completado, sinRegistro, now } = data;
 
   const annotatedEntries = useMemo(() => [
     ...upcoming.map((e) => ({ entry: e, variant: "upcoming" as const })),
@@ -41,7 +39,6 @@ export function CardView({
           <div className="flex items-center justify-between gap-3">
             <p className="section-label mb-0">Próximas gotas</p>
             <div className="flex shrink-0 items-center gap-2">
-              {annotatedEntries.length > 0 && <ViewDayButton onClick={() => setProjectionOpen(true)} />}
               <ViewToggle view={view} setView={setView} />
             </div>
           </div>
@@ -91,13 +88,6 @@ export function CardView({
           )}
         </div>
       </div>
-
-      <DayProjectionSheet
-        open={projectionOpen}
-        onClose={() => setProjectionOpen(false)}
-        slots={daySlots}
-        now={now}
-      />
     </>
   );
 }
