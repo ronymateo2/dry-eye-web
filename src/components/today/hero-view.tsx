@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { dropsApi, useInvalidateDrops } from "@/features/drops";
 import { TopographicBg } from "@/components/ui/topographic-bg";
-import { QuickLogCheck } from "./quick-log-check";
+import { DropLogCheck } from "./drop-log-check";
 import { CountdownValue } from "./countdown-value";
 import { ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
@@ -143,7 +143,7 @@ export function HeroView({
                       exit={{ opacity: 0, scale: 0.85 }}
                       transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
                     >
-                      <QuickLogCheck />
+                      <DropLogCheck />
                     </motion.div>
                   ) : computed ? (
                     <motion.div
