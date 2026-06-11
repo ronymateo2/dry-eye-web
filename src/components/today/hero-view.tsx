@@ -143,7 +143,7 @@ export function HeroView({
                       exit={{ opacity: 0, scale: 0.85 }}
                       transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
                     >
-                      <QuickLogCheck color="var(--pain-low)" />
+                      <QuickLogCheck />
                     </motion.div>
                   ) : computed ? (
                     <motion.div
