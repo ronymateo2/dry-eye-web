@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { dropsApi, useInvalidateDrops } from "@/features/drops";
@@ -136,24 +136,44 @@ export function HeroView({
           <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
             <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4">
               <div className="pt-1">
-                {isRegistered ? (
-                  <QuickLogCheck color="var(--pain-low)" />
-                ) : computed ? (
-                  <CountdownValue
-                    label={computed.label}
-                    overdue={computed.overdue}
-                    color={quickLogPending ? "var(--accent-dim)" : computed.color}
-                    progress={computed.progress}
-                    onClick={handleQuickLog}
-                  />
-                ) : (
-                  <div className="grid gap-2 justify-items-center text-center">
-                    <p className="section-label mb-0">Cada</p>
-                    <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
-                      {heroEntry.interval_hours}h
-                    </p>
-                  </div>
-                )}
+                <AnimatePresence mode="wait" initial={false}>
+                  {isRegistered ? (
+                    <motion.div
+                      key="check"
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                    >
+                      <QuickLogCheck color="var(--pain-low)" />
+                    </motion.div>
+                  ) : computed ? (
+                    <motion.div
+                      key="ring"
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                    >
+                      <CountdownValue
+                        label={computed.label}
+                        overdue={computed.overdue}
+                        color={quickLogPending ? "var(--accent-dim)" : computed.color}
+                        progress={computed.progress}
+                        onClick={handleQuickLog}
+                      />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="interval"
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                    >
+                      <div className="grid gap-2 justify-items-center text-center">
+                        <p className="section-label mb-0">Cada</p>
+                        <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
+                          {heroEntry.interval_hours}h
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               <div className="grid min-w-0 gap-3 pt-1">
