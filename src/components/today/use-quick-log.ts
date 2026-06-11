@@ -60,6 +60,7 @@ export function useQuickLog(opts?: {
       }
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: dropKeys.today() });
+        queryClient.invalidateQueries({ queryKey: dropKeys.lastPerType() });
       }, TRANSITION_MS);
     },
     onError: () => {
