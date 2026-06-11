@@ -414,13 +414,21 @@ export const MedicationsAgenda = memo(function MedicationsAgenda() {
                 <div className="grid grid-cols-[92px_minmax(0,1fr)] items-center gap-5">
                   {/* Ring / check */}
                   <div>
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence mode="wait" initial={false}>
                       {quickLogging ? (
-                        <motion.div key="check">
+                        <motion.div
+                          key="check"
+                          exit={{ opacity: 0, scale: 0.85 }}
+                          transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                        >
                           <QuickLogCheck color="var(--dose-early)" />
                         </motion.div>
                       ) : (
-                        <motion.div key="ring">
+                        <motion.div
+                          key="ring"
+                          exit={{ opacity: 0, scale: 0.85 }}
+                          transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                        >
                           <SlotCountdown
                             slotTime={hero.slotTime}
                             totalMs={hero.totalIntervalMs}
