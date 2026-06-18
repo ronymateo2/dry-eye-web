@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { TrashIcon, EyedropperSampleIcon } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
 import type { ActiveVialEntry } from "./helpers";
@@ -25,11 +26,9 @@ export function VialRow({
   const status = getVialStatus(vial, now);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 3 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-      className="group min-h-[34px] w-full overflow-hidden rounded-[9px]"
+    <div
+      style={{ "--i": index } as CSSProperties}
+      className="anim-fade-up group min-h-[34px] w-full overflow-hidden rounded-[9px]"
     >
       <AnimatePresence mode="wait" initial={false}>
         {!isConfirming ? (
@@ -110,6 +109,6 @@ export function VialRow({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

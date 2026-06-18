@@ -1,4 +1,4 @@
-import { memo, useState, useMemo, lazy, Suspense } from "react";
+import { memo, useState, useMemo, lazy, Suspense, type CSSProperties } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   AlarmIcon,
@@ -80,14 +80,13 @@ function TimelineRow({
   const isGroup = slot.names.length > 1;
   const countdownDisplay = cd.overdue ? cd.label : `en ${cd.label}`;
   return (
-    <motion.button
+    <button
       type="button"
-      initial={{ opacity: 0, y: 3 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+      style={{ "--i": index } as CSSProperties}
       onClick={onLog}
       aria-label={`Registrar ${slot.names.join(", ")}`}
       className={cn(
+        "anim-fade-up",
         "group grid min-h-[40px] w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-[9px] px-3 py-1.5 text-left",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)] focus-visible:outline-none",
@@ -149,7 +148,7 @@ function TimelineRow({
           className="text-[var(--text-faint)] transition-transform duration-[160ms] ease-out group-hover:translate-x-0.5"
         />
       </span>
-    </motion.button>
+    </button>
   );
 }
 

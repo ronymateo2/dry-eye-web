@@ -1,5 +1,4 @@
 import { memo, useState, useMemo, useRef } from "react";
-import { motion } from "motion/react";
 import { useQuery } from "@tanstack/react-query";
 import { dropsApi, dropKeys, dropTypeKeys, useInvalidateDrops } from "@/features/drops";
 import { CheckIcon, DropIcon } from "@phosphor-icons/react";
@@ -110,17 +109,12 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
             {drop.name}
           </p>
           {justRegistered ? (
-            <motion.p
-              initial={{ opacity: 0, y: 3 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="mt-0.5 text-[12px] text-[var(--text-faint)]"
-            >
+            <p className="anim-fade-up mt-0.5 text-[12px] text-[var(--text-faint)]">
               Tomada a las{" "}
               <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
                 {justRegistered}
               </span>
-            </motion.p>
+            </p>
           ) : lastDrop ? (
             <p className="mt-0.5 text-[12px] text-[var(--text-faint)]">
               última <LastDropTime iso={lastDrop.logged_at} />
@@ -139,15 +133,12 @@ function OnDemandDropItem({ drop }: { drop: DropTypeRecord }) {
           )}
 
           {justRegistered ? (
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-              className="flex h-10 w-10 items-center justify-center rounded-full"
+            <div
+              className="anim-pop-in flex h-10 w-10 items-center justify-center rounded-full"
               style={{ background: "color-mix(in srgb, var(--pain-low) 18%, transparent)" }}
             >
               <CheckIcon size={18} weight="bold" style={{ color: "var(--pain-low)" }} />
-            </motion.div>
+            </div>
           ) : (
             <Button
               variant="tinted"

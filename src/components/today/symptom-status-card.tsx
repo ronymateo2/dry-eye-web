@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNow } from "@/lib/hooks/use-now";
-import { motion } from "motion/react";
 import {
   DropHalfIcon,
   FireIcon,
@@ -139,16 +138,13 @@ const IntensityGauge = memo(function IntensityGauge({
           {value}/10
         </span>
         {label && (
-          <motion.span
+          <span
             key={label}
-            initial={{ opacity: 0, y: 3 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="text-[9px] font-semibold uppercase tracking-[0.08em] leading-none"
+            className="anim-fade-up text-[9px] font-semibold uppercase tracking-[0.08em] leading-none"
             style={{ color: "var(--text-faint)" }}
           >
             {label}
-          </motion.span>
+          </span>
         )}
       </div>
     </div>
@@ -224,13 +220,11 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
 
   if (!latest) {
     return (
-      <motion.button
+      <button
         type="button"
         onClick={onRegister}
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
         className={cn(
+          "anim-fade-up",
           "w-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4 text-left",
           "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
           "hover:bg-[color-mix(in_srgb,var(--surface-card)_95%,var(--accent))]",
@@ -246,7 +240,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
             <p className="text-[14px] text-[var(--text-faint)]">Aún no hay registro hoy</p>
           </div>
         </div>
-      </motion.button>
+      </button>
     );
   }
 
@@ -255,12 +249,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
   const timeAgo = formatRelative(latest.logged_at, dataUpdatedAt);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-      className="relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4"
-    >
+    <div className="anim-fade-up relative overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4">
       <TopographicBg position="calc(100% + 20px) calc(100% + 10px)" size="600px" />
 
       <div className="relative z-10">
@@ -323,7 +312,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
           </p>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 });
 

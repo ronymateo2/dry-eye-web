@@ -221,17 +221,12 @@ export function HeroView({
                     )}
                   </div>
                   {isRegistered && (
-                    <motion.p
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.28, ease: "easeOut" }}
-                      className="absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]"
-                    >
+                    <p className="anim-fade-up absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]">
                       Tomada a las{" "}
                       <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
                         {justRegistered?.takenAt ?? ""}
                       </span>
-                    </motion.p>
+                    </p>
                   )}
                 </div>
 

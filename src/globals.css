@@ -813,6 +813,23 @@ img, svg { display: block; max-width: 100%; }
   to   { transform: scale(1); opacity: 1; }
 }
 
+/* Compositor-only mount animations (replace motion initial/animate) */
+@keyframes mount-fade-up {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes mount-pop-in {
+  from { opacity: 0; transform: scale(0.65); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.anim-fade-up {
+  animation: mount-fade-up 0.18s var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+.anim-pop-in {
+  animation: mount-pop-in 0.38s var(--ease-out) both;
+}
+
 
 @media screen and (max-width: 480px) {
   .section-label  { font-size: 14px; }

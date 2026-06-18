@@ -1,12 +1,8 @@
-import { motion } from "motion/react";
-
 export function QuickLogCheck({ color }: { color: string }) {
   return (
     <div style={{ width: 88, height: 88, display: "grid", placeItems: "center" }}>
-      <motion.div
-        initial={{ scale: 0.65, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.38, ease: [0.23, 1, 0.32, 1] }}
+      <div
+        className="anim-pop-in"
         style={{
           width: 72,
           height: 72,
@@ -26,7 +22,7 @@ export function QuickLogCheck({ color }: { color: string }) {
             }}
           />
         </svg>
-      </motion.div>
+      </div>
       <style>{`@keyframes qlDrawCheck { to { stroke-dashoffset: 0; } }`}</style>
     </div>
   );
