@@ -1,16 +1,16 @@
 import { TrashIcon, EyedropperSampleIcon } from "@phosphor-icons/react";
+import { useNow } from "@/lib/hooks/use-now";
 import type { ActiveVialEntry } from "./helpers";
 import { getVialStatus } from "./helpers";
 
 export function HeroVialStatus({
   vial,
-  now,
   onClick,
 }: {
   vial: ActiveVialEntry;
-  now: number;
   onClick: () => void;
 }) {
+  const now = useNow();
   const status = getVialStatus(vial, now);
 
   const label = status.isExpired

@@ -1,13 +1,13 @@
 import type { CSSProperties } from "react";
 import { TrashIcon, EyedropperSampleIcon } from "@phosphor-icons/react";
 import { motion, AnimatePresence } from "motion/react";
+import { useNow } from "@/lib/hooks/use-now";
 import type { ActiveVialEntry } from "./helpers";
 import { getVialStatus } from "./helpers";
 
 export function VialRow({
   vial,
   index,
-  now,
   isConfirming,
   onRequestDiscard,
   onCancel,
@@ -16,13 +16,13 @@ export function VialRow({
 }: {
   vial: ActiveVialEntry;
   index: number;
-  now: number;
   isConfirming: boolean;
   onRequestDiscard: () => void;
   onCancel: () => void;
   onConfirmDiscard: () => void;
   isPending: boolean;
 }) {
+  const now = useNow();
   const status = getVialStatus(vial, now);
 
   return (

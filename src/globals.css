@@ -830,6 +830,32 @@ img, svg { display: block; max-width: 100%; }
   animation: mount-pop-in 0.38s var(--ease-out) both;
 }
 
+/* Countdown ring — tappable hint pulse + digit odometer */
+@keyframes ringPulse {
+  0%   { transform: scale(1);    opacity: 0.35; }
+  65%  { transform: scale(1.18); opacity: 0; }
+  100% { transform: scale(1.18); opacity: 0; }
+}
+.ring-pulse {
+  animation: ringPulse 2.2s ease-out infinite;
+}
+@keyframes gaugeRingPulse {
+  0%   { transform: scale(1);    opacity: 0.35; }
+  65%  { transform: scale(1.15); opacity: 0; }
+  100% { transform: scale(1.15); opacity: 0; }
+}
+.gauge-ring-pulse {
+  animation: gaugeRingPulse 2.2s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ring-pulse,
+  .gauge-ring-pulse { animation: none; }
+}
+@keyframes odometerIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
 
 @media screen and (max-width: 480px) {
   .section-label  { font-size: 14px; }

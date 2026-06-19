@@ -79,33 +79,23 @@ export function CountdownValue({
       style={onClick ? { cursor: "pointer", position: "relative" } : undefined}
     >
       {onClick && (
-        <>
-          <style>{`
-            @keyframes ringPulse {
-              0%   { transform: scale(1);    opacity: 0.35; }
-              65%  { transform: scale(1.18); opacity: 0; }
-              100% { transform: scale(1.18); opacity: 0; }
-            }
-          `}</style>
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              border: `2px solid ${color}`,
-              animation: "ringPulse 2.2s ease-out infinite",
-              pointerEvents: "none",
-            }}
-          />
-        </>
+        <div
+          aria-hidden="true"
+          className="ring-pulse"
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: "50%",
+            border: `2px solid ${color}`,
+            pointerEvents: "none",
+          }}
+        />
       )}
       <CircularProgress size={88} progress={progress ?? 0} color={color}>
         <p className="mb-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
           {overdue ? "Vencida" : "En"}
         </p>
         <div className="flex flex-nowrap items-end gap-x-0.5 whitespace-nowrap leading-none" style={{ color }}>
-          <style>{`@keyframes odometerIn{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
           {parts.map((part) => {
             const value = part.slice(0, -1);
             const unit = part.slice(-1);

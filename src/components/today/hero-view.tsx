@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { AlarmIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { dropsApi, useInvalidateDrops } from "@/features/drops";
 import { TopographicBg } from "@/components/ui/topographic-bg";
-import { DropLogCheck } from "./drop-log-check";
+import { QuickLogCheck } from "./quick-log-check";
 import { CountdownValue } from "./countdown-value";
 import { ViewToggle } from "./view-toggle";
 import { TimelineRow } from "./timeline-row";
@@ -17,6 +17,50 @@ import { TodayCountBadge } from "./today-count-badge";
 import { useQuickLog } from "./use-quick-log";
 import type { ActiveVialEntry } from "./helpers";
 import { getCountdown, dispatchQuickAction } from "./helpers";
+import { useNow } from "@/lib/hooks/use-now";
+
+function HeroCountdownRing({
+  lastLoggedAt,
+  intervalHours,
+  pending,
+  onClick,
+}: {
+  lastLoggedAt: string;
+  intervalHours: number;
+  pending: boolean;
+  onClick: () => void;
+}) {
+  const now = useNow();
+  const cd = getCountdown(lastLoggedAt, intervalHours, now);
+  return (
+    <CountdownValue
+      label={cd.label}
+      overdue={cd.overdue}
+      color={pending ? "var(--accent-dim)" : cd.color}
+      progress={cd.progress}
+      onClick={onClick}
+    />
+  );
+}
+
+function HeroNextTime({
+  lastLoggedAt,
+  intervalHours,
+}: {
+  lastLoggedAt: string;
+  intervalHours: number;
+}) {
+  const now = useNow();
+  const { nextTime } = getCountdown(lastLoggedAt, intervalHours, now);
+  return (
+    <div className="flex items-center gap-1.5">
+      <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
+      <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
+        {nextTime}
+      </p>
+    </div>
+  );
+}
 
 export function HeroView({
   data,
@@ -64,7 +108,7 @@ export function HeroView({
     onError: () => setJustRegistered(null),
   });
 
-  const { now, upcoming, completado, sinRegistro, vialByDropType, todayCount } = data;
+  const { upcoming, completado, sinRegistro, vialByDropType, todayCount } = data;
 
   if (upcoming.length === 0 && completado.length === 0 && sinRegistro.length === 0) return null;
 
@@ -84,10 +128,7 @@ export function HeroView({
     quickLog(heroEntry.drop_type_id, !!(heroEntry.is_vial && !heroVial));
   }
 
-  const computed =
-    heroEntry?.last_logged_at && heroEntry?.interval_hours
-      ? getCountdown(heroEntry.last_logged_at, heroEntry.interval_hours, now)
-      : null;
+  const hasCountdown = !!(heroEntry?.last_logged_at && heroEntry?.interval_hours);
 
   return (
     <>
@@ -143,19 +184,18 @@ export function HeroView({
                       exit={{ opacity: 0, scale: 0.85 }}
                       transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
                     >
-                      <DropLogCheck />
+                      <QuickLogCheck color="var(--pain-low)" />
                     </motion.div>
-                  ) : computed ? (
+                  ) : hasCountdown ? (
                     <motion.div
                       key="ring"
                       exit={{ opacity: 0, scale: 0.85 }}
                       transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
                     >
-                      <CountdownValue
-                        label={computed.label}
-                        overdue={computed.overdue}
-                        color={quickLogPending ? "var(--accent-dim)" : computed.color}
-                        progress={computed.progress}
+                      <HeroCountdownRing
+                        lastLoggedAt={heroEntry.last_logged_at!}
+                        intervalHours={heroEntry.interval_hours!}
+                        pending={quickLogPending}
                         onClick={handleQuickLog}
                       />
                     </motion.div>
@@ -207,13 +247,11 @@ export function HeroView({
                 {/* alarm/time row — stays in DOM; "Tomada a las" overlaid in same spot */}
                 <div style={{ position: "relative" }}>
                   <div style={{ opacity: isRegistered ? 0 : 1, transition: "opacity 200ms ease" }}>
-                    {computed ? (
-                      <div className="flex items-center gap-1.5">
-                        <AlarmIcon size={14} weight="fill" className="shrink-0 text-[var(--accent)]" />
-                        <p className="font-mono text-[20px] font-semibold leading-none tabular-nums text-[var(--accent)]">
-                          {computed.nextTime}
-                        </p>
-                      </div>
+                    {hasCountdown ? (
+                      <HeroNextTime
+                        lastLoggedAt={heroEntry.last_logged_at!}
+                        intervalHours={heroEntry.interval_hours!}
+                      />
                     ) : (
                       <p className="font-mono text-[17px] tabular-nums text-[var(--text-muted)]">
                         Cada {heroEntry.interval_hours}h
@@ -241,7 +279,7 @@ export function HeroView({
                         pointerEvents: isRegistered ? "none" : "auto",
                       }}
                     >
-                      <HeroVialStatus vial={heroVial} now={now} onClick={() => setDiscardTarget(heroVial)} />
+                      <HeroVialStatus vial={heroVial} onClick={() => setDiscardTarget(heroVial)} />
                     </div>
                   </>
                 )}
@@ -264,7 +302,6 @@ export function HeroView({
                     key={entry.drop_type_id}
                     entry={entry}
                     index={i}
-                    now={now}
                     vial={vial}
                     onDiscardVial={(v) => setDiscardTarget(v)}
                     variant={variant}

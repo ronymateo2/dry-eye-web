@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { CaretRightIcon, EyedropperSampleIcon, TrashIcon } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
+import { useNow } from "@/lib/hooks/use-now";
 import type { DropScheduleEntry } from "@/types/domain";
 import type { ActiveVialEntry } from "./helpers";
 import { getCountdown, getVialStatus, dispatchQuickAction } from "./helpers";
@@ -8,18 +9,17 @@ import { getCountdown, getVialStatus, dispatchQuickAction } from "./helpers";
 export function TimelineRow({
   entry,
   index,
-  now,
   vial,
   onDiscardVial,
   variant = "upcoming",
 }: {
   entry: DropScheduleEntry;
   index: number;
-  now: number;
   vial: ActiveVialEntry | null;
   onDiscardVial?: (vial: ActiveVialEntry) => void;
   variant?: "upcoming" | "completado" | "sinRegistro";
 }) {
+  const now = useNow();
   if (!entry.interval_hours) return null;
 
   const noRecord = !entry.last_logged_at || variant === "sinRegistro";

@@ -20,7 +20,7 @@ export function CardView({
 
   const discardMutation = useDiscardVial(() => setConfirmingId(null));
 
-  const { activeVials, upcoming, completado, sinRegistro, now } = data;
+  const { activeVials, upcoming, completado, sinRegistro } = data;
 
   const annotatedEntries = useMemo(() => [
     ...upcoming.map((e) => ({ entry: e, variant: "upcoming" as const })),
@@ -50,7 +50,6 @@ export function CardView({
                   key={entry.drop_type_id}
                   entry={entry}
                   index={i}
-                  now={now}
                   vial={null}
                   variant={variant}
                 />
@@ -72,7 +71,6 @@ export function CardView({
                       key={vial.id}
                       vial={vial}
                       index={i}
-                      now={now}
                       isConfirming={confirmingId === vial.id}
                       onRequestDiscard={() =>
                         setConfirmingId((prev) => (prev === vial.id ? null : vial.id))

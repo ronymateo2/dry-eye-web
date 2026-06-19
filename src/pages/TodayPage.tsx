@@ -19,7 +19,6 @@ import { checkInKeys } from "@/features/check-ins";
 import { todayApi, todayKeys, type TodayBundle } from "@/features/today";
 import { cn } from "@/lib/utils";
 import { useLocalStorage } from "@/lib/hooks/use-local-storage";
-import { useNow } from "@/lib/hooks/use-now";
 
 const openSymptomsSheet = () => dispatchQuickAction("symptoms");
 
@@ -55,8 +54,7 @@ function TodaySkeleton() {
 
 function ScheduleSection() {
   const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
-  const now = useNow();
-  const scheduleData = useScheduleData(now);
+  const scheduleData = useScheduleData();
 
   return view === "card" ? (
     <CardView data={scheduleData} view={view} setView={setView} />

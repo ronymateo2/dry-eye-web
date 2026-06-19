@@ -88,26 +88,17 @@ const IntensityGauge = memo(function IntensityGauge({
       aria-label={label ? `${label}: ${value} de 10` : `Intensidad promedio ${value} de 10`}
     >
       {onClick && (
-        <>
-          <style>{`
-            @keyframes gaugeRingPulse {
-              0%   { transform: scale(1);    opacity: 0.35; }
-              65%  { transform: scale(1.15); opacity: 0; }
-              100% { transform: scale(1.15); opacity: 0; }
-            }
-          `}</style>
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 10,
-              borderRadius: "50%",
-              border: `2px solid ${color}`,
-              animation: "gaugeRingPulse 2.2s ease-out infinite",
-              pointerEvents: "none",
-            }}
-          />
-        </>
+        <div
+          aria-hidden="true"
+          className="gauge-ring-pulse"
+          style={{
+            position: "absolute",
+            inset: 10,
+            borderRadius: "50%",
+            border: `2px solid ${color}`,
+            pointerEvents: "none",
+          }}
+        />
       )}
       <svg
         width={size}
