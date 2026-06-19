@@ -55,7 +55,7 @@ function TodaySkeleton() {
 
 function ScheduleSection() {
   const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
-  const now = useNow(30_000);
+  const now = useNow();
   const scheduleData = useScheduleData(now);
 
   return view === "card" ? (

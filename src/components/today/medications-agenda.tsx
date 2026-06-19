@@ -52,7 +52,7 @@ function SlotCountdown({
   totalMs: number;
   onClick: () => void;
 }) {
-  const now = useNow(30_000);
+  const now = useNow();
   const cd = getSlotCountdown(slotTime.getTime(), now, totalMs);
   return (
     <CountdownValue
@@ -75,7 +75,7 @@ function TimelineRow({
   index: number;
   onLog: () => void;
 }) {
-  const now = useNow(30_000);
+  const now = useNow();
   const cd = getSlotCountdown(slot.slotTime.getTime(), now, slot.totalIntervalMs);
   const isGroup = slot.names.length > 1;
   const countdownDisplay = cd.overdue ? cd.label : `en ${cd.label}`;

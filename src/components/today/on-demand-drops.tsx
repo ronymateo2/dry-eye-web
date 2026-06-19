@@ -21,7 +21,7 @@ function formatTimeAgo(dateStr: string, now: number): string {
 }
 
 function LastDropTime({ iso }: { iso: string }) {
-  const now = useNow(60_000);
+  const now = useNow();
   return <span className="font-mono">{formatTimeAgo(iso, now)}</span>;
 }
 

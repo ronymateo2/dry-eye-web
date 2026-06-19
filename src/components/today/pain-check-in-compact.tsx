@@ -9,7 +9,7 @@ import { timeAgo } from "./helpers";
 
 export const PainCheckInCompact = memo(function PainCheckInCompact() {
   const navigate = useNavigate();
-  const now = useNow(60_000);
+  const now = useNow();
   const { data: lastCheckIn } = useQuery({
     queryKey: checkInKeys.last(),
     queryFn: checkInsApi.getLast,

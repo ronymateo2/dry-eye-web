@@ -177,7 +177,7 @@ type Props = {
 };
 
 function RelativeTime({ iso }: { iso: string }) {
-  const now = useNow(60_000);
+  const now = useNow();
   return <>{formatRelative(iso, now)}</>;
 }
 

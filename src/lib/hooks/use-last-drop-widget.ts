@@ -17,7 +17,7 @@ export function formatDropTimeAgo(isoString: string, now: number = Date.now()): 
 }
 
 export function useLastDropWidget() {
-  const now = useNow(60_000);
+  const now = useNow();
   const { data = null, isFetching, refetch } = useQuery({
     queryKey: dropKeys.last(),
     queryFn: dropsApi.getLast,
