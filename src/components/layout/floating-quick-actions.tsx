@@ -28,12 +28,14 @@ export function FloatingQuickActions() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [sheet, setSheet] = useState<Sheet>(null);
+  const [obsMounted, setObsMounted] = useState(false);
   const [initialDropTypeId, setInitialDropTypeId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const handler = (e: Event) => {
       const { sheet: s, dropTypeId } = (e as CustomEvent<{ sheet: Sheet; dropTypeId?: string }>).detail;
       setSheet(s);
+      if (s === "obs") setObsMounted(true);
       setInitialDropTypeId(dropTypeId);
       setMenuOpen(false);
     };
@@ -67,6 +69,7 @@ export function FloatingQuickActions() {
       setMenuOpen(false);
     } else {
       setSheet(s as Sheet);
+      if (s === "obs") setObsMounted(true);
     }
   };
 
@@ -112,7 +115,7 @@ export function FloatingQuickActions() {
         <MobileSheet open={sheet === "hygiene"} title="Higiene Palpebral" description="Registra tu sesion de higiene palpebral." panelClassName="!h-[95dvh]" onClose={closeAll}>
           <HygieneSheet onSaved={savedAndClose} onClose={closeAll} />
         </MobileSheet>
-        <ObservationFlowSheet open={sheet === "obs"} onClose={closeAll} />
+        {obsMounted && <ObservationFlowSheet open={sheet === "obs"} onClose={closeAll} />}
         <MobileSheet open={sheet === "therapy"} title="Registrar terapia" description="Registra una sesion de terapia miofascial." onClose={closeAll}>
           <TherapySheet onSaved={savedAndClose} />
         </MobileSheet>

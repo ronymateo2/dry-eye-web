@@ -16,8 +16,6 @@ export default defineConfig({
           "vendor-react": ["react", "react-dom", "react-router-dom"],
           "vendor-motion": ["motion/react"],
           "vendor-query": ["@tanstack/react-query"],
-          "vendor-charts": ["recharts"],
-          "vendor-pdf": ["jspdf", "html2canvas"],
         },
       },
     },
