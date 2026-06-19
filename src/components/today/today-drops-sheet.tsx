@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useCallback } from "react";
+import { lazy, Suspense, useEffect, useMemo, useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { TrashIcon, PencilSimpleIcon, EyedropperIcon } from "@phosphor-icons/react";
 import { StackedSheet } from "@/components/layout/stacked-sheet";
 import { useSheetStack } from "@/lib/hooks/use-sheet-stack";
-import { DropSheet } from "@/components/forms/drop-sheet";
+
+const DropSheet = lazy(() =>
+  import("@/components/forms/drop-sheet").then((m) => ({ default: m.DropSheet })),
+);
 import { Button } from "@/components/ui/button";
 import { TimelineRow, TimelineDot, TimelineGap } from "@/components/history/timeline-ui";
 import { formatTime, formatGap } from "@/components/history/utils";
@@ -106,16 +109,18 @@ export function TodayDropsSheet({
         title: "Editar dosis",
         description: `${typeName} · ${formatTime(drop.logged_at, timezone)}`,
         content: (
-          <DropSheet
-            editDrop={{
-              id: drop.id,
-              loggedAt: drop.logged_at,
-              eye: (["left", "right", "both"].includes(drop.eye) ? drop.eye : "both") as DropEye,
-              quantity: drop.quantity,
-              dropTypeId: typeId,
-            }}
-            onSaved={stack.pop}
-          />
+          <Suspense fallback={null}>
+            <DropSheet
+              editDrop={{
+                id: drop.id,
+                loggedAt: drop.logged_at,
+                eye: (["left", "right", "both"].includes(drop.eye) ? drop.eye : "both") as DropEye,
+                quantity: drop.quantity,
+                dropTypeId: typeId,
+              }}
+              onSaved={stack.pop}
+            />
+          </Suspense>
         ),
       });
     },
