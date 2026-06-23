@@ -269,6 +269,7 @@ export type User = {
   notifications_enabled: boolean;
   quiet_start: string | null;
   quiet_end: string | null;
+  widget_drop_type_ids: string[];
 };
 
 export type SymptomState = "calmado" | "leve" | "sensible" | "reactivo" | "brote";

@@ -11,6 +11,7 @@ export type Me = {
   notifications_enabled: boolean;
   quiet_start: string | null;
   quiet_end: string | null;
+  widget_drop_type_ids: string[];
 };
 
 export type UpdateMeBody = {
@@ -18,4 +19,5 @@ export type UpdateMeBody = {
   name?: string;
   theme?: "dark" | "light";
   font?: UserFont;
+  widgetDropTypeIds?: string[];
 };

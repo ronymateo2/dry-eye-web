@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TextInput } from "@/components/ui/text-input";
 import { setToken } from "@/lib/http";
 import { calendarApi, calendarKeys } from "@/features/calendar";
+import { useDropTypes } from "@/features/drops";
 import { userApi } from "@/features/user";
 import { notificationsApi, usePush } from "@/features/notifications";
 import { useAuth, useUser } from "@/lib/auth";
@@ -15,6 +16,7 @@ import {
   CalendarDotsIcon,
   CaretRightIcon,
   ClockIcon,
+  DropIcon,
   MoonIcon,
   PencilSimpleIcon,
   PillIcon,
@@ -116,6 +118,42 @@ export default function ProfilePage() {
       toast.error("No se pudo actualizar el timezone.");
     } finally {
       setTzPending(false);
+    }
+  };
+
+  // Widget de gotas (selección para Today)
+  const { data: dropTypes = [] } = useDropTypes();
+  const [widgetSheetOpen, setWidgetSheetOpen] = useState(false);
+  const [widgetPending, setWidgetPending] = useState(false);
+  const [widgetSelected, setWidgetSelected] = useState<string[]>(user.widget_drop_type_ids);
+  const [widgetDraft, setWidgetDraft] = useState<string[]>(user.widget_drop_type_ids);
+
+  const widgetSelectedNames = useMemo(() => {
+    const byId = new Map(dropTypes.map((d) => [d.id, d.name]));
+    return widgetSelected.map((id) => byId.get(id)).filter((n): n is string => Boolean(n));
+  }, [dropTypes, widgetSelected]);
+
+  const toggleWidgetDraft = (id: string) => {
+    setWidgetDraft((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const openWidgetSheet = () => {
+    setWidgetDraft(widgetSelected);
+    setWidgetSheetOpen(true);
+  };
+
+  const saveWidgetSelection = async () => {
+    setWidgetPending(true);
+    try {
+      await userApi.updateMe({ widgetDropTypeIds: widgetDraft });
+      await refreshUser();
+      setWidgetSelected(widgetDraft);
+      setWidgetSheetOpen(false);
+      toast.success("Gotas del widget actualizadas.");
+    } catch {
+      toast.error("No se pudo guardar la selección.");
+    } finally {
+      setWidgetPending(false);
     }
   };
 
@@ -330,6 +368,28 @@ export default function ProfilePage() {
                     <MoonIcon size={18} color="var(--accent)" weight="regular" />
                   </motion.span>
                 </motion.span>
+              </button>
+            </div>
+            <div className="flex min-h-[72px] items-center gap-3 border-t border-[var(--border)] px-4">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-dim)]">
+                <DropIcon size={16} color="var(--accent)" weight="fill" />
+              </div>
+              <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-[var(--text-faint)]">
+                  Widget de gotas
+                </span>
+                <span className="truncate text-[14px] text-[var(--text-primary)]">
+                  {widgetSelectedNames.length > 0 ? widgetSelectedNames.join(", ") : "Ninguna"}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={openWidgetSheet}
+                aria-label="Elegir gotas del widget"
+                disabled={widgetPending}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--surface-el)] text-[var(--text-faint)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-40"
+              >
+                <PencilSimpleIcon size={15} />
               </button>
             </div>
           </div>
@@ -560,6 +620,54 @@ export default function ProfilePage() {
               })
             )}
           </ul>
+        </div>
+      </MobileSheet>
+
+      {/* Widget drop-types picker sheet */}
+      <MobileSheet
+        open={widgetSheetOpen}
+        title="Widget de gotas"
+        description="Elige qué gotas se muestran en el seguimiento de Inicio."
+        onClose={() => setWidgetSheetOpen(false)}
+      >
+        <div className="flex flex-col gap-3">
+          <ul className="max-h-[45vh] overflow-y-auto rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
+            {dropTypes.length === 0 ? (
+              <li className="flex min-h-12 items-center px-4 text-[13px] text-[var(--text-faint)]">
+                No tienes gotas registradas
+              </li>
+            ) : (
+              dropTypes.map((d) => {
+                const isActive = widgetDraft.includes(d.id);
+                return (
+                  <li key={d.id} className="border-b border-[var(--border)] last:border-b-0">
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={isActive}
+                      disabled={widgetPending}
+                      onClick={() => toggleWidgetDraft(d.id)}
+                      className="flex min-h-12 w-full items-center px-4 text-left transition-colors disabled:opacity-40"
+                      style={{ color: isActive ? "var(--accent)" : "var(--text-primary)" }}
+                    >
+                      <span className={`text-[14px] capitalize ${isActive ? "font-medium" : ""}`}>{d.name}</span>
+                      {isActive && (
+                        <span className="ml-auto text-[11px] font-medium text-[var(--accent)]">✓</span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })
+            )}
+          </ul>
+          <Button
+            variant="primary"
+            onClick={saveWidgetSelection}
+            disabled={widgetPending}
+            aria-label="Guardar selección de gotas"
+          >
+            Guardar
+          </Button>
         </div>
       </MobileSheet>
     </>

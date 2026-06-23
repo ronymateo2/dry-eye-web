@@ -3,6 +3,7 @@ import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-quer
 import { GearIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { MedicationsAgenda } from "@/components/today/medications-agenda";
 import { OnDemandDrops } from "@/components/today/on-demand-drops";
+import { DropStreakWidget } from "@/components/today/drop-streak-widget";
 import { SymptomStatusCard } from "@/components/today/symptom-status-card";
 import { SleepStatus } from "@/components/ui/sleep-status";
 import { CardView } from "@/components/today/card-view";
@@ -73,6 +74,8 @@ function TodayContent() {
       <ScheduleSection />
 
       <OnDemandDrops />
+
+      <DropStreakWidget />
 
       <MedicationsAgenda />
 
