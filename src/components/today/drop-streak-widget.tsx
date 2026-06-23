@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { useDropStatsPerType } from "@/features/drops";
 import { useUser } from "@/lib/auth";
 import type { DropTypeStats } from "@/types/domain";
@@ -17,14 +17,7 @@ export const DropStreakWidget = memo(function DropStreakWidget() {
   const user = useUser();
   const { data: stats = [] } = useDropStatsPerType(user.widget_drop_type_ids);
 
-  const selected = useMemo(() => {
-    const byId = new Map(stats.map((s) => [s.drop_type_id, s]));
-    return user.widget_drop_type_ids
-      .map((id) => byId.get(id))
-      .filter((s): s is DropTypeStats => Boolean(s));
-  }, [stats, user.widget_drop_type_ids]);
-
-  if (selected.length === 0) return null;
+  if (stats.length === 0) return null;
 
   return (
     <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
@@ -34,7 +27,7 @@ export const DropStreakWidget = memo(function DropStreakWidget() {
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2.5 px-4 pb-4">
-        {selected.map((s) => {
+        {stats.map((s) => {
           const { days, avgPerDay } = computeStreak(s);
           return (
             <div
