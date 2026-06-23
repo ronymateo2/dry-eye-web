@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -309,42 +310,51 @@ export function DropSheet({
       )}
 
       <div>
-        <button
-          type="button"
-          aria-expanded={showDatePicker}
-          className="flex items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5 text-[13px] font-medium transition-colors"
-          style={loggedAt
-            ? { color: "var(--accent)", borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)" }
-            : { color: "var(--text-muted)", borderColor: "var(--border)" }
-          }
-          onClick={() => {
-            if (showDatePicker) {
-              setShowDatePicker(false);
-            } else {
-              setShowDatePicker(true);
-              if (!loggedAt) setLoggedAt(new Date().toISOString());
-            }
-          }}
-        >
-          <ClockIcon size={13} />
-          {loggedAt ? loggedTimeStr : `Ahora · ${nowTimeStr}`}
-        </button>
-
-        {showDatePicker && (
-          <div className="mt-2 space-y-1.5">
-            <div className="flex items-center justify-between">
-              <p className="section-label mb-0">Fecha y hora</p>
-              <button
-                type="button"
-                className="text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)]"
-                onClick={() => { setShowDatePicker(false); setLoggedAt(null); }}
-              >
-                Volver a ahora
-              </button>
-            </div>
-            <DateTimePicker value={loggedAt} onChange={setLoggedAt} max={new Date()} />
-          </div>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {showDatePicker ? (
+            <motion.div
+              key="editor"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+              className="space-y-1.5"
+            >
+              <DateTimePicker value={loggedAt} onChange={setLoggedAt} max={new Date()} />
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+                  onClick={() => { setShowDatePicker(false); setLoggedAt(null); }}
+                >
+                  Volver a ahora
+                </button>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.button
+              key="pill"
+              type="button"
+              aria-label="Editar fecha y hora"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+              className="flex items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5 text-[13px] font-medium transition-colors"
+              style={loggedAt
+                ? { color: "var(--accent)", borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)" }
+                : { color: "var(--text-muted)", borderColor: "var(--border)" }
+              }
+              onClick={() => {
+                setShowDatePicker(true);
+                if (!loggedAt) setLoggedAt(new Date().toISOString());
+              }}
+            >
+              <ClockIcon size={13} />
+              {loggedAt ? loggedTimeStr : `Ahora · ${nowTimeStr}`}
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
 
       {state.status !== "idle" && <StatusBanner state={state} />}
