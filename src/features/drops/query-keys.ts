@@ -2,7 +2,10 @@ export const dropKeys = {
   all: ["drops"] as const,
   last: () => [...dropKeys.all, "last"] as const,
   lastPerType: () => [...dropKeys.all, "last-per-type"] as const,
-  statsPerType: () => [...dropKeys.all, "stats-per-type"] as const,
+  statsPerType: (ids?: string[]) =>
+    ids && ids.length
+      ? ([...dropKeys.all, "stats-per-type", [...ids].sort().join(",")] as const)
+      : ([...dropKeys.all, "stats-per-type"] as const),
   today: () => [...dropKeys.all, "today"] as const,
   recentNoVial: (dropTypeId: string, hours: number) =>
     [...dropKeys.all, "recent-no-vial", dropTypeId, hours] as const,

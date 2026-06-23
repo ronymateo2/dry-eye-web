@@ -30,7 +30,7 @@ export function DropsTab({ timezone }: { timezone: string }) {
   const reducedMotion = useReducedMotion();
   const { data: stats, isLoading } = useQuery({
     queryKey: dropKeys.statsPerType(),
-    queryFn: dropsApi.getStatsPerType,
+    queryFn: () => dropsApi.getStatsPerType(),
   });
 
   if (isLoading) {

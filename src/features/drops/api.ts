@@ -18,7 +18,10 @@ export const dropsApi = {
   remove: (id: string) => http.delete(`/drops/${id}`),
   getLast: () => http.get<LastDrop | null>("/drops/last"),
   getLastPerType: () => http.get<DropScheduleEntry[]>("/drops/last-per-type"),
-  getStatsPerType: () => http.get<DropTypeStats[]>("/drops/stats-per-type"),
+  getStatsPerType: (ids?: string[]) =>
+    http.get<DropTypeStats[]>(
+      `/drops/stats-per-type${ids && ids.length ? `?ids=${encodeURIComponent(ids.join(","))}` : ""}`,
+    ),
   getRecent: (dropTypeId: string, hours: number, opts?: { hasVial?: boolean }) =>
     http.get<RecentDrop[]>(
       `/drops/recent?dropTypeId=${dropTypeId}&hours=${hours}${opts?.hasVial ? "&hasVial=true" : ""}`,

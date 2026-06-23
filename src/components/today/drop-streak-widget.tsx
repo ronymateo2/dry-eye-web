@@ -15,7 +15,7 @@ function computeStreak(s: DropTypeStats) {
 
 export const DropStreakWidget = memo(function DropStreakWidget() {
   const user = useUser();
-  const { data: stats = [] } = useDropStatsPerType();
+  const { data: stats = [] } = useDropStatsPerType(user.widget_drop_type_ids);
 
   const selected = useMemo(() => {
     const byId = new Map(stats.map((s) => [s.drop_type_id, s]));

@@ -22,8 +22,12 @@ export function useLastDropPerType() {
   });
 }
 
-export function useDropStatsPerType() {
-  return useQuery({ queryKey: dropKeys.statsPerType(), queryFn: dropsApi.getStatsPerType });
+export function useDropStatsPerType(ids?: string[]) {
+  return useQuery({
+    queryKey: dropKeys.statsPerType(ids),
+    queryFn: () => dropsApi.getStatsPerType(ids),
+    enabled: ids === undefined || ids.length > 0,
+  });
 }
 
 export function useActiveVials() {
