@@ -1,15 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { GearIcon, CaretRightIcon } from "@phosphor-icons/react";
-import { MedicationsAgenda } from "@/components/today/medications-agenda";
-import { OnDemandDrops } from "@/components/today/on-demand-drops";
-import { DropStreakWidget } from "@/components/today/drop-streak-widget";
-import { SymptomStatusCard } from "@/components/today/symptom-status-card";
 import { SleepStatus } from "@/components/ui/sleep-status";
-import { CardView } from "@/components/today/card-view";
-import { HeroView } from "@/components/today/hero-view";
 import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
-import { useScheduleData } from "@/components/today/use-schedule-data";
+import { TodayWidgetList } from "@/components/today/today-widget-list";
+import { TodayWidgetEditor } from "@/components/today/today-widget-editor";
+import { useWidgetConfig } from "@/components/today/use-widget-config";
 import { dispatchQuickAction } from "@/components/today/helpers";
 import { dropKeys, dropTypeKeys, vialKeys } from "@/features/drops";
 import { calendarKeys } from "@/features/calendar";
@@ -19,7 +16,6 @@ import { sleepKeys } from "@/features/sleep";
 import { checkInKeys } from "@/features/check-ins";
 import { todayApi, todayKeys, type TodayBundle } from "@/features/today";
 import { cn } from "@/lib/utils";
-import { useLocalStorage } from "@/lib/hooks/use-local-storage";
 
 const openSymptomsSheet = () => dispatchQuickAction("symptoms");
 
@@ -53,31 +49,34 @@ function TodaySkeleton() {
   );
 }
 
-function ScheduleSection() {
-  const [view, setView] = useLocalStorage<"card" | "hero">("schedule-view", "hero");
-  const scheduleData = useScheduleData();
-
-  return view === "card" ? (
-    <CardView data={scheduleData} view={view} setView={setView} />
-  ) : (
-    <HeroView data={scheduleData} view={view} setView={setView} />
-  );
-}
-
 function TodayContent() {
   const navigate = useNavigate();
+  const [editMode, setEditMode] = useState(false);
+  const { config, reorder, toggleVisible, reset } = useWidgetConfig();
 
   return (
     <section className="space-y-5">
-      <SymptomStatusCard onRegister={openSymptomsSheet} />
+      <div className="flex justify-end">
+        <button
+          type="button"
+          aria-pressed={editMode}
+          onClick={() => setEditMode((v) => !v)}
+          className="text-[12px] font-medium tracking-[0.06em] uppercase text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
+        >
+          {editMode ? "Hecho" : "Personalizar"}
+        </button>
+      </div>
 
-      <ScheduleSection />
-
-      <OnDemandDrops />
-
-      <DropStreakWidget />
-
-      <MedicationsAgenda />
+      {editMode ? (
+        <TodayWidgetEditor
+          config={config}
+          onReorder={reorder}
+          onToggle={toggleVisible}
+          onReset={reset}
+        />
+      ) : (
+        <TodayWidgetList config={config} ctx={{ onRegister: openSymptomsSheet }} />
+      )}
 
       <div className="space-y-0.5 pt-1">
         <PainCheckInCompact />
