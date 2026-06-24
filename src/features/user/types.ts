@@ -1,3 +1,5 @@
+import type { TodayWidgetConfigEntry } from "@/types/domain";
+
 export type UserFont = "atkinson-hyperlegible" | "manrope" | "sf-pro-rounded";
 
 export type Me = {
@@ -12,6 +14,7 @@ export type Me = {
   quiet_start: string | null;
   quiet_end: string | null;
   widget_drop_type_ids: string[];
+  today_widget_config: TodayWidgetConfigEntry[];
 };
 
 export type UpdateMeBody = {
@@ -20,4 +23,5 @@ export type UpdateMeBody = {
   theme?: "dark" | "light";
   font?: UserFont;
   widgetDropTypeIds?: string[];
+  todayWidgetConfig?: TodayWidgetConfigEntry[];
 };
