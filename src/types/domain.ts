@@ -258,6 +258,8 @@ export type CalendarStatus = {
   }>;
 };
 
+export type TodayWidgetConfigEntry = { id: string; visible: boolean };
+
 export type User = {
   id: string;
   name: string | null;
