@@ -18,8 +18,9 @@ export function SortableWidgetRow({ entry, def, onToggle }: Props) {
 
   const Icon = def.icon;
 
+  const base = CSS.Transform.toString(transform);
   const style: CSSProperties = {
-    transform: CSS.Transform.toString(transform),
+    transform: isDragging ? `${base ?? ""} scale(1.02)` : base,
     transition,
     zIndex: isDragging ? 10 : undefined,
   };
@@ -30,8 +31,10 @@ export function SortableWidgetRow({ entry, def, onToggle }: Props) {
       style={style}
       className={cn(
         "flex min-h-[52px] items-center gap-3 border-b border-[var(--border)] px-4 last:border-b-0",
-        "bg-[var(--surface-card)] transition-opacity",
-        isDragging && "shadow-[0_4px_20px_rgba(0,0,0,0.35)]",
+        "transition-opacity",
+        isDragging
+          ? "rounded-[12px] border-transparent bg-[var(--surface-el)] shadow-[0_8px_28px_rgba(0,0,0,0.42)]"
+          : "bg-[var(--surface-card)]",
         !entry.visible && "opacity-40",
       )}
     >
@@ -64,7 +67,13 @@ export function SortableWidgetRow({ entry, def, onToggle }: Props) {
         aria-checked={entry.visible}
         aria-label={`${entry.visible ? "Ocultar" : "Mostrar"} ${def.label}`}
         onClick={() => onToggle(entry.id)}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] text-[var(--text-faint)] transition-colors hover:text-[var(--accent)]"
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]",
+          "transition-[color,background-color,transform] duration-[160ms] ease-out active:scale-[0.92]",
+          entry.visible
+            ? "bg-[var(--accent-dim)] text-[var(--accent)]"
+            : "text-[var(--text-faint)] hover:text-[var(--accent)]",
+        )}
       >
         {entry.visible ? <EyeIcon size={17} /> : <EyeSlashIcon size={17} />}
       </button>

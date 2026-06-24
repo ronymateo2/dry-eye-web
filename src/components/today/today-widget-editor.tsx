@@ -79,7 +79,7 @@ export function TodayWidgetEditor({ config, onReorder, onToggle, onReset }: Prop
       <button
         type="button"
         onClick={onReset}
-        className="flex items-center gap-1.5 text-[13px] text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
+        className="flex items-center gap-1.5 text-[13px] text-[var(--text-muted)] transition-[color,transform] duration-[160ms] ease-out hover:text-[var(--accent)] active:scale-[0.96]"
         aria-label="Restaurar orden predeterminado"
       >
         <ArrowCounterClockwiseIcon size={14} />
