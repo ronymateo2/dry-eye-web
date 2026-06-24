@@ -52,11 +52,7 @@ export const DropStreakWidget = memo(function DropStreakWidget() {
               <div className="mt-3 flex items-baseline gap-2">
                 <span
                   className="font-mono font-bold leading-none tabular-nums text-[var(--accent)]"
-                  style={{
-                    fontSize: "clamp(42px, 12vw, 52px)",
-                    textShadow:
-                      "0 0 18px var(--splash-glow-near), 0 0 40px var(--splash-glow-far)",
-                  }}
+                  style={{ fontSize: "clamp(42px, 12vw, 52px)" }}
                 >
                   {days}
                 </span>
