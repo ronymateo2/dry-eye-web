@@ -14,6 +14,7 @@ import { symptomsApi, symptomKeys } from "@/features/symptoms";
 import { SYMPTOM_STATE_COLOR, SYMPTOM_STATE_COPY, SYMPTOM_STATE_LABEL } from "@/lib/symptom-state";
 import { cn } from "@/lib/utils";
 import { TopographicBg } from "@/components/ui/topographic-bg";
+import { dispatchQuickAction } from "@/components/today/helpers";
 import type { SymptomIntensities, SymptomState, SymptomTopItem } from "@/types/domain";
 
 const SYMPTOM_ICONS: Record<keyof SymptomIntensities, React.ElementType> = {
@@ -163,16 +164,13 @@ function TopSymptomCell({ item }: { item: SymptomTopItem }) {
   );
 }
 
-type Props = {
-  onRegister: () => void;
-};
-
 function RelativeTime({ iso }: { iso: string }) {
   const now = useNow();
   return <>{formatRelative(iso, now)}</>;
 }
 
-export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }: Props) {
+export const SymptomStatusCard = memo(function SymptomStatusCard() {
+  const openSymptomsSheet = () => dispatchQuickAction("symptoms");
   const { data, isLoading, dataUpdatedAt } = useQuery({
     queryKey: symptomKeys.today(),
     queryFn: symptomsApi.getStatusToday,
@@ -213,7 +211,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
     return (
       <button
         type="button"
-        onClick={onRegister}
+        onClick={openSymptomsSheet}
         className={cn(
           "anim-fade-up",
           "w-full rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)] p-4 text-left",
@@ -259,7 +257,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
         {/* Main row: state + gauge */}
         <button
           type="button"
-          onClick={onRegister}
+          onClick={openSymptomsSheet}
           className="w-full text-left mb-3"
           aria-label="Actualizar registro de síntomas"
         >
@@ -276,7 +274,7 @@ export const SymptomStatusCard = memo(function SymptomStatusCard({ onRegister }:
             <IntensityGauge
               value={avgVal}
               color={color}
-              onClick={onRegister}
+              onClick={openSymptomsSheet}
             />
           </div>
         </button>

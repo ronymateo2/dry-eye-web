@@ -7,7 +7,6 @@ import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
 import { TodayWidgetList } from "@/components/today/today-widget-list";
 import { TodayWidgetEditor } from "@/components/today/today-widget-editor";
 import { useWidgetConfig } from "@/components/today/use-widget-config";
-import { dispatchQuickAction } from "@/components/today/helpers";
 import { dropKeys, dropTypeKeys, vialKeys } from "@/features/drops";
 import { calendarKeys } from "@/features/calendar";
 import { medicationKeys } from "@/features/medications";
@@ -16,8 +15,6 @@ import { sleepKeys } from "@/features/sleep";
 import { checkInKeys } from "@/features/check-ins";
 import { todayApi, todayKeys, type TodayBundle } from "@/features/today";
 import { cn } from "@/lib/utils";
-
-const openSymptomsSheet = () => dispatchQuickAction("symptoms");
 
 function seedTodayCaches(qc: QueryClient, bundle: TodayBundle) {
   const seed = (key: readonly unknown[], val: unknown) => {
@@ -75,7 +72,7 @@ function TodayContent() {
           onReset={reset}
         />
       ) : (
-        <TodayWidgetList config={config} ctx={{ onRegister: openSymptomsSheet }} />
+        <TodayWidgetList config={config} />
       )}
 
       <div className="space-y-0.5 pt-1">

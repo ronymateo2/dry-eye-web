@@ -22,13 +22,11 @@ export type TodayWidgetId =
 export type TodayWidgetEntry = { id: TodayWidgetId; visible: boolean };
 export type TodayWidgetConfig = TodayWidgetEntry[];
 
-export type WidgetRenderCtx = { onRegister: () => void };
-
 export type TodayWidgetDef = {
   id: TodayWidgetId;
   label: string;
   icon: ElementType;
-  render: (ctx: WidgetRenderCtx) => ReactNode;
+  render: () => ReactNode;
 };
 
 export const TODAY_WIDGET_REGISTRY: TodayWidgetDef[] = [
@@ -36,7 +34,7 @@ export const TODAY_WIDGET_REGISTRY: TodayWidgetDef[] = [
     id: "symptoms",
     label: "Estado de síntomas",
     icon: CircleHalfIcon,
-    render: ({ onRegister }) => <SymptomStatusCard onRegister={onRegister} />,
+    render: () => <SymptomStatusCard />,
   },
   {
     id: "schedule",
