@@ -20,42 +20,68 @@ export const DropStreakWidget = memo(function DropStreakWidget() {
   if (stats.length === 0) return null;
 
   return (
-    <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
-      <div className="px-4 pt-4 pb-3">
-        <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.10em] text-[var(--text-faint)]">
+    <section
+      className="relative overflow-hidden rounded-[16px] border bg-[var(--surface-card)]"
+      style={{ borderColor: "var(--info-border)" }}
+      aria-labelledby="drop-streak-label"
+    >
+      <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+        <span
+          aria-hidden
+          className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]"
+          style={{ boxShadow: "0 0 8px var(--accent)" }}
+        />
+        <p
+          id="drop-streak-label"
+          className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.12em] text-[var(--text-muted)]"
+        >
           Seguimiento de gotas
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2.5 px-4 pb-4">
-        {stats.map((s) => {
+        {stats.map((s, i) => {
           const { days, avgPerDay } = computeStreak(s);
           return (
             <div
               key={s.drop_type_id}
-              className="relative flex flex-col overflow-hidden rounded-[12px] border border-[var(--border)] bg-[var(--surface-el)] p-3.5"
+              className="anim-fade-up relative flex flex-col overflow-hidden rounded-[12px] border border-[var(--border)] p-4"
+              style={{
+                ["--i" as string]: i,
+                background:
+                  "linear-gradient(180deg, var(--accent-dim), var(--surface-el))",
+              }}
             >
-              <p className="truncate text-[13px] font-semibold capitalize leading-snug text-[var(--text-primary)]">
+              <p className="truncate text-[14px] font-semibold capitalize leading-snug text-[var(--text-primary)]">
                 {s.name}
               </p>
-              <div className="mt-2.5 flex items-baseline gap-1.5">
-                <span className="font-mono text-[34px] font-bold leading-none tabular-nums text-[var(--accent)]">
+              <div className="mt-3 flex items-baseline gap-2">
+                <span
+                  className="font-mono font-bold leading-none tabular-nums text-[var(--accent)]"
+                  style={{
+                    fontSize: "clamp(42px, 12vw, 52px)",
+                    textShadow:
+                      "0 0 18px var(--splash-glow-near), 0 0 40px var(--splash-glow-far)",
+                  }}
+                >
                   {days}
                 </span>
-                <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-faint)]">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.10em] text-[var(--text-muted)]">
                   {days === 1 ? "día" : "días"}
                 </span>
               </div>
-              <p className="mt-2 text-[11px] text-[var(--text-faint)]">
-                promedio{" "}
-                <span className="font-mono font-semibold text-[var(--text-muted)]">
+              <div className="mt-3 flex items-center gap-1.5 border-t border-[var(--border)] pt-2.5">
+                <span className="text-[11px] text-[var(--text-faint)]">
+                  promedio
+                </span>
+                <span className="font-mono text-[12px] font-semibold tabular-nums text-[var(--text-muted)]">
                   {avgPerDay.toFixed(1)}
                 </span>
-                /día
-              </p>
+                <span className="text-[11px] text-[var(--text-faint)]">/día</span>
+              </div>
             </div>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 });
