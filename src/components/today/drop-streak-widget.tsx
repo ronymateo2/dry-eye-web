@@ -26,11 +26,6 @@ export const DropStreakWidget = memo(function DropStreakWidget() {
       aria-labelledby="drop-streak-label"
     >
       <div className="flex items-center gap-2 px-4 pt-4 pb-3">
-        <span
-          aria-hidden
-          className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]"
-          style={{ boxShadow: "0 0 8px var(--accent)" }}
-        />
         <p
           id="drop-streak-label"
           className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.12em] text-[var(--text-muted)]"
