@@ -272,6 +272,7 @@ export type User = {
   quiet_start: string | null;
   quiet_end: string | null;
   widget_drop_type_ids: string[];
+  today_widget_config: TodayWidgetConfigEntry[];
 };
 
 export type SymptomState = "calmado" | "leve" | "sensible" | "reactivo" | "brote";
