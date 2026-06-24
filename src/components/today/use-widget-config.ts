@@ -25,7 +25,7 @@ function writeLocal(config: TodayWidgetConfig) {
 }
 
 export function useWidgetConfig() {
-  const { auth, refreshUser } = useAuth();
+  const { auth } = useAuth();
   const [config, setConfig] = useState<TodayWidgetConfig>(() => readLocal());
   const hydrated = useRef(false);
 
@@ -44,14 +44,13 @@ export function useWidgetConfig() {
       writeLocal(next);
       try {
         await userApi.updateMe({ todayWidgetConfig: next });
-        await refreshUser();
       } catch {
         setConfig(previous);
         writeLocal(previous);
         toast.error("No se pudo guardar el orden.");
       }
     },
-    [refreshUser],
+    [],
   );
 
   const reorder = useCallback(
