@@ -830,6 +830,18 @@ img, svg { display: block; max-width: 100%; }
   animation: mount-pop-in 0.38s var(--ease-out) both;
 }
 
+@keyframes widget-jiggle {
+  0%   { transform: rotate(-0.6deg); }
+  50%  { transform: rotate(0.6deg); }
+  100% { transform: rotate(-0.6deg); }
+}
+.widget-jiggle {
+  animation: widget-jiggle 0.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .widget-jiggle { animation: none; }
+}
+
 /* Countdown ring — tappable hint pulse + digit odometer */
 @keyframes ringPulse {
   0%   { transform: scale(1);    opacity: 0.35; }

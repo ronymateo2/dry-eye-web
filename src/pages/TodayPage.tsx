@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { GearIcon, CaretRightIcon } from "@phosphor-icons/react";
+import {
+  GearIcon,
+  CaretRightIcon,
+  SlidersHorizontalIcon,
+  CheckIcon,
+} from "@phosphor-icons/react";
 import { SleepStatus } from "@/components/ui/sleep-status";
 import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
 import { TodayWidgetList } from "@/components/today/today-widget-list";
@@ -52,47 +57,67 @@ function TodayContent() {
   const { config, reorder, toggleVisible, reset } = useWidgetConfig();
 
   return (
-    <section className="space-y-5">
-      <div className="flex justify-end">
-        <button
-          type="button"
-          aria-pressed={editMode}
-          onClick={() => setEditMode((v) => !v)}
-          className="text-[12px] font-medium tracking-[0.06em] uppercase text-[var(--text-muted)] transition-colors hover:text-[var(--accent)]"
-        >
-          {editMode ? "Hecho" : "Personalizar"}
-        </button>
+    <section className="space-y-6">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[12px] font-medium tracking-[0.06em] uppercase text-[var(--text-faint)]">
+            Tus módulos
+          </span>
+          <button
+            type="button"
+            aria-pressed={editMode}
+            onClick={() => setEditMode((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 text-[12px] font-medium tracking-[0.06em] uppercase text-[var(--text-muted)]",
+              "transition-[color,transform] duration-[160ms] ease-out hover:text-[var(--accent)] active:scale-[0.96]",
+            )}
+          >
+            {editMode ? (
+              <CheckIcon size={13} weight="bold" />
+            ) : (
+              <SlidersHorizontalIcon size={13} />
+            )}
+            {editMode ? "Hecho" : "Personalizar"}
+          </button>
+        </div>
+
+        <div key={editMode ? "edit" : "view"} className="anim-fade-up">
+          {editMode ? (
+            <TodayWidgetEditor
+              config={config}
+              onReorder={reorder}
+              onToggle={toggleVisible}
+              onReset={reset}
+            />
+          ) : (
+            <TodayWidgetList config={config} onLongPress={() => setEditMode(true)} />
+          )}
+        </div>
       </div>
 
-      {editMode ? (
-        <TodayWidgetEditor
-          config={config}
-          onReorder={reorder}
-          onToggle={toggleVisible}
-          onReset={reset}
-        />
-      ) : (
-        <TodayWidgetList config={config} />
-      )}
-
-      <div className="space-y-0.5 pt-1">
-        <PainCheckInCompact />
-        <SleepStatus />
-        <button
-          type="button"
-          onClick={() => navigate("/treatments")}
-          className={cn(
-            "flex min-h-[48px] w-full items-center gap-3 rounded-[9px] px-2 py-1.5 text-left",
-            "text-[15px] text-[var(--text-muted)]",
-            "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
-            "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
-          )}
-          aria-label="Gestionar tratamientos"
-        >
-          <GearIcon size={16} className="shrink-0" />
-          Gestionar tratamientos
-          <CaretRightIcon size={10} className="ml-auto shrink-0 text-[var(--text-faint)]" />
-        </button>
+      <div className="space-y-3">
+        <span className="text-[12px] font-medium tracking-[0.06em] uppercase text-[var(--text-faint)]">
+          Siempre visible
+        </span>
+        <div className="space-y-0.5">
+          <PainCheckInCompact />
+          <SleepStatus />
+          <button
+            type="button"
+            onClick={() => navigate("/treatments")}
+            className={cn(
+              "flex min-h-[48px] w-full items-center gap-3 rounded-[9px] px-2 py-1.5 text-left",
+              "text-[15px] text-[var(--text-muted)]",
+              "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
+              "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
+            )}
+            aria-label="Gestionar tratamientos"
+          >
+            <GearIcon size={16} className="shrink-0" />
+            Gestionar tratamientos
+            <CaretRightIcon size={10} className="ml-auto shrink-0 text-[var(--text-faint)]" />
+          </button>
+        </div>
       </div>
     </section>
   );
