@@ -1,10 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { MobileSheet } from "./mobile-sheet";
 import { QuickActionsSheet } from "./quick-actions-sheet";
+import { useQuickAction, openQuickAction, closeQuickAction } from "@/lib/quick-actions-store";
 import { vialKeys } from "@/features/drops";
 import { medicationKeys } from "@/features/medications";
 import { observationKeys } from "@/features/observations";
@@ -27,21 +28,9 @@ export function FloatingQuickActions() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [sheet, setSheet] = useState<Sheet>(null);
+  const { sheet, dropTypeId: initialDropTypeId } = useQuickAction();
   const [obsMounted, setObsMounted] = useState(false);
-  const [initialDropTypeId, setInitialDropTypeId] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const { sheet: s, dropTypeId } = (e as CustomEvent<{ sheet: Sheet; dropTypeId?: string }>).detail;
-      setSheet(s);
-      if (s === "obs") setObsMounted(true);
-      setInitialDropTypeId(dropTypeId);
-      setMenuOpen(false);
-    };
-    window.addEventListener("quickactions:open", handler);
-    return () => window.removeEventListener("quickactions:open", handler);
-  }, []);
+  if (sheet === "obs" && !obsMounted) setObsMounted(true);
 
   const isTodayPage = pathname === "/today";
   const isVisible = isTodayPage || pathname === "/history";
@@ -49,7 +38,7 @@ export function FloatingQuickActions() {
     "bottom-[calc(var(--tabbar-height)+var(--safe-bottom-nav)+20px)]";
 
   const queryClient = useQueryClient();
-  const closeAll = () => { setSheet(null); setMenuOpen(false); setInitialDropTypeId(undefined); };
+  const closeAll = () => { closeQuickAction(); setMenuOpen(false); };
   const savedAndClose = () => {
     window.dispatchEvent(new CustomEvent("history:refresh"));
     queryClient.invalidateQueries({ queryKey: historyKeys.all });
@@ -67,9 +56,9 @@ export function FloatingQuickActions() {
     if (s === "pain") {
       navigate("/register");
       setMenuOpen(false);
-    } else {
-      setSheet(s as Sheet);
-      if (s === "obs") setObsMounted(true);
+    } else if (s) {
+      openQuickAction(s);
+      setMenuOpen(false);
     }
   };
 

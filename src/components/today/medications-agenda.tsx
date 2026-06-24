@@ -23,6 +23,7 @@ import {
 } from "@/features/medications";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/auth";
+import { openQuickAction } from "@/lib/quick-actions-store";
 import { useNow } from "@/lib/hooks/use-now";
 import { MobileSheet } from "@/components/layout/mobile-sheet";
 import { Button } from "@/components/ui/button";
@@ -284,11 +285,7 @@ export const MedicationsAgenda = memo(function MedicationsAgenda() {
   const hasMedsWithTimes = medications.some((m) => parseTimesJson(m.times_json).length > 0);
 
   function openSessionSheet(medicationId?: string) {
-    window.dispatchEvent(
-      new CustomEvent("quickactions:open", {
-        detail: { sheet: "medication-intake", dropTypeId: medicationId },
-      }),
-    );
+    openQuickAction("medication-intake", medicationId);
   }
 
   async function handleQuickLog() {

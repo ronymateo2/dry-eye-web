@@ -1,3 +1,5 @@
+import { openQuickAction, type QuickActionSheet } from "@/lib/quick-actions-store";
+
 export type { ActiveVialEntry, DoseSlot } from "@/features/drops/domain";
 export {
   timeAgo,
@@ -8,8 +10,6 @@ export {
   getVialStatus,
 } from "@/features/drops/domain";
 
-export function dispatchQuickAction(sheet: string, extra?: Record<string, unknown>) {
-  window.dispatchEvent(
-    new CustomEvent("quickactions:open", { detail: { sheet, ...extra } }),
-  );
+export function dispatchQuickAction(sheet: QuickActionSheet, extra?: { dropTypeId?: string }) {
+  openQuickAction(sheet, extra?.dropTypeId);
 }

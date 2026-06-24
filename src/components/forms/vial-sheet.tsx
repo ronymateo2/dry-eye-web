@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TimerIcon, EyedropperSampleIcon, PlusIcon, CaretDownIcon } from "@phosphor-icons/react";
 import { dropsApi, dropKeys, dropTypeKeys, vialKeys, invalidateDrops } from "@/features/drops";
 import { cn } from "@/lib/utils";
+import { openQuickAction } from "@/lib/quick-actions-store";
 
 function timeAgo(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -111,7 +112,7 @@ export function VialSheet({ onClose }: { onClose: () => void }) {
   const handleOpenDropSheet = () => {
     onClose();
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } }));
+      openQuickAction("drop");
     }, 300);
   };
 

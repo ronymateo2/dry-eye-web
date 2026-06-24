@@ -1,5 +1,6 @@
 import { DropIcon, ArrowsClockwiseIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { useLastDropWidget } from "@/lib/hooks/use-last-drop-widget";
+import { openQuickAction } from "@/lib/quick-actions-store";
 
 export function LastDropLine() {
   const { data, timeAgo, isRefreshing, refresh } = useLastDropWidget();
@@ -11,7 +12,7 @@ export function LastDropLine() {
         aria-label="Registrar gota"
         className="app-header__last-drop-text-btn"
         style={{ WebkitTapHighlightColor: "transparent" }}
-        onClick={() => window.dispatchEvent(new CustomEvent("quickactions:open", { detail: { sheet: "drop" } }))}
+        onClick={() => openQuickAction("drop")}
       >
         <DropIcon aria-hidden weight="duotone" size={13} style={{ color: "var(--accent)" }} />
         <span className="app-header__last-drop-name">{data.drop_type_name}</span>
