@@ -13,7 +13,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
-import { SortableWidgetRow } from "./sortable-widget-row";
+import { SortableWidgetCard } from "./sortable-widget-card";
 import {
   widgetDef,
   type TodayWidgetConfig,
@@ -40,12 +40,10 @@ export function TodayWidgetEditor({ config, onReorder, onToggle, onReset }: Prop
     }
   };
 
-  const allHidden = config.every((e) => !e.visible);
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-5">
       <p className="text-[12px] text-[var(--text-muted)]">
-        Arrastra para reordenar. Toca el ojo para mostrar u ocultar.
+        Arrastra las tarjetas para reordenar. Toca el ojo para mostrar u ocultar.
       </p>
 
       <DndContext
@@ -57,24 +55,24 @@ export function TodayWidgetEditor({ config, onReorder, onToggle, onReset }: Prop
           items={config.map((e) => e.id)}
           strategy={verticalListSortingStrategy}
         >
-          <ul className="overflow-hidden rounded-[16px] border border-[var(--border)] bg-[var(--surface-card)]">
-            {config.map((entry) => (
-              <SortableWidgetRow
-                key={entry.id}
-                entry={entry}
-                def={widgetDef(entry.id)}
-                onToggle={onToggle}
-              />
-            ))}
-          </ul>
+          <div className="space-y-5">
+            {config.map((entry) => {
+              const def = widgetDef(entry.id);
+              return (
+                <SortableWidgetCard
+                  key={entry.id}
+                  id={entry.id}
+                  label={def.label}
+                  visible={entry.visible}
+                  onToggle={onToggle}
+                >
+                  {def.render()}
+                </SortableWidgetCard>
+              );
+            })}
+          </div>
         </SortableContext>
       </DndContext>
-
-      {allHidden && (
-        <p className="text-[12px] text-[var(--text-faint)]">
-          Todos los módulos están ocultos. Muéstralos con el icono del ojo.
-        </p>
-      )}
 
       <button
         type="button"
