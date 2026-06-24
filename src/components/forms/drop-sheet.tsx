@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -35,8 +34,7 @@ export function DropSheet({
   const [selectedDropType, setSelectedDropType] = useState<string>(editDrop?.dropTypeId ?? "");
   const [quantity, setQuantity] = useState(editDrop?.quantity ?? 1);
   const [eye, setEye] = useState<DropEye>(editDrop?.eye ?? "left");
-  const [loggedAt, setLoggedAt] = useState<string | null>(editDrop?.loggedAt ?? null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loggedAt, setLoggedAt] = useState<string | null>(editDrop?.loggedAt ?? new Date().toISOString());
   const [state, setState] = useState<ActionState>({ status: "idle" });
   const [isPending, setIsPending] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
@@ -271,19 +269,6 @@ export function DropSheet({
     return { timeStr, name: lastDrop.drop_type_name, eye: eyeLabel, quantityLabel };
   })() : null;
 
-  const nowTimeStr = (() => {
-    const d = new Date();
-    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-  })();
-
-  const loggedTimeStr = loggedAt ? (() => {
-    const d = new Date(loggedAt);
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    const dateStr = d.toLocaleDateString("es-CO", { day: "numeric", month: "short" });
-    return `${hh}:${mm} · ${dateStr}`;
-  })() : null;
-
   return (
     <div className="space-y-5 pb-[calc(20px+env(safe-area-inset-bottom))]">
       {lastDropLabel && !editDrop && (
@@ -309,52 +294,20 @@ export function DropSheet({
         </div>
       )}
 
-      <div>
-        <AnimatePresence mode="wait" initial={false}>
-          {showDatePicker ? (
-            <motion.div
-              key="editor"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-              className="space-y-1.5"
-            >
-              <DateTimePicker value={loggedAt} onChange={setLoggedAt} max={new Date()} />
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
-                  onClick={() => { setShowDatePicker(false); setLoggedAt(null); }}
-                >
-                  Volver a ahora
-                </button>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.button
-              key="pill"
-              type="button"
-              aria-label="Editar fecha y hora"
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-              className="flex items-center gap-1.5 rounded-[6px] border px-2.5 py-1.5 text-[13px] font-medium transition-colors"
-              style={loggedAt
-                ? { color: "var(--accent)", borderColor: "color-mix(in srgb, var(--accent) 40%, transparent)" }
-                : { color: "var(--text-muted)", borderColor: "var(--border)" }
-              }
-              onClick={() => {
-                setShowDatePicker(true);
-                if (!loggedAt) setLoggedAt(new Date().toISOString());
-              }}
-            >
-              <ClockIcon size={13} />
-              {loggedAt ? loggedTimeStr : `Ahora · ${nowTimeStr}`}
-            </motion.button>
-          )}
-        </AnimatePresence>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="section-label mb-0">Fecha y hora</p>
+          <button
+            type="button"
+            aria-label="Usar la hora actual"
+            className="flex items-center gap-1 text-[12px] font-medium text-[var(--text-muted)] hover:text-[var(--accent)] transition-[color,transform] duration-[160ms] ease-out active:scale-[0.97]"
+            onClick={() => setLoggedAt(new Date().toISOString())}
+          >
+            <ClockIcon size={13} />
+            Ahora
+          </button>
+        </div>
+        <DateTimePicker value={loggedAt} onChange={setLoggedAt} max={new Date()} />
       </div>
 
       {state.status !== "idle" && <StatusBanner state={state} />}
