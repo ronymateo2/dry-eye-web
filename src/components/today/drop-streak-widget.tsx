@@ -15,7 +15,43 @@ function computeStreak(s: DropTypeStats) {
 
 export const DropStreakWidget = memo(function DropStreakWidget() {
   const user = useUser();
-  const { data: stats = [] } = useDropStatsPerType(user.widget_drop_type_ids);
+  const { data: stats = [], isLoading } = useDropStatsPerType(
+    user.widget_drop_type_ids,
+  );
+
+  if (isLoading) {
+    const count = Math.max(user.widget_drop_type_ids?.length ?? 2, 1);
+    return (
+      <section
+        className="relative overflow-hidden rounded-[16px] border bg-[var(--surface-card)]"
+        style={{ borderColor: "var(--info-border)" }}
+        aria-busy="true"
+        aria-label="Cargando seguimiento de gotas"
+      >
+        <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+          <p className="mb-0 text-[12px] font-semibold uppercase leading-none tracking-[0.12em] text-[var(--text-muted)]">
+            Seguimiento de gotas
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5 px-4 pb-4">
+          {Array.from({ length: count }).map((_, i) => (
+            <div
+              key={i}
+              className="flex h-[150px] flex-col rounded-[12px] border border-[var(--border)] p-4"
+              style={{
+                background:
+                  "linear-gradient(180deg, var(--accent-dim), var(--surface-el))",
+              }}
+            >
+              <div className="h-4 w-20 animate-pulse rounded bg-[var(--surface-el)]" />
+              <div className="mt-3 h-[42px] w-16 animate-pulse rounded bg-[var(--surface-el)]" />
+              <div className="mt-auto h-3 w-24 animate-pulse rounded bg-[var(--surface-el)]" />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   if (stats.length === 0) return null;
 
