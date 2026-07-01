@@ -9,77 +9,66 @@ import {
   type TodayWidgetId,
 } from "./widget-config";
 
-const STORAGE_KEY = "today-widget-config";
-
-function readLocal(): TodayWidgetConfig {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return reconcileWidgetConfig(stored ? JSON.parse(stored) : []);
-  } catch {
-    return DEFAULT_WIDGET_CONFIG;
-  }
-}
-
-function writeLocal(config: TodayWidgetConfig) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-}
+const SYNC_DEBOUNCE_MS = 500;
 
 export function useWidgetConfig() {
   const { auth } = useAuth();
-  const [config, setConfig] = useState<TodayWidgetConfig>(() => readLocal());
-  const hydrated = useRef(false);
+  const [config, setConfig] = useState<TodayWidgetConfig>(() =>
+    reconcileWidgetConfig(
+      auth.status === "authenticated" ? (auth.user.today_widget_config ?? []) : [],
+    ),
+  );
+  const synced = useRef<TodayWidgetConfig>(config);
+  const pending = useRef<TodayWidgetConfig | null>(null);
 
   useEffect(() => {
-    if (auth.status === "authenticated" && !hydrated.current) {
-      hydrated.current = true;
-      const merged = reconcileWidgetConfig(auth.user.today_widget_config ?? []);
-      setConfig(merged);
-      writeLocal(merged);
-    }
-  }, [auth]);
-
-  const persist = useCallback(
-    async (next: TodayWidgetConfig, previous: TodayWidgetConfig) => {
-      setConfig(next);
-      writeLocal(next);
+    if (config === synced.current) return;
+    pending.current = config;
+    const timer = setTimeout(async () => {
+      pending.current = null;
       try {
-        await userApi.updateMe({ todayWidgetConfig: next });
+        await userApi.updateMe({ todayWidgetConfig: config });
+        synced.current = config;
       } catch {
-        setConfig(previous);
-        writeLocal(previous);
+        // solo rollback si no hay un cambio más nuevo en cola
+        if (pending.current === null) setConfig(synced.current);
         toast.error("No se pudo guardar el orden.");
+      }
+    }, SYNC_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [config]);
+
+  useEffect(
+    () => () => {
+      if (pending.current) {
+        userApi.updateMe({ todayWidgetConfig: pending.current }).catch(() => {});
       }
     },
     [],
   );
 
-  const reorder = useCallback(
-    (activeId: TodayWidgetId, overId: TodayWidgetId) => {
-      if (activeId === overId) return;
-      const from = config.findIndex((e) => e.id === activeId);
-      const to = config.findIndex((e) => e.id === overId);
-      if (from === -1 || to === -1) return;
-      const next = [...config];
+  const reorder = useCallback((activeId: TodayWidgetId, overId: TodayWidgetId) => {
+    if (activeId === overId) return;
+    setConfig((prev) => {
+      const from = prev.findIndex((e) => e.id === activeId);
+      const to = prev.findIndex((e) => e.id === overId);
+      if (from === -1 || to === -1) return prev;
+      const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
-      void persist(next, config);
-    },
-    [config, persist],
-  );
+      return next;
+    });
+  }, []);
 
-  const toggleVisible = useCallback(
-    (id: TodayWidgetId) => {
-      const next = config.map((e) =>
-        e.id === id ? { ...e, visible: !e.visible } : e,
-      );
-      void persist(next, config);
-    },
-    [config, persist],
-  );
+  const toggleVisible = useCallback((id: TodayWidgetId) => {
+    setConfig((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, visible: !e.visible } : e)),
+    );
+  }, []);
 
   const reset = useCallback(() => {
-    void persist(DEFAULT_WIDGET_CONFIG, config);
-  }, [config, persist]);
+    setConfig(DEFAULT_WIDGET_CONFIG);
+  }, []);
 
   return { config, reorder, toggleVisible, reset };
 }

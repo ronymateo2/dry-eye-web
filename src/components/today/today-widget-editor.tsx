@@ -58,6 +58,7 @@ export function TodayWidgetEditor({ config, onReorder, onToggle, onReset }: Prop
           <div className="space-y-5">
             {config.map((entry) => {
               const def = widgetDef(entry.id);
+              if (!def) return null;
               return (
                 <SortableWidgetCard
                   key={entry.id}

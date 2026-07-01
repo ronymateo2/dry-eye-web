@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type PointerEvent } from "react";
 import { widgetDef, type TodayWidgetConfig } from "./widget-registry";
 
 type Props = {
@@ -11,7 +11,9 @@ const LONG_PRESS_MS = 450;
 export function TodayWidgetList({ config, onLongPress }: Props) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const start = () => {
+  const start = (e: PointerEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input, select, textarea")) return;
     timer.current = setTimeout(onLongPress, LONG_PRESS_MS);
   };
   const cancel = () => {
@@ -24,18 +26,22 @@ export function TodayWidgetList({ config, onLongPress }: Props) {
 
   return (
     <div className="space-y-5">
-      {visible.map((entry) => (
-        <div
-          key={entry.id}
-          onPointerDown={start}
-          onPointerUp={cancel}
-          onPointerMove={cancel}
-          onPointerLeave={cancel}
-          onContextMenu={(e) => e.preventDefault()}
-        >
-          {widgetDef(entry.id).render()}
-        </div>
-      ))}
+      {visible.map((entry) => {
+        const def = widgetDef(entry.id);
+        if (!def) return null;
+        return (
+          <div
+            key={entry.id}
+            onPointerDown={start}
+            onPointerUp={cancel}
+            onPointerMove={cancel}
+            onPointerLeave={cancel}
+            onContextMenu={(e) => e.preventDefault()}
+          >
+            {def.render()}
+          </div>
+        );
+      })}
     </div>
   );
 }

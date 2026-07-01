@@ -62,8 +62,6 @@ export const TODAY_WIDGET_REGISTRY: TodayWidgetDef[] = [
   },
 ];
 
-export function widgetDef(id: TodayWidgetId): TodayWidgetDef {
-  const def = TODAY_WIDGET_REGISTRY.find((w) => w.id === id);
-  if (!def) throw new Error(`Unknown today widget: ${id}`);
-  return def;
+export function widgetDef(id: TodayWidgetId): TodayWidgetDef | undefined {
+  return TODAY_WIDGET_REGISTRY.find((w) => w.id === id);
 }

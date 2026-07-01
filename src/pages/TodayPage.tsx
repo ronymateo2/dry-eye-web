@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import {
   GearIcon,
   CaretRightIcon,
@@ -12,31 +11,8 @@ import { PainCheckInCompact } from "@/components/today/pain-check-in-compact";
 import { TodayWidgetList } from "@/components/today/today-widget-list";
 import { TodayWidgetEditor } from "@/components/today/today-widget-editor";
 import { useWidgetConfig } from "@/components/today/use-widget-config";
-import { dropKeys, dropTypeKeys, vialKeys } from "@/features/drops";
-import { calendarKeys } from "@/features/calendar";
-import { medicationKeys } from "@/features/medications";
-import { symptomKeys } from "@/features/symptoms";
-import { sleepKeys } from "@/features/sleep";
-import { checkInKeys } from "@/features/check-ins";
-import { todayApi, todayKeys, type TodayBundle } from "@/features/today";
+import { useTodayBundle } from "@/features/today";
 import { cn } from "@/lib/utils";
-
-function seedTodayCaches(qc: QueryClient, bundle: TodayBundle) {
-  const seed = (key: readonly unknown[], val: unknown) => {
-    if (qc.getQueryData(key) === undefined) qc.setQueryData(key, val);
-  };
-  seed(checkInKeys.last(), bundle.checkInLast);
-  seed(sleepKeys.today(), bundle.sleepToday);
-  seed(dropKeys.lastPerType(), bundle.dropsLastPerType);
-  seed(calendarKeys.eventsToday(), bundle.calendarEventsToday);
-  seed(medicationKeys.list(), bundle.medications);
-  seed(medicationKeys.intakesToday(), bundle.medicationIntakesToday);
-  seed(medicationKeys.intakesLastPerMed(), bundle.medicationIntakesLastPerMed);
-  seed(vialKeys.active(), bundle.vialsActive);
-  seed(symptomKeys.today(), bundle.symptomsToday);
-  seed(dropTypeKeys.list(), bundle.dropTypes);
-  seed(dropKeys.today(), bundle.dropsToday);
-}
 
 const SKELETON_WIDGET_HEIGHTS = [88, 120, 72, 64, 110];
 
@@ -154,17 +130,7 @@ function TodayContent() {
 }
 
 export default function TodayPage() {
-  const queryClient = useQueryClient();
-
-  const { isPending } = useQuery({
-    queryKey: todayKeys.all,
-    queryFn: async () => {
-      const bundle = await todayApi.getBundle();
-      seedTodayCaches(queryClient, bundle);
-      return bundle;
-    },
-    staleTime: 30_000,
-  });
+  const { isPending } = useTodayBundle();
 
   if (isPending) return <TodaySkeleton />;
   return <TodayContent />;
