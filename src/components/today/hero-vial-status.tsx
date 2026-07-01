@@ -22,11 +22,11 @@ export function HeroVialStatus({
       <button
         type="button"
         onClick={onClick}
-        className="inline-flex items-center gap-1.5 text-[12px] transition-opacity hover:opacity-80 active:opacity-60"
+        className="inline-flex items-center gap-1.5 text-[13px] font-semibold transition-opacity hover:opacity-80 active:opacity-60"
         style={{ color: status.isExpired ? "var(--pain-high)" : status.color }}
         aria-label={`${label}. Toca para descartar.`}
       >
-        <EyedropperSampleIcon size={12} weight="fill" className="shrink-0" />
+        <EyedropperSampleIcon size={13} weight="fill" className="shrink-0" />
         <span>{label}</span>
       </button>
 

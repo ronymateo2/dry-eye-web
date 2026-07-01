@@ -76,7 +76,7 @@ export function TimelineRow({
               style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
             />
             <span
-              className="text-[14px] font-medium tabular-nums whitespace-nowrap"
+              className="text-[14px] font-semibold tabular-nums whitespace-nowrap"
               style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
             >
               {vialStatus.rightLabel}
