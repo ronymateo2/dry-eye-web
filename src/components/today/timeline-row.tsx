@@ -37,7 +37,7 @@ export function TimelineRow({
       style={{ "--i": index } as CSSProperties}
       className={cn(
         "anim-fade-up",
-        "group relative flex items-start gap-3 w-full rounded-[12px] px-3 min-h-[56px] cursor-pointer",
+        "group relative flex items-start gap-3 w-full rounded-[12px] px-3 py-2 cursor-pointer",
         "transition-[background-color,transform] duration-[160ms] ease-out active:scale-[0.995]",
         "hover:bg-[color-mix(in_srgb,var(--surface-el)_18%,transparent)]",
       )}

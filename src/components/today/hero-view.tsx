@@ -288,7 +288,7 @@ export function HeroView({
 
         {(timelineEntries.length > 0 || completado.length > 0 || sinRegistro.length > 0) && (
           <div className="relative z-10 border-t border-[var(--border)]">
-            <div className="space-y-0 px-1 pb-2 pt-1">
+            <div className="space-y-0 px-1 pb-1">
               {[
                 ...timelineEntries.map((e) => ({ entry: e, variant: "upcoming" as const })),
                 ...completado.map((e) => ({ entry: e, variant: "completado" as const })),
