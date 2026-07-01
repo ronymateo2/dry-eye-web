@@ -29,7 +29,8 @@ export function TimelineRow({
   const badgeColor = isCompleted ? "var(--pain-low)" : computed?.color ?? "var(--text-muted)";
   const vialStatus = vial ? getVialStatus(vial, now) : null;
   const timeLabel = (noRecord || isCompleted) ? `c/${entry.interval_hours}h` : computed!.nextTime;
-  const badgeText = (noRecord || isCompleted) ? badgeLabel : `en ${badgeLabel}`;
+  const badgeText = (noRecord || isCompleted || computed!.overdue) ? badgeLabel : `en ${badgeLabel}`;
+  const pillTint = noRecord ? 10 : 12;
 
   return (
     <div
@@ -51,12 +52,6 @@ export function TimelineRow({
         }
       }}
     >
-      <span
-        className="w-[3px] shrink-0 self-stretch rounded-full opacity-60 origin-center transition-[opacity] duration-[160ms] ease-out group-hover:opacity-100"
-        style={{ background: badgeColor }}
-        aria-hidden
-      />
-
       <span
         className="font-mono text-[14px] tabular-nums whitespace-nowrap w-[44px] shrink-0 text-right pt-[3px]"
         style={{ color: "var(--text-faint)" }}
@@ -84,7 +79,7 @@ export function TimelineRow({
               className="text-[14px] font-medium tabular-nums whitespace-nowrap"
               style={{ color: vialStatus.isExpired ? "var(--pain-high)" : vialStatus.color }}
             >
-              {vialStatus.isExpired ? `+${vialStatus.timeStr}` : vialStatus.timeStr}
+              {vialStatus.rightLabel}
             </span>
             <button
               type="button"
@@ -103,8 +98,12 @@ export function TimelineRow({
 
       <div className="flex shrink-0 items-center gap-1 pt-[2px]">
         <span
-          className="font-mono text-[15px] font-medium tabular-nums"
-          style={{ color: badgeColor, transition: "color 0.4s ease" }}
+          className="inline-flex h-[24px] items-center rounded-full px-2.5 font-mono text-[13px] font-medium tabular-nums whitespace-nowrap"
+          style={{
+            color: badgeColor,
+            background: `color-mix(in srgb, ${badgeColor} ${pillTint}%, transparent)`,
+            transition: "color 0.4s ease, background-color 0.4s ease",
+          }}
         >
           {badgeText}
         </span>
