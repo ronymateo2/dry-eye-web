@@ -39,6 +39,7 @@ function HeroCountdownRing({
       color={pending ? "var(--accent-dim)" : cd.color}
       progress={cd.progress}
       onClick={onClick}
+      size={120}
     />
   );
 }
@@ -145,7 +146,7 @@ export function HeroView({
             : "var(--border)",
         }}
       >
-        <TopographicBg position="calc(100% + 20px) -10px" size="600px" />
+        <TopographicBg position="50% -40%" size="600px" />
 
         <div className="relative z-10 flex items-center justify-between gap-3 px-4 pt-4">
           <p
@@ -174,117 +175,114 @@ export function HeroView({
         )}
 
         {heroEntry && (
-          <div className="relative z-10 grid gap-5 px-4 pb-5 pt-5">
-            <div className="grid grid-cols-[92px_minmax(0,1fr)] items-start gap-4">
-              <div className="pt-1">
-                <AnimatePresence mode="wait" initial={false}>
-                  {isRegistered ? (
-                    <motion.div
-                      key="check"
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                    >
-                      <QuickLogCheck color="var(--pain-low)" />
-                    </motion.div>
-                  ) : hasCountdown ? (
-                    <motion.div
-                      key="ring"
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                    >
-                      <HeroCountdownRing
-                        lastLoggedAt={heroEntry.last_logged_at!}
-                        intervalHours={heroEntry.interval_hours!}
-                        pending={quickLogPending}
-                        onClick={handleQuickLog}
-                      />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="interval"
-                      exit={{ opacity: 0, scale: 0.85 }}
-                      transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
-                    >
-                      <div className="grid gap-2 justify-items-center text-center">
-                        <p className="section-label mb-0">Cada</p>
-                        <p className="font-mono text-[28px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
-                          {heroEntry.interval_hours}h
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              <div className="grid min-w-0 gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => !isRegistered && dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
-                  aria-label={`Registrar dosis de ${heroEntry.name}`}
-                  className="group inline-flex min-w-0 max-w-full items-center gap-2 text-left active:opacity-70"
-                  style={{ cursor: isRegistered ? "default" : "pointer" }}
+          <div className="relative z-10 flex flex-col items-center gap-3 px-4 pb-5 pt-4 text-center">
+            <AnimatePresence mode="wait" initial={false}>
+              {isRegistered ? (
+                <motion.div
+                  key="check"
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
                 >
-                  <span
-                    className="truncate text-[26px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
-                    style={{
-                      color: isRegistered ? "var(--text-muted)" : "var(--text-primary)",
-                      textDecorationLine: isRegistered ? "line-through" : "none",
-                      textDecorationColor: "rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    {heroEntry.name}
-                  </span>
-                  {!isRegistered && (
-                    <CaretRightIcon
-                      size={18}
-                      weight="bold"
-                      className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
-                      style={{ color: "var(--text-faint)" }}
-                    />
-                  )}
-                </button>
-
-                {/* alarm/time row — stays in DOM; "Tomada a las" overlaid in same spot */}
-                <div style={{ position: "relative" }}>
-                  <div style={{ opacity: isRegistered ? 0 : 1, transition: "opacity 200ms ease" }}>
-                    {hasCountdown ? (
-                      <HeroNextTime
-                        lastLoggedAt={heroEntry.last_logged_at!}
-                        intervalHours={heroEntry.interval_hours!}
-                      />
-                    ) : (
-                      <p className="font-mono text-[17px] tabular-nums text-[var(--text-muted)]">
-                        Cada {heroEntry.interval_hours}h
-                      </p>
-                    )}
-                  </div>
-                  {isRegistered && (
-                    <p className="anim-fade-up absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]">
-                      Tomada a las{" "}
-                      <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
-                        {justRegistered?.takenAt ?? ""}
-                      </span>
+                  <QuickLogCheck color="var(--pain-low)" size={120} />
+                </motion.div>
+              ) : hasCountdown ? (
+                <motion.div
+                  key="ring"
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <HeroCountdownRing
+                    lastLoggedAt={heroEntry.last_logged_at!}
+                    intervalHours={heroEntry.interval_hours!}
+                    pending={quickLogPending}
+                    onClick={handleQuickLog}
+                  />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="interval"
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.16, ease: [0.23, 1, 0.32, 1] }}
+                >
+                  <div className="grid h-[120px] w-[120px] content-center gap-2 justify-items-center text-center">
+                    <p className="section-label mb-0">Cada</p>
+                    <p className="font-mono text-[32px] font-semibold leading-none tabular-nums text-[var(--text-muted)]">
+                      {heroEntry.interval_hours}h
                     </p>
-                  )}
-                </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                {heroVial && (
-                  <>
-                    <div className="h-px w-[80%] bg-[var(--border)]" />
-                    {/* vial — stays in DOM (preserve height), hidden when registered */}
-                    <div
-                      style={{
-                        opacity: isRegistered ? 0 : 1,
-                        transition: "opacity 200ms ease",
-                        pointerEvents: isRegistered ? "none" : "auto",
-                      }}
-                    >
-                      <HeroVialStatus vial={heroVial} onClick={() => setDiscardTarget(heroVial)} />
-                    </div>
-                  </>
+            <button
+              type="button"
+              onClick={() => !isRegistered && dispatchQuickAction("drop", { dropTypeId: heroEntry.drop_type_id })}
+              aria-label={`Registrar dosis de ${heroEntry.name}`}
+              className="group inline-flex min-w-0 max-w-full items-center justify-center gap-2 active:opacity-70"
+              style={{ cursor: isRegistered ? "default" : "pointer" }}
+            >
+              <span
+                className="truncate text-[24px] font-bold capitalize leading-none tracking-[-0.02em] transition-colors duration-300"
+                style={{
+                  color: isRegistered ? "var(--text-muted)" : "var(--text-primary)",
+                  textDecorationLine: isRegistered ? "line-through" : "none",
+                  textDecorationColor: "rgba(0,0,0,0.2)",
+                }}
+              >
+                {heroEntry.name}
+              </span>
+              {!isRegistered && (
+                <CaretRightIcon
+                  size={18}
+                  weight="bold"
+                  className="shrink-0 transition-transform duration-200 group-hover:translate-x-0.5"
+                  style={{ color: "var(--text-faint)" }}
+                />
+              )}
+            </button>
+
+            {/* alarm/time row — stays in DOM; "Tomada a las" overlaid in same spot */}
+            <div className="w-full" style={{ position: "relative" }}>
+              <div
+                className="flex justify-center"
+                style={{ opacity: isRegistered ? 0 : 1, transition: "opacity 200ms ease" }}
+              >
+                {hasCountdown ? (
+                  <HeroNextTime
+                    lastLoggedAt={heroEntry.last_logged_at!}
+                    intervalHours={heroEntry.interval_hours!}
+                  />
+                ) : (
+                  <p className="font-mono text-[17px] tabular-nums text-[var(--text-muted)]">
+                    Cada {heroEntry.interval_hours}h
+                  </p>
                 )}
               </div>
+              {isRegistered && (
+                <p className="anim-fade-up absolute inset-x-0 top-0 text-[14px] text-[var(--text-muted)]">
+                  Tomada a las{" "}
+                  <span className="font-mono font-semibold" style={{ color: "var(--pain-low)" }}>
+                    {justRegistered?.takenAt ?? ""}
+                  </span>
+                </p>
+              )}
             </div>
+
+            {heroVial && (
+              <>
+                <div className="mx-auto h-px w-12 bg-[var(--border)]" />
+                {/* vial — stays in DOM (preserve height), hidden when registered */}
+                <div
+                  style={{
+                    opacity: isRegistered ? 0 : 1,
+                    transition: "opacity 200ms ease",
+                    pointerEvents: isRegistered ? "none" : "auto",
+                  }}
+                >
+                  <HeroVialStatus vial={heroVial} onClick={() => setDiscardTarget(heroVial)} />
+                </div>
+              </>
+            )}
           </div>
         )}
 

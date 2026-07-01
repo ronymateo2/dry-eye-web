@@ -59,15 +59,18 @@ export function CountdownValue({
   color,
   progress,
   onClick,
+  size = 88,
 }: {
   label: string;
   overdue: boolean;
   color: string;
   progress?: number;
   onClick?: () => void;
+  size?: number;
 }) {
   const cleanLabel = label.replace(/^hace\s+/, "");
   const parts = cleanLabel.split(" ");
+  const scale = size / 88;
 
   return (
     <div
@@ -91,15 +94,18 @@ export function CountdownValue({
           }}
         />
       )}
-      <CircularProgress size={88} progress={progress ?? 0} color={color}>
-        <p className="mb-0.5 text-[8px] font-semibold uppercase leading-none tracking-[0.10em]" style={{ color }}>
+      <CircularProgress size={size} progress={progress ?? 0} color={color}>
+        <p
+          className="mb-0.5 font-semibold uppercase leading-none tracking-[0.10em]"
+          style={{ color, fontSize: Math.round(8 * scale) }}
+        >
           {overdue ? "Vencida" : "En"}
         </p>
         <div className="flex flex-nowrap items-end gap-x-0.5 whitespace-nowrap leading-none" style={{ color }}>
           {parts.map((part) => {
             const value = part.slice(0, -1);
             const unit = part.slice(-1);
-            const fs = parts.length > 1 ? 20 : 22;
+            const fs = Math.round((parts.length > 1 ? 20 : 22) * scale);
             const digitW = Math.round(fs * 0.62);
             return (
               <span key={unit} className="inline-flex items-end gap-0.5">
@@ -125,7 +131,10 @@ export function CountdownValue({
                     </span>
                   ))}
                 </span>
-                <span className="pb-0.5 text-[11px] font-semibold leading-none">
+                <span
+                  className="pb-0.5 font-semibold leading-none"
+                  style={{ fontSize: Math.round(11 * scale) }}
+                >
                   {unit}
                 </span>
               </span>
