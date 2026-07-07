@@ -88,37 +88,39 @@ export function DropSheet({
     const ts = loggedAt ? new Date(loggedAt).toISOString() : new Date().toISOString();
     const dropTypeName = dropTypes.find((dt) => dt.id === selectedDropType)?.name ?? "";
 
-    if (!isOnline) {
-      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-      queryClient.setQueryData(dropKeys.last(), { id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
-      toast.success("Gota en cola — se sincronizará al reconectar.");
-      setIsPending(false);
-      onSaved();
-      return;
-    }
-
     try {
-      await dropsApi.save({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-      toast.success(editDrop ? "Gota actualizada." : "Gota registrada.");
-
-      if (!editDrop && vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
-        try {
-          await dropsApi.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
-          toast.success(`Vial abierto · ${dropTypeName}`);
-        } catch {
-          toast.warning("Gota guardada. No se pudo abrir el vial — ábrelo manualmente desde Tratamientos.");
-        }
+      if (!isOnline) {
+        await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
+        queryClient.setQueryData(dropKeys.last(), { id: dropId, logged_at: ts, quantity, eye, drop_type_id: selectedDropType, drop_type_name: dropTypeName });
+        toast.success("Gota en cola — se sincronizará al reconectar.");
+        onSaved();
+        return;
       }
 
-      invalidateDrops(selectedDropType);
-      await calendarApi.syncDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
+      try {
+        await dropsApi.save({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
+        toast.success(editDrop ? "Gota actualizada." : "Gota registrada.");
+
+        if (!editDrop && vialStatus?.kind === "new" && selectedDropTypeInfo?.is_vial) {
+          try {
+            await dropsApi.createVial({ id: crypto.randomUUID(), dropTypeId: selectedDropType, startedAt: ts, dropId });
+            toast.success(`Vial abierto · ${dropTypeName}`);
+          } catch {
+            toast.warning("Gota guardada. No se pudo abrir el vial — ábrelo manualmente desde Tratamientos.");
+          }
+        }
+
+        invalidateDrops(selectedDropType);
+        await calendarApi.syncDay(selectedDropType, getDayKey(ts, user.timezone), ts).catch(() => { });
+      } catch {
+        await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
+        toast.warning("No se pudo guardar ahora — quedó en cola y se reintentará.");
+      }
       onSaved();
     } catch {
-      await queueDrop({ id: dropId, dropTypeId: selectedDropType, loggedAt: ts, quantity, eye });
-
-      toast.success("Gota en cola — se sincronizará al reconectar.");
+      toast.error("No se pudo guardar la gota. Inténtalo de nuevo.");
+    } finally {
       setIsPending(false);
-      onSaved();
     }
   };
 

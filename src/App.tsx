@@ -29,6 +29,7 @@ function AppRoutes() {
     <>
       <SplashScreen isLoading={isLoading} />
       {!isLoading && (
+        <ErrorBoundary>
         <AppShell isAuthenticated={isAuthenticated}>
           <ErrorBoundary key={location.pathname}>
           <Suspense fallback={null}>
@@ -64,6 +65,7 @@ function AppRoutes() {
           </Suspense>
           </ErrorBoundary>
         </AppShell>
+        </ErrorBoundary>
       )}
     </>
   );

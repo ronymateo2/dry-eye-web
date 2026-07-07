@@ -33,7 +33,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE}${path}`, { ...options, headers });
+  const res = await fetch(`${BASE}${path}`, {
+    signal: AbortSignal.timeout(15_000),
+    ...options,
+    headers,
+  });
 
   if (!res.ok) {
     if (res.status === 401) {
